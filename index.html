@@ -1564,6 +1564,260 @@ html[data-theme=light] .modal-overlay{background:rgba(40,50,70,.4);}
 .viz-host.viz-lod .vz-arrowdown{display:none;}
 .viz-host.viz-lod .viz-node{box-shadow:none;}
 .viz-host.viz-lod .viz-node.vz-primary{box-shadow:0 0 0 2px var(--role-execution);}
+
+/* ==================================================================
+   PHASE 10 — workspace UX, memory readability and the Memory Error Lab
+   ================================================================== */
+
+/* ---------------- LIBRARY DRAWER (replaces the duplicate Project panel) ----
+   The project tree and the error lessons overlay the left pane instead of
+   permanently stealing height from the source editor. */
+#paneLeft{position:relative;}
+.lib-drawer{
+  position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;
+  background:var(--surface);border-right:1px solid var(--border);box-shadow:var(--shadow);
+}
+.lib-drawer[hidden]{display:none;}
+.lib-head{
+  display:flex;align-items:center;gap:6px;padding:0 8px;height:38px;flex-shrink:0;
+  background:var(--surface-2);border-bottom:1px solid var(--border);
+}
+.lib-tabs{display:flex;align-items:center;gap:2px;flex:1;min-width:0;overflow-x:auto;}
+.lib-tab{
+  display:flex;align-items:center;gap:6px;padding:0 10px;height:37px;background:none;border:none;
+  border-bottom:2px solid transparent;color:var(--text-faint);font-size:11px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;
+}
+.lib-tab:hover{color:var(--text);}
+.lib-tab.active{color:var(--execution);border-bottom-color:var(--execution);}
+.lib-body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;}
+.lib-sec[hidden]{display:none;}
+
+/* ---------------- SOURCE EXPAND ----------------
+   Expanding gives the editor the WHOLE workspace: the debugger column and the
+   divider fold away and the timeline collapses to its header. That is the only
+   change that is actually worth a button once the duplicate Project panel is
+   gone — a long C file then gets ~1550x620 instead of ~650x580.
+
+   Nothing is destroyed and nothing is unreachable: the same button (or
+   Ctrl+Shift+E) puts it all back, the timeline header stays where it is, and
+   because the pane still fits its box, no second scrollbar appears under the
+   editor. */
+#paneLeft{overflow-y:auto;overflow-x:hidden;}
+#paneLeft > .panel > .panel-head{position:sticky;top:0;z-index:6;background:var(--surface);}
+#paneLeft > .panel{overflow:visible;}
+/* The timeline's body is a toolbar + a virtualized viewport rather than a
+   .panel-body, so collapsing it never actually hid anything. It does now. */
+#panelTimeline.collapsed{height:auto !important;}
+#panelTimeline.collapsed .tl-toolbar,#panelTimeline.collapsed .tl-viewport{display:none;}
+body.src-expanded .panes{grid-template-columns:1fr 0 0;}
+body.stacked.src-expanded .panes{grid-template-columns:1fr;grid-template-rows:1fr 0 0;}
+body.src-expanded #divider,body.src-expanded #paneRight{display:none;}
+body.src-expanded #btnExpandSrc{background:var(--execution-dim);color:var(--execution);border-color:var(--execution);}
+
+/* ---------------- MEMORY: A CLEAN PICTURE FIRST ----------------
+   The learner sees the structure; the numbers arrive on demand. Per-byte
+   addresses are printed only at the Deep detail level. */
+#memPanel{position:relative;}
+#panelMemory > .panel-body{overflow:visible;}
+.byte-cell .ba{display:none;}
+body.level-deep .byte-cell .ba{display:block;}
+
+/* the element strip: one cell per array element, index underneath */
+.mem-cells{
+  display:flex;flex-wrap:wrap;gap:0;margin:2px 0 10px;align-items:flex-start;
+}
+.mcell{
+  position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;background:none;border:none;padding:0;font:inherit;
+}
+.mc-box{
+  min-width:34px;height:34px;padding:0 6px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--text);
+  background:var(--surface-3);border:1px solid var(--border-strong);
+  margin-left:-1px;/* shared borders read as one contiguous block of memory */
+}
+.mcell:first-child .mc-box{margin-left:0;border-top-left-radius:4px;border-bottom-left-radius:4px;}
+.mcell:last-child .mc-box{border-top-right-radius:4px;border-bottom-right-radius:4px;}
+.mc-i{font-family:var(--mono);font-size:9.5px;color:var(--text-faint);line-height:1;}
+.mcell:hover .mc-box{border-color:var(--memory);color:var(--memory);}
+.mc-box.uninit{color:var(--text-faint);background:var(--surface-2);border-style:dashed;}
+.mc-box.nul{color:var(--text-muted);}
+
+/* USER SELECTION — "I clicked this to inspect it" */
+.mcell.sel .mc-box,.byte-cell .bv.sel{
+  border-color:var(--memory);box-shadow:inset 0 0 0 1px var(--memory);color:var(--memory);
+  position:relative;z-index:2;
+}
+.mcell.sel .mc-i{color:var(--memory);font-weight:700;}
+
+/* EXECUTION FOCUS — "this is what the program is working on right now".
+   Deliberately a different colour and a different affordance from selection,
+   because they are different questions. */
+.mcell.exec .mc-box,.byte-cell .bv.exec{
+  border-color:var(--execution);background:var(--execution-dim);color:var(--execution);
+  box-shadow:0 0 0 1px var(--execution),0 0 10px -2px var(--execution);
+  position:relative;z-index:3;
+}
+.mcell.exec .mc-i{color:var(--execution);font-weight:800;}
+.mc-cur{
+  position:absolute;top:-15px;left:50%;transform:translateX(-50%);
+  font-size:8.5px;font-weight:800;letter-spacing:.08em;color:var(--execution);
+  font-family:var(--mono);white-space:nowrap;pointer-events:none;
+}
+/* One short pulse when the focus MOVES. Nothing animates while it sits still —
+   a permanently breathing memory panel teaches nothing. */
+@keyframes mcPulse{0%{box-shadow:0 0 0 0 var(--execution);}100%{box-shadow:0 0 0 7px transparent;}}
+.mcell.exec.moved .mc-box{animation:mcPulse .45s ease-out;}
+@media (prefers-reduced-motion:reduce){.mcell.exec.moved .mc-box{animation:none;}}
+
+.mem-legend{
+  display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:0 0 9px;
+  font-size:10px;color:var(--text-faint);
+}
+.mem-legend b{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px;}
+.ml-exec b{background:var(--execution);}
+.ml-sel b{background:var(--memory);}
+
+/* ---------------- ANCHORED POPUP + HOVER TOOLTIP ----------------
+   Both are absolutely positioned inside #memPanel, next to the cell they
+   describe, and flip above/below so they never leave the panel. */
+.byte-detail.anchored,.mem-tip{
+  position:absolute;z-index:20;width:210px;max-width:calc(100% - 12px);
+  background:var(--surface-4);border:1px solid var(--memory);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:9px 10px;
+}
+.mem-tip{
+  width:auto;min-width:120px;padding:6px 9px;pointer-events:none;
+  border-color:var(--border-strong);background:var(--surface-3);
+}
+.byte-detail.anchored::after,.mem-tip::after{
+  content:'';position:absolute;left:var(--arrow-x,20px);width:9px;height:9px;
+  background:inherit;border:inherit;transform:rotate(45deg);
+}
+.byte-detail.anchored.above::after,.mem-tip.above::after{bottom:-5px;border-top:none;border-left:none;}
+.byte-detail.anchored.below::after,.mem-tip.below::after{top:-5px;border-bottom:none;border-right:none;}
+.bd-close{
+  position:absolute;top:4px;right:4px;width:18px;height:18px;line-height:1;border:none;background:none;
+  color:var(--text-faint);cursor:pointer;border-radius:3px;font-size:11px;
+}
+.bd-close:hover{background:var(--surface-2);color:var(--text);}
+.mt-name{font-family:var(--mono);font-size:11.5px;font-weight:800;color:var(--memory);}
+.mt-row{font-family:var(--mono);font-size:10.5px;color:var(--text-muted);white-space:nowrap;}
+
+/* ---------------- MEMORY ERROR LAB ---------------- */
+.errlab-list{padding:10px;display:flex;flex-direction:column;gap:7px;}
+.errlab-intro{
+  font-size:11px;color:var(--text-muted);line-height:1.6;padding:2px 2px 6px;
+  border-bottom:1px solid var(--border);margin-bottom:3px;
+}
+.elab{
+  display:flex;align-items:flex-start;gap:9px;width:100%;text-align:left;cursor:pointer;
+  background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:8px 10px;color:var(--text);font:inherit;
+}
+.elab:hover{border-color:var(--error);background:var(--surface-3);}
+.elab.active{border-color:var(--error);box-shadow:inset 3px 0 0 var(--error);}
+.elab-ico{
+  width:22px;height:22px;flex-shrink:0;border-radius:5px;display:flex;align-items:center;justify-content:center;
+  background:var(--error-dim);color:var(--error);border:1px solid var(--error);font-size:11px;
+}
+.elab-txt{flex:1;min-width:0;}
+.elab-n{display:block;font-size:12px;font-weight:700;line-height:1.35;}
+.elab-d{display:block;margin-top:2px;font-size:10.5px;color:var(--text-faint);line-height:1.45;}
+.elab-tag{
+  font-size:9px;font-family:var(--mono);padding:1px 6px;border-radius:99px;flex-shrink:0;
+  background:var(--surface-4);color:var(--text-faint);border:1px solid var(--border);
+}
+.elab-tag.partial{color:var(--warning);border-color:var(--warning);}
+
+/* ---- the lesson panel ---- */
+.el-title{font-size:13.5px;font-weight:800;color:var(--error);margin:0 0 3px;}
+.el-what{font-size:11.5px;color:var(--text-muted);line-height:1.65;margin:0 0 11px;}
+.el-sec{
+  font-size:9.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--text-faint);margin:13px 0 6px;
+}
+.el-wait{
+  font-size:11.5px;color:var(--text-muted);line-height:1.6;background:var(--surface-2);
+  border:1px dashed var(--border-strong);border-radius:var(--radius);padding:10px 12px;
+}
+.el-grid{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:11.5px;align-items:baseline;}
+.el-k{color:var(--text-faint);font-size:10.5px;white-space:nowrap;}
+.el-v{font-family:var(--mono);color:var(--text);word-break:break-word;}
+.el-v.bad{color:var(--error);font-weight:700;}
+.el-why{
+  font-size:11.5px;line-height:1.7;color:var(--text-muted);background:var(--error-dim);
+  border-left:3px solid var(--error);border-radius:0 var(--radius) var(--radius) 0;padding:9px 12px;margin-top:6px;
+}
+.el-limit{
+  font-size:11px;line-height:1.65;color:var(--warning);background:var(--warning-dim);
+  border-left:3px solid var(--warning);border-radius:0 var(--radius) var(--radius) 0;padding:9px 12px;margin-top:10px;
+}
+
+/* ---- the boundary picture: valid region, then the attempted access ----
+   The invalid cell is drawn as an ATTEMPT, never as a memory cell with a
+   value in it: the program has no such storage and the engine knows none. */
+.el-bound{display:flex;align-items:flex-start;gap:0;flex-wrap:wrap;margin:4px 0 2px;}
+.el-gap{
+  align-self:center;font-family:var(--mono);color:var(--text-faint);font-size:11px;
+  padding:0 7px;margin-top:-8px;
+}
+.mc-box.invalid{
+  border:1px dashed var(--error);background:var(--error-dim);color:var(--error);
+  font-weight:800;margin-left:0;border-radius:4px;
+}
+.mcell.invalid .mc-i{color:var(--error);font-weight:800;}
+.el-badge{
+  display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.06em;
+  color:var(--error);background:var(--error-dim);border:1px solid var(--error);
+  border-radius:99px;padding:2px 9px;margin-bottom:7px;
+}
+.el-badge.ok{color:var(--success);background:var(--success-dim);border-color:var(--success);}
+
+/* ---- the chain pictures (free / return / recursion) ---- */
+.el-chain{display:flex;flex-direction:column;align-items:flex-start;gap:0;margin:2px 0;}
+.el-node{
+  font-family:var(--mono);font-size:11px;padding:4px 11px;border-radius:var(--radius-sm);
+  border:1px solid var(--border-strong);background:var(--surface-2);color:var(--text-muted);
+}
+.el-node.heap{border-color:var(--heap);color:var(--heap);background:var(--heap-dim);}
+.el-node.stack{border-color:var(--stack);color:var(--stack);background:var(--stack-dim);}
+.el-node.act{border-color:var(--warning);color:var(--warning);background:var(--warning-dim);}
+.el-node.bad{border-color:var(--error);color:var(--error);background:var(--error-dim);font-weight:800;}
+.el-arrow{color:var(--text-faint);font-size:12px;line-height:1.1;padding:2px 0 2px 14px;}
+
+/* ---------------- SCROLLING HYGIENE ----------------
+   One scrolling container per pane. Panel bodies inside a scrolling pane do
+   not scroll on their own, so a learner never has to find a hidden inner
+   scrollbar, and content is always clipped behind the sticky header. */
+.pane-scroll .panel-body,#paneLeft > .panel > .panel-body{overflow:visible;}
+.pane-scroll,#paneLeft{scrollbar-gutter:stable;}
+
+/* ---------------- STOPPED-AT-THE-FAULT BANNER ----------------
+   The statement that trapped produced no step, so the card leads with the
+   failing line instead of presenting the last good step as the current one. */
+.exec.has-error{border-color:var(--error);}
+.exec-stopped{
+  display:flex;align-items:center;gap:9px;padding:8px 14px;
+  background:var(--error-dim);border-bottom:1px solid var(--error);
+  color:var(--error);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+}
+.exec-stopped .es-kind{
+  margin-left:auto;font-family:var(--mono);font-weight:700;text-transform:none;letter-spacing:0;
+  background:var(--surface-2);border:1px solid var(--error);border-radius:99px;padding:1px 9px;font-size:10px;
+}
+.exec-code.err{border-left:3px solid var(--error);}
+
+/* the anchored copy is placed by script, so it must not carry the inline
+   variant's stacking margin */
+.byte-detail.anchored{margin:0;}
+
+/* A detail level that only COLLAPSES the panels it excludes still leaves the
+   beginner staring at seven headers they were told not to think about. Basic
+   and Medium take them off the page entirely; Deep brings them all back, and
+   an explicit openPanel() overrides the level for that one panel. */
+.panel.lvl-hidden{display:none;}
 </style>
 </head>
 <body>
@@ -1614,9 +1868,9 @@ html[data-theme=light] .modal-overlay{background:rgba(40,50,70,.4);}
     <div class="tgroup" style="margin-left:auto;">
       <span class="speed-wrap" style="margin:0;"><span data-i18n="ctl.detail">Detail</span></span>
       <div class="seg" id="levelSeg" role="group" aria-label="Detail level">
-        <button data-level="beginner" class="active" title="Values and explanations only">Beginner</button>
-        <button data-level="intermediate" title="Adds addresses, pointers and representation">Intermediate</button>
-        <button data-level="deep" title="Adds RAM map, watch and the conceptual CPU view">Deep</button>
+        <button data-level="beginner" class="active" data-i18n="lvl.basic" title="Call stack, variables, memory and pointers only">Basic</button>
+        <button data-level="intermediate" data-i18n="lvl.medium" title="Adds the RAM map">Medium</button>
+        <button data-level="deep" data-i18n="lvl.deepBtn" title="Adds timeline, trace, watch and the conceptual CPU view">Deep</button>
       </div>
     </div>
   </div>
@@ -1627,7 +1881,8 @@ html[data-theme=light] .modal-overlay{background:rgba(40,50,70,.4);}
       <button class="rail-btn" id="railHome"    title="Dashboard (Ctrl+0)" aria-label="Dashboard">⌂</button>
       <button class="rail-btn active" id="railWork" title="Workspace (Ctrl+1)" aria-label="Workspace">▦</button>
       <div class="rail-sp"></div>
-      <button class="rail-btn" id="railExplorer" title="Toggle project explorer" aria-label="Toggle project explorer">☰</button>
+      <button class="rail-btn" id="railExplorer" title="Exercises and memory-error lessons (Ctrl+B)" aria-label="Open the library" aria-pressed="false">☰</button>
+      <button class="rail-btn" id="railErrLab" title="Memory Error Lab" aria-label="Open the memory error lab" aria-pressed="false">⚠</button>
       <button class="rail-btn" id="rail3d"      title="3D visualization (V)" aria-label="3D visualization" aria-pressed="false">◈</button>
       <button class="rail-btn" id="railDock"     title="Toggle bottom dock (Ctrl+`)" aria-label="Toggle bottom dock">▬</button>
       <button class="rail-btn" id="railHelp"     title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
@@ -1637,20 +1892,29 @@ html[data-theme=light] .modal-overlay{background:rgba(40,50,70,.4);}
       <div class="panes" id="panes">
 
         <!-- ================= LEFT: PROJECT + SOURCE + TIMELINE ================= -->
-        <section class="pane" id="paneLeft" aria-label="Project and source">
+        <section class="pane" id="paneLeft" aria-label="Source code">
 
-          <div class="panel" id="panelExplorer">
-            <div class="panel-head clickable" data-toggle="panelExplorer">
-              <span class="p-chev">▶</span>
-              <span class="p-ico" aria-hidden="true">▣</span>
-              <span class="p-titles">
-                <span class="p-title" data-i18n="panel.project">Project</span>
-                <span class="p-desc" data-i18n="panel.project.d">Exercises and source files</span>
-              </span>
-              <span class="p-ctrls"><span class="p-tag" id="explorerTag">13</span></span>
+          <!-- The project tree used to be a second Project panel stacked above
+               Source, duplicating the Project menu in the title bar and eating
+               ~29% of the left pane. It now lives in a drawer over this pane,
+               so all of that height belongs to the source editor. -->
+          <div class="lib-drawer" id="libDrawer" hidden aria-label="Library">
+            <div class="lib-head">
+              <div class="lib-tabs" role="tablist" aria-label="Library sections">
+                <button class="lib-tab active" data-lib="files" role="tab" aria-selected="true">
+                  <span aria-hidden="true">▣</span><span data-i18n="lib.files">Exercises</span>
+                  <span class="p-tag" id="explorerTag">13</span>
+                </button>
+                <button class="lib-tab" data-lib="errors" role="tab" aria-selected="false">
+                  <span aria-hidden="true">⚠</span><span data-i18n="lib.errors">Memory errors</span>
+                  <span class="p-tag" id="errLabTag">0</span>
+                </button>
+              </div>
+              <button class="p-btn" id="libClose" aria-label="Close library" title="Close (Esc)">✕</button>
             </div>
-            <div class="panel-body flush" style="max-height:148px;">
-              <div class="explorer" id="explorer"></div>
+            <div class="lib-body" id="libBody">
+              <div class="lib-sec" id="libFiles"><div class="explorer" id="explorer"></div></div>
+              <div class="lib-sec" id="libErrors" hidden></div>
             </div>
           </div>
 
@@ -1664,7 +1928,8 @@ html[data-theme=light] .modal-overlay{background:rgba(40,50,70,.4);}
               <span class="p-ctrls">
                 <span class="p-tag" id="bpTag" data-i18n="panel.source.bp">click gutter for breakpoint</span>
                 <button class="p-btn" id="btnEdit" title="Edit source" aria-label="Edit source">✎</button>
-                <button class="p-btn" id="btnFocusSrc" title="Focus this panel" aria-label="Focus source panel">⤢</button>
+                <button class="p-btn" id="btnExpandSrc" title="Expand the editor (Ctrl+Shift+E)"
+                        aria-label="Expand the source editor" aria-pressed="false">⤢</button>
               </span>
             </div>
             <div class="bp-banner hide" id="bpBanner">
@@ -1724,6 +1989,22 @@ html[data-theme=light] .modal-overlay{background:rgba(40,50,70,.4);}
           </div>
           <div id="execHost"></div>
           <div class="pane-scroll" id="rightScroll">
+
+            <!-- The lesson panel for the Memory Error Lab. Hidden unless an
+                 error lesson is loaded, so the Basic detail level still shows
+                 only its four panels during ordinary work. -->
+            <div class="panel" id="panelErrLab" hidden>
+              <div class="panel-head clickable" data-toggle="panelErrLab">
+                <span class="p-chev">▶</span>
+                <span class="p-ico" aria-hidden="true" style="background:var(--error-dim);color:var(--error);border-color:var(--error);">⚠</span>
+                <span class="p-titles">
+                  <span class="p-title" data-i18n="panel.errlab">Memory error lab</span>
+                  <span class="p-desc" data-i18n="panel.errlab.d">What this example demonstrates, and what actually happened</span>
+                </span>
+                <span class="p-ctrls"><span class="p-tag" id="errLabState" data-i18n="errlab.notrun">not run</span></span>
+              </div>
+              <div class="panel-body" id="errLabPanel"></div>
+            </div>
 
             <div class="panel" id="panelStack">
               <div class="panel-head clickable" data-toggle="panelStack">
@@ -7162,6 +7443,126 @@ const CConcepts = (() => {
       },
     },
 
+    overflow: {
+      color: 'error',
+      en: {
+        title: 'Array overflow',
+        what: {
+          beginner: 'Using an index past the last slot of an array. arr[3] has slots 0, 1 and 2 — there is no slot 3.',
+          intermediate: 'C does not check indexes. arr[5] simply computes base + 5 × element size and uses whatever is there, so the bug is silent until something else breaks.',
+          deep: 'The engine knows every array’s base, element size and length, so it can report the exact address, the requested index and the valid range instead of letting the write land somewhere plausible.',
+        },
+        look: 'Compare the index under the attempted cell with the indexes under the real cells: the attempted one is outside them.',
+        why: 'Like a hotel with rooms 0 to 2 and a key stamped 5: the key turns something, just not a door that belongs to you.',
+      },
+      fr: {
+        title: 'Débordement de tableau',
+        what: {
+          beginner: 'Utiliser un indice au-delà de la dernière case d’un tableau. arr[3] a les cases 0, 1 et 2 — il n’y a pas de case 3.',
+          intermediate: 'C ne vérifie pas les indices. arr[5] calcule simplement base + 5 × taille d’élément et utilise ce qui s’y trouve : le bug reste silencieux jusqu’à ce qu’autre chose casse.',
+          deep: 'Le moteur connaît la base, la taille d’élément et la longueur de chaque tableau : il peut donc signaler l’adresse exacte, l’indice demandé et la plage valide au lieu de laisser l’écriture atterrir quelque part de plausible.',
+        },
+        look: 'Comparez l’indice sous la case tentée avec ceux des vraies cases : la case tentée est en dehors.',
+        why: 'Comme un hôtel avec les chambres 0 à 2 et une clé marquée 5 : la clé ouvre quelque chose, mais pas une porte qui vous appartient.',
+      },
+    },
+
+    underflow: {
+      color: 'error',
+      en: {
+        title: 'Array underflow',
+        what: {
+          beginner: 'Using a negative index, which lands before the start of the array.',
+          intermediate: 'A counter that reached -1, or a loop that decremented one step too far, produces an address below the array. It is the same fault as an overflow, in the other direction.',
+          deep: 'The engine reports direction: "underflow" separately from "overflow", because the memory in front of an object usually belongs to a different variable rather than to nothing.',
+        },
+        look: 'The attempted cell is drawn to the LEFT of index 0 — before the object begins.',
+        why: 'Like counting down from the first step of a staircase and taking one more: there is floor there, but it is not a step.',
+      },
+      fr: {
+        title: 'Sous-débordement de tableau',
+        what: {
+          beginner: 'Utiliser un indice négatif, ce qui tombe avant le début du tableau.',
+          intermediate: 'Un compteur descendu à -1, ou une boucle décrémentée d’un cran de trop, produit une adresse sous le tableau. C’est la même faute qu’un débordement, dans l’autre sens.',
+          deep: 'Le moteur signale direction : « underflow » séparément de « overflow », car la mémoire située avant un objet appartient généralement à une autre variable plutôt qu’à rien.',
+        },
+        look: 'La case tentée est dessinée à GAUCHE de l’indice 0 — avant le début de l’objet.',
+        why: 'Comme descendre une marche de plus que la première : il y a bien du sol, mais ce n’est pas une marche.',
+      },
+    },
+
+    nullDeref: {
+      color: 'error',
+      en: {
+        title: 'NULL dereference',
+        what: {
+          beginner: 'Following a pointer that holds 0. Address 0 is deliberately not usable memory.',
+          intermediate: 'NULL is what malloc returns when it fails and what a pointer should be set to when it aims at nothing. Reading or writing through it is always a bug.',
+          deep: 'The engine traps address 0 before any block lookup, so a NULL dereference is reported as null-deref rather than as an ordinary out-of-bounds access.',
+        },
+        look: 'The pointer chain ends at NULL · 0x0 — there is no box on the other end, because there is nothing there.',
+        why: 'Like dialling a number that is reserved to mean "no number": it is not a phone that is switched off, it was never a phone.',
+      },
+      fr: {
+        title: 'Déréférencement de NULL',
+        what: {
+          beginner: 'Suivre un pointeur qui vaut 0. L’adresse 0 est délibérément une mémoire inutilisable.',
+          intermediate: 'NULL est ce que malloc renvoie en cas d’échec, et ce à quoi un pointeur doit valoir quand il ne vise rien. Y lire ou y écrire est toujours un bug.',
+          deep: 'Le moteur piège l’adresse 0 avant toute recherche de bloc : un déréférencement de NULL est donc signalé comme null-deref et non comme un accès hors limites ordinaire.',
+        },
+        look: 'La chaîne du pointeur se termine sur NULL · 0x0 — il n’y a pas de boîte au bout, parce qu’il n’y a rien.',
+        why: 'Comme composer un numéro réservé pour signifier « pas de numéro » : ce n’est pas un téléphone éteint, ce n’a jamais été un téléphone.',
+      },
+    },
+
+    useAfterFree: {
+      color: 'error',
+      en: {
+        title: 'Use-after-free',
+        what: {
+          beginner: 'Using a heap block after free() has given it back.',
+          intermediate: 'free() tells the allocator it may reuse those bytes. It does not change your pointer, which still holds the old address and still looks perfectly valid.',
+          deep: 'This model never recycles a freed block’s address, so a dangling pointer is always provably detectable here. A real allocator would hand that address to the next malloc, and the bug would appear as corrupted data somewhere else entirely.',
+        },
+        look: 'Follow the chain: the block existed, free() happened, and the access came after it.',
+        why: 'Like keeping the key to a hotel room after checking out: the key still fits, but the room is someone else’s now.',
+      },
+      fr: {
+        title: 'Utilisation après libération',
+        what: {
+          beginner: 'Utiliser un bloc du tas après que free() l’a rendu.',
+          intermediate: 'free() indique à l’allocateur qu’il peut réutiliser ces octets. Cela ne change pas votre pointeur, qui garde l’ancienne adresse et paraît toujours parfaitement valide.',
+          deep: 'Ce modèle ne recycle jamais l’adresse d’un bloc libéré : un pointeur pendouillant y est donc toujours détectable de façon prouvée. Un vrai allocateur donnerait cette adresse au malloc suivant, et le bug apparaîtrait sous forme de données corrompues ailleurs.',
+        },
+        look: 'Suivez la chaîne : le bloc existait, free() a eu lieu, et l’accès est venu après.',
+        why: 'Comme garder la clé d’une chambre d’hôtel après le départ : la clé entre encore, mais la chambre est à quelqu’un d’autre.',
+      },
+    },
+
+    stackOverflow: {
+      color: 'error',
+      en: {
+        title: 'Stack overflow',
+        what: {
+          beginner: 'Too many function calls piled on top of each other, usually recursion with no base case.',
+          intermediate: 'Every call adds a frame holding that call’s parameters and locals. Without a case that returns instead of recursing, the frames never come back off.',
+          deep: 'This model has no byte-level lower bound for the stack, so it does not simulate a stack pointer running off a real 8 MB stack. It does model call-depth exhaustion exactly: the run stops at depth 200, and the frame chain shown is real.',
+        },
+        look: 'Watch the call stack grow by one frame per step and never shrink.',
+        why: 'Like stacking plates without ever taking one off: the failure is not one bad plate, it is that nothing is ever removed.',
+      },
+      fr: {
+        title: 'Débordement de pile',
+        what: {
+          beginner: 'Trop d’appels de fonction empilés, en général une récursion sans cas de base.',
+          intermediate: 'Chaque appel ajoute une trame contenant ses paramètres et ses locales. Sans un cas qui retourne au lieu de rappeler, les trames ne repartent jamais.',
+          deep: 'Ce modèle n’a pas de limite basse en octets pour la pile : il ne simule pas un pointeur de pile sortant d’une vraie pile de 8 Mo. Il modélise en revanche exactement l’épuisement de la profondeur d’appel : l’exécution s’arrête à la profondeur 200, et la chaîne de trames affichée est réelle.',
+        },
+        look: 'Regardez la pile d’appels grandir d’une trame par étape sans jamais diminuer.',
+        why: 'Comme empiler des assiettes sans jamais en retirer : la faute n’est pas une mauvaise assiette, c’est que rien n’est jamais enlevé.',
+      },
+    },
+
     error: {
       color: 'error',
       en: {
@@ -7832,33 +8233,49 @@ const CViz3D = (() => {
     return null;
   }
 
-  function currentObject(model) {
-    if (!model) return null;
-    // A failed access outranks everything: it is what the learner must look at.
-    if (model.error && typeof model.error.address === 'number') {
-      const hit = locate(model, model.error.address);
-      if (hit) return Object.assign({ reason: 'error', known: true }, hit);
-      return { id: 'err:addr', kind: 'invalid', name: null, nameKey: 'viz.outside',
-               address: model.error.address, typeName: UNKNOWN, reason: 'error', known: true };
-    }
-    const acc = Array.isArray(model.accessed) ? model.accessed : [];
+  /* THE execution-focus rule, in one place. Given only what the engine
+     recorded for a step, it answers "which address is the program working on
+     right now, and why", most significant first. Both the 3D scene and the
+     Memory panel read this list, so the highlighted box and the highlighted
+     cell are the same fact rather than two lookalike guesses.
 
+     Nothing here is inferred: an address appears only because the engine's
+     readValue / writeValue reported it. When the step touched nothing
+     addressable the list is empty — that is an answer, not a gap to fill. */
+  function focusCandidates(src) {
+    if (!src) return [];
+    const out = [];
+    // A failed access outranks everything: it is what the learner must look at.
+    if (src.error && typeof src.error.address === 'number')
+      out.push({ address: src.error.address, size: src.error.details && src.error.details.size, reason: 'error' });
+    const acc = Array.isArray(src.accessed) ? src.accessed : [];
     // 1. a write the engine reported — the strongest possible "this changed"
-    if (model.memDiff && typeof model.memDiff.address === 'number') {
-      const hit = locate(model, model.memDiff.address);
-      if (hit) return Object.assign({ reason: 'write', known: true }, hit);
-    }
+    if (src.memDiff && typeof src.memDiff.address === 'number')
+      out.push({ address: src.memDiff.address, size: src.memDiff.size, reason: 'write' });
     const lastWrite = [...acc].reverse().find(a => a.kind === 'write');
-    if (lastWrite) {
-      const hit = locate(model, lastWrite.address);
-      if (hit) return Object.assign({ reason: 'write', known: true }, hit);
-    }
+    if (lastWrite) out.push({ address: lastWrite.address, size: lastWrite.size, reason: 'write' });
     // 2. the LAST read of this step: for str[i] the engine reads i first and the
     //    element second, so the last read is the specific thing being worked on
     const reads = acc.filter(a => a.kind === 'read');
-    for (let i = reads.length - 1; i >= 0; i--) {
-      const hit = locate(model, reads[i].address);
-      if (hit) return Object.assign({ reason: 'read', known: true }, hit);
+    for (let i = reads.length - 1; i >= 0; i--)
+      out.push({ address: reads[i].address, size: reads[i].size, reason: 'read' });
+    return out;
+  }
+  // The single best answer, for a view that highlights one thing.
+  function focusAddress(src) {
+    const c = focusCandidates(src);
+    return c.length ? c[0] : null;
+  }
+
+  function currentObject(model) {
+    if (!model) return null;
+    for (const f of focusCandidates(model)) {
+      const hit = locate(model, f.address);
+      if (hit) return Object.assign({ reason: f.reason, known: true }, hit);
+      // an address outside every live object: real, but nothing to point at
+      if (f.reason === 'error')
+        return { id: 'err:addr', kind: 'invalid', name: null, nameKey: 'viz.outside',
+                 address: f.address, typeName: UNKNOWN, reason: 'error', known: true };
     }
     // 3. nothing addressable: fall back to the frame, which is always known
     const frames = model.frames || [];
@@ -8822,7 +9239,7 @@ const CViz3D = (() => {
     modelFromEngine, modelFromTrace, unsupported,
     varFromEngine, heapFromEngine, eventFromStep, traceEvent,
     layout, boundsOf, explain, conceptFor, nameAtAddress, hex, caps, SAY,
-    currentObject, relatedIds, locate,
+    currentObject, focusAddress, focusCandidates, relatedIds, locate,
     createStage,
   };
 })();
@@ -8856,35 +9273,84 @@ const ui = {
   dockTab: 'output',
   dockCollapsed: false,
   explorerOpen: true,
+  libOpen: false,          // the library drawer (exercises + memory errors)
+  libTab: 'files',         // 'files' | 'errors'
+  srcExpanded: false,      // source editor expanded over the timeline
+  hiddenByLevel: {},       // panelId -> true when the detail level excludes it
   collapsed: {},           // panelId -> bool
   focusPanel: null,
   inspectFrame: null,      // index into state.frames, or null = follow execution
   selectedVar: null,       // variable name whose detail is expanded
   focusObject: null,       // blockId highlighted in Memory
   focusRegion: null,       // 'stack'|'heap'|'globals'|'code'
-  focusByte: null,         // {address} for the byte inspector
+  focusByte: null,         // {address} for the byte inspector — USER SELECTION.
+                           // Execution focus is derived from the step and is
+                           // deliberately NOT stored here: clicking a cell must
+                           // never move what the program is working on.
   watches: [],
   exampleKey: 'ex6',
+  lesson: null,            // active Memory Error Lab lesson id, or null
   level: 'beginner',       // beginner | intermediate | deep — detail level
   execMode: 'engine',      // 'engine' = CEngine history, 'trace' = real traced run
   view3d: false,           // 3D visualization open in the right pane
   dockH: 210,              // bottom dock height in px, learner-resizable
 };
 
-/* Detail level drives the information hierarchy: which level-2/3 panels start
-   open, and whether addresses and bit representations are shown. The user can
-   still collapse or expand any individual panel afterwards. */
+/* Detail level drives the information hierarchy, and it is the main defence
+   against overwhelming a beginner. The internal keys stay beginner /
+   intermediate / deep so saved preferences keep working; the labels the
+   learner reads are Basic / Medium / Deep.
+
+     Basic   Call stack · Variables · Memory · Pointers, and nothing else.
+     Medium  Basic + the RAM map.
+     Deep    everything, including the timeline, the trace and the
+             conceptual compiler/CPU view.
+
+   `true` means COLLAPSED. Every panel that a level does not include is listed
+   explicitly, so adding a panel to the shell can never silently leak into
+   Basic. The learner may still open any panel by hand afterwards. */
 const LEVEL_PANELS = {
-  beginner:     { panelWatch:true,  panelPointers:true,  panelRam:true,  panelDeep:true  },
-  intermediate: { panelWatch:true,  panelPointers:false, panelRam:true,  panelDeep:true  },
-  deep:         { panelWatch:false, panelPointers:false, panelRam:false, panelDeep:false },
+  beginner: {
+    panelStack:false, panelVars:false, panelMemory:false, panelPointers:false,
+    panelWatch:true, panelTrace:true, panelTest:true, panelCompiler:true,
+    panelRule:true, panelRam:true, panelDeep:true, panelTimeline:true,
+  },
+  intermediate: {
+    panelStack:false, panelVars:false, panelMemory:false, panelPointers:false,
+    panelRam:false,
+    panelWatch:true, panelTrace:true, panelTest:true, panelCompiler:true,
+    panelRule:true, panelDeep:true, panelTimeline:true,
+  },
+  deep: {
+    panelStack:false, panelVars:false, panelMemory:false, panelPointers:false,
+    panelRam:false, panelTimeline:false, panelTrace:false, panelWatch:false,
+    panelDeep:false, panelCompiler:false, panelTest:false, panelRule:false,
+  },
+};
+/* Which panels each level shows, as a plain list — the UI and the tests read
+   the same table, so "Basic shows only these four" is one fact, not two. */
+const LEVEL_VISIBLE = {
+  beginner:     ['panelStack', 'panelVars', 'panelMemory', 'panelPointers'],
+  intermediate: ['panelStack', 'panelVars', 'panelMemory', 'panelPointers', 'panelRam'],
+  deep:         Object.keys(LEVEL_PANELS.deep),
 };
 function applyLevel() {
   const m = LEVEL_PANELS[ui.level] || LEVEL_PANELS.beginner;
-  Object.keys(m).forEach(id => { ui.collapsed[id] = m[id]; });
+  ui.hiddenByLevel = {};
+  Object.keys(m).forEach(id => {
+    ui.collapsed[id] = m[id];
+    // A panel this level does not include is taken off the page, not just
+    // folded shut — a row of headers for postponed concepts is still noise.
+    if (m[id]) ui.hiddenByLevel[id] = true;
+  });
   $$('#levelSeg button').forEach(b => b.classList.toggle('active', b.dataset.level === ui.level));
+  document.body.classList.toggle('level-deep', ui.level === 'deep');
+  document.body.classList.toggle('level-basic', ui.level === 'beginner');
   applyCollapsed();
 }
+/* Changing the detail level changes what is VISIBLE and nothing else: the
+   execution position, the program state, the camera and every learner
+   selection are deliberately untouched here. */
 function setLevel(l) {
   ui.level = l;
   applyLevel();
@@ -8914,7 +9380,7 @@ function saveUI() {
       theme: ui.theme, lang: ui.lang, split: ui.split, stacked: ui.stacked,
       memView: ui.memView, dockTab: ui.dockTab, dockCollapsed: ui.dockCollapsed, level: ui.level,
       explorerOpen: ui.explorerOpen, collapsed: ui.collapsed, watches: ui.watches,
-      dockH: ui.dockH,
+      dockH: ui.dockH, srcExpanded: ui.srcExpanded, libTab: ui.libTab,
       view3d: (typeof viz === 'object' && viz) ? viz.open : false,
       viz3dFlat: (typeof viz === 'object' && viz) ? viz.flat : false,
     }));
@@ -8935,6 +9401,8 @@ function loadUI() {
     if (typeof o.dockTab === 'string') ui.dockTab = o.dockTab;
     if (typeof o.dockCollapsed === 'boolean') ui.dockCollapsed = o.dockCollapsed;
     if (typeof o.explorerOpen === 'boolean') ui.explorerOpen = o.explorerOpen;
+    if (typeof o.srcExpanded === 'boolean') ui.srcExpanded = o.srcExpanded;
+    if (o.libTab === 'files' || o.libTab === 'errors') ui.libTab = o.libTab;
     if (o.collapsed && typeof o.collapsed === 'object') ui.collapsed = o.collapsed;
     if (Array.isArray(o.watches)) ui.watches = o.watches.filter(x => typeof x === 'string').slice(0, 20);
     if (typeof o.dockH === 'number' && o.dockH >= 80 && o.dockH <= 2000) ui.dockH = o.dockH;
@@ -9023,6 +9491,34 @@ const I18N = {
     'ts.workspace':'Build workspace:','ts.exe':'executable:',
     'ts.demoExpected':'demo','ts.demoExpectedLong':'This DEMO case is designed to fail.',
     'dock.trace':'Trace','panel.trace':'Trace','panel.trace.d':'What the real program did, step by step',
+    'lvl.basic':'Basic','lvl.medium':'Medium','lvl.deepBtn':'Deep',
+    'exec.last':'Last completed step',
+    'lib.title':'Library','lib.files':'Exercises','lib.errors':'Memory errors',
+    'lib.open':'Open the library','lib.close':'Close the library',
+    'src.expand':'Expand the editor','src.collapse':'Restore the editor',
+    'panel.errlab':'Memory error lab','panel.errlab.d':'What this example demonstrates, and what actually happened',
+    'errlab.title':'Memory Errors','errlab.notrun':'not run','errlab.armed':'ready — press Step',
+    'errlab.caught':'error reproduced','errlab.clean':'finished without an error',
+    'errlab.intro':'Each lesson is a real C program that breaks a real memory rule. It runs on the same engine and the same visualization as every other example — press Step and watch it fail.',
+    'errlab.demonstrates':'What this demonstrates',
+    'errlab.expected':'Expected outcome','errlab.whatHappened':'What actually happened',
+    'errlab.wait':'Nothing has gone wrong yet. Press Step (or Run) and the program will reach the invalid access on its own.',
+    'errlab.noError':'The program finished without triggering the error. Reset and step again, or check whether the source was edited.',
+    'errlab.type':'Error','errlab.line':'Source line','errlab.access':'Access',
+    'errlab.address':'Attempted address','errlab.index':'Attempted index','errlab.object':'Object',
+    'errlab.valid':'Valid range','errlab.validIdx':'Valid indexes','errlab.size':'Size',
+    'errlab.why':'Why this is invalid','errlab.picture':'What the program tried to do',
+    'errlab.invalid':'INVALID ACCESS','errlab.stopped':'Execution stopped at this line',
+    'errlab.outside':'outside','errlab.notMemory':'not memory that belongs to this object',
+    'errlab.limitTitle':'Honest limitation',
+    'errlab.reset':'Reset','errlab.load':'Load this lesson',
+    'errlab.acc.read':'read','errlab.acc.write':'write','errlab.acc.free':'free()',
+    'errlab.acc.index':'array index','errlab.acc.deref':'dereference','errlab.acc.call':'function call',
+    'mem.legend.exec':'currently executing','mem.legend.sel':'selected by you',
+    'mem.current':'CURRENT','mem.selected':'selected','mem.value':'Value','mem.type':'Type',
+    'mem.index':'Index','mem.addr':'Address','mem.hex':'Hex','mem.dec':'Decimal','mem.bin':'Binary',
+    'mem.uninit':'not written yet','mem.clickHint':'Click a cell for details · hover for a quick look',
+    'mem.close':'Close',
     'viz.title':'3D Visualization','viz.open':'Open 3D visualization','viz.close':'Close',
     'viz.flow':'Data flow','viz.lastValid':'last valid','viz.outside':'outside valid range',
     'viz.e.access':'Access','viz.e.address':'Address','viz.e.target':'Target','viz.e.index':'Index used',
@@ -9068,7 +9564,7 @@ const I18N = {
     'viz.d.size':'Size','viz.d.scope':'Scope','viz.d.index':'Index','viz.d.kind':'Region',
     'viz.d.target':'Points to','viz.d.targetAddr':'Target address','viz.d.targetVal':'Target value',
     'viz.d.bytes':'Bytes','viz.d.shadowed':'shadowed','viz.d.scopeFn':'function','viz.d.scopeBlock':'block',
-    'lvl.beginner':'beginner','lvl.intermediate':'intermediate','lvl.deep':'deep',
+    'lvl.beginner':'basic','lvl.intermediate':'medium','lvl.deep':'deep',
     'tr.run':'Run Trace','tr.short':'trace','tr.modePill':'Real traced run','tr.demo':'Demo program','tr.loadDemo':'Load demo',
     'tr.demoLoaded':'Demo program loaded into the editor','tr.events':'events','tr.step':'step',
     'tr.realNote':'real execution of the compiled program','tr.depth':'depth',
@@ -9174,6 +9670,34 @@ const I18N = {
     'ts.workspace':'Répertoire de compilation :','ts.exe':'exécutable :',
     'ts.demoExpected':'démo','ts.demoExpectedLong':'Ce cas DÉMO est conçu pour échouer.',
     'dock.trace':'Trace','panel.trace':'Trace','panel.trace.d':'Ce que le vrai programme a fait, étape par étape',
+    'lvl.basic':'Basique','lvl.medium':'Moyen','lvl.deepBtn':'Approfondi',
+    'exec.last':'Dernière étape terminée',
+    'lib.title':'Bibliothèque','lib.files':'Exercices','lib.errors':'Erreurs mémoire',
+    'lib.open':'Ouvrir la bibliothèque','lib.close':'Fermer la bibliothèque',
+    'src.expand':'Agrandir l’éditeur','src.collapse':'Restaurer l’éditeur',
+    'panel.errlab':'Labo des erreurs mémoire','panel.errlab.d':'Ce que cet exemple démontre, et ce qui s’est réellement passé',
+    'errlab.title':'Erreurs mémoire','errlab.notrun':'non exécuté','errlab.armed':'prêt — appuyez sur Pas',
+    'errlab.caught':'erreur reproduite','errlab.clean':'terminé sans erreur',
+    'errlab.intro':'Chaque leçon est un vrai programme C qui viole une vraie règle mémoire. Il s’exécute avec le même moteur et la même visualisation que les autres exemples — appuyez sur Pas et regardez-le échouer.',
+    'errlab.demonstrates':'Ce que cela démontre',
+    'errlab.expected':'Résultat attendu','errlab.whatHappened':'Ce qui s’est réellement passé',
+    'errlab.wait':'Rien n’a encore échoué. Appuyez sur Pas (ou Exécuter) et le programme atteindra l’accès invalide de lui-même.',
+    'errlab.noError':'Le programme s’est terminé sans déclencher l’erreur. Réinitialisez et refaites les pas, ou vérifiez si la source a été modifiée.',
+    'errlab.type':'Erreur','errlab.line':'Ligne source','errlab.access':'Accès',
+    'errlab.address':'Adresse tentée','errlab.index':'Indice tenté','errlab.object':'Objet',
+    'errlab.valid':'Plage valide','errlab.validIdx':'Indices valides','errlab.size':'Taille',
+    'errlab.why':'Pourquoi c’est invalide','errlab.picture':'Ce que le programme a tenté de faire',
+    'errlab.invalid':'ACCÈS INVALIDE','errlab.stopped':'Exécution arrêtée à cette ligne',
+    'errlab.outside':'hors zone','errlab.notMemory':'pas de la mémoire appartenant à cet objet',
+    'errlab.limitTitle':'Limite assumée',
+    'errlab.reset':'Réinitialiser','errlab.load':'Charger cette leçon',
+    'errlab.acc.read':'lecture','errlab.acc.write':'écriture','errlab.acc.free':'free()',
+    'errlab.acc.index':'indice de tableau','errlab.acc.deref':'déréférencement','errlab.acc.call':'appel de fonction',
+    'mem.legend.exec':'en cours d’exécution','mem.legend.sel':'sélectionné par vous',
+    'mem.current':'COURANT','mem.selected':'sélectionné','mem.value':'Valeur','mem.type':'Type',
+    'mem.index':'Indice','mem.addr':'Adresse','mem.hex':'Hex','mem.dec':'Décimal','mem.bin':'Binaire',
+    'mem.uninit':'pas encore écrit','mem.clickHint':'Cliquez une case pour les détails · survolez pour un aperçu',
+    'mem.close':'Fermer',
     'viz.title':'Visualisation 3D','viz.open':'Ouvrir la visualisation 3D','viz.close':'Fermer',
     'viz.flow':'Flux de données','viz.lastValid':'dernier valide','viz.outside':'hors de la plage valide',
     'viz.e.access':'Accès','viz.e.address':'Adresse','viz.e.target':'Cible','viz.e.index':'Indice utilisé',
@@ -9219,7 +9743,7 @@ const I18N = {
     'viz.d.size':'Taille','viz.d.scope':'Portée','viz.d.index':'Indice','viz.d.kind':'Région',
     'viz.d.target':'Vise','viz.d.targetAddr':'Adresse visée','viz.d.targetVal':'Valeur visée',
     'viz.d.bytes':'Octets','viz.d.shadowed':'masquée','viz.d.scopeFn':'fonction','viz.d.scopeBlock':'bloc',
-    'lvl.beginner':'débutant','lvl.intermediate':'intermédiaire','lvl.deep':'approfondi',
+    'lvl.beginner':'basique','lvl.intermediate':'moyen','lvl.deep':'approfondi',
     'tr.run':'Lancer la trace','tr.short':'trace','tr.modePill':'Exécution réelle tracée','tr.demo':'Programme démo','tr.loadDemo':'Charger la démo',
     'tr.demoLoaded':'Programme démo chargé dans l’éditeur','tr.events':'événements','tr.step':'étape',
     'tr.realNote':'exécution réelle du programme compilé','tr.depth':'profondeur',
@@ -9258,6 +9782,9 @@ function applyI18n() {
   updateModePill();
   if (run.history) render();
   renderExplorer();
+  if (typeof renderErrLabList === 'function') renderErrLabList();
+  if (typeof renderErrLab === 'function') renderErrLab();
+  if (typeof applySrcExpanded === 'function') applySrcExpanded();
   // Validation panels build their text with t() at render time, so a language
   // change has to re-render them too.
   if (typeof renderValidation === 'function') renderValidation();
@@ -9299,7 +9826,9 @@ function resetLayout() {
   // Restore the markup's level-3 defaults rather than expanding everything.
   ui.collapsed = Object.assign({}, DEFAULT_COLLAPSED);
   ui.explorerOpen = true; ui.dockCollapsed = false;
+  ui.srcExpanded = false; ui.libOpen = false;
   applyStacked(); applySplit(); applyCollapsed(); applyDock();
+  applySrcExpanded(); applyLibrary();
   saveUI();
   toast('Layout reset');
 }
@@ -9368,23 +9897,30 @@ function initDivider() {
 let DEFAULT_COLLAPSED = {};
 function seedCollapsedDefaults() {
   $$('.panel').forEach(p => {
-    if (p.id === 'panelExplorer') return;
     DEFAULT_COLLAPSED[p.id] = p.classList.contains('collapsed');
     if (ui.collapsed[p.id] === undefined) ui.collapsed[p.id] = DEFAULT_COLLAPSED[p.id];
   });
 }
 function applyCollapsed() {
-  $$('.panel').forEach(p => p.classList.toggle('collapsed', !!ui.collapsed[p.id]));
-  $('#panelExplorer').classList.toggle('collapsed', !ui.explorerOpen);
-  $('#railExplorer').classList.toggle('active', ui.explorerOpen);
+  const off = ui.hiddenByLevel || {};
+  $$('.panel').forEach(p => {
+    p.classList.toggle('collapsed', !!ui.collapsed[p.id]);
+    p.classList.toggle('lvl-hidden', !!off[p.id]);
+  });
+  // The project tree is a drawer now, not a panel; the rail button reflects it.
+  const rx = $('#railExplorer');
+  if (rx) { rx.classList.toggle('active', ui.libOpen); rx.setAttribute('aria-pressed', String(!!ui.libOpen)); }
 }
 function togglePanel(id) {
-  if (id === 'panelExplorer') { ui.explorerOpen = !ui.explorerOpen; }
+  if (id === 'panelExplorer') { toggleLibrary(); return; }
   else ui.collapsed[id] = !ui.collapsed[id];
   applyCollapsed(); saveUI();
 }
 function openPanel(id) {
-  if (id === 'panelExplorer') ui.explorerOpen = true; else ui.collapsed[id] = false;
+  if (id === 'panelExplorer') { openLibrary('files'); return; }
+  // An explicit request beats the detail level for this one panel.
+  if (ui.hiddenByLevel) delete ui.hiddenByLevel[id];
+  ui.collapsed[id] = false;
   applyCollapsed(); saveUI();
   const el = $('#' + id);
   if (el) { el.scrollIntoView({ block:'nearest', behavior:'smooth' }); focusPanel(id); }
@@ -9631,6 +10167,9 @@ function updateModePill() {
 function loadExample(key) {
   const ex = EXAMPLES[key];
   if (!ex) return;
+  // Opening an ordinary exercise leaves the Memory Error Lab: the lesson
+  // panel must never describe a program that is no longer in the editor.
+  ui.lesson = null;
   ui.exampleKey = key;
   $('#sourceEdit').value = ex.src;
   $('#sourceDesc').textContent = fileNameFor(key) + '  ·  ' + ex.label;
@@ -9676,6 +10215,7 @@ function resetAll() {
   renderEmpty();
   renderTimeline();
   renderDock();
+  if (typeof renderErrLab === 'function') renderErrLab();
   updateStatus();
 }
 function renderEmpty() {
@@ -9697,6 +10237,7 @@ function renderEmpty() {
   renderWatch();
   ['stackTag','varsTag','ptrTag','tlTag'].forEach(id => { const e = $('#' + id); if (e) e.textContent = '0'; });
   if (typeof renderViz === 'function') renderViz();
+  if (typeof renderErrLab === 'function') renderErrLab();
   $('#stepReadout').textContent = '—';
 }
 
@@ -9768,6 +10309,9 @@ function showRuntimeError(e) {
     last._error = true;
   }
   buildRuntimeError(e);
+  // The lesson panel reads run.error, so it has to be refreshed here as well:
+  // a run that stops on the error may not re-enter render().
+  if (typeof renderErrLab === 'function') renderErrLab();
   updateStatus();
 }
 
@@ -9944,6 +10488,7 @@ function render() {
   renderDeep(s, state);
   renderTimeline();
   renderDock();
+  if (typeof renderErrLab === 'function') renderErrLab();
   // The 3D view is one more consumer of the same state, never a second source.
   if (typeof renderViz === 'function') renderViz();
   updateStatus();
@@ -10066,8 +10611,24 @@ function renderExec(s, state) {
   fn = fn || 'program';
   const code = (run.src.split('\n')[s.line - 1] || '').trim();
   const d = s.detail || {};
-  let h = '<div class="exec"><div class="exec-top"><div class="exec-id">' +
-    '<div class="exec-eyebrow"><span class="pulse"></span>' + esc(t('exec.now')) + '</div>' +
+  // The step that trapped never completed, so it produced no step record. At
+  // the end of a failed run the card leads with the failing line — the same
+  // line the source view highlights — rather than with the last good step.
+  const stoppedHere = !!(run.error && run.history && run.index === run.history.length - 1);
+  const errLine = stoppedHere && typeof run.error.line === 'number' ? run.error.line : null;
+  let h = '<div class="exec' + (stoppedHere ? ' has-error' : '') + '">';
+  if (stoppedHere) {
+    h += '<div class="exec-stopped"><span aria-hidden="true">■</span><span>' +
+      esc(t('errlab.stopped')) + (errLine ? ' — ' + esc(t('errlab.line')).toLowerCase() + ' ' + errLine : '') +
+      '</span><span class="es-kind">' + esc(errKindLabel(run.error.kind)) + '</span></div>';
+    if (errLine) {
+      const bad = (run.src.split('\n')[errLine - 1] || '').trim();
+      if (bad) h += '<div class="exec-code err">' + hl(bad) + '</div>';
+    }
+  }
+  h += '<div class="exec-top"><div class="exec-id">' +
+    '<div class="exec-eyebrow"><span class="pulse"></span>' +
+    esc(stoppedHere ? t('exec.last') : t('exec.now')) + '</div>' +
     '<div class="exec-where"><span class="exec-fn">' + esc(fn) + '()</span>' +
     '<span class="exec-line">line ' + s.line + '</span>' +
     '<span class="exec-phase">' + esc(PHASE_LABEL[s.phase] || s.phase) + '</span></div></div></div>';
@@ -10336,7 +10897,7 @@ function byteText(v) {
     default:        return v === 0 ? '\\0' : (v >= 32 && v < 127 ? String.fromCharCode(v) : '·');
   }
 }
-function byteCell(b, changed) {
+function byteCell(b, changed, focus) {
   const wide = ui.memView === 'binary';
   const cls = ['byte-cell'];
   if (wide) cls.push('wide');
@@ -10344,13 +10905,64 @@ function byteCell(b, changed) {
   if (b.value === 0 && b.init) cls.push('nul');
   if (changed) cls.push('changed');
   if (ui.focusByte && ui.focusByte.address === b.address) cls.push('cur');
+  // Two independent states, never merged: 'sel' is the learner's choice,
+  // 'exec' is what the engine says the program is touching right now.
+  const bcls = ['bv'];
+  if (ui.focusByte && ui.focusByte.address === b.address) bcls.push('sel');
+  if (focus && inFocus(focus, b.address, 1)) bcls.push('exec');
   return '<div class="' + cls.join(' ') + '"><span class="ba">' + (b.address & 0xffff).toString(16).padStart(4, '0') + '</span>' +
-    '<span class="bv" data-addr="' + b.address + '" data-val="' + b.value + '" data-init="' + (b.init ? 1 : 0) +
+    '<span class="' + bcls.join(' ') + '" data-addr="' + b.address + '" data-val="' + b.value + '" data-init="' + (b.init ? 1 : 0) +
     '" role="button" tabindex="-1" title="' + hexA(b.address) + '">' + esc(b.init ? byteText(b.value) : '·') + '</span></div>';
+}
+// Does [address, address+size) overlap the range the engine says is in use?
+function inFocus(focus, address, size) {
+  if (!focus || typeof focus.address !== 'number') return false;
+  const fs_ = focus.size || 1;
+  return address < focus.address + fs_ && focus.address < address + (size || 1);
+}
+
+/* The element strip — the picture the learner should see FIRST: one box per
+   array element with its index underneath, and nothing else. Addresses and
+   byte-level detail are one click (or one hover) away, and permanently
+   visible only at the Deep detail level. */
+function memCellStrip(o, focus) {
+  if (!o.elements || !o.elements.length) return '';
+  let h = '<div class="mem-cells" role="group" aria-label="' + esc(o.varName || 'array') + '">';
+  o.elements.forEach((el, i) => {
+    const exec = inFocus(focus, el.address, el.bytes.length);
+    const sel = !!(ui.focusByte && ui.focusByte.address >= el.address &&
+                   ui.focusByte.address < el.address + el.bytes.length);
+    const moved = exec && lastExecAddr !== null && lastExecAddr !== focus.address;
+    const cls = ['mcell'];
+    if (exec) cls.push('exec');
+    if (moved) cls.push('moved');
+    if (sel) cls.push('sel');
+    const box = ['mc-box'];
+    if (!el.initialized) box.push('uninit');
+    else if (el.value === '0' || el.value === 0) box.push('nul');
+    h += '<button type="button" class="' + cls.join(' ') + '" data-addr="' + el.address +
+         '" data-span="' + el.bytes.length + '" data-idx="' + i + '" data-block="' + o.blockId + '" aria-label="' +
+         esc((o.varName || 'array') + '[' + i + ']') + '"' + (exec ? ' aria-current="true"' : '') + '>' +
+         (exec ? '<span class="mc-cur">▼ ' + esc(t('mem.current')) + '</span>' : '') +
+         '<span class="' + box.join(' ') + '">' + esc(elemGlyph(el)) + '</span>' +
+         '<span class="mc-i">' + i + '</span></button>';
+  });
+  return h + '</div>';
+}
+// What goes inside the box. A char shows the character the way C prints it;
+// anything else shows the value the engine already formatted.
+function elemGlyph(el) {
+  if (!el.initialized) return '·';
+  const v = el.valueText != null ? String(el.valueText) : String(el.value);
+  const m = /^'(.*)' \(/.exec(v);
+  if (m) return m[1];
+  return v;
 }
 function renderMemory(s, state) {
   const objs = state.objects.slice();
   if (!objs.length) { $('#memPanel').innerHTML = '<div class="empty">No objects in memory yet.</div>'; return; }
+  // What the PROGRAM is working on, from the engine's own record of this step.
+  const focus = typeof execFocus === 'function' ? execFocus(s) : null;
   const changed = new Set();
   if (s.memDiff) for (let k = 0; k < s.memDiff.size; k++) changed.add(s.memDiff.address + k);
   const order = { stack: 0, heap: 1, global: 2, static: 3 };
@@ -10381,36 +10993,151 @@ function renderMemory(s, state) {
         (o.isArray && o.uninitialized ? '<span class="mv-uninit">some bytes not written yet</span>' : '') + '</div>';
     }
     if (o.elements && o.elements.length) {
+      h += memCellStrip(o, focus);
       h += '<div class="byte-grid">';
       o.elements.forEach((el, i) => {
         if (i > 0) h += '<div class="byte-sep"></div>';
         h += '<div><div class="elem-label">[' + i + ']' + (el.initialized && el.valueText ? ' ' + esc(el.valueText) : '') + '</div>' +
-          '<div class="byte-grid">' + el.bytes.map(b => byteCell(b, changed.has(b.address))).join('') + '</div></div>';
+          '<div class="byte-grid">' + el.bytes.map(b => byteCell(b, changed.has(b.address), focus)).join('') + '</div></div>';
       });
       h += '</div>';
     } else {
-      h += '<div class="byte-grid">' + o.bytes.map(b => byteCell(b, changed.has(b.address))).join('') + '</div>';
+      h += '<div class="byte-grid">' + o.bytes.map(b => byteCell(b, changed.has(b.address), focus)).join('') + '</div>';
     }
     if (o.size > 1 && (!o.elements || (o.elements[0] && o.elements[0].bytes.length > 1))) multiByte = true;
-    if (ui.focusByte) {
-      const inThis = (o.bytes || []).find(b => b.address === ui.focusByte.address);
-      if (inThis) h += byteDetail(inThis, o, state);
-    }
     h += '</div></div>';
   }
+  const legend = '<div class="mem-legend"><span class="ml-exec"><b></b>' + esc(t('mem.legend.exec')) +
+    '</span><span class="ml-sel"><b></b>' + esc(t('mem.legend.sel')) + '</span>' +
+    '<span style="margin-left:auto;">' + esc(t('mem.clickHint')) + '</span></div>';
   if (multiByte) h = '<div class="endian-note" style="margin:0 0 10px;">Little-endian: within every multi-byte object the least significant byte sits at the lowest address.</div>' + h;
-  $('#memPanel').innerHTML = h;
+  $('#memPanel').innerHTML = legend + h;
   const cr = $('#clearRegion');
   if (cr) cr.addEventListener('click', () => { ui.focusRegion = null; render(); });
-  $$('#memPanel .bv').forEach(el => el.addEventListener('click', () => {
-    const a = +el.dataset.addr;
+
+  // Selecting a cell is inspection, never navigation: it changes ui.focusByte
+  // and nothing else, so execution focus stays exactly where the engine put it.
+  const pick = (a) => {
     ui.focusByte = (ui.focusByte && ui.focusByte.address === a) ? null : { address: a };
     render();
-  }));
+  };
+  $$('#memPanel .bv').forEach(el => el.addEventListener('click', (ev) => { ev.stopPropagation(); pick(+el.dataset.addr); }));
+  $$('#memPanel .mcell').forEach(el => {
+    el.addEventListener('click', (ev) => { ev.stopPropagation(); pick(+el.dataset.addr); });
+    el.addEventListener('mouseenter', () => showMemTip(el, state));
+    el.addEventListener('mouseleave', hideMemTip);
+    el.addEventListener('focus', () => showMemTip(el, state));
+    el.addEventListener('blur', hideMemTip);
+  });
+  $$('#memPanel .bv').forEach(el => {
+    el.addEventListener('mouseenter', () => showMemTip(el, state));
+    el.addEventListener('mouseleave', hideMemTip);
+  });
+
+  placeByteDetail(state);
+  lastExecAddr = focus ? focus.address : null;
+
   if (ui.focusObject) {
     const el = $('#memPanel .mem-obj[data-block="' + ui.focusObject + '"]');
     if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
+}
+
+/* ---- the anchored inspector ----
+   Positioned against the element the learner clicked, inside #memPanel so it
+   travels with the panel when it scrolls. It sits above the cell, and flips
+   below when there is not enough room above — the learner never has to hunt
+   for it and it never leaves the panel. */
+function placeByteDetail(state) {
+  const host = $('#memPanel');
+  if (!host || !ui.focusByte) return;
+  const addr = ui.focusByte.address;
+  const anchor = host.querySelector('.mcell[data-addr="' + addr + '"]') ||
+                 [...host.querySelectorAll('.mcell')].find(c => {
+                   const a = +c.dataset.addr, n = +c.dataset.span || 1;
+                   return addr >= a && addr < a + n;
+                 }) ||
+                 host.querySelector('.bv[data-addr="' + addr + '"]');
+  if (!anchor) return;
+  let obj = null, byte = null;
+  for (const o of state.objects) {
+    const b = (o.bytes || []).find(x => x.address === addr);
+    if (b) { obj = o; byte = b; break; }
+  }
+  if (!obj) return;
+  const el = document.createElement('div');
+  el.className = 'byte-detail anchored';
+  el.innerHTML = '<button class="bd-close" id="bdClose" aria-label="' + esc(t('mem.close')) + '">✕</button>' +
+                 byteDetail(byte, obj, state);
+  host.appendChild(el);
+  anchorInside(host, anchor, el);
+  const x = $('#bdClose');
+  if (x) x.addEventListener('click', (ev) => { ev.stopPropagation(); ui.focusByte = null; render(); });
+}
+
+/* ---- the hover tooltip ----
+   Lightweight, follows the pointer from cell to cell, and never becomes a
+   second static information panel somewhere else on the page. */
+function showMemTip(cell, state) {
+  hideMemTip();
+  const host = $('#memPanel');
+  if (!host || !cell) return;
+  const addr = +cell.dataset.addr;
+  let obj = null, el = null, idx = null;
+  for (const o of state.objects) {
+    if (o.elements) {
+      const k = o.elements.findIndex(e => addr >= e.address && addr < e.address + e.bytes.length);
+      if (k >= 0) { obj = o; el = o.elements[k]; idx = k; break; }
+    }
+    if ((o.bytes || []).some(b => b.address === addr)) { obj = o; break; }
+  }
+  if (!obj) return;
+  const name = (obj.varName || obj.label || 'block') + (idx !== null ? '[' + idx + ']' : '');
+  const byte = (obj.bytes || []).find(b => b.address === addr);
+  const rows = ['<div class="mt-name">' + esc(name) + '</div>',
+                '<div class="mt-row">' + esc(hexA(addr)) + '</div>'];
+  if (el && el.initialized) rows.push('<div class="mt-row">' + esc(el.valueText || String(el.value)) + '</div>');
+  else if (byte && byte.init) rows.push('<div class="mt-row">' + byte.value + ' · 0x' + byte.value.toString(16).padStart(2, '0') + '</div>');
+  else rows.push('<div class="mt-row">' + esc(t('mem.uninit')) + '</div>');
+  if (obj.typeName) rows.push('<div class="mt-row">' + esc(obj.typeName) + '</div>');
+  const tip = document.createElement('div');
+  tip.className = 'mem-tip';
+  tip.id = 'memTip';
+  tip.setAttribute('role', 'tooltip');
+  tip.innerHTML = rows.join('');
+  host.appendChild(tip);
+  anchorInside(host, cell, tip);
+}
+function hideMemTip() {
+  const t2 = $('#memTip');
+  if (t2) t2.remove();
+}
+
+/* Places `pop` next to `anchor` inside `host`. Above by default; below when
+   the top would be clipped. Horizontally clamped to the host, with the arrow
+   moved to keep pointing at the anchor — the popup stays visible near an edge
+   instead of sliding off it. */
+function anchorInside(host, anchor, pop) {
+  const hr = host.getBoundingClientRect();
+  const ar = anchor.getBoundingClientRect();
+  const pw = pop.offsetWidth, ph = pop.offsetHeight;
+  const cx = ar.left - hr.left + host.scrollLeft + ar.width / 2;
+  const cy = ar.top - hr.top + host.scrollTop;
+  const roomAbove = cy;
+  const roomBelow = host.clientHeight - (cy + ar.height);
+  // Above by preference, below when there is no room above, and on the roomier
+  // side when neither fits — then clamped into the panel so the popup can never
+  // spill over the next section header below it.
+  const above = roomAbove >= ph + 12 ? true
+              : (roomBelow >= ph + 12 ? false : roomAbove > roomBelow);
+  let left = cx - pw / 2;
+  left = Math.max(4, Math.min(left, Math.max(0, host.clientWidth - pw - 4)));
+  let top = above ? cy - ph - 9 : cy + ar.height + 9;
+  top = Math.max(0, Math.min(top, Math.max(0, host.clientHeight - ph)));
+  pop.style.left = Math.round(left) + 'px';
+  pop.style.top = Math.round(top) + 'px';
+  pop.classList.add(above ? 'above' : 'below');
+  pop.style.setProperty('--arrow-x', Math.round(Math.max(8, Math.min(cx - left - 4, pw - 17))) + 'px');
 }
 // "ADDRESS BYTE VALUE TYPE SOURCE" for the selected byte.
 function byteDetail(b, o, state) {
@@ -10924,9 +11651,12 @@ function commands() {
     { g:'View', n:'Open terminal dock',     k:'Ctrl+`',ico:'❯',  a:() => setDockTab('terminal') },
     { g:'View', n:'Show program output',    k:'',      ico:'▶',  a:() => setDockTab('output') },
     { g:'View', n:'Show debug pane',        k:'',      ico:'◈',  a:() => setDockTab('debug') },
-    { g:'Detail', n:'Detail level: Beginner',     k:'', ico:'◔', a:() => setLevel('beginner') },
-    { g:'Detail', n:'Detail level: Intermediate', k:'', ico:'◑', a:() => setLevel('intermediate') },
-    { g:'Detail', n:'Detail level: Deep',         k:'', ico:'●', a:() => setLevel('deep') },
+    { g:'Detail', n:'Detail level: Basic',  k:'', ico:'◔', a:() => setLevel('beginner') },
+    { g:'Detail', n:'Detail level: Medium', k:'', ico:'◑', a:() => setLevel('intermediate') },
+    { g:'Detail', n:'Detail level: Deep',   k:'', ico:'●', a:() => setLevel('deep') },
+    { g:'View', n:t('src.expand'), k:'Ctrl+Shift+E', ico:'⤢', a:toggleSrcExpand },
+    { g:'View', n:t('lib.open'),   k:'Ctrl+B',       ico:'☰', a:() => openLibrary('files') },
+    { g:'Focus', n:t('panel.errlab'), k:'',          ico:'⚠', a:() => openPanel('panelErrLab') },
     { g:'View', n:'Toggle theme',           k:'Ctrl+Shift+L', ico:'◐', a:toggleTheme },
     { g:'View', n:'Toggle stacked layout',  k:'',      ico:'⇄',  a:() => { autoStacked = false; ui.stacked = !ui.stacked; applyStacked(); saveUI(); } },
     { g:'View', n:'Reset layout',           k:'',      ico:'⤢',  a:resetLayout },
@@ -10938,6 +11668,8 @@ function commands() {
     { g:'Help', n:'Memory model',           k:'',      ico:'▥',  a:showModelModal },
   ].concat(EXAMPLE_ORDER.map(k => ({
     g:'Open', n:'Open ' + EXAMPLES[k].label, k:'', ico:'·', a:() => loadExample(k),
+  }))).concat(ERROR_LESSONS.map(l => ({
+    g: t('errlab.title'), n: lessonText(l, 'n'), k:'', ico:'⚠', a:() => loadLesson(l.id),
   })));
 }
 let cmdkSel = 0, cmdkItems = [];
@@ -11019,7 +11751,9 @@ function closeMenus() {
 }
 const MENUS = {
   mProject: () => EXAMPLE_ORDER.slice(0, 8).map(k => ({ n: EXAMPLES[k].label, ico:'·', a: () => loadExample(k) }))
-    .concat(['-', { n:'Dashboard', ico:'⌂', k:'Ctrl+0', a: showDashboard }]),
+    .concat(['-', { n:t('lib.open'), ico:'☰', k:'Ctrl+B', a:() => openLibrary('files') },
+             { n:t('errlab.title'), ico:'⚠', a:() => openLibrary('errors') },
+             { n:'Dashboard', ico:'⌂', k:'Ctrl+0', a: showDashboard }]),
   mRun: () => [
     { n:'Step', ico:'▶', k:'Space', a:doStep },
     { n:'Run / Pause', ico:'▶▶', k:'Enter', a:togglePlay },
@@ -11072,6 +11806,7 @@ const MENUS = {
     { n:'Keyboard shortcuts', ico:'?', k:'?', a:showShortcuts },
     { n:'Command palette', ico:'⌘', k:'Ctrl+K', a:openCmdk },
     '-',
+    { n:t('errlab.title'), ico:'⚠', a:() => openLibrary('errors') },
     { n:'Norm Lab', ico:'✓', disabled:true },
     { n:'Moulinette Lab', ico:'⚗', a:() => { setDockTab('tests'); openPanel('panelTest'); } },
     { n:'Trace Analyzer', ico:'◷', a:() => { setDockTab('trace'); openPanel('panelTrace'); } },
@@ -12926,7 +13661,7 @@ const PANEL_CONCEPTS = {
   panelSource: 'line', panelTimeline: 'step', panelStack: 'stack',
   panelVars: 'variable', panelWatch: 'value', panelMemory: 'memory',
   panelPointers: 'pointer', panelRam: 'address', panelDeep: 'type',
-  panelTrace: 'traceEvent', panelHeap: 'heap',
+  panelTrace: 'traceEvent', panelHeap: 'heap', panelErrLab: 'overflow',
 };
 const DOCK_CONCEPTS = { trace: 'traceEvent' };
 
@@ -13023,6 +13758,621 @@ function closeInfoPop() {
 }
 function infoPopOpen() { return !!infoPopEl; }
 
+/* ==== ERRLAB START ====
+   ============================================================================
+   PHASE 10 — MEMORY ERROR LAB, LIBRARY DRAWER, SOURCE WORKSPACE
+
+   The engine has been able to DETECT these faults since Phase 9. Detection is
+   not a feature a learner can use: this file is the part they can actually
+   see, load and step through. Every lesson below is an ordinary C program run
+   by the ordinary engine through the ordinary debugger — there is no separate
+   animation, no scripted failure and no fabricated memory.
+
+   Everything the lesson panel prints comes from the error object the engine
+   raised. When the engine does not know something, the field is omitted; it is
+   never guessed.
+   ========================================================================== */
+
+/* Each lesson names the error kind it claims to demonstrate. phase11.test.js
+   runs every one of them through the engine and fails if the claim is wrong,
+   so this table cannot drift away from what really happens. */
+const ERROR_LESSONS = [
+{
+  id:'overflow', ico:'▸', kind:'out-of-bounds', direction:'overflow',
+  en:{ n:'Array overflow',
+       d:'Writing one element past the end of a fixed-size array. The classic off-by-one: arr has 3 slots, the program uses index 5.' },
+  fr:{ n:'Débordement de tableau',
+       d:'Écriture au-delà de la fin d’un tableau. Le classique décalage d’un : arr a 3 cases, le programme utilise l’indice 5.' },
+  src:
+`int	main(void)
+{
+	int	arr[3];
+	int	i;
+
+	i = 0;
+	while (i < 3)
+	{
+		arr[i] = i * 10;
+		i++;
+	}
+	arr[5] = 99;
+	return (0);
+}
+`},
+{
+  id:'underflow', ico:'◂', kind:'out-of-bounds', direction:'underflow',
+  en:{ n:'Array underflow',
+       d:'Indexing before the start of an array. A loop counter that reached -1 still compiles, and still reads memory that is not yours.' },
+  fr:{ n:'Sous-débordement de tableau',
+       d:'Indexation avant le début d’un tableau. Un compteur tombé à -1 compile toujours, et lit toujours une mémoire qui ne vous appartient pas.' },
+  src:
+`int	main(void)
+{
+	int	arr[3];
+	int	i;
+
+	i = 0;
+	while (i < 3)
+	{
+		arr[i] = i * 10;
+		i++;
+	}
+	i = -1;
+	arr[i] = 99;
+	return (0);
+}
+`},
+{
+  id:'invalidread', ico:'👁', kind:'out-of-bounds', access:'read',
+  en:{ n:'Invalid read',
+       d:'Reading through a pointer that has walked past the end of its heap block. Nothing is modified — reading the wrong address is already a bug.' },
+  fr:{ n:'Lecture invalide',
+       d:'Lecture via un pointeur sorti de son bloc du tas. Rien n’est modifié — lire la mauvaise adresse est déjà un bug.' },
+  src:
+`int	main(void)
+{
+	char	*b;
+	char	*p;
+	char	c;
+
+	b = malloc(4);
+	b[0] = 'a';
+	p = b + 40;
+	c = *p;
+	return (c);
+}
+`},
+{
+  id:'invalidwrite', ico:'✎', kind:'out-of-bounds', access:'write',
+  en:{ n:'Invalid write',
+       d:'Storing through a pointer that no longer aims inside its block. A write corrupts whatever happens to live there, which is why it is the more dangerous half.' },
+  fr:{ n:'Écriture invalide',
+       d:'Écriture via un pointeur qui ne vise plus son bloc. Une écriture corrompt ce qui se trouve là — c’est la moitié la plus dangereuse.' },
+  src:
+`int	main(void)
+{
+	char	*b;
+	char	*p;
+
+	b = malloc(4);
+	b[0] = 'a';
+	p = b + 40;
+	*p = 'z';
+	return (0);
+}
+`},
+{
+  id:'nullderef', ico:'∅', kind:'null-deref',
+  en:{ n:'NULL dereference',
+       d:'Following a pointer that holds 0. malloc returns NULL when it fails, and NULL is not an address you may read or write.' },
+  fr:{ n:'Déréférencement de NULL',
+       d:'Suivre un pointeur qui vaut 0. malloc renvoie NULL en cas d’échec, et NULL n’est pas une adresse lisible ni inscriptible.' },
+  src:
+`int	main(void)
+{
+	int	*p;
+
+	p = 0;
+	*p = 5;
+	return (0);
+}
+`},
+{
+  id:'invalidaccess', ico:'✖', kind:'out-of-bounds', unmapped:true,
+  en:{ n:'Invalid access (segfault)',
+       d:'Dereferencing an address that belongs to no allocation at all. On a real machine the MMU raises SIGSEGV; here execution stops at the same instant.' },
+  fr:{ n:'Accès invalide (segfault)',
+       d:'Déréférencer une adresse qui n’appartient à aucune allocation. Sur une vraie machine la MMU lève SIGSEGV ; ici l’exécution s’arrête au même instant.' },
+  src:
+`int	main(void)
+{
+	int	x;
+	int	*p;
+
+	x = 1;
+	p = &x;
+	p = p + 4096;
+	*p = 7;
+	return (0);
+}
+`},
+{
+  id:'uaf', ico:'♻', kind:'use-after-free',
+  en:{ n:'Use-after-free',
+       d:'Touching a heap block after free() gave it back. The pointer still holds the old address — free() changes the allocator, not your variable.' },
+  fr:{ n:'Utilisation après libération',
+       d:'Toucher un bloc du tas après que free() l’a rendu. Le pointeur garde l’ancienne adresse — free() change l’allocateur, pas votre variable.' },
+  src:
+`int	main(void)
+{
+	char	*b;
+
+	b = malloc(4);
+	b[0] = 'a';
+	free(b);
+	b[0] = 'z';
+	return (0);
+}
+`},
+{
+  id:'uar', ico:'↩', kind:'use-after-return',
+  en:{ n:'Use-after-return',
+       d:'Returning the address of a local variable. The frame that owned it was destroyed by the return, so the caller is holding a receipt for storage that no longer exists.' },
+  fr:{ n:'Utilisation après retour',
+       d:'Renvoyer l’adresse d’une variable locale. La trame qui la possédait a été détruite par le return : l’appelant tient un reçu pour une mémoire qui n’existe plus.' },
+  src:
+`int	*ft_bad(void)
+{
+	int	local;
+
+	local = 42;
+	return (&local);
+}
+
+int	main(void)
+{
+	int	*p;
+
+	p = ft_bad();
+	*p = 7;
+	return (0);
+}
+`},
+{
+  id:'doublefree', ico:'⊗', kind:'double-free',
+  en:{ n:'Double free',
+       d:'Calling free() twice on the same block. The second call hands the allocator a block it already owns, which corrupts its bookkeeping.' },
+  fr:{ n:'Double libération',
+       d:'Appeler free() deux fois sur le même bloc. Le second appel rend à l’allocateur un bloc qu’il possède déjà, ce qui corrompt sa comptabilité.' },
+  src:
+`int	main(void)
+{
+	char	*b;
+
+	b = malloc(4);
+	b[0] = 'a';
+	free(b);
+	free(b);
+	return (0);
+}
+`},
+{
+  id:'invalidfree', ico:'⌦', kind:'invalid-free',
+  en:{ n:'Invalid free',
+       d:'Passing free() something malloc never returned. Only a pointer that came out of malloc, exactly as it came out, may go back in.' },
+  fr:{ n:'Libération invalide',
+       d:'Donner à free() ce que malloc n’a jamais renvoyé. Seul un pointeur issu de malloc, exactement tel quel, peut y retourner.' },
+  src:
+`int	main(void)
+{
+	int	x;
+	int	*p;
+
+	x = 1;
+	p = &x;
+	free(p);
+	return (0);
+}
+`},
+{
+  id:'stackoverflow', ico:'⇊', kind:'stack-overflow',
+  en:{ n:'Stack overflow',
+       d:'Recursion with no base case. Every call adds a frame, and the frames never come back off.' },
+  fr:{ n:'Débordement de pile',
+       d:'Récursion sans cas de base. Chaque appel ajoute une trame, et les trames ne repartent jamais.' },
+  // Honest scope note, shown in the lesson panel itself.
+  limit:{
+    en:'This model has no byte-level lower bound for the stack, so it cannot simulate a stack pointer running off the end of a real 8 MB stack. What it does model exactly is call-depth exhaustion: the run stops at depth ' + '200' + ', which is the same bug with a smaller ceiling. The frame chain you see is real.',
+    fr:'Ce modèle n’a pas de limite basse en octets pour la pile : il ne simule pas un pointeur de pile sortant d’une vraie pile de 8 Mo. Ce qu’il modélise exactement, c’est l’épuisement de la profondeur d’appel : l’exécution s’arrête à la profondeur ' + '200' + ', le même bug avec un plafond plus bas. La chaîne de trames affichée est réelle.',
+  },
+  src:
+`int	ft_recurse(int n)
+{
+	return (ft_recurse(n + 1));
+}
+
+int	main(void)
+{
+	int	r;
+
+	r = ft_recurse(0);
+	return (r);
+}
+`},
+{
+  id:'uninit', ico:'?', kind:'uninitialized-read',
+  en:{ n:'Read of uninitialized memory',
+       d:'Using a local before anything was stored in it. Declaring a variable reserves bytes; it does not put a value in them.' },
+  fr:{ n:'Lecture de mémoire non initialisée',
+       d:'Utiliser une locale avant d’y avoir rien rangé. Déclarer une variable réserve des octets ; elle n’y met aucune valeur.' },
+  src:
+`int	main(void)
+{
+	int	a;
+	int	b;
+
+	b = a + 1;
+	return (b);
+}
+`},
+];
+const LESSON_BY_ID = {};
+ERROR_LESSONS.forEach(l => { LESSON_BY_ID[l.id] = l; });
+function lessonText(l, field) { return (l[ui.lang] && l[ui.lang][field]) || l.en[field]; }
+function activeLesson() { return ui.lesson ? LESSON_BY_ID[ui.lesson] : null; }
+
+/* ============================ LIBRARY DRAWER ============================
+   Exercises and error lessons in one overlay, so neither of them has to sit
+   permanently on top of the source editor. */
+function applyLibrary() {
+  const d = $('#libDrawer');
+  if (!d) return;
+  d.hidden = !ui.libOpen;
+  $$('#libDrawer .lib-tab').forEach(b => {
+    const on = b.dataset.lib === ui.libTab;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', String(on));
+  });
+  const f = $('#libFiles'), e = $('#libErrors');
+  if (f) f.hidden = ui.libTab !== 'files';
+  if (e) e.hidden = ui.libTab !== 'errors';
+  const rx = $('#railExplorer');
+  if (rx) { rx.classList.toggle('active', ui.libOpen); rx.setAttribute('aria-pressed', String(!!ui.libOpen)); }
+  const re = $('#railErrLab');
+  if (re) {
+    const on = ui.libOpen && ui.libTab === 'errors';
+    re.classList.toggle('active', on);
+    re.setAttribute('aria-pressed', String(on));
+  }
+}
+function openLibrary(tab) {
+  ui.libOpen = true;
+  if (tab) ui.libTab = tab;
+  showWorkspace();
+  renderErrLabList();
+  applyLibrary();
+  saveUI();
+}
+function closeLibrary() { ui.libOpen = false; applyLibrary(); saveUI(); }
+function toggleLibrary(tab) {
+  if (ui.libOpen && (!tab || tab === ui.libTab)) closeLibrary();
+  else openLibrary(tab);
+}
+
+/* Renders the error-lesson picker. One click loads the lesson. */
+function renderErrLabList() {
+  const host = $('#libErrors');
+  if (!host) return;
+  let h = '<div class="errlab-list"><div class="errlab-intro">' + esc(t('errlab.intro')) + '</div>';
+  for (const l of ERROR_LESSONS) {
+    h += '<button class="elab' + (ui.lesson === l.id ? ' active' : '') + '" data-lesson="' + esc(l.id) + '">' +
+      '<span class="elab-ico" aria-hidden="true">' + esc(l.ico) + '</span>' +
+      '<span class="elab-txt"><span class="elab-n">' + esc(lessonText(l, 'n')) + '</span>' +
+      '<span class="elab-d">' + esc(lessonText(l, 'd')) + '</span></span>' +
+      (l.limit ? '<span class="elab-tag partial">' + esc(t('errlab.limitTitle')) + '</span>' : '') +
+      '</button>';
+  }
+  host.innerHTML = h + '</div>';
+  const tag = $('#errLabTag');
+  if (tag) tag.textContent = String(ERROR_LESSONS.length);
+  $$('#libErrors .elab').forEach(b =>
+    b.addEventListener('click', () => loadLesson(b.dataset.lesson)));
+}
+
+/* Loading a lesson is loading a program: same editor, same engine, same
+   toolbar. The only extra is the lesson panel that explains it. */
+function loadLesson(id) {
+  const l = LESSON_BY_ID[id];
+  if (!l) return;
+  ui.lesson = id;
+  $('#sourceEdit').value = l.src;
+  $('#sourceDesc').textContent = l.id + '.c  ·  ' + lessonText(l, 'n');
+  resetAll();
+  switchToEditing();
+  openPanel('panelErrLab');
+  renderErrLab();
+  renderErrLabList();
+  showWorkspace();
+  closeLibrary();
+  saveUI();
+}
+
+/* ---- the lesson panel ---- */
+function accessLabel(a) {
+  const k = 'errlab.acc.' + a;
+  const s = t(k);
+  return s === k ? a : s;
+}
+function errKindLabel(kind) {
+  const v = t('viz.err.' + kind);
+  if (v !== 'viz.err.' + kind) return v;
+  return (CEngine.MEM_SAFETY_LABELS && CEngine.MEM_SAFETY_LABELS[kind]) || kind;
+}
+/* Which kinds are literally an access to memory the program may not touch.
+   Everything else is reported under its own name rather than borrowed wording. */
+const INVALID_ACCESS_KINDS = ['out-of-bounds', 'null-deref', 'use-after-free',
+                             'use-after-return', 'double-free', 'invalid-free'];
+function renderErrLab() {
+  const panel = $('#panelErrLab');
+  const host = $('#errLabPanel');
+  if (!panel || !host) return;
+  const l = activeLesson();
+  panel.hidden = !l;
+  if (!l) { host.innerHTML = ''; return; }
+
+  const e = run.error;
+  const tag = $('#errLabState');
+  const caught = !!(e && (e.kind === l.kind));
+  if (tag) {
+    tag.textContent = e ? t('errlab.caught')
+      : (run.mode === 'done' ? t('errlab.clean') : (run.history ? t('errlab.armed') : t('errlab.notrun')));
+  }
+
+  let h = '<div class="el-title">' + esc(lessonText(l, 'n')) + '</div>' +
+          '<div class="el-sec">' + esc(t('errlab.demonstrates')) + '</div>' +
+          '<p class="el-what">' + esc(lessonText(l, 'd')) + '</p>';
+
+  if (!e) {
+    h += '<div class="el-wait">' +
+      esc(run.mode === 'done' ? t('errlab.noError') : t('errlab.wait')) + '</div>';
+  } else {
+    // Only a genuinely invalid ACCESS may be called one. Call-depth
+    // exhaustion and an uninitialised read are real faults but not bad
+    // addresses, so they are named for what they are.
+    const isBadAccess = INVALID_ACCESS_KINDS.indexOf(e.kind) >= 0;
+    h += '<div class="el-badge">⚠ ' + esc(isBadAccess ? t('errlab.invalid') : errKindLabel(e.kind)) + '</div>' +
+         '<div class="el-sec">' + esc(t('errlab.whatHappened')) + '</div>' +
+         errFacts(e) + errPicture(l, e);
+    if (e.message) h += '<div class="el-why">' + esc(e.message) + '</div>';
+  }
+  if (l.limit) {
+    h += '<div class="el-limit"><b>' + esc(t('errlab.limitTitle')) + ' — </b>' +
+         esc(l.limit[ui.lang] || l.limit.en) + '</div>';
+  }
+  host.innerHTML = h;
+  if (typeof caught === 'boolean') panel.classList.toggle('caught', caught);
+}
+
+/* Every row here is a field the ENGINE reported. A field it did not report is
+   left out entirely rather than filled with a plausible-looking value. */
+function errFacts(e) {
+  const d = e.details || {};
+  const rows = [];
+  const add = (k, v, bad) => { if (v !== undefined && v !== null && v !== '') rows.push([k, v, !!bad]); };
+  add(t('errlab.type'), errKindLabel(e.kind));
+  add(t('errlab.line'), e.line != null ? String(e.line) : null);
+  add(t('errlab.access'), e.access ? accessLabel(e.access) : null);
+  if (d.arrayName) add(t('errlab.object'), d.arrayName + (d.elemTypeName ? ' : ' + d.elemTypeName + '[' + d.len + ']' : ''));
+  else if (d.blockLabel) add(t('errlab.object'), d.blockLabel);
+  if (d.requested !== undefined) add(t('errlab.index'), String(d.requested), true);
+  add(t('errlab.address'), e.address != null ? hexA(e.address) : null, true);
+  if (d.validMin !== undefined && d.validMax !== undefined)
+    add(t('errlab.validIdx'), d.validMin + ' → ' + d.validMax);
+  if (d.validFrom !== undefined && d.validTo !== undefined)
+    add(t('errlab.valid'), hexA(d.validFrom) + ' → ' + hexA(d.validTo));
+  if (d.size !== undefined) add(t('errlab.size'), d.size + (d.size === 1 ? ' byte' : ' bytes'));
+  if (d.depth !== undefined) add(t('errlab.type') + ' · depth', d.depth + ' / ' + d.limit);
+  return '<div class="el-grid">' + rows.map(([k, v, bad]) =>
+    '<span class="el-k">' + esc(k) + '</span><span class="el-v' + (bad ? ' bad' : '') + '">' + esc(v) + '</span>'
+  ).join('') + '</div>';
+}
+
+/* The picture. Drawn only from facts: the valid cells are the ones the engine
+   says exist, and the attempted access is drawn OUTSIDE them with no value in
+   it, because there is no such storage and therefore no such value. */
+function errPicture(l, e) {
+  const d = e.details || {};
+  let body = '';
+  if (d.arrayName && d.len !== undefined && d.requested !== undefined) {
+    const state = st();
+    const obj = state ? state.objects.find(o => o.varName === d.arrayName) : null;
+    const under = d.requested < 0;
+    let cells = '';
+    if (under) cells += attemptCell(d.requested);
+    if (under) cells += '<span class="el-gap">◂ ◂</span>';
+    for (let i = 0; i < d.len; i++) {
+      const el = obj && obj.elements ? obj.elements[i] : null;
+      const txt = el && el.initialized ? cellText(el) : '·';
+      cells += '<span class="mcell"><span class="mc-box' + (el && el.initialized ? '' : ' uninit') + '">' +
+               esc(txt) + '</span><span class="mc-i">' + i + '</span></span>';
+    }
+    if (!under) {
+      if (d.requested > d.len) cells += '<span class="el-gap">▸ ▸</span>';
+      cells += attemptCell(d.requested);
+    }
+    body = '<div class="el-bound">' + cells + '</div>' +
+      '<div class="el-k" style="margin-top:5px;">' + esc(d.arrayName) + '[' + esc(String(d.requested)) +
+      '] — ' + esc(t('errlab.notMemory')) + '</div>';
+  } else if (e.kind === 'null-deref') {
+    body = chain([['', 'p', ''], ['bad', 'NULL  ·  ' + hexA(0), '']]);
+  } else if (e.kind === 'use-after-free' || e.kind === 'double-free') {
+    body = chain([
+      ['heap', 'malloc — ' + (d.blockLabel || 'block') + (d.validFrom !== undefined ? '  ·  ' + hexA(d.validFrom) : ''), ''],
+      ['act', 'free()', ''],
+      ['bad', e.kind === 'double-free' ? 'free() ' + accessLabel('free') : accessLabel(e.access || 'read') + '  ·  ' + hexA(e.address), ''],
+    ]);
+  } else if (e.kind === 'use-after-return') {
+    body = chain([
+      ['stack', (d.blockLabel || 'local') + (d.validFrom !== undefined ? '  ·  ' + hexA(d.validFrom) : ''), ''],
+      ['act', 'return', ''],
+      ['bad', accessLabel(e.access || 'write') + '  ·  ' + hexA(e.address), ''],
+    ]);
+  } else if (e.kind === 'stack-overflow') {
+    const fn = (d.fn || 'f') + '()';
+    body = chain([['stack', 'main()', ''], ['', fn, ''], ['', fn, ''], ['', '⋮  ' + (d.depth || '') + ' frames', ''],
+                  ['bad', errKindLabel('stack-overflow'), '']]);
+  } else if (e.address != null) {
+    body = chain([
+      d.validFrom !== undefined ? ['stack', hexA(d.validFrom) + ' → ' + hexA(d.validTo), ''] : null,
+      ['bad', accessLabel(e.access || 'read') + '  ·  ' + hexA(e.address) + '  ·  ' + t('errlab.outside'), ''],
+    ].filter(Boolean));
+  }
+  if (!body) return '';
+  return '<div class="el-sec">' + esc(t('errlab.picture')) + '</div>' + body;
+}
+function attemptCell(i) {
+  return '<span class="mcell invalid"><span class="mc-box invalid" title="' + esc(t('errlab.notMemory')) + '">✖</span>' +
+         '<span class="mc-i">' + esc(String(i)) + '</span></span>';
+}
+function cellText(el) {
+  const v = el.valueText || String(el.value);
+  const m = /^'(.*)' \(/.exec(v);
+  return m ? m[1] : v;
+}
+function chain(rows) {
+  let h = '<div class="el-chain">';
+  rows.forEach(([cls, text], i) => {
+    if (i) h += '<div class="el-arrow">↓</div>';
+    h += '<div class="el-node' + (cls ? ' ' + cls : '') + '">' + esc(text) + '</div>';
+  });
+  return h + '</div>';
+}
+
+/* ============================ SOURCE WORKSPACE ============================ */
+/* Expanding collapses the timeline and hands its height to the editor. The
+   timeline header stays where it is, so nothing becomes unreachable. */
+function applySrcExpanded() {
+  document.body.classList.toggle('src-expanded', !!ui.srcExpanded);
+  const b = $('#btnExpandSrc');
+  if (b) {
+    b.setAttribute('aria-pressed', String(!!ui.srcExpanded));
+    b.textContent = ui.srcExpanded ? '⤡' : '⤢';
+    const lbl = t(ui.srcExpanded ? 'src.collapse' : 'src.expand');
+    b.title = lbl; b.setAttribute('aria-label', lbl);
+  }
+}
+/* Expanding takes back every piece of the workspace the editor is not using:
+   the debugger column, the timeline body and the bottom dock. All three are
+   restored exactly as they were — including a dock the learner had already
+   collapsed, or a timeline they had already closed. */
+function toggleSrcExpand() {
+  ui.srcExpanded = !ui.srcExpanded;
+  if (ui.srcExpanded) {
+    ui._tlWasCollapsed = !!ui.collapsed.panelTimeline;
+    ui._dockWasCollapsed = !!ui.dockCollapsed;
+    ui.collapsed.panelTimeline = true;
+    ui.dockCollapsed = true;
+  } else {
+    ui.collapsed.panelTimeline = !!ui._tlWasCollapsed;
+    ui.dockCollapsed = !!ui._dockWasCollapsed;
+  }
+  applyCollapsed();
+  applyDock();
+  applySrcExpanded();
+  saveUI();
+  if (typeof drawTimelineWindow === 'function') drawTimelineWindow();
+  // Restoring gives the right pane its width back, which is a real viewport
+  // change — the kind of change Fit is allowed to react to. An execution step
+  // still never moves the camera.
+  if (!ui.srcExpanded && typeof viz === 'object' && viz && viz.stage && viz.open) {
+    requestAnimationFrame(() => { if (viz.stage && viz.stage.refitIfClean) viz.stage.refitIfClean(); });
+  }
+}
+
+/* ---- Tab / Shift+Tab in the C editor ----
+   A code editor that loses focus on Tab cannot be used to write C. This keeps
+   Tab inside the textarea and makes it indent, including across a multi-line
+   selection, while leaving every other key — arrows, Home/End, selection,
+   copy/paste, undo — to the browser. Undo is preserved by editing through
+   execCommand where it exists, which keeps the native undo stack intact. */
+const INDENT = '\t';
+function wireEditorKeys() {
+  const ta = $('#sourceEdit');
+  if (!ta) return;
+  ta.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab' || e.ctrlKey || e.metaKey || e.altKey) return;
+    e.preventDefault();                       // focus stays in the editor
+    const v = ta.value, s = ta.selectionStart, t2 = ta.selectionEnd;
+    const lineStart = v.lastIndexOf('\n', s - 1) + 1;
+    const multi = v.slice(s, t2).indexOf('\n') >= 0;
+
+    if (!e.shiftKey && !multi) { insertAtCursor(ta, INDENT); return; }
+
+    // Block indent / unindent: rewrite whole lines, keep the selection on them.
+    let endLine = v.indexOf('\n', t2);
+    if (endLine < 0) endLine = v.length;
+    const block = v.slice(lineStart, endLine);
+    const lines = block.split('\n');
+    let firstDelta = 0, total = 0;
+    const out = lines.map((ln, i) => {
+      if (e.shiftKey) {
+        const m = /^(\t| {1,4})/.exec(ln);
+        const cut = m ? m[0].length : 0;
+        if (i === 0) firstDelta = -cut;
+        total -= cut;
+        return ln.slice(cut);
+      }
+      if (ln.length === 0 && lines.length > 1) return ln;   // don't indent blank lines
+      if (i === 0) firstDelta = INDENT.length;
+      total += INDENT.length;
+      return INDENT + ln;
+    }).join('\n');
+    if (out === block) return;
+    ta.setSelectionRange(lineStart, endLine);
+    replaceSelection(ta, out);
+    ta.setSelectionRange(Math.max(lineStart, s + firstDelta), Math.max(lineStart, t2 + total));
+  });
+}
+function insertAtCursor(ta, text) {
+  const s = ta.selectionStart, t2 = ta.selectionEnd;
+  if (!replaceSelection(ta, text)) return;
+  ta.setSelectionRange(s + text.length, s + text.length + (t2 - t2));
+}
+// execCommand keeps the browser's own undo stack; the assignment fallback does
+// not, but it is only reached where execCommand is unavailable.
+function replaceSelection(ta, text) {
+  ta.focus();
+  let ok = false;
+  try { ok = document.execCommand && document.execCommand('insertText', false, text); } catch (err) { ok = false; }
+  if (!ok) {
+    const s = ta.selectionStart, t2 = ta.selectionEnd;
+    ta.value = ta.value.slice(0, s) + text + ta.value.slice(t2);
+    ta.setSelectionRange(s + text.length, s + text.length);
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  return true;
+}
+
+/* ============================ MEMORY EMPHASIS ============================
+   EXECUTION FOCUS is what the program is working on. It is derived from the
+   step the engine produced, using the SAME precedence as the 3D scene
+   (CViz3D.focusAddress) so the two views can never disagree.
+
+   USER SELECTION is ui.focusByte. They are separate on purpose: a learner
+   must be able to inspect str[2] while execution sits on str[3]. */
+function execFocus(s) {
+  if (!s) return null;
+  const src = { error: run.error, memDiff: s.memDiff, accessed: s.accessed };
+  if (typeof CViz3D === 'object' && CViz3D && typeof CViz3D.focusAddress === 'function') {
+    return CViz3D.focusAddress(src);
+  }
+  return null;
+}
+// Remembered only to decide whether the pulse should play; it is never a
+// second copy of the execution state.
+let lastExecAddr = null;
+/* ==== ERRLAB END ==== */
+
 /* ================================ WIRING ================================ */
 function inEditable(el) {
   return el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.isContentEditable);
@@ -13037,12 +14387,16 @@ window.addEventListener('DOMContentLoaded', () => {
   applyCollapsed();
   applyLevel();
   applyDock();
+  applySrcExpanded();
+  applyLibrary();
+  wireEditorKeys();
   applyI18n();
   initDivider();
   checkAutoStack();
 
   $('#sbArch').textContent = CEngine.ARCH.short;
   renderExplorer();
+  renderErrLabList();
   loadExample(ui.exampleKey);
   showDashboard();
 
@@ -13063,7 +14417,16 @@ window.addEventListener('DOMContentLoaded', () => {
   /* ---- rail ---- */
   $('#railHome').addEventListener('click', showDashboard);
   $('#railWork').addEventListener('click', showWorkspace);
-  $('#railExplorer').addEventListener('click', () => togglePanel('panelExplorer'));
+  $('#railExplorer').addEventListener('click', () => toggleLibrary('files'));
+  $('#railErrLab').addEventListener('click', () => toggleLibrary('errors'));
+  $('#libClose').addEventListener('click', closeLibrary);
+  $('#libDrawer').addEventListener('click', (e) => {
+    const b = e.target.closest('.lib-tab');
+    if (!b) return;
+    ui.libTab = b.dataset.lib;
+    applyLibrary();
+    saveUI();
+  });
   /* ---- bottom dock splitter ---- */
   // Drag it, or focus it and use the arrow keys. Clamped so neither the
   // workspace nor the dock can be crushed into uselessness.
@@ -13125,7 +14488,7 @@ window.addEventListener('DOMContentLoaded', () => {
     h.addEventListener('click', (e) => { if (e.target.closest('.p-btn')) return; togglePanel(h.dataset.toggle); });
   });
   $('#btnEdit').addEventListener('click', (e) => { e.stopPropagation(); switchToEditing(); });
-  $('#btnFocusSrc').addEventListener('click', (e) => { e.stopPropagation(); focusPanel('panelSource'); });
+  $('#btnExpandSrc').addEventListener('click', (e) => { e.stopPropagation(); toggleSrcExpand(); });
   $('#bpBannerClose').addEventListener('click', () => { $('#bpBanner').classList.add('hide'); run.bpHit = null; renderSource(step() ? step().line : null); });
 
   /* ---- memory view ---- */
@@ -13200,16 +14563,22 @@ window.addEventListener('DOMContentLoaded', () => {
     if (cmdkOpen()) return;                       // palette owns the keyboard
     if (e.key === 'Escape') {
       if (typeof infoPopOpen === 'function' && infoPopOpen()) { closeInfoPop(); return; }
+      if (ui.libOpen) { closeLibrary(); return; }
       if ($('#modalRoot').innerHTML) { closeModal(); return; }
       closeMenus(); closeLineActions();
       if (trc.playing) { tracePause(); renderTrace(); return; }
-      if (run.playing) pausePlay();
+      if (run.playing) { pausePlay(); return; }
+      // Last, so Escape still belongs to pausing and to closing menus first:
+      // dismissing a memory inspection is the least urgent thing it can mean.
+      if (ui.focusByte) { ui.focusByte = null; render(); }
       return;
     }
     if (mod && e.key === '0') { e.preventDefault(); showDashboard(); return; }
     if (mod && e.key === '1') { e.preventDefault(); showWorkspace(); return; }
     if (mod && e.key === '2') { e.preventDefault(); showWorkspace(); openViz(); return; }
     if (mod && e.key === '`') { e.preventDefault(); toggleDock(); return; }
+    if (mod && !e.shiftKey && e.key.toLowerCase() === 'b') { e.preventDefault(); toggleLibrary('files'); return; }
+    if (mod && e.shiftKey && e.key.toLowerCase() === 'e') { e.preventDefault(); toggleSrcExpand(); return; }
     if (mod && e.shiftKey && e.key.toLowerCase() === 'l') { e.preventDefault(); toggleTheme(); return; }
     if (mod) return;
     if (inEditable(document.activeElement)) return;
@@ -13238,7 +14607,10 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  document.addEventListener('click', () => { if (typeof closeInfoPop === 'function') closeInfoPop(); });
+  document.addEventListener('click', () => {
+    if (typeof closeInfoPop === 'function') closeInfoPop();
+    if (typeof hideMemTip === 'function') hideMemTip();
+  });
   window.addEventListener('scroll', () => { if (typeof closeInfoPop === 'function') closeInfoPop(); }, true);
   window.addEventListener('resize', () => { checkAutoStack(); applyDockH(); drawTimelineWindow(); });
   updateStatus();

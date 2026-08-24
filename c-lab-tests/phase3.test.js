@@ -84,7 +84,11 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
   /* ===================== SCROLLING ===================== */
   console.log('\n=== Phase 3: three-level scrolling ===');
-  await page.evaluate(() => showWorkspace());
+  // Phase 10 moved the Timeline to the Deep detail level (spec section 4:
+  // Basic shows only call stack, variables, memory and pointers). The
+  // assertions below are unchanged; only the level they run at is, because
+  // Deep is now the level at which the Timeline is part of the UI.
+  await page.evaluate(() => { showWorkspace(); setLevel('deep'); });
   await open('ex6'); await start(); await runAll(); await sleep(200);
   const scrolls = await page.evaluate(() => {
     const can = (sel) => { const e = document.querySelector(sel); if (!e) return 'missing'; return e.scrollHeight > e.clientHeight + 2 ? 'scrolls' : 'fits'; };
@@ -168,6 +172,9 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
   /* ===================== TIMELINE UX ===================== */
   console.log('\n=== Phase 3: timeline UX ===');
+  // Deep for the same reason as the scrolling section above: the Timeline is a
+  // Deep-level panel since Phase 10. The checks themselves are untouched.
+  await page.evaluate(() => setLevel('deep'));
   await open('ex6'); await start(); await runAll(); await sleep(200);
   check('current step marker is rendered', await page.evaluate(() => {
     goTo(40); return !!document.querySelector('#tlRows .tl-item.current');
@@ -228,6 +235,9 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
   /* ===================== PANELS / HIERARCHY ===================== */
   console.log('\n=== Phase 3: panels & hierarchy ===');
+  // Back to the default level: the timeline sections above raised it to Deep,
+  // and this section is about what the DEFAULT hierarchy looks like.
+  await page.evaluate(() => setLevel('beginner'));
   check('every panel has icon, title and description', await page.evaluate(() => {
     const bad = [];
     document.querySelectorAll('.panel').forEach(p => {
@@ -483,6 +493,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     return unreachable.length ? unreachable.join(',') : true;
   }) === true, 'timeline must stay reachable at 700px');
   check('timeline is scrollable into view when stacked', await page.evaluate(() => {
+    setLevel('deep');            // the Timeline is a Deep-level panel since Phase 10
     const pane = document.querySelector('#paneLeft');
     const tl = document.querySelector('#panelTimeline');
     pane.scrollTop = pane.scrollHeight;

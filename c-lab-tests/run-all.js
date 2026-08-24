@@ -16,6 +16,7 @@ const SUITES = [
   ['Phase 8 3D Visualization', 'phase8.test.js'],
   ['Final UX + emphasis',      'phase9.test.js'],
   ['Phase 9 flow/errors/scale','phase10.test.js'],
+  ['Phase 10 UX + Error Lab',  'phase11.test.js'],
 ];
 
 let failed = 0;

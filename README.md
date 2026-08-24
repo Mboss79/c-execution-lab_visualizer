@@ -4,7 +4,7 @@ A single-file, browser-based environment for learning how a C program actually
 executes: step through it, watch memory change, and see the execution as a
 readable 3D diagram.
 
-**Live demo:** _(fill in after the first GitHub Pages deploy — see "Deploying" below)_
+**Live demo:** https://mboss79.github.io/c-execution-lab_visualizer/
 
 ---
 
@@ -15,7 +15,10 @@ readable 3D diagram.
 | **Debugger** | Step / Prev / Run / To end / Reset, breakpoints, and a virtualized timeline you can travel through. Going back does not re-run anything: history is recorded. |
 | **Memory model** | An educational simulated 64-bit model (LP64-like, little-endian). Byte-level view, real addresses, alignment, pointer arithmetic scaled by pointee size. |
 | **3D visualization** | Variables, arrays, pointers, stack frames and heap blocks as a stable, readable diagram. The current execution object is highlighted; operand data flow is drawn for the step being executed. |
-| **Memory errors** | Out-of-bounds (over and under), null dereference, use-after-free, use-after-return, double free, invalid free, uninitialized read, and call-depth exhaustion — each with the address, the access kind, the valid range and the failing line. |
+| **Memory Error Lab** | Twelve ready-made broken programs — array overflow and underflow, invalid read and write, NULL dereference, invalid access, use-after-free, use-after-return, double free, invalid free, stack overflow, uninitialised read. Pick one, press Step, and watch it fail in the ordinary debugger with the ordinary visualization. |
+| **Memory errors** | Every fault above reports the address, the access kind, the attempted index, the valid range and the failing line — all from the engine. The attempted access is drawn OUTSIDE the object, with no value in it, because there is no such storage. |
+| **Detail levels** | **Basic** (call stack, variables, memory, pointers), **Medium** (+ RAM map), **Deep** (everything: timeline, trace, watch, conceptual CPU view). Switching level changes only what is shown — never the execution position, the program state or the camera. |
+| **Memory view** | Arrays are drawn as one labelled cell per element. Hover a cell for a tooltip beside it; click it for an inspector anchored to that cell. The cell the program is working on right now is highlighted separately from the cell you selected — they are different questions. |
 | **Norminette Lab** | Runs the real `norminette` when a local bridge is available. |
 | **Compiler Lab** | Runs the real `cc -Wall -Wextra -Werror`. Those flags are fixed. |
 | **Test Lab** | Compiles and runs the real binary against DEMO test suites. Not the official 42 Moulinette. |
@@ -66,7 +69,7 @@ WSL).
 ```bash
 cd c-lab-tests
 npm install          # puppeteer-core only
-npm test             # all 11 suites
+npm test             # all 12 suites
 ```
 
 | Suite | Checks | What it covers |
@@ -82,7 +85,8 @@ npm test             # all 11 suites
 | `phase8.test.js` | 99 | 3D visualization |
 | `phase9.test.js` | 46 | execution emphasis, camera, workspace |
 | `phase10.test.js` | 46 | operand flow, memory errors, scale |
-| **Total** | **788** | |
+| `phase11.test.js` | 206 | workspace UX, detail levels, memory popups, the Error Lab |
+| **Total** | **994** | |
 
 The browser suites drive real Chrome; the tool suites start and stop the bridge
 themselves so the unavailable path is exercised honestly.
@@ -152,7 +156,14 @@ These are deliberate and documented rather than hidden:
   detectable here even where real C would appear to work.
 - **A byte-level stack boundary is not modelled.** Call-depth exhaustion is; an
   address-level stack overflow is not simulated, and the app says so instead of
-  faking one.
+  faking one. The Stack overflow lesson prints that limitation in its own panel
+  rather than letting the picture imply something the engine does not model.
+- **Step explanations stay in the engine’s language.** The interface chrome, the
+  Error Lab and the concept help are fully EN + FR; the per-step WHAT/WHY prose
+  comes from the engine and is English, because translating it there would fork
+  the single source of truth.
+- **The engine does not parse cast expressions.** `(char *)malloc(4)` is a parse
+  error; `malloc(4)` works. The Error Lab lessons are written without casts.
 - **Operand flow needs engine-known operands.** `z = x + y` draws the full
   relationship. An operand that is itself a computed temporary has no address,
   and no arrow is drawn from a box that does not exist.
