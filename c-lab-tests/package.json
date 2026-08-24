@@ -1,0 +1,24 @@
+{
+  "name": "c-lab-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Regression + QA suite for C Execution Lab. Runs against the shipped ../index.html.",
+  "scripts": {
+    "test": "node run-all.js",
+    "test:engine": "node regression.test.js",
+    "test:ui": "node ui.test.js",
+    "test:qa": "node qa.test.js",
+    "test:phase3": "node phase3.test.js",
+    "test:phase4": "node phase4.test.js",
+    "test:phase5": "node phase5.test.js",
+    "test:phase6": "node phase6.test.js",
+    "test:phase7": "node phase7.test.js",
+    "test:phase8": "node phase8.test.js",
+    "test:final": "node phase9.test.js",
+    "test:phase9": "node phase10.test.js",
+    "shots": "node shots.js"
+  },
+  "dependencies": {
+    "puppeteer-core": "^25.8.0"
+  }
+}

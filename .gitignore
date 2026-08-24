@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+package-lock.json
+
+# local build + test artefacts
+c-lab-tests/screenshots/
+*.log
+*.tmp
+*.bak
+*.bak.js
+index.phase*.backup.html
+
+# editor / OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# never commit credentials or local environment
+.env
+.env.*
+*.pem
+*.key
+*.token
+secrets.json
