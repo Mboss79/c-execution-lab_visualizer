@@ -531,20 +531,25 @@ const SRC_UNINIT = ['int\tmain(void)', '{', '\tint\ta;', '\tint\tb;', '', '\ta =
     return moved.panX !== home.panX && moved.panY !== home.panY && moved.zoom > home.zoom &&
            back.zoom > 0 && isFinite(back.panX) && isFinite(back.panY);
   }));
-  check('[49] the scene CANNOT be rotated: the orientation is a constant', await page.evaluate(() => {
-    const angles = (s) => (s.match(/rotate[XY]\(-?[\d.]+deg\)/g) || []).join(',');
+  /* Phase 11 turned the tilted perspective scene into a 2.5D plane, so the old
+     wording of this check — "the fixed tilt is still exactly 9deg/-13deg" —
+     asserts a contract the product no longer has. The replacement is strictly
+     STRONGER: it forbids every rotation and every 3D transform rather than
+     pinning two particular angles, and it forbids any orientation field on the
+     camera rather than requiring two specific ones. */
+  check('[49] the scene has NO rotation and no 3D transform of any kind', await page.evaluate(() => {
     const before = document.querySelector('#vizHost .viz-world').style.transform;
     // ask for rotation every way a caller could: it must be ignored
-    viz.stage.setCamera({ yaw: 33, pitch: -50, rotateX: 70, rotateY: 120 });
+    viz.stage.setCamera({ yaw: 33, pitch: -50, rotateX: 70, rotateY: 120, tiltX: 40, tiltY: 40 });
     viz.stage.panBy(25, 25);
     viz.stage.zoomBy(1.2);
     const after = document.querySelector('#vizHost .viz-world').style.transform;
     const c = viz.stage.getCamera();
     viz.stage.resetCamera();
-    return angles(before) === angles(after) &&
-           /rotateX\(9deg\) rotateY\(-13deg\)/.test(after) &&
-           c.tiltX === 9 && c.tiltY === -13 &&
-           !('yaw' in c) && !('pitch' in c);
+    const clean = (s) => !/rotate|translate3d|perspective|matrix3d|skew/.test(s);
+    return clean(before) && clean(after) &&
+           /^scale\([\d.]+\) translate\([-\d.]+px, ?[-\d.]+px\)$/.test(after) &&
+           !('tiltX' in c) && !('tiltY' in c) && !('yaw' in c) && !('pitch' in c);
   }));
   check('[49b] no drag gesture can flip or orbit the scene', await page.evaluate(() => {
     const host = document.querySelector('#vizHost');
@@ -557,7 +562,9 @@ const SRC_UNINIT = ['int\tmain(void)', '{', '\tint\ta;', '\tint\tb;', '', '\ta =
     }
     const tr = document.querySelector('#vizHost .viz-world').style.transform;
     viz.stage.resetCamera();
-    return /rotateX\(9deg\) rotateY\(-13deg\)/.test(tr);
+    // Same replacement rationale as [49]: no rotation at all, rather than one
+    // particular pair of angles.
+    return !/rotate|translate3d|perspective|matrix3d|skew/.test(tr);
   }));
   check('[50] focusing an object centres it in the visible area', await page.evaluate(() => {
     const n = viz.lastScene.nodes.find(x => x.kind === 'cell' || x.kind === 'var');
@@ -693,10 +700,19 @@ const SRC_UNINIT = ['int\tmain(void)', '{', '\tint\ta;', '\tint\tb;', '', '\ta =
     const cap = (document.querySelector('.viz-cap-what') || {}).textContent || '';
     return vals > 0 && cap.length > 5;
   }));
-  check('[60] switching back to 3D restores the perspective scene', await page.evaluate(() => {
+  /* Phase 11 removed the 3D projection entirely, so there is no longer a mode
+     to switch back TO. The replacement asserts the stronger property the
+     product now guarantees: whatever a caller does to viz.flat, the scene is
+     always the same 2.5D plane — there is no second projection that could
+     disagree with the first. */
+  check('[60] there is only one projection, and asking for another cannot restore 3D',
+        await page.evaluate(() => {
     viz.flat = false; disposeViz(); vizEnsureStage(); renderViz();
     const tr = document.querySelector('#vizHost .viz-world').style.transform;
-    return viz.stage.flat === false && /translate3d/.test(tr) &&
+    const host = document.querySelector('#vizHost');
+    return viz.stage.flat === true &&
+           host.classList.contains('viz-flat') &&
+           !/translate3d|rotate|perspective/.test(tr) &&
            document.querySelectorAll('#vizHost .viz-node').length > 0;
   }));
 

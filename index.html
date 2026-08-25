@@ -1818,12 +1818,222 @@ body.level-deep .byte-cell .ba{display:block;}
    and Medium take them off the page entirely; Deep brings them all back, and
    an explicit openPanel() overrides the level for that one panel. */
 .panel.lvl-hidden{display:none;}
+
+/* ==================================================================
+   PHASE 11 — one header, an editor that keeps its gutter, one speed
+   control, and a 2.5D spatial visualization
+   ================================================================== */
+
+/* ---------------- EDITOR: ONE CODE PICTURE IN BOTH MODES ----------------
+   #sourceView draws the gutter and the syntax colours and is always present.
+   #sourceEdit lies transparently on top of the CODE COLUMN only — its left,
+   width and padding-top are measured from the rendered view at runtime rather
+   than guessed from the stylesheet, so the two layers cannot drift apart when
+   the font, the theme or the gutter width changes. */
+.src-code{position:relative;min-height:100%;width:max-content;min-width:100%;}
+#sourceView{padding:8px 0;position:relative;z-index:1;}
+textarea#sourceEdit{
+  position:absolute;top:0;z-index:2;
+  margin:0;padding:0 12px 0 0;border:none;outline:none;resize:none;overflow:hidden;
+  background:transparent;color:transparent;caret-color:var(--text);
+  font-family:var(--mono);font-size:12.5px;line-height:1.65;tab-size:4;
+  white-space:pre;word-wrap:normal;
+}
+textarea#sourceEdit::selection{background:var(--execution-dim);color:transparent;}
+textarea#sourceEdit::-moz-selection{background:var(--execution-dim);color:transparent;}
+/* Editing hides the execution decorations that would be a lie about a program
+   that is no longer the one in the buffer, but never the gutter or the colours. */
+body.src-editing .codeline.active{background:none;border-left-color:transparent;}
+body.src-editing .codeline.active .ln{color:var(--text-faint);font-weight:400;}
+body.src-editing .codeline.active .ln::after{content:none;}
+body.src-editing .codeline .code{cursor:text;}
+body.src-editing .codeline.has-steps:hover .code{background:none;}
+/* The caret column must not sit under the gutter's hover affordance. */
+body.src-editing .codeline .ln{cursor:pointer;}
+.src-editing-tag{color:var(--execution);}
+
+/* ---------------- ONE HEADER ----------------
+   The title bar IS the application header now: brand, menus and the execution
+   toolbar share one row. The command palette, language and theme moved to the
+   rail, which is where application-level controls belong. */
+.titlebar{flex-wrap:nowrap;gap:10px;height:46px;min-height:46px;}
+.titlebar .toolbar{
+  position:static;display:flex;align-items:center;gap:8px;flex:1;min-width:0;
+  height:100%;padding:0;margin:0;background:none;border:none;
+  flex-wrap:nowrap;overflow:hidden;
+}
+.titlebar .toolbar > *{align-self:center;}
+.hdr-sep{width:1px;height:22px;background:var(--border);flex-shrink:0;}
+.hdr-spring{flex:1;min-width:0;}
+.titlebar .tgroup{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.titlebar .seg{flex-shrink:0;}
+
+/* rail-mounted application controls */
+.rail-group{
+  display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;
+  padding-top:8px;margin-top:2px;border-top:1px solid var(--border);
+}
+.rail-btn.rail-sm{font-size:11px;font-weight:800;letter-spacing:.02em;}
+.rail-lang{display:flex;flex-direction:column;gap:2px;align-items:center;}
+.rail-lang button{
+  width:30px;height:19px;border-radius:4px;border:1px solid var(--border);
+  background:var(--surface-2);color:var(--text-faint);font-size:9.5px;font-weight:800;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;letter-spacing:.04em;
+}
+.rail-lang button:hover{color:var(--text);border-color:var(--border-strong);}
+.rail-lang button.active{background:var(--execution-dim);color:var(--execution);border-color:var(--execution);}
+.rail-kbd{
+  font-family:var(--mono);font-size:8px;color:var(--text-faint);
+  border:1px solid var(--border);border-radius:3px;padding:1px 3px;line-height:1;
+}
+
+/* ---------------- ONE SPEED CONTROL ---------------- */
+.spd{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.spd-label{font-size:10px;color:var(--text-faint);white-space:nowrap;}
+select#vizSpeed{
+  background:var(--surface-2);color:var(--text);border:1px solid var(--border);
+  border-radius:var(--radius-sm);font-family:var(--mono);font-size:11px;
+  padding:3px 6px;cursor:pointer;height:26px;
+}
+select#vizSpeed:hover{border-color:var(--border-strong);}
+select#vizSpeed:focus-visible{outline:2px solid var(--border-focus);outline-offset:-2px;}
+
+/* ---------------- RESPONSIVE HEADER ----------------
+   Nothing is removed as the window narrows; labels fold away before controls do,
+   and the controls themselves are the last thing to go. */
+/* Breakpoints are set from MEASURED need, not from round numbers: at 1600 the
+   toolbar wants 1154px and the brand + menus were taking 480 of the 1576
+   available, which is what pushed Detail off the row. */
+@media (max-width:1700px){
+  .titlebar .brand .title{display:none;}
+  .spd-label{display:none;}
+}
+@media (max-width:1460px){
+  .titlebar .dbtn .lbl{display:none;}
+  .titlebar .menubar .menu-btn{padding:0 7px;}
+}
+@media (max-width:1100px){
+  .titlebar .menubar{display:none;}       /* every menu item is in the palette */
+  .titlebar .mode-pill{display:none;}
+}
+@media (max-width:980px){
+  .titlebar .seg#levelSeg button{padding:0 7px;font-size:9.5px;}
+  .titlebar .step-readout{padding:5px 7px;}
+}
+
+/* ================= 2.5D SPATIAL VISUALIZATION =================
+   The scene is a flat plane the learner pans and scales. Depth is DRAWN, not
+   projected: each card carries a --depth hint (0 = far back, 1 = front) that
+   drives its shadow, its edge light and its elevation. Nothing here scales a
+   box by its distance, which is what keeps every stack frame the same size. */
+.viz-camera{perspective:none !important;perspective-origin:50% 50%;}
+.viz-world{transform-style:flat !important;}
+.viz-node{transform-style:flat;}
+
+/* A card is a slab: a lit top edge, a body, and a shadow that deepens with
+   elevation. That reads as dimensional without a single 3D transform. */
+.viz-node.vz-var,.viz-node.vz-heap,.viz-node.vz-dead,.viz-node.vz-cell{
+  box-shadow:
+    0 calc(2px + 6px * var(--depth,.6)) calc(4px + 14px * var(--depth,.6)) rgba(0,0,0,calc(.10 + .16 * var(--depth,.6))),
+    inset 0 1px 0 rgba(255,255,255,.055);
+}
+html[data-theme=light] .viz-node.vz-var,
+html[data-theme=light] .viz-node.vz-heap,
+html[data-theme=light] .viz-node.vz-dead,
+html[data-theme=light] .viz-node.vz-cell{
+  box-shadow:
+    0 calc(2px + 5px * var(--depth,.6)) calc(4px + 12px * var(--depth,.6)) rgba(23,32,54,calc(.07 + .12 * var(--depth,.6))),
+    inset 0 1px 0 rgba(255,255,255,.7);
+}
+
+/* Stack frames and regions are the deepest surfaces: a thicker slab, a
+   stronger drop, and a faint plate edge on the left so a pile of frames reads
+   as layered sheets rather than as flat outlines. */
+.viz-node.vz-frame,.viz-node.vz-region{
+  box-shadow:
+    0 calc(6px + 12px * var(--depth,.6)) calc(14px + 26px * var(--depth,.6)) rgba(0,0,0,calc(.16 + .18 * var(--depth,.6))),
+    inset 0 1px 0 rgba(255,255,255,.05);
+  position:absolute;
+}
+html[data-theme=light] .viz-node.vz-frame,
+html[data-theme=light] .viz-node.vz-region{
+  box-shadow:
+    0 calc(5px + 10px * var(--depth,.6)) calc(12px + 22px * var(--depth,.6)) rgba(23,32,54,calc(.10 + .12 * var(--depth,.6))),
+    inset 0 1px 0 rgba(255,255,255,.75);
+}
+/* the "side" of the slab: a thin plate drawn under the left edge */
+.viz-node.vz-frame::after{
+  content:'';position:absolute;left:-4px;top:6px;bottom:-4px;width:4px;
+  background:linear-gradient(to right,transparent,rgba(0,0,0,.20));
+  border-bottom-left-radius:var(--radius-sm);pointer-events:none;
+}
+html[data-theme=light] .viz-node.vz-frame::after{
+  background:linear-gradient(to right,transparent,rgba(23,32,54,.13));
+}
+/* the current frame lifts off the plane — elevation, not scale */
+.viz-node.vz-frame.vz-current{
+  box-shadow:
+    0 0 0 1px var(--role-execution),
+    0 calc(10px + 12px * var(--depth,.6)) calc(22px + 26px * var(--depth,.6)) rgba(0,0,0,calc(.24 + .16 * var(--depth,.6)));
+}
+
+/* Depth also cools the far surfaces slightly, the way distance does. */
+.viz-node.vz-region{filter:saturate(calc(.55 + .45 * var(--depth,.6)));}
+
+/* Arrows sit above the plane they connect, never inside a card. */
+.viz-edge,.viz-flow{transform-style:flat;}
+
+/* Reduced motion still gets the depth, just not the movement. */
+@media (prefers-reduced-motion:reduce){
+  .viz-node,.viz-edge,.viz-world{transition:none;}
+}
+
+/* The mode pill is the one header item whose text length is not under the
+   layout's control, so it is the one that gets an ellipsis rather than being
+   allowed to push the detail controls off the row. */
+.titlebar .mode-pill{max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;line-height:20px;}
+.titlebar .step-readout{white-space:nowrap;}
+
+/* A nowrap header must never widen the application. Below the stacking
+   threshold the toolbar becomes a horizontal scroller instead: every control
+   stays reachable, and the shell stays exactly as wide as the window. */
+.shell{min-width:0;}
+.titlebar{min-width:0;overflow:hidden;}
+@media (max-width:980px){
+  .titlebar .toolbar{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;}
+  .titlebar .toolbar::-webkit-scrollbar{height:0;}
+  .titlebar .hdr-spring{flex:0 0 4px;min-width:4px;}
+}
+
+/* At the narrowest sizes the step readout folds away before any CONTROL does:
+   the same "step 6 / 30" is already in the status bar, so nothing is lost,
+   and Detail stays on the row where a learner can reach it. */
+@media (max-width:860px){
+  .titlebar .step-readout{display:none;}
+}
+
+/* Folding rules last: the ellipsis rule above sets a display, and at equal
+   specificity the later declaration wins, so the folds must come after it. */
+@media (max-width:1100px){ .titlebar .mode-pill{display:none;} }
+@media (max-width:860px){ .titlebar .step-readout{display:none;} }
+
+/* Fit lands immediately instead of sliding into place over the animation
+   duration: the learner asked to see the whole scene, not to watch it arrive. */
+.viz-host.viz-nofx .viz-world,
+.viz-host.viz-nofx .viz-node,
+.viz-host.viz-nofx .viz-edge,
+.viz-host.viz-nofx .viz-flow{transition:none !important;}
 </style>
 </head>
 <body>
 <div class="shell">
 
-  <!-- ============================ TITLE BAR ============================ -->
+  <!-- ==================== APPLICATION HEADER (one bar) ====================
+       The title bar and the debug toolbar used to be two stacked rows costing
+       93px of vertical chrome. They are one row now: brand, menus and the
+       execution toolbar. The command palette, language and theme moved to the
+       rail, which is where application-level controls belong — that is what
+       freed the width to fit everything on one line. -->
   <header class="titlebar">
     <div class="brand"><span class="mark" aria-hidden="true"></span><span class="title">C EXECUTION LAB</span></div>
     <nav class="menubar" aria-label="Main menu">
@@ -1834,46 +2044,43 @@ body.level-deep .byte-cell .ba{display:block;}
       <button class="menu-btn" id="mLearn"   aria-haspopup="true" aria-expanded="false" data-i18n="menu.learn">Learn</button>
       <button class="menu-btn" id="mValidate" aria-haspopup="true" aria-expanded="false" data-i18n="menu.validate">Validate</button>
     </nav>
-    <div class="tb-gap"></div>
-    <div class="tb-right">
-      <button class="iconbtn" id="cmdkBtn" title="Command palette (Ctrl+K)" aria-label="Open command palette">⌘ <kbd>Ctrl K</kbd></button>
-      <button class="iconbtn" id="layoutBtn" title="Toggle side-by-side / stacked layout" aria-label="Toggle workspace orientation">⇄</button>
-      <div class="lang-seg" role="group" aria-label="Language">
-        <button data-lang="en" class="active">EN</button>
-        <button data-lang="fr">FR</button>
+    <span class="hdr-sep" aria-hidden="true"></span>
+
+    <div class="toolbar" role="toolbar" aria-label="Execution controls">
+      <div class="tgroup">
+        <button class="dbtn" id="btnFirst" title="First step (Home)" aria-label="Go to first step"><span class="gl">⏮</span><span class="lbl" data-i18n="ctl.first">First</span></button>
+        <button class="dbtn" id="btnPrev"  title="Previous step (← or F6)" aria-label="Previous step"><span class="gl">◀</span><span class="lbl" data-i18n="ctl.prev">Prev</span></button>
+        <button class="dbtn primary" id="btnStep" title="Step (Space, → or F10)" aria-label="Step forward"><span class="gl">▶</span><span class="lbl" data-i18n="ctl.step">Step</span></button>
+        <button class="dbtn" id="btnRun"   title="Run / Pause (Enter or F5)" aria-label="Run or pause"><span class="gl">▶▶</span><span class="lbl" data-i18n="ctl.run">Run</span></button>
+        <button class="dbtn" id="btnLast"  title="Fast run to end — no per-step rendering (F9)" aria-label="Fast run to end"><span class="gl">⏭</span><span class="lbl" data-i18n="ctl.end">To end</span></button>
+        <button class="dbtn danger" id="btnReset" title="Reset (R or Shift+F5)" aria-label="Reset execution"><span class="gl">↻</span><span class="lbl" data-i18n="ctl.reset">Reset</span></button>
       </div>
-      <button class="iconbtn" id="themeToggle" title="Toggle light / dark theme" aria-label="Toggle theme">◐</button>
+      <div class="tgroup">
+        <span class="step-readout" id="stepReadout" aria-live="polite">—</span>
+        <span class="mode-pill mode-render" id="modePill" data-i18n="mode.render">Rendering every step</span>
+      </div>
+      <span class="hdr-spring"></span>
+      <span class="hdr-sep" aria-hidden="true"></span>
+      <div class="tgroup">
+        <button class="dbtn" id="btnViz" title="Spatial visualization (V)" aria-label="Toggle the spatial visualization" aria-pressed="false"><span class="gl">◈</span><span class="lbl" data-i18n="viz.short">Visual</span></button>
+      </div>
+      <!-- ONE speed control. It drives the Run cadence AND the animation
+           durations; there is no second competing slider any more. -->
+      <div class="tgroup spd">
+        <span class="spd-label" data-i18n="ctl.speed">Speed</span>
+        <select id="vizSpeed" aria-label="Execution and animation speed"></select>
+      </div>
+      <span class="hdr-sep" aria-hidden="true"></span>
+      <div class="tgroup">
+        <span class="spd-label" data-i18n="ctl.detail">Detail</span>
+        <div class="seg" id="levelSeg" role="group" aria-label="Detail level">
+          <button data-level="beginner" class="active" data-i18n="lvl.basic" title="Call stack, variables, memory and pointers only">Basic</button>
+          <button data-level="intermediate" data-i18n="lvl.medium" title="Adds the RAM map">Medium</button>
+          <button data-level="deep" data-i18n="lvl.deepBtn" title="Adds timeline, trace, watch and the conceptual CPU view">Deep</button>
+        </div>
+      </div>
     </div>
   </header>
-
-  <!-- ============================ DEBUG TOOLBAR ============================ -->
-  <div class="toolbar" role="toolbar" aria-label="Execution controls">
-    <div class="tgroup">
-      <button class="dbtn" id="btnFirst" title="First step (Home)" aria-label="Go to first step"><span class="gl">⏮</span><span class="lbl" data-i18n="ctl.first">First</span></button>
-      <button class="dbtn" id="btnPrev"  title="Previous step (← or F6)" aria-label="Previous step"><span class="gl">◀</span><span class="lbl" data-i18n="ctl.prev">Prev</span></button>
-      <button class="dbtn primary" id="btnStep" title="Step (Space, → or F10)" aria-label="Step forward"><span class="gl">▶</span><span class="lbl" data-i18n="ctl.step">Step</span></button>
-      <button class="dbtn" id="btnRun"   title="Run / Pause (Enter or F5)" aria-label="Run or pause"><span class="gl">▶▶</span><span class="lbl" data-i18n="ctl.run">Run</span></button>
-      <button class="dbtn" id="btnLast"  title="Fast run to end — no per-step rendering (F9)" aria-label="Fast run to end"><span class="gl">⏭</span><span class="lbl" data-i18n="ctl.end">To end</span></button>
-      <button class="dbtn danger" id="btnReset" title="Reset (R or Shift+F5)" aria-label="Reset execution"><span class="gl">↻</span><span class="lbl" data-i18n="ctl.reset">Reset</span></button>
-    </div>
-    <div class="tgroup">
-      <span class="step-readout" id="stepReadout" aria-live="polite">—</span>
-      <span class="mode-pill mode-render" id="modePill" data-i18n="mode.render">Rendering every step</span>
-    </div>
-    <div class="tgroup">
-      <span class="speed-wrap"><span data-i18n="ctl.speed">Speed</span>
-        <input type="range" id="speedSlider" min="1" max="10" value="6" aria-label="Playback speed">
-      </span>
-    </div>
-    <div class="tgroup" style="margin-left:auto;">
-      <span class="speed-wrap" style="margin:0;"><span data-i18n="ctl.detail">Detail</span></span>
-      <div class="seg" id="levelSeg" role="group" aria-label="Detail level">
-        <button data-level="beginner" class="active" data-i18n="lvl.basic" title="Call stack, variables, memory and pointers only">Basic</button>
-        <button data-level="intermediate" data-i18n="lvl.medium" title="Adds the RAM map">Medium</button>
-        <button data-level="deep" data-i18n="lvl.deepBtn" title="Adds timeline, trace, watch and the conceptual CPU view">Deep</button>
-      </div>
-    </div>
-  </div>
 
   <!-- ============================ MAIN ============================ -->
   <div class="main">
@@ -1886,6 +2093,19 @@ body.level-deep .byte-cell .ba{display:block;}
       <button class="rail-btn" id="rail3d"      title="3D visualization (V)" aria-label="3D visualization" aria-pressed="false">◈</button>
       <button class="rail-btn" id="railDock"     title="Toggle bottom dock (Ctrl+`)" aria-label="Toggle bottom dock">▬</button>
       <button class="rail-btn" id="railHelp"     title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
+
+      <!-- Application controls: command palette, language and theme. They used
+           to sit in the header and eat the width the execution toolbar needed. -->
+      <div class="rail-group">
+        <button class="rail-btn rail-sm" id="cmdkBtn" title="Command palette (Ctrl+K)" aria-label="Open command palette">⌘</button>
+        <span class="rail-kbd" aria-hidden="true">⌃K</span>
+        <div class="lang-seg rail-lang" role="group" aria-label="Language">
+          <button data-lang="en" class="active">EN</button>
+          <button data-lang="fr">FR</button>
+        </div>
+        <button class="rail-btn rail-sm" id="layoutBtn" title="Toggle side-by-side / stacked layout" aria-label="Toggle workspace orientation">⇄</button>
+        <button class="rail-btn rail-sm" id="themeToggle" title="Toggle light / dark theme (Ctrl+Shift+L)" aria-label="Toggle theme">◐</button>
+      </div>
     </nav>
 
     <div class="workarea">
@@ -1936,10 +2156,20 @@ body.level-deep .byte-cell .ba{display:block;}
               <span>●</span><span id="bpBannerText">Breakpoint hit</span>
               <button class="bb-x" id="bpBannerClose" aria-label="Dismiss">✕</button>
             </div>
+            <!-- ONE source of truth for the code: #sourceEdit.value. #sourceView
+                 is a derived layer that draws the gutter and the syntax colours,
+                 and it is present in BOTH modes. While editing, the textarea sits
+                 transparently on top of the code column only, so the line numbers
+                 stay visible and the breakpoint gutter stays clickable. Both
+                 layers live in one scroll container, so scrolling is shared
+                 without any synchronisation code. -->
             <div class="src-wrap">
               <div class="src-scroll" id="srcScroll">
-                <textarea id="sourceEdit" spellcheck="false" aria-label="C source code"></textarea>
-                <div id="sourceView" style="display:none;padding:8px 0;position:relative;"></div>
+                <div class="src-code" id="srcCode">
+                  <div id="sourceView"></div>
+                  <textarea id="sourceEdit" spellcheck="false" wrap="off" autocomplete="off"
+                            autocorrect="off" autocapitalize="off" aria-label="C source code"></textarea>
+                </div>
               </div>
             </div>
             <div id="errorBox"></div>
@@ -8012,6 +8242,10 @@ const CViz3D = (() => {
      edges in world space (x right, y down, z toward the viewer). No DOM.
      ====================================================================== */
 
+  // How far a card slides per unit of depth. Small on purpose: enough to read
+  // as layering, never enough to be mistaken for a size difference.
+  const DEPTH_SHIFT = 0.045;
+  function depthShift(z) { return (z || 0) * DEPTH_SHIFT; }
   const CARD_W = 138, CARD_H = 84, CARD_GAP = 16;
   const CELL_W = 78, CELL_H = 58;
   const FRAME_PAD = 14, FRAME_HEAD = 30, FRAME_GAP = 26;
@@ -8054,20 +8288,40 @@ const CViz3D = (() => {
     // y grows downward, so the FIRST frame sits at y = 0 and each later call is
     // placed above it: the newest frame ends up on top of the pile, the way a
     // stack is always drawn.
+    /* ---- UNIFORM FRAMES ------------------------------------------------
+       Every frame on screen is drawn at the SAME width and the SAME height:
+       the largest any of them needs. A stack whose boxes are all different
+       sizes does not look like a stack, and a frame must never appear smaller
+       because it happens to be deeper in the pile.
+
+       The size is measured first, then applied to all of them, so it is
+       derived from the real contents rather than being a constant that could
+       clip a wide array.
+       ------------------------------------------------------------------- */
+    const FRAME_W_MIN = 300, FRAME_H_MIN = 118;
+    const measured = frames.map(f => {
+      const probe = [];
+      const size = layoutVarCards(f.vars, 0, 0, STACK_Z, probe, null);
+      return {
+        w: size.width + FRAME_PAD * 2,
+        h: FRAME_HEAD + FRAME_PAD * 2 + Math.max(size.height, f.vars.length ? CARD_H : 26),
+      };
+    });
+    const FRAME_W = Math.max(FRAME_W_MIN, ...measured.map(m => m.w), 0);
+    const FRAME_H = Math.max(FRAME_H_MIN, ...measured.map(m => m.h), 0);
+
     let frameY = 0;
     const frameBoxes = [];
     for (let i = 0; i < frames.length; i++) {
       const f = frames[i];
       const inner = [];
-      const size = layoutVarCards(f.vars, STACK_X + FRAME_PAD, frameY + FRAME_HEAD + FRAME_PAD, STACK_Z, inner, null);
-      const w = Math.max(size.width + FRAME_PAD * 2, 260);
-      const h = FRAME_HEAD + FRAME_PAD * 2 + Math.max(size.height, f.vars.length ? CARD_H : 26);
+      layoutVarCards(f.vars, STACK_X + FRAME_PAD, frameY + FRAME_HEAD + FRAME_PAD, STACK_Z, inner, null);
       const box = { kind: 'frame', id: f.id, f, x: STACK_X, y: frameY, z: STACK_Z,
-                    w, h, role: ROLE.frame, current: f.current, depth: f.depth };
+                    w: FRAME_W, h: FRAME_H, role: ROLE.frame, current: f.current, depth: f.depth };
       frameBoxes.push(box);
       nodes.push(box);
       for (const n of inner) nodes.push(n);
-      frameY -= (h + FRAME_GAP);
+      frameY -= (FRAME_H + FRAME_GAP);
     }
 
     /* ---- globals: a plate behind the stack ---- */
@@ -8101,8 +8355,12 @@ const CViz3D = (() => {
       let dx = STACK_X;
       const dy = 150;
       for (const b of model.dead) {
+        // CARD_H, because that is what .vz-dead is actually painted at. The
+        // layout must describe what the browser draws: bounds are computed from
+        // these numbers, and Fit frames the bounds. A node declared shorter than
+        // it paints is a node that hangs out of a 'fitted' view.
         nodes.push({ kind: 'dead', id: b.id, v: b, x: dx, y: dy, z: STACK_Z + 40,
-                     w: CARD_W, h: 52, role: ROLE.inactive });
+                     w: CARD_W, h: CARD_H, role: ROLE.inactive });
         dx += CARD_W + CARD_GAP;
       }
     }
@@ -8166,6 +8424,14 @@ const CViz3D = (() => {
       edges.push(edge);
     }
 
+    /* Depth is a DRAWN cue, so it belongs to the coordinates every consumer
+       reads: bounds, culling, edges, arrows and paint. Applying it later, at
+       paint time only, would leave Fit fitting a rectangle that is not the one
+       on screen. It shifts a card a few pixels; it never resizes one. */
+    for (const n of nodes) {
+      const d = depthShift(n.z);
+      n.x += d; n.y += d;
+    }
     return { nodes, edges, bounds: boundsOf(nodes), model };
   }
 
@@ -8571,7 +8837,9 @@ const CViz3D = (() => {
     if (typeof document === 'undefined') return null;
     const o = opts || {};
     const cap = caps();
-    const flat = !cap.transforms3d || !!o.forceFlat;
+    // There is one spatial mode: the 2.5D plane. The flag survives only so the
+    // host keeps a stable class name and callers that ask can still be told.
+    const flat = true;
 
     const camera = document.createElement('div');
     camera.className = 'viz-camera';
@@ -8579,7 +8847,7 @@ const CViz3D = (() => {
     world.className = 'viz-world';
     camera.appendChild(world);
     host.appendChild(camera);
-    if (flat) host.classList.add('viz-flat');
+    host.classList.add('viz-flat');
 
     const pool = new Map();          // node id -> element
     const edgePool = new Map();      // edge key -> element
@@ -8592,31 +8860,41 @@ const CViz3D = (() => {
     let selected = null;
     let lastScene = null;
     let lastCeo = null;
+    let lastCull = 0;            // nodes culled by the last render
     let disposed = false;
 
-    /* ---- camera -------------------------------------------------------
-       This is an interactive educational DIAGRAM, not a 3D model viewer.
-       The orientation is a FIXED, gentle tilt chosen once: the stack stays
-       vertical, text stays upright, and the learner can never flip, orbit or
-       spin the scene into an unreadable state. The only camera verbs are
-       pan, zoom, fit and reset.
+    /* ---- camera — SPATIAL 2.5D ----------------------------------------
+       A flat plane the learner slides and scales. There is no perspective, no
+       tilt, no orbit and no rotation of any kind: a box is exactly as big as
+       its layout says, wherever it sits in the scene. Depth is drawn (offset,
+       shadow, layering, elevation) instead of projected, which is what keeps
+       every stack frame the same size as every other one.
+
+       The only camera verbs are pan, zoom, fit and reset.
        ------------------------------------------------------------------- */
-    const TILT_Y = -13;          // constant, never changed by any interaction
-    const TILT_X = 9;
-    const PERSPECTIVE = 1200;
     const ZOOM_MIN = 0.30, ZOOM_MAX = 2.6;
+    // Slack for what the layout box does not describe: borders, shadows and the
+    // depth plate drawn beside a frame.
+    const FIT_MARGIN = 0.92;
 
     function applyCamera() {
-      if (flat) {
-        world.style.transform =
-          'translate(' + cam.panX + 'px,' + cam.panY + 'px) scale(' + cam.zoom.toFixed(4) + ')';
-        return;
-      }
-      // scale is expressed as a z distance, so perspective and depth survive
-      const d = PERSPECTIVE * (1 - 1 / cam.zoom);
+      // scale() FIRST, then translate: that makes the pan a WORLD-space offset,
+      // which is the model every other piece of camera maths here already uses
+      // (screen = zoom * (world + pan); panBy adds dx/zoom; focusNode and Fit
+      // both solve pan = screen/zoom - world). With translate() first the pan
+      // would be screen-space and every one of those would be wrong by a factor
+      // of zoom — which is exactly how a 'fitted' scene ended up hanging out of
+      // the viewport after a dock resize.
       world.style.transform =
-        'translate3d(' + cam.panX + 'px,' + cam.panY + 'px,' + d.toFixed(2) + 'px)' +
-        ' rotateX(' + TILT_X + 'deg) rotateY(' + TILT_Y + 'deg)';
+        'scale(' + cam.zoom.toFixed(4) + ') translate(' + cam.panX + 'px,' + cam.panY + 'px)';
+    }
+    /* A node's z is a DEPTH CUE, never a projection: it decides how the card is
+       stacked and shadowed. The positional part of the cue is already baked
+       into the layout. */
+    function applyDepth(node, z) {
+      const d = z || 0;
+      node.style.zIndex = String(400 + Math.round(d / 5));
+      node.style.setProperty('--depth', Math.max(0, Math.min(1, (d + 320) / 420)).toFixed(3));
     }
     const clampZoom = (z) => Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z));
 
@@ -8640,8 +8918,9 @@ const CViz3D = (() => {
       repainting = true;
       try { render(lastScene); } finally { repainting = false; }
     }
+    // No orientation is reported because none exists: the scene is a plane.
     function getCamera() {
-      return { panX: cam.panX, panY: cam.panY, zoom: cam.zoom, tiltX: TILT_X, tiltY: TILT_Y };
+      return { panX: cam.panX, panY: cam.panY, zoom: cam.zoom };
     }
     function panBy(dx, dy) { fitIsClean = false; cam.panX += dx / cam.zoom; cam.panY += dy / cam.zoom; applyCamera(); repaint(); }
     function zoomBy(f) { fitIsClean = false; cam.zoom = clampZoom(cam.zoom * f); applyCamera(); repaint(); }
@@ -8664,7 +8943,7 @@ const CViz3D = (() => {
 
     /* The world rectangle the camera can currently see. screen = zoom*(world+pan),
        so world = screen/zoom - pan. A generous margin means small pans and the
-       perspective tilt never reveal an un-built node. */
+       depth offset never reveal an un-built node. */
     function visibleWorld() {
       const hr = host.getBoundingClientRect();
       if (!hr.width || !hr.height) return null;
@@ -8715,34 +8994,26 @@ const CViz3D = (() => {
     }
 
     /* ---- Fit -------------------------------------------------------------
-       A perspective scene is bigger on screen than bounds * zoom: the fixed
-       tilt pushes the near edge toward the viewer, where it magnifies. So Fit
-       PROJECTS the four corners of the real bounds through the real transform
-       and shrinks until the projection genuinely fits the measured free area.
-       Nothing here is a constant guess.
+       On a plane the projection is just bounds x zoom, so Fit is one division
+       instead of the corner-projection loop the perspective scene needed. The
+       measured correction pass below stays: borders and shadows are still
+       things only the browser knows the size of.
        -------------------------------------------------------------------- */
-    const RAD = Math.PI / 180;
-    const CY = Math.cos(TILT_Y * RAD), SY = Math.sin(TILT_Y * RAD);
-    const CX = Math.cos(TILT_X * RAD), SX = Math.sin(TILT_X * RAD);
+    function projectedBox(b, zoom) { return { w: b.w * zoom, h: b.h * zoom }; }
 
-    // Screen-space box of the bounds at a given zoom, centred on the bounds.
-    function projectedBox(b, zoom) {
-      if (flat) return { w: b.w * zoom, h: b.h * zoom };
-      const d = PERSPECTIVE * (1 - 1 / zoom);
-      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-      const hx = b.w / 2, hy = b.h / 2, hz = (b.d || 0) / 2;
-      for (const sx of [-1, 1]) for (const sy of [-1, 1]) for (const sz of [-1, 1]) {
-        const x = sx * hx, y = sy * hy, zz = sz * hz;
-        const rx = x * CY + zz * SY;
-        const rz = -x * SY + zz * CY;
-        const ry = y * CX - rz * SX;
-        const rz2 = y * SX + rz * CX;
-        const Z = rz2 + d;
-        const s = PERSPECTIVE / Math.max(1, PERSPECTIVE - Z);
-        minX = Math.min(minX, rx * s); maxX = Math.max(maxX, rx * s);
-        minY = Math.min(minY, ry * s); maxY = Math.max(maxY, ry * s);
-      }
-      return { w: maxX - minX, h: maxY - minY };
+    /* The framing maths on its own: no DOM measurement, no repaint. Safe to
+       call from inside render() before anything has been built. */
+    function fitAnalytic(b) {
+      const v = visibleBox();
+      if (!b || !b.w || !b.h || !v.w || !v.h) return false;
+      cam.zoom = clampZoom(Math.min((v.w * FIT_MARGIN) / b.w, (v.h * FIT_MARGIN) / b.h));
+      cam.panX = v.cx / cam.zoom - b.cx;
+      cam.panY = v.cy / cam.zoom - b.cy;
+      fitIsClean = true;
+      fittedBounds = b.w.toFixed(1) + 'x' + b.h.toFixed(1);
+      fittedBox = hostKey();
+      applyCamera();
+      return true;
     }
 
     let fitting = false;
@@ -8752,59 +9023,21 @@ const CViz3D = (() => {
       fitting = true;
       try { return fitInner(); } finally { fitting = false; }
     }
+    /* fitInner is fitAnalytic plus a repaint: the framing maths, then rebuild
+       what the new view reveals. Nothing here reads the DOM — see the patch
+       note above for why measuring it was worse than not measuring it. */
     function fitInner() {
       if (!lastScene || !lastScene.nodes.length) return false;
-      const b = lastScene.bounds;
-      const v = visibleBox();
-      if (!b.w || !b.h) return false;
-      // start from the flat estimate, then shrink until the real projection fits
-      let z = clampZoom(Math.min((v.w * 0.94) / b.w, (v.h * 0.94) / b.h));
-      for (let i = 0; i < 24; i++) {
-        const p = projectedBox(b, z);
-        const over = Math.max(p.w / (v.w * 0.94), p.h / (v.h * 0.94));
-        if (over <= 1.001) break;
-        const next = clampZoom(z / over);
-        if (Math.abs(next - z) < 0.0005) break;
-        z = next;
-      }
-      cam.zoom = z;
-      cam.panX = v.cx / z - b.cx;
-      cam.panY = v.cy / z - b.cy;
-      // Measure against the FINAL transform, not the one mid-transition: with
-      // the animation running, getBoundingClientRect reports where the scene
-      // currently is, and correcting against that diverges.
-      // claimed up front so the repaint below cannot re-enter fit()
-      fitIsClean = true;
-      fittedBounds = b.w.toFixed(1) + 'x' + b.h.toFixed(1);
-      fittedBox = boxKey(v);
-      const prevTransition = world.style.transition;
-      world.style.transition = 'none';
-      applyCamera();
+      if (!fitAnalytic(lastScene.bounds)) return false;
+      // Fit LANDS; it does not drift into place over the animation duration.
+      // Without this the scene is still sliding for ~420ms after Fit returns,
+      // which is both worse to use and impossible to measure.
+      host.classList.add('viz-nofx');
       repaint();                 // culling: build what the new view reveals
       void world.offsetWidth;
-      // The analytic pass cannot know about borders, shadows or how a rotated
-      // card actually rasterises, so verify against what the browser really
-      // painted and correct. This is what makes Fit fit rather than approximate.
-      for (let i = 0; i < 3; i++) {
-        const m = measuredBox();
-        if (!m) break;
-        const vv = visibleBox();
-        const over = Math.max(m.w / vv.w, m.h / vv.h);
-        let changed = false;
-        if (over > 1.004) { cam.zoom = clampZoom(cam.zoom / over); changed = true; }
-        const dx = vv.cx - m.cx, dy = vv.cy - m.cy;
-        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-          cam.panX += dx / cam.zoom; cam.panY += dy / cam.zoom; changed = true;
-        }
-        if (!changed) break;
-        applyCamera();
-        void world.offsetWidth;
-      }
-      world.style.transition = prevTransition;
-      repaint();
+      host.classList.remove('viz-nofx');
       return true;
     }
-
     // Union of every painted node, expressed relative to the host centre —
     // the same frame visibleBox() uses.
     /* Only the nodes at the edges of the scene can define its painted box, so
@@ -8849,15 +9082,18 @@ const CViz3D = (() => {
     /* Quantized on purpose. A caption that grows by a line when the step is a
        condition must NOT move the camera; a panel appearing or disappearing
        (error banner ~340px, inspector ~250px) must. 48px separates the two. */
-    const BOX_Q = 48;
-    function boxKey(b) {
-      if (!b) return '';
-      return [b.w, b.h, b.cx, b.cy].map(n => Math.round(n / BOX_Q)).join('|');
+    const BOX_Q = 24;
+    /* Keyed on the HOST, not on the free area: the host changes when the
+       workspace, the dock or the window is resized, and never because a caption
+       gained a line. That is exactly the difference between "the viewport
+       changed" and "the program took a step". */
+    function hostKey() {
+      const r = host.getBoundingClientRect();
+      return Math.round(r.width / BOX_Q) + '|' + Math.round(r.height / BOX_Q);
     }
     function refitIfClean() {
       if (!fitIsClean) return false;
-      const key = boxKey(visibleBox());
-      if (key === fittedBox) return false;
+      if (hostKey() === fittedBox) return false;
       return fit();
     }
 
@@ -8936,11 +9172,12 @@ const CViz3D = (() => {
     const unk = () => (o.unknownLabel ? o.unknownLabel() : 'unknown');
 
     function place(node, n) {
-      node.style.transform = flat
-        ? 'translate(' + n.x + 'px,' + n.y + 'px)'
-        : 'translate3d(' + n.x + 'px,' + n.y + 'px,' + n.z + 'px)';
+      // The depth shift is already in n.x / n.y (see layout). Here depth only
+      // decides layering and shadow — it never scales anything.
+      node.style.transform = 'translate(' + n.x + 'px,' + n.y + 'px)';
       node.style.width = n.w + 'px';
       if (n.kind === 'frame' || n.kind === 'region') node.style.height = n.h + 'px';
+      applyDepth(node, n.z);
     }
 
     function bodyFor(n, model, ceo) {
@@ -9029,9 +9266,40 @@ const CViz3D = (() => {
     }
 
     /* ---- render ---- */
+    /* Should this scene be framed before it is drawn?
+
+       Yes exactly twice: the first time a scene appears, and if a scene has
+       drifted so far out of view that the learner would be looking at an empty
+       plane. Never because the scene merely changed shape — a new stack frame
+       must not move the camera. The decision is geometric (bounds against the
+       visible world), so it costs nothing and is made BEFORE culling, which
+       means what gets painted is what the caller is told about. */
+    const MOSTLY_HIDDEN = 0.2, WORTH_CHECKING = 12;
+    let rescuedShape = null;     // scene shape the safety net has already framed
+    function frameDecision(scene) {
+      if (!fitIsClean || !scene.nodes.length) return false;
+      if (fittedBounds === null) return true;
+      if (scene.nodes.length < WORTH_CHECKING) return false;
+      const vw = visibleWorld();
+      if (!vw) return false;
+      const b = scene.bounds;
+      const iw = Math.min(b.maxX, vw.right) - Math.max(b.minX, vw.left);
+      const ih = Math.min(b.maxY, vw.bottom) - Math.max(b.minY, vw.top);
+      const visible = Math.max(0, iw) * Math.max(0, ih);
+      const whole = Math.max(1, (b.maxX - b.minX) * (b.maxY - b.minY));
+      if (visible / whole >= MOSTLY_HIDDEN) return false;
+      // A scene too large to fit even at minimum zoom would stay "mostly
+      // hidden" for ever, so the net is armed once per shape and then disarmed.
+      const key = scene.nodes.length + ':' + b.w.toFixed(0) + 'x' + b.h.toFixed(0);
+      if (key === rescuedShape) return false;
+      rescuedShape = key;
+      return true;
+    }
+
     function render(scene) {
       if (disposed) return { drawn: 0, truncated: false };
       lastScene = scene;
+      if (frameDecision(scene)) fitAnalytic(scene.bounds);
       const model = scene.model;
       // one resolution per step, not per node
       const ceo = model ? currentObject(model) : null;
@@ -9092,15 +9360,14 @@ const CViz3D = (() => {
         if (!line) { line = el('viz-edge'); world.appendChild(line); edgePool.set(key, line); }
         const x1 = a.x + a.w / 2, y1 = a.y + a.h, z1 = a.z;
         const x2 = b ? b.x + b.w / 2 : x1, y2 = b ? b.y : y1 + 40, z2 = b ? b.z : z1;
-        const dx = x2 - x1, dy = y2 - y1, dz = z2 - z1;
-        const len = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1;
-        const rotY = -Math.atan2(dz, dx) * 180 / Math.PI;
-        const rotZ = Math.atan2(dy, Math.hypot(dx, dz)) * 180 / Math.PI;
+        const ax = x1, ay = y1, bx = x2, by = y2;
+        const dx = bx - ax, dy = by - ay;
+        const len = Math.hypot(dx, dy) || 1;
         line.className = 'viz-edge role-' + e.role + (e.kind === 'live' ? '' : ' vz-bad') + (b ? '' : ' vz-dangling');
         line.style.width = len + 'px';
-        line.style.transform = flat
-          ? 'translate(' + x1 + 'px,' + y1 + 'px) rotate(' + Math.atan2(dy, dx) * 180 / Math.PI + 'deg)'
-          : 'translate3d(' + x1 + 'px,' + y1 + 'px,' + z1 + 'px) rotateY(' + rotY + 'deg) rotateZ(' + rotZ + 'deg)';
+        line.style.transform =
+          'translate(' + ax + 'px,' + ay + 'px) rotate(' + (Math.atan2(dy, dx) * 180 / Math.PI) + 'deg)';
+        line.style.zIndex = String(700 + Math.round((z1 || 0) / 5));
         const lbl = b ? '' : (e.targetText || '');
         if (line._lbl !== lbl) { line.innerHTML = lbl ? '<span class="viz-edge-lbl">' + esc(lbl) + '</span>' : ''; line._lbl = lbl; }
       }
@@ -9110,12 +9377,14 @@ const CViz3D = (() => {
       }
       drawDataflow(scene);
 
-      /* The camera is not moved by execution. It is re-framed only when the
-         SCENE ITSELF changes shape (a frame appeared, an array was declared)
-         and only while the learner has not taken the camera. Stepping through
-         i++ leaves the bounds identical, so the view stays perfectly still. */
-      const shape = scene.bounds.w.toFixed(1) + 'x' + scene.bounds.h.toFixed(1);
-      if (fitIsClean && shape !== fittedBounds) fit();
+      /* The camera is NEVER moved by execution. It is framed once, when a
+         scene first appears, and after that only by the learner (Fit, Reset,
+         pan, zoom) or by the viewport itself changing size. A new stack frame
+         no longer yanks the view: that was the single biggest source of
+         "the whole world moved when I pressed Step". */
+      // A brand new program starts from a blank scene; let that one be framed.
+      if (!scene.nodes.length) fittedBounds = null;
+      lastCull = culled;
       return { drawn: nodes.length, truncated, culled, total: scene.nodes.length, current: ceo };
     }
 
@@ -9150,21 +9419,18 @@ const CViz3D = (() => {
       if (df.op) {
         const badge = el('viz-flow-op');
         badge.textContent = df.op;
-        badge.style.transform = flat
-          ? 'translate(' + (ox - 15) + 'px,' + (oy - 15) + 'px)'
-          : 'translate3d(' + (ox - 15) + 'px,' + (oy - 15) + 'px,' + destNode.z + 'px)';
+        badge.style.transform = 'translate(' + (ox - 15) + 'px,' + (oy - 15) + 'px)';
+        badge.style.zIndex = '820';
         world.appendChild(badge); flowEls.push(badge);
       }
       const line = (x1, y1, z1, x2, y2, z2, cls) => {
         const d = el('viz-flow ' + cls);
-        const dx = x2 - x1, dy = y2 - y1, dz = z2 - z1;
-        const len = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1;
-        d.style.width = len + 'px';
-        d.style.transform = flat
-          ? 'translate(' + x1 + 'px,' + y1 + 'px) rotate(' + (Math.atan2(dy, dx) * 180 / Math.PI) + 'deg)'
-          : 'translate3d(' + x1 + 'px,' + y1 + 'px,' + z1 + 'px) rotateY(' +
-            (-Math.atan2(dz, dx) * 180 / Math.PI) + 'deg) rotateZ(' +
-            (Math.atan2(dy, Math.hypot(dx, dz)) * 180 / Math.PI) + 'deg)';
+        const ax = x1, ay = y1, bx = x2, by = y2;
+        const dx = bx - ax, dy = by - ay;
+        d.style.width = (Math.hypot(dx, dy) || 1) + 'px';
+        d.style.transform =
+          'translate(' + ax + 'px,' + ay + 'px) rotate(' + (Math.atan2(dy, dx) * 180 / Math.PI) + 'deg)';
+        d.style.zIndex = '810';
         world.appendChild(d); flowEls.push(d);
       };
       for (const { n } of srcNodes) {
@@ -9294,6 +9560,7 @@ const ui = {
   execMode: 'engine',      // 'engine' = CEngine history, 'trace' = real traced run
   view3d: false,           // 3D visualization open in the right pane
   dockH: 210,              // bottom dock height in px, learner-resizable
+  animSpeed: 1,            // THE speed: playback cadence and animation duration
 };
 
 /* Detail level drives the information hierarchy, and it is the main defence
@@ -9348,6 +9615,41 @@ function applyLevel() {
   document.body.classList.toggle('level-basic', ui.level === 'beginner');
   applyCollapsed();
 }
+/* ------------------------------- SPEED -------------------------------
+   One control, two consumers. Timing lives here so the toolbar, the animation
+   CSS and the 3D stage cannot disagree about how fast "2x" is. */
+function applyAnimSpeed() {
+  const s = ui.animSpeed || 1;
+  // Animation durations, for every layer that animates.
+  document.documentElement.style.setProperty('--anim', Math.round(420 / s) + 'ms');
+  if (typeof viz === 'object' && viz) {
+    viz.speed = s;
+    // The stage keeps owning --viz-anim on its own host: the visualization can
+    // then be tuned independently later without reaching into the document.
+    if (viz.stage) viz.stage.setSpeed(s);
+  }
+  const sel = $('#vizSpeed');
+  if (sel && sel.value !== String(s)) sel.value = String(s);
+}
+function buildSpeedControl() {
+  const sel = $('#vizSpeed');
+  if (!sel) return;
+  sel.innerHTML = CViz3D.SPEEDS.map(s =>
+    '<option value="' + s + '">' + s + 'x</option>').join('');
+  sel.value = String(ui.animSpeed || 1);
+  sel.addEventListener('change', () => setAnimSpeed(Number(sel.value) || 1));
+}
+function setAnimSpeed(s) {
+  if (CViz3D.SPEEDS.indexOf(s) < 0) return;
+  ui.animSpeed = s;
+  applyAnimSpeed();
+  saveUI();
+  // A run already in flight must pick up the new cadence immediately rather
+  // than finishing at the old one. togglePlay() rebuilds the interval, and
+  // pausePlay() has just cleared run.playing, so this restarts rather than stops.
+  if (run.playing) { pausePlay(); togglePlay(); }
+}
+
 /* Changing the detail level changes what is VISIBLE and nothing else: the
    execution position, the program state, the camera and every learner
    selection are deliberately untouched here. */
@@ -9381,6 +9683,7 @@ function saveUI() {
       memView: ui.memView, dockTab: ui.dockTab, dockCollapsed: ui.dockCollapsed, level: ui.level,
       explorerOpen: ui.explorerOpen, collapsed: ui.collapsed, watches: ui.watches,
       dockH: ui.dockH, srcExpanded: ui.srcExpanded, libTab: ui.libTab,
+      animSpeed: ui.animSpeed,
       view3d: (typeof viz === 'object' && viz) ? viz.open : false,
       viz3dFlat: (typeof viz === 'object' && viz) ? viz.flat : false,
     }));
@@ -9402,6 +9705,7 @@ function loadUI() {
     if (typeof o.dockCollapsed === 'boolean') ui.dockCollapsed = o.dockCollapsed;
     if (typeof o.explorerOpen === 'boolean') ui.explorerOpen = o.explorerOpen;
     if (typeof o.srcExpanded === 'boolean') ui.srcExpanded = o.srcExpanded;
+    if (typeof o.animSpeed === 'number' && CViz3D.SPEEDS.indexOf(o.animSpeed) >= 0) ui.animSpeed = o.animSpeed;
     if (o.libTab === 'files' || o.libTab === 'errors') ui.libTab = o.libTab;
     if (o.collapsed && typeof o.collapsed === 'object') ui.collapsed = o.collapsed;
     if (Array.isArray(o.watches)) ui.watches = o.watches.filter(x => typeof x === 'string').slice(0, 20);
@@ -9491,7 +9795,7 @@ const I18N = {
     'ts.workspace':'Build workspace:','ts.exe':'executable:',
     'ts.demoExpected':'demo','ts.demoExpectedLong':'This DEMO case is designed to fail.',
     'dock.trace':'Trace','panel.trace':'Trace','panel.trace.d':'What the real program did, step by step',
-    'lvl.basic':'Basic','lvl.medium':'Medium','lvl.deepBtn':'Deep',
+    'lvl.basic':'Basic','lvl.medium':'Medium','lvl.deepBtn':'Deep','viz.short':'Visual',
     'exec.last':'Last completed step',
     'lib.title':'Library','lib.files':'Exercises','lib.errors':'Memory errors',
     'lib.open':'Open the library','lib.close':'Close the library',
@@ -9519,7 +9823,7 @@ const I18N = {
     'mem.index':'Index','mem.addr':'Address','mem.hex':'Hex','mem.dec':'Decimal','mem.bin':'Binary',
     'mem.uninit':'not written yet','mem.clickHint':'Click a cell for details · hover for a quick look',
     'mem.close':'Close',
-    'viz.title':'3D Visualization','viz.open':'Open 3D visualization','viz.close':'Close',
+    'viz.title':'Spatial view','viz.open':'Open the spatial view','viz.close':'Close',
     'viz.flow':'Data flow','viz.lastValid':'last valid','viz.outside':'outside valid range',
     'viz.e.access':'Access','viz.e.address':'Address','viz.e.target':'Target','viz.e.index':'Index used',
     'viz.e.validIndex':'Valid indices','viz.e.validRange':'Valid memory','viz.e.unmapped':'no live allocation there',
@@ -9545,7 +9849,7 @@ const I18N = {
     'menu.view':'View','viz.v.source':'Source','viz.v.debugger':'Debugger','viz.v.memory':'Memory','viz.v.trace':'Trace',
     'viz.now':'Currently executing','viz.unknown':'unknown','viz.explain':'What is this?','viz.analogy':'Think of it like',
     'viz.legend':'Legend','viz.speed':'Animation speed','viz.fit':'Fit','viz.resetCam':'Reset camera',
-    'viz.mode3d':'3D','viz.mode2d':'2D','viz.truncated':'scene truncated',
+    'viz.truncated':'scene truncated',
     'viz.frame':'frame','viz.heap':'Heap','viz.globals':'Globals','viz.stack':'Stack',
     'viz.destroyed':'destroyed','viz.freed':'freed',
     'viz.emptyTitle':'Nothing is executing yet','viz.emptyBody':'Press Step, or load one of the visualization demos, and the scene will follow the program.',
@@ -9670,7 +9974,7 @@ const I18N = {
     'ts.workspace':'Répertoire de compilation :','ts.exe':'exécutable :',
     'ts.demoExpected':'démo','ts.demoExpectedLong':'Ce cas DÉMO est conçu pour échouer.',
     'dock.trace':'Trace','panel.trace':'Trace','panel.trace.d':'Ce que le vrai programme a fait, étape par étape',
-    'lvl.basic':'Basique','lvl.medium':'Moyen','lvl.deepBtn':'Approfondi',
+    'lvl.basic':'Basique','lvl.medium':'Moyen','lvl.deepBtn':'Approfondi','viz.short':'Visuel',
     'exec.last':'Dernière étape terminée',
     'lib.title':'Bibliothèque','lib.files':'Exercices','lib.errors':'Erreurs mémoire',
     'lib.open':'Ouvrir la bibliothèque','lib.close':'Fermer la bibliothèque',
@@ -9698,7 +10002,7 @@ const I18N = {
     'mem.index':'Indice','mem.addr':'Adresse','mem.hex':'Hex','mem.dec':'Décimal','mem.bin':'Binaire',
     'mem.uninit':'pas encore écrit','mem.clickHint':'Cliquez une case pour les détails · survolez pour un aperçu',
     'mem.close':'Fermer',
-    'viz.title':'Visualisation 3D','viz.open':'Ouvrir la visualisation 3D','viz.close':'Fermer',
+    'viz.title':'Vue spatiale','viz.open':'Ouvrir la vue spatiale','viz.close':'Fermer',
     'viz.flow':'Flux de données','viz.lastValid':'dernier valide','viz.outside':'hors de la plage valide',
     'viz.e.access':'Accès','viz.e.address':'Adresse','viz.e.target':'Cible','viz.e.index':'Indice utilisé',
     'viz.e.validIndex':'Indices valides','viz.e.validRange':'Mémoire valide','viz.e.unmapped':'aucune allocation vivante à cet endroit',
@@ -9724,7 +10028,7 @@ const I18N = {
     'menu.view':'Affichage','viz.v.source':'Source','viz.v.debugger':'Débogueur','viz.v.memory':'Mémoire','viz.v.trace':'Trace',
     'viz.now':'Exécution en cours','viz.unknown':'inconnu','viz.explain':'Qu’est-ce que c’est ?','viz.analogy':'Comme',
     'viz.legend':'Légende','viz.speed':'Vitesse d’animation','viz.fit':'Ajuster','viz.resetCam':'Réinitialiser la caméra',
-    'viz.mode3d':'3D','viz.mode2d':'2D','viz.truncated':'scène tronquée',
+    'viz.truncated':'scène tronquée',
     'viz.frame':'trame','viz.heap':'Tas','viz.globals':'Globales','viz.stack':'Pile',
     'viz.destroyed':'détruit','viz.freed':'libéré',
     'viz.emptyTitle':'Rien ne s’exécute encore','viz.emptyBody':'Appuyez sur Pas, ou chargez une démo de visualisation : la scène suivra le programme.',
@@ -10067,6 +10371,17 @@ function displaySource() {
   if (typeof val === 'object' && val && typeof val.viewSource === 'string') return val.viewSource;
   return currentSource();
 }
+/* Re-derive the gutter and the colours from the buffer while the learner types.
+   Coalesced into one animation frame so a fast typist repaints once per frame
+   rather than once per keystroke. */
+let srcRepaint = 0;
+function scheduleSourceRepaint() {
+  if (srcRepaint) return;
+  srcRepaint = requestAnimationFrame(() => {
+    srcRepaint = 0;
+    if (run.editing) renderSource(null);
+  });
+}
 function renderSource(currentLine) {
   // A traced line is marked distinctly: it is a line the REAL executable ran,
   // not a line the interpreter stepped through.
@@ -10091,10 +10406,32 @@ function renderSource(currentLine) {
     el.addEventListener('click', (e) => showLineActions(e, +el.dataset.line)));
   // Validation markers are painted on top of the freshly built lines.
   if (typeof decorateSourceDiagnostics === 'function') decorateSourceDiagnostics();
+  syncEditorMetrics();
   if (currentLine) {
     const el = view.querySelector('.codeline[data-line="' + currentLine + '"]');
     if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
+}
+
+/* Align the transparent textarea with the rendered code column.
+
+   Everything here is MEASURED from the view that was just painted — the gutter
+   width, the first line's top edge and the widest line — so the two layers stay
+   locked together even if the font, the theme or the gutter changes. Guessing
+   these numbers from the stylesheet is what makes overlay editors drift. */
+function syncEditorMetrics() {
+  const view = $('#sourceView'), ta = $('#sourceEdit'), box = $('#srcCode');
+  if (!view || !ta || !box) return;
+  const code = view.querySelector('.codeline .code');
+  if (!code) return;
+  const vr = view.getBoundingClientRect(), cr = code.getBoundingClientRect();
+  const gutter = Math.round(cr.left - vr.left);
+  ta.style.left = gutter + 'px';
+  ta.style.paddingTop = Math.round(cr.top - vr.top) + 'px';
+  // Sized to the content, never to the viewport: the ONE scroll container is
+  // .src-scroll, so the textarea must not grow a second scrollbar of its own.
+  ta.style.width = Math.max(0, view.scrollWidth - gutter) + 'px';
+  ta.style.height = view.scrollHeight + 'px';
 }
 function flashLine(n) {
   const el = $('#sourceView .codeline[data-line="' + n + '"]');
@@ -10180,9 +10517,12 @@ function loadExample(key) {
 }
 function switchToEditing() {
   $('#sourceEdit').style.display = 'block';
-  $('#sourceView').style.display = 'none';
   $('#btnEdit').classList.add('on');
+  document.body.classList.add('src-editing');
   run.editing = true;
+  // The view is derived from the buffer, so it has to be rebuilt from the text
+  // that is about to be edited rather than left showing the last run.
+  renderSource(null);
   // editing means we are back on the live buffer, not a pinned diagnostic snapshot
   if (typeof val === 'object' && val) val.viewSource = null;
   // Editing invalidates a loaded trace: it describes text that no longer matches
@@ -10198,8 +10538,8 @@ function switchToEditing() {
 }
 function switchToRunning() {
   $('#sourceEdit').style.display = 'none';
-  $('#sourceView').style.display = 'block';
   $('#btnEdit').classList.remove('on');
+  document.body.classList.remove('src-editing');
   run.editing = false;
 }
 
@@ -10359,7 +10699,10 @@ function doFirst() {
   if (run.history) goTo(0);
 }
 
-function speedMs() { return Math.round(1000 - ($('#speedSlider').value - 1) * 100); }
+// The Run cadence IS the speed control: 1x is 600ms per step, 5x is 120ms,
+// 0.25x is 2400ms. Same number the animations use, so a slow animation can
+// never be cut short by a fast step.
+function speedMs() { return Math.round(600 / (ui.animSpeed || 1)); }
 function togglePlay() {
   if (typeof traceActive === 'function' && traceActive()) { tracePlay(); return; }
   if (needsCompile()) { if (!startExecution()) return; }
@@ -13283,7 +13626,7 @@ function vizEnsureStage() {
       renderVizHud();
     },
   });
-  viz.stage.setSpeed(viz.speed);
+  viz.stage.setSpeed(ui.animSpeed || 1);
   return viz.stage;
 }
 
@@ -13422,13 +13765,9 @@ function renderVizHud() {
       '<span>' + esc(t(key)) + '</span>' + infoBtn(concept) + '</div>').join('') +
     '</div>';
 
-  /* ---- tools: camera + animation speed (animation only) ---- */
+  /* ---- tools: camera only. Speed is a single application-level control in
+         the header now, not a second one hidden at the bottom of the legend. ---- */
   h += '<div class="viz-tools">' +
-    '<span class="viz-cap-k">' + esc(t('viz.speed')) + infoBtn('step') + '</span>' +
-    '<select id="vizSpeed" aria-label="' + esc(t('viz.speed')) + '">' +
-      CViz3D.SPEEDS.map(s => '<option value="' + s + '"' + (s === viz.speed ? ' selected' : '') +
-        '>' + s + 'x</option>').join('') +
-    '</select>' +
     '<button id="vizPanL" title="' + esc(t('viz.pan')) + '">&#9664;</button>' +
     '<button id="vizPanR" title="' + esc(t('viz.pan')) + '">&#9654;</button>' +
     '<button id="vizPanU" title="' + esc(t('viz.pan')) + '">&#9650;</button>' +
@@ -13437,8 +13776,7 @@ function renderVizHud() {
     '<button id="vizZoomIn" title="' + esc(t('viz.zoomIn')) + '">+</button>' +
     '<button id="vizFit">' + esc(t('viz.fit')) + '</button>' +
     '<button id="vizResetCam">' + esc(t('viz.resetCam')) + '</button>' +
-    '<button id="vizFlat" aria-pressed="' + (viz.flat ? 'true' : 'false') + '">' +
-      esc(viz.flat ? t('viz.mode2d') : t('viz.mode3d')) + '</button>' +
+
     '<button id="vizClose">' + esc(t('viz.close')) + '</button>' +
     (viz.truncated ? '<span class="viz-cap-k">' + esc(t('viz.truncated')) + '</span>' : '') +
     '</div>';
@@ -13620,25 +13958,14 @@ function wireVizHud() {
   bind('vizDetailX', () => { viz.detail = null; if (viz.stage) viz.stage.select(null); renderVizHud(); });
   bind('vizStep', () => doStep());
   bind('vizLoadDemo', () => loadVizDemo());
-  bind('vizFlat', () => {
-    viz.flat = !viz.flat;
-    disposeViz();          // the stage is rebuilt in the other projection
-    vizEnsureStage();
-    renderViz();
-    if (viz.stage) viz.stage.frameAll();
-  });
+  // The 2D/3D switch is gone: the visualization is always the 2.5D plane.
   const head = $('#vizLegendHead');
   if (head) {
     const go = () => { viz.legendOpen = !viz.legendOpen; renderVizHud(); };
     head.addEventListener('click', go);
     head.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
   }
-  const sp = $('#vizSpeed');
-  if (sp) sp.addEventListener('change', () => {
-    // Animation speed only — execution semantics are untouched.
-    viz.speed = Number(sp.value) || 1;
-    if (viz.stage) viz.stage.setSpeed(viz.speed);
-  });
+  // The speed select lives in the application header and is wired once at boot.
   wireInfoButtons($('#vizHud'));
 }
 
@@ -14261,23 +14588,21 @@ function applySrcExpanded() {
     b.title = lbl; b.setAttribute('aria-label', lbl);
   }
 }
-/* Expanding takes back every piece of the workspace the editor is not using:
-   the debugger column, the timeline body and the bottom dock. All three are
-   restored exactly as they were — including a dock the learner had already
-   collapsed, or a timeline they had already closed. */
+/* Expanding is a WORKSPACE layout change, not a full-screen mode. The editor
+   takes the debugger column's width, and the timeline's height inside its own
+   pane. Deliberately, the dock is left alone: collapsing it too was what made
+   the old behaviour feel like the source had swallowed the application. The
+   header, the rail, the dock and the status bar all stay put, and restoring
+   puts the timeline back exactly as the learner had left it. */
 function toggleSrcExpand() {
   ui.srcExpanded = !ui.srcExpanded;
   if (ui.srcExpanded) {
     ui._tlWasCollapsed = !!ui.collapsed.panelTimeline;
-    ui._dockWasCollapsed = !!ui.dockCollapsed;
     ui.collapsed.panelTimeline = true;
-    ui.dockCollapsed = true;
   } else {
     ui.collapsed.panelTimeline = !!ui._tlWasCollapsed;
-    ui.dockCollapsed = !!ui._dockWasCollapsed;
   }
   applyCollapsed();
-  applyDock();
   applySrcExpanded();
   saveUI();
   if (typeof drawTimelineWindow === 'function') drawTimelineWindow();
@@ -14287,6 +14612,9 @@ function toggleSrcExpand() {
   if (!ui.srcExpanded && typeof viz === 'object' && viz && viz.stage && viz.open) {
     requestAnimationFrame(() => { if (viz.stage && viz.stage.refitIfClean) viz.stage.refitIfClean(); });
   }
+  // The transparent editor overlay is positioned from measurements, and the
+  // pane it is measured against just changed width.
+  requestAnimationFrame(() => { if (typeof syncEditorMetrics === 'function') syncEditorMetrics(); });
 }
 
 /* ---- Tab / Shift+Tab in the C editor ----
@@ -14299,6 +14627,11 @@ const INDENT = '\t';
 function wireEditorKeys() {
   const ta = $('#sourceEdit');
   if (!ta) return;
+  // Every path that changes the buffer — typing, paste, undo, redo, the Tab
+  // handler below — ends in an input event, so one listener keeps the gutter
+  // and the colours correct for all of them.
+  ta.addEventListener('input', scheduleSourceRepaint);
+  ta.addEventListener('scroll', () => { ta.scrollTop = 0; ta.scrollLeft = 0; });
   ta.addEventListener('keydown', (e) => {
     if (e.key !== 'Tab' || e.ctrlKey || e.metaKey || e.altKey) return;
     e.preventDefault();                       // focus stays in the editor
@@ -14389,6 +14722,8 @@ window.addEventListener('DOMContentLoaded', () => {
   applyDock();
   applySrcExpanded();
   applyLibrary();
+  buildSpeedControl();
+  applyAnimSpeed();
   wireEditorKeys();
   applyI18n();
   initDivider();
@@ -14468,6 +14803,7 @@ window.addEventListener('DOMContentLoaded', () => {
   })();
 
   $('#rail3d').addEventListener('click', toggleViz);
+  $('#btnViz').addEventListener('click', toggleViz);
   $('#railDock').addEventListener('click', toggleDock);
   $('#railHelp').addEventListener('click', showShortcuts);
 
@@ -14612,7 +14948,10 @@ window.addEventListener('DOMContentLoaded', () => {
     if (typeof hideMemTip === 'function') hideMemTip();
   });
   window.addEventListener('scroll', () => { if (typeof closeInfoPop === 'function') closeInfoPop(); }, true);
-  window.addEventListener('resize', () => { checkAutoStack(); applyDockH(); drawTimelineWindow(); });
+  window.addEventListener('resize', () => {
+    checkAutoStack(); applyDockH(); drawTimelineWindow();
+    if (typeof syncEditorMetrics === 'function') syncEditorMetrics();
+  });
   updateStatus();
 });
 

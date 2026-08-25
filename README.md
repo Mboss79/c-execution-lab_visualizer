@@ -14,7 +14,10 @@ readable 3D diagram.
 |---|---|
 | **Debugger** | Step / Prev / Run / To end / Reset, breakpoints, and a virtualized timeline you can travel through. Going back does not re-run anything: history is recorded. |
 | **Memory model** | An educational simulated 64-bit model (LP64-like, little-endian). Byte-level view, real addresses, alignment, pointer arithmetic scaled by pointee size. |
-| **3D visualization** | Variables, arrays, pointers, stack frames and heap blocks as a stable, readable diagram. The current execution object is highlighted; operand data flow is drawn for the step being executed. |
+| **Spatial view (2.5D)** | Variables, arrays, pointers, stack frames and heap blocks as a stable, readable diagram on a flat plane. Depth is DRAWN — layered offsets, shadow, elevation — never projected, so a rectangle is the same size wherever it sits and every stack frame matches every other one. Pan, zoom and fit; no camera to orbit, and execution never re-frames the view. |
+| **One header** | Brand, menus and the whole execution toolbar on a single 46px row. The command palette, language and theme live in the left rail. |
+| **One speed control** | 0.25x / 0.5x / 1x / 2x / 5x, driving BOTH the Run cadence and every animation duration. |
+| **Editor** | Line numbers and syntax colours in edit mode as well as run mode — one buffer, one derived view. Tab / Shift+Tab indent, native undo/redo, breakpoint gutter clickable while editing. |
 | **Memory Error Lab** | Twelve ready-made broken programs — array overflow and underflow, invalid read and write, NULL dereference, invalid access, use-after-free, use-after-return, double free, invalid free, stack overflow, uninitialised read. Pick one, press Step, and watch it fail in the ordinary debugger with the ordinary visualization. |
 | **Memory errors** | Every fault above reports the address, the access kind, the attempted index, the valid range and the failing line — all from the engine. The attempted access is drawn OUTSIDE the object, with no value in it, because there is no such storage. |
 | **Detail levels** | **Basic** (call stack, variables, memory, pointers), **Medium** (+ RAM map), **Deep** (everything: timeline, trace, watch, conceptual CPU view). Switching level changes only what is shown — never the execution position, the program state or the camera. |
@@ -69,7 +72,7 @@ WSL).
 ```bash
 cd c-lab-tests
 npm install          # puppeteer-core only
-npm test             # all 12 suites
+npm test             # all 13 suites
 ```
 
 | Suite | Checks | What it covers |
@@ -86,7 +89,8 @@ npm test             # all 12 suites
 | `phase9.test.js` | 46 | execution emphasis, camera, workspace |
 | `phase10.test.js` | 46 | operand flow, memory errors, scale |
 | `phase11.test.js` | 206 | workspace UX, detail levels, memory popups, the Error Lab |
-| **Total** | **994** | |
+| `phase12.test.js` | 89 | one header, the editor, expand, speed, 2.5D |
+| **Total** | **1083** | |
 
 The browser suites drive real Chrome; the tool suites start and stop the bridge
 themselves so the unavailable path is exercised honestly.
@@ -171,9 +175,17 @@ These are deliberate and documented rather than hidden:
   addresses for assignments and for side-effect-free reads in conditions; a
   read whose sub-expression has side effects is not instrumented, because
   logging it would change what the program does.
-- **The 3D scene paints what is visible.** Off-screen objects are culled and a
-  drawn-node budget applies, so very large scenes stay responsive rather than
-  rendering everything at once.
+- **The spatial view paints what is visible.** Off-screen objects are culled and
+  a drawn-node budget applies, so very large scenes stay responsive rather than
+  rendering everything at once. Because execution never re-frames the camera,
+  a scene that grows well past the viewport stays where the learner left it —
+  Fit and Reset camera are one click away in the view controls. The one
+  exception is a scene that would be almost entirely off-screen, which is
+  framed once so the learner is never looking at an empty plane.
+- **All stack frames share one size.** Every frame on screen is drawn at the
+  largest size any of them needs, so they read as a stack. That shared size can
+  still change between steps if a frame declares an unusually wide array — but
+  all frames change together, and never because of depth.
 - **The bridge is controlled local execution, not a sandbox.** It restricts what
   can be run, but it runs real programs on your machine.
 

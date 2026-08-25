@@ -17,7 +17,8 @@
     "test:final": "node phase9.test.js",
     "test:phase9": "node phase10.test.js",
     "shots": "node shots.js",
-    "test:phase10": "node phase11.test.js"
+    "test:phase10": "node phase11.test.js",
+    "test:phase11": "node phase12.test.js"
   },
   "dependencies": {
     "puppeteer-core": "^25.8.0"

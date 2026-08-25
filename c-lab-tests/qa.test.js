@@ -153,7 +153,10 @@ function check(name, ok, detail) {
   await page.evaluate((kk) => loadExample(kk), 'ex3'); await new Promise(r => setTimeout(r, 100));
   await start();
   await page.evaluate(() => toggleBreakpoint(7));
-  await page.evaluate(() => { $('#speedSlider').value = 10; });
+  // Phase 11 merged the playback slider and the animation-speed select into one
+  // control, so "make Run fast" is now setAnimSpeed(5). Setup only — every
+  // assertion below is unchanged.
+  await page.evaluate(() => setAnimSpeed(5));
   await page.click('#btnRun');
   await new Promise(r => setTimeout(r, 1800));
   const bpStop = await page.evaluate(() => ({ playing: run.playing, line: run.history.steps[run.index].line }));

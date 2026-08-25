@@ -120,7 +120,10 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
   check('First jumps to step 1', await page.evaluate(() => run.index) === 0);
   await page.click('#btnStep'); await sleep(60);
   check('Step moves forward', await page.evaluate(() => run.index) === 1);
-  await page.evaluate(() => { document.querySelector('#speedSlider').value = 10; });
+  // Phase 11 merged the playback slider and the animation-speed select into one
+  // control, so "make Run fast" is now setAnimSpeed(5). Setup only — every
+  // assertion below is unchanged.
+  await page.evaluate(() => setAnimSpeed(5));
   await page.click('#btnRun'); await sleep(400);
   check('Run starts playing', await page.evaluate(() => run.playing));
   await page.click('#btnRun'); await sleep(150);

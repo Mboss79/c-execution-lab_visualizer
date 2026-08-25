@@ -733,12 +733,13 @@ function shippedLessons() {
   });
   check('pan moves the camera and only the camera',
         panRes.b.panX !== panRes.a.panX && panRes.b.panY !== panRes.a.panY &&
-        panRes.b.zoom === panRes.a.zoom && panRes.b.tiltX === panRes.a.tiltX &&
-        panRes.b.tiltY === panRes.a.tiltY,
+        panRes.b.zoom === panRes.a.zoom,
         JSON.stringify(panRes));
-  check('the fixed tilt is a constant, not something a step or a pan can change',
-        panRes.a.tiltX === panRes.b.tiltX && panRes.a.tiltY === panRes.b.tiltY,
-        'tilt ' + panRes.a.tiltX + '/' + panRes.a.tiltY);
+  // Phase 11: the scene is a plane, so there is no tilt to hold constant. The
+  // stronger property is that no orientation exists to be changed at all.
+  check('the camera has no orientation for a step or a pan to change',
+        Object.keys(panRes.b).sort().join(',') === 'panX,panY,zoom',
+        Object.keys(panRes.b).join(','));
   check('zoom changes scale without rotating anything',
         await page.evaluate(() => {
           const a = viz.stage.getCamera();

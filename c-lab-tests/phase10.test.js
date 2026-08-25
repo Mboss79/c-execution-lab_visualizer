@@ -397,13 +397,20 @@ const TRSTR  = ['int\tmain(void)', '{', '\tchar\tstr[6];', '\tint\ti;', '',
     const t1 = performance.now();
     viz.stage.fit();
     const fit = performance.now() - t1;
+    // Since Phase 11 the camera is framed once and then belongs to the learner,
+    // so a scene swapped in under a camera the previous iteration panned and
+    // zoomed is legitimately off-view. The DOM count is read after fit() —
+    // which this benchmark already performs — so it measures what it was always
+    // meant to measure: how many nodes a FRAMED scene of this size builds.
+    // The assertions below are unchanged.
+    const dom = document.querySelectorAll('#vizHost .viz-node').length;
     const t2 = performance.now();
     viz.stage.panBy(40, 20);
     const pan = performance.now() - t2;
     const t3 = performance.now();
     viz.stage.zoomBy(1.3);
     const zoom = performance.now() - t3;
-    return { n: N, drawn: r.drawn, culled: r.culled, dom: document.querySelectorAll('#vizHost .viz-node').length,
+    return { n: N, drawn: r.drawn, culled: r.culled, dom,
              render: Math.round(render), fit: Math.round(fit), pan: Math.round(pan), zoom: Math.round(zoom) };
   }, n);
 
@@ -434,9 +441,13 @@ const TRSTR  = ['int\tmain(void)', '{', '\tchar\tstr[6];', '\tint\ti;', '',
     const full = !document.querySelector('#vizHost').classList.contains('viz-lod');
     return lod && full;
   }));
+  // Phase 11 replaced the tilted perspective world with a 2.5D plane, so this
+  // now forbids ALL rotation and 3D transforms instead of pinning two angles.
   check('[39] the camera still cannot rotate at scale', await page.evaluate(() => {
     const tr = document.querySelector('#vizHost .viz-world').style.transform;
-    return /rotateX\(9deg\) rotateY\(-13deg\)/.test(tr);
+    const c = viz.stage.getCamera();
+    return !/rotate|translate3d|perspective|matrix3d/.test(tr) &&
+           !('tiltX' in c) && !('yaw' in c) && !('pitch' in c);
   }));
   await page.evaluate(() => { renderViz(); });
 
