@@ -194,7 +194,13 @@ kbd{
 .rail-btn:hover{color:var(--text);background:var(--surface-3);}
 .rail-btn.active{color:var(--execution);background:var(--execution-dim);border-color:var(--execution);}
 .rail-btn.active::before{content:'';position:absolute;left:-8px;top:6px;bottom:6px;width:2px;background:var(--execution);border-radius:2px;}
+/* The rail is ONE continuous navigation group at the shared gap. The old
+   .rail-sp{flex:1} absorbed all spare height and split it in two; it is gone.
+   The only separation left is a single deliberate rule above the application
+   toggles, set on the group container so spacing stays deterministic rather
+   than being nudged icon by icon. */
 .rail-sp{flex:1;}
+.rail-group{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
 
 /* position:relative makes this the containing block for #dashRoot/#labRoot,
    which is how a full-screen view covers the work area WITHOUT covering the
@@ -3756,11 +3762,6 @@ html[data-theme=light] .viz-node.vz-frame::after{
   padding: 16px 17px; font-size: 12.5px; color: var(--text-faint); line-height: 1.6;
 }
 
-.dash .dash-colophon {
-  margin: 16px 0 0; font-size: 11.5px; color: var(--text-faint);
-  line-height: 1.65; max-width: 640px;
-}
-.dash .dash-colophon b { color: var(--text-muted); font-weight: 600; }
 
 /* Focus must stay visible on every dashboard control: several of these are the
    only route to a whole area of the app. */
@@ -3774,6 +3775,30 @@ html[data-theme=light] .viz-node.vz-frame::after{
   .dash .dash-inner { padding: 24px 16px 48px; }
   .dash .dash-cta .dbtn { flex: 1 1 auto; }
 }
+
+/* A quote and a signature close the page. Both stay quiet: small type, muted
+   colour, no card, no decoration competing with the sections above. */
+.dash .dash-quote {
+  margin: 34px 0 0; padding: 0 0 0 15px;
+  border-left: 2px solid var(--border);
+  max-width: 620px;
+}
+.dash .dash-quote blockquote {
+  margin: 0; font-size: 13px; line-height: 1.7; color: var(--text-muted);
+  font-style: italic;
+}
+.dash .dash-quote figcaption {
+  margin-top: 7px; font-size: 11px; color: var(--text-faint); font-style: normal;
+}
+.dash .dash-sign {
+  margin-top: 30px; padding-top: 16px; border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: flex-end; gap: 1px;
+}
+.dash .dash-sign .ds-user {
+  font-family: var(--mono); font-size: 11px; color: var(--text-faint); letter-spacing: .02em;
+}
+.dash .dash-sign .ds-name { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+
 /* ==== HOMECSS END ==== */
 </style>
 </head>
@@ -3790,6 +3815,7 @@ html[data-theme=light] .viz-node.vz-frame::after{
     <div class="brand"><span class="mark" aria-hidden="true"></span><span class="title">C EXECUTION LAB</span></div>
     <nav class="menubar" aria-label="Main menu">
       <button class="menu-btn" id="mProject" aria-haspopup="true" aria-expanded="false" data-i18n="menu.project">Project</button>
+      <button class="menu-btn" id="mExercises" aria-haspopup="true" aria-expanded="false" data-i18n="menu.exercises">Exercises</button>
       <button class="menu-btn" id="mRun"     aria-haspopup="true" aria-expanded="false" data-i18n="menu.run">Run</button>
       <button class="menu-btn" id="mDebug"   aria-haspopup="true" aria-expanded="false" data-i18n="menu.debug">Debug</button>
       <button class="menu-btn" id="mView"    aria-haspopup="true" aria-expanded="false" data-i18n="menu.view">View</button>
@@ -3843,10 +3869,6 @@ html[data-theme=light] .viz-node.vz-frame::after{
       <button class="rail-btn" id="railLab" title="Labs — ASCII, types, memory, pointers, functions (Ctrl+2)" aria-label="Open the labs">⌗</button>
       <button class="rail-btn" id="railExplorer" title="Exercises and memory-error lessons (Ctrl+B)" aria-label="Open the library" aria-pressed="false">☰</button>
       <button class="rail-btn" id="railErrLab" title="Memory Error Lab" aria-label="Open the memory error lab" aria-pressed="false">⚠</button>
-      <!-- The flexible gap belongs HERE: between where you can go and what you
-           can toggle. Before, it sat after the second button and split the
-           destinations in half. -->
-      <div class="rail-sp"></div>
       <button class="rail-btn" id="rail3d"      title="3D visualization (V)" aria-label="3D visualization" aria-pressed="false">◈</button>
       <button class="rail-btn" id="railDock"     title="Toggle bottom dock (Ctrl+`)" aria-label="Toggle bottom dock">▬</button>
       <button class="rail-btn" id="railHelp"     title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
@@ -12253,7 +12275,7 @@ function loadUI() {
    engine's language — translating them here would fork the source of truth. */
 const I18N = {
   en: {
-    'menu.project':'Project','menu.run':'Run','menu.debug':'Debug','menu.learn':'Learn',
+    'menu.project':'Project','menu.exercises':'Exercises','menu.run':'Run','menu.debug':'Debug','menu.learn':'Learn',
     'ctl.first':'First','ctl.prev':'Prev','ctl.step':'Step','ctl.run':'Run','ctl.end':'To end','ctl.reset':'Reset','ctl.speed':'Speed','ctl.detail':'Detail',
     'mode.render':'Rendering every step','mode.fast':'Fast execution','mode.done':'Finished','mode.err':'Stopped','mode.idle':'Not started','mode.paused':'Paused',
     'panel.project':'Project','panel.project.d':'Exercises and source files',
@@ -12432,7 +12454,7 @@ const I18N = {
     'tr.ev.FUNCTION_RETURN':'Function return','tr.ev.PROGRAM_END':'Program end','tr.ev.ERROR':'Error',
   },
   fr: {
-    'menu.project':'Projet','menu.run':'Exécuter','menu.debug':'Déboguer','menu.learn':'Apprendre',
+    'menu.project':'Projet','menu.exercises':'Exercices','menu.run':'Exécuter','menu.debug':'Déboguer','menu.learn':'Apprendre',
     'ctl.first':'Début','ctl.prev':'Préc.','ctl.step':'Pas','ctl.run':'Exécuter','ctl.end':'À la fin','ctl.reset':'Réinit.','ctl.speed':'Vitesse','ctl.detail':'Détail',
     'mode.render':'Rendu de chaque étape','mode.fast':'Exécution rapide','mode.done':'Terminé','mode.err':'Arrêté','mode.idle':'Non démarré','mode.paused':'En pause',
     'panel.project':'Projet','panel.project.d':'Exercices et fichiers source',
@@ -14582,6 +14604,28 @@ const DASH_LAB_DESC = {
    what stops the dashboard advertising features that were never built, and (as
    the audit found) features that WERE built but stayed marked "coming next"
    five phases later. Plain typeof guards: this project does not use eval. */
+/* A small curated set. Each attribution is to the person who demonstrably wrote
+   the line, in the work named beside it — an attribution shown is an
+   attribution that has to be right. */
+const DASH_QUOTES = [
+  { text:'Programs must be written for people to read, and only incidentally for machines to execute.',
+    who:'Harold Abelson, Structure and Interpretation of Computer Programs' },
+  { text:'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
+    who:'Martin Fowler, Refactoring' },
+  { text:'Controlling complexity is the essence of computer programming.',
+    who:'Brian Kernighan, Software Tools' },
+  { text:'C is quirky, flawed, and an enormous success.',
+    who:'Dennis Ritchie, The Development of the C Language' },
+  { text:'Data dominates. If you have chosen the right data structures and organized things well, the algorithms will almost always be self-evident.',
+    who:'Rob Pike, Notes on Programming in C' },
+];
+/* Rotates by the day, so the page is stable within a session and testable: no
+   timer, no randomness, and the same day always yields the same quote. */
+function dashQuote(day) {
+  const d = day == null ? Math.floor(Date.now() / 86400000) : day;
+  return DASH_QUOTES[((d % DASH_QUOTES.length) + DASH_QUOTES.length) % DASH_QUOTES.length];
+}
+
 function renderDashboard() {
   const labs = (typeof LAB_TABS !== 'undefined') ? LAB_TABS : [];
   const labById = {};
@@ -14600,28 +14644,6 @@ function renderDashboard() {
       '<button class="dbtn primary" id="dashStart">Open the Workspace</button>' +
       (labs.length ? '<button class="dbtn" id="dashLabs">Explore the Labs</button>' : '') +
     '</div></header>';
-
-  /* ---- Continue: only what genuinely happened ---- */
-  const lastKey = ui.lastExample && EXAMPLES[ui.lastExample] ? ui.lastExample : null;
-  const lastTab = ui.lastLabTab && labById[ui.lastLabTab] ? ui.lastLabTab : null;
-  h += dashSec('Continue');
-  if (!lastKey && !lastTab) {
-    h += '<div class="dash-empty">No recent activity yet. Open an exercise or a lab and ' +
-      'this is where you will pick it back up.</div>';
-  } else {
-    h += '<div class="dash-grid">';
-    if (lastKey) h += '<button class="dcard primary" data-open="' + esc(lastKey) + '">' +
-      '<div class="dc-top"><span class="dc-ico" aria-hidden="true">▶</span>' +
-      '<span class="dc-title">' + esc(EXAMPLES[lastKey].label) + '</span></div>' +
-      '<div class="dc-desc">Back to this exercise in the workspace.</div>' +
-      '<div class="dc-meta">' + esc(fileNameFor(lastKey)) + '</div></button>';
-    if (lastTab) h += '<button class="dcard" data-lab="' + esc(lastTab) + '">' +
-      '<div class="dc-top"><span class="dc-ico" aria-hidden="true">⌗</span>' +
-      '<span class="dc-title">' + esc(labById[lastTab].label) + '</span></div>' +
-      '<div class="dc-desc">Back to this lab.</div></button>';
-    h += '</div>';
-  }
-  h += '</section>';
 
   /* ---- Labs: the half of the product Home never mentioned ---- */
   if (labs.length) {
@@ -14647,21 +14669,6 @@ function renderDashboard() {
       '</div></div>';
     h += '</section>';
   }
-
-  /* ---- Exercises: unchanged, it already worked ---- */
-  h += dashSec('Exercises');
-  for (const g of GROUPS) {
-    h += '<div class="dash-sub"><h3 class="dash-sub-h">' + esc(g.icon + '  ' + g.name) + '</h3><div class="ex-list">';
-    for (const k of g.keys) {
-      const ex = EXAMPLES[k];
-      if (!ex) continue;
-      h += '<button class="ex-row" data-open="' + k + '"><span class="er-i" aria-hidden="true">·</span>' +
-        '<span class="er-n">' + esc(fileNameFor(k)) + '</span>' +
-        '<span class="er-d">' + esc(ex.label) + '</span></button>';
-    }
-    h += '</div></div>';
-  }
-  h += '</section>';
 
   /* ---- Tools: every one verified to exist before it is drawn ---- */
   const tools = [
@@ -14693,9 +14700,14 @@ function renderDashboard() {
       '<span class="dc-title">Keyboard shortcuts</span></div>' +
       '<div class="dc-desc">Every view and control has one.</div></button>' +
     '</div>' +
-    '<p class="dash-colophon">Built by <b>mbousebe</b> (Mboss) for 1337 / 42 students. ' +
-    'Not affiliated with 1337 or 42; the norm, compiler and test runners here are ' +
-    'educational and are not the official tooling.</p></section>';
+    '</section>';
+
+  /* A quote and a signature close the page. Both are quiet on purpose. */
+  const q = dashQuote();
+  h += '<figure class="dash-quote"><blockquote>' + esc(q.text) + '</blockquote>' +
+    '<figcaption>' + esc(q.who) + '</figcaption></figure>' +
+    '<div class="dash-sign"><span class="ds-user">mbousebe</span>' +
+    '<span class="ds-name">Mboss</span></div>';
 
   h += '</div></div>';
   $('#dashRoot').innerHTML = h;
@@ -14710,10 +14722,9 @@ function renderDashboard() {
     showWorkspace(); setDockTab(x.dataset.ddock);
   }));
   const start = $('#dashStart');
-  if (start) start.addEventListener('click', () => {
-    if (ui.lastExample && EXAMPLES[ui.lastExample]) loadExample(ui.lastExample);
-    else showWorkspace();
-  });
+  // Opens the workspace as it stands. It deliberately does not resume one
+  // exercise: Home represents the whole laboratory, not a single path through it.
+  if (start) start.addEventListener('click', showWorkspace);
   const dl = $('#dashLabs');
   if (dl) dl.addEventListener('click', () => openLabTab(ui.lastLabTab || (LAB_TABS[0] && LAB_TABS[0].id)));
   const dm = $('#dashModel');
@@ -14955,6 +14966,21 @@ const MENUS = {
       a:() => openLabTab(ui.lastLabTab || null) },
     { n:t('errlab.title'), ico:'⚠', a:() => openLibrary('errors') },
              { n:'Dashboard', ico:'⌂', k:'Ctrl+0', a: showDashboard }]),
+  /* Exercises: a header destination that routes to the catalog the app already
+     has (the explorer tree). Built from GROUPS/EXAMPLES, so nothing is
+     duplicated and future C00–C07 groups appear here automatically. */
+  mExercises: () => {
+    const items = [{ n: t('lib.open') + ' — the full catalog', ico:'☰', k:'Ctrl+B',
+                     a:() => openLibrary('files') }, '-'];
+    for (const g of GROUPS) {
+      items.push({ n: g.icon + '  ' + g.name, ico:'', header:true, disabled:true });
+      for (const k of g.keys) {
+        const ex = EXAMPLES[k];
+        if (ex) items.push({ n: fileNameFor(k) + ' — ' + ex.label, ico:'·', a:() => loadExample(k) });
+      }
+    }
+    return items;
+  },
   mRun: () => [
     { n:'Step', ico:'▶', k:'Space', a:doStep },
     { n:'Run / Pause', ico:'▶▶', k:'Enter', a:togglePlay },
