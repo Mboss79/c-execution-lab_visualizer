@@ -2789,6 +2789,149 @@ html[data-theme=light] .viz-node.vz-frame::after{
   .fn-cols{grid-template-columns:1fr;}
   .fn-anat-frag{min-width:0;}
 }
+
+/* ==================================================================
+   PHASE 7.5 — the C03 string-function project.
+   Two visual jobs: make the three families obvious at a glance, and
+   make a byte that CHANGED impossible to miss, because "the
+   destination was modified" is the fact half these functions turn on.
+   ================================================================== */
+
+.c3-block{
+  border:1px solid var(--border);border-radius:9px;padding:13px 14px;margin-bottom:14px;
+  background:var(--surface-2);
+}
+.c3-block-h{font-size:10px;letter-spacing:.13em;color:var(--text-faint);margin-bottom:11px;text-transform:uppercase;}
+.c3-note{font-size:10.5px;line-height:1.65;color:var(--text-faint);margin-top:11px;}
+.c3-note b{color:var(--text);}
+.c3-empty{font-size:10.5px;color:var(--text-faint);font-style:italic;}
+.c3-sub-h{font-size:9px;letter-spacing:.12em;color:var(--text-faint);margin:13px 0 7px;}
+
+/* --- families --- */
+.c3-tree{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:11px;}
+.c3-fam{border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--surface);}
+.c3-fam-h{font-size:10px;letter-spacing:.13em;margin-bottom:5px;}
+.c3-fam.c3-compare{border-color:var(--memory);} .c3-fam.c3-compare .c3-fam-h{color:var(--memory);}
+.c3-fam.c3-concat{border-color:var(--execution);} .c3-fam.c3-concat .c3-fam-h{color:var(--execution);}
+.c3-fam.c3-search{border-color:var(--heap);} .c3-fam.c3-search .c3-fam-h{color:var(--heap);}
+.c3-fam-b{font-size:10.5px;line-height:1.6;color:var(--text-faint);margin-bottom:9px;}
+.c3-fam-fns{display:flex;gap:5px;flex-wrap:wrap;}
+.c3-fn{
+  background:var(--surface-2);border:1px solid var(--border);border-radius:999px;color:var(--text-faint);
+  font-family:var(--mono);font-size:10.5px;padding:3px 10px;cursor:pointer;transition:border-color .15s,color .15s;
+}
+.c3-fn:hover{color:var(--text);}
+.c3-fn.on{border-color:var(--memory);color:var(--memory);}
+
+/* --- matrix --- */
+.c3-table td{font-size:10.5px;vertical-align:top;}
+.c3-table th{white-space:nowrap;}
+.c3-yes{color:var(--execution);font-weight:600;}
+.c3-no{color:var(--text-faint);}
+
+/* --- stepper --- */
+.c3-open{display:flex;align-items:center;gap:10px;margin-bottom:11px;flex-wrap:wrap;}
+.c3-open-n{font-size:10px;color:var(--text-faint);}
+.c3-two{display:grid;grid-template-columns:minmax(260px,1.1fr) minmax(280px,1fr);gap:12px;}
+.c3-src{
+  font-size:11px;line-height:1.55;background:var(--surface);border:1px solid var(--border);
+  border-radius:6px;padding:9px 0;margin:0;max-height:420px;overflow:auto;
+}
+.c3-srcline{display:block;padding:0 9px;color:var(--text-faint);white-space:pre;}
+.c3-srcline.on{background:var(--execution-dim);color:var(--text);box-shadow:inset 2px 0 0 var(--execution);}
+.c3-scrub{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:9px;}
+.c3-desc{font-size:10.5px;line-height:1.6;color:var(--text-faint);margin-bottom:6px;}
+
+.c3-ptrs{display:flex;flex-direction:column;gap:4px;}
+.c3-ptr{
+  display:flex;align-items:baseline;gap:7px;border:1px solid var(--border);border-radius:6px;
+  padding:5px 9px;background:var(--surface);font-size:10.5px;flex-wrap:wrap;
+}
+.c3-ptr.bad{border-color:var(--error);}
+.c3-ptr-n{color:var(--memory);}
+.c3-ptr-arr{color:var(--text-faint);}
+.c3-ptr-t{color:var(--text);}
+.c3-ptr-in{font-size:9.5px;color:var(--text-faint);}
+.c3-ptr-v{margin-left:auto;color:var(--heap);}
+
+/* --- buffers: the byte view that carries the lesson --- */
+.c3-bufs{display:flex;flex-direction:column;gap:9px;}
+.c3-buf{border:1px solid var(--border);border-radius:7px;padding:8px 9px;background:var(--surface);}
+.c3-buf-h{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;}
+.c3-buf-h b{font-size:11.5px;}
+.c3-buf-t{font-size:9.5px;color:var(--text-faint);}
+.c3-buf-a{font-size:9.5px;color:var(--text-faint);margin-left:auto;}
+.c3-cells{display:flex;gap:3px;flex-wrap:wrap;}
+.c3-cell{
+  display:flex;flex-direction:column;align-items:center;gap:1px;min-width:26px;
+  border:1px solid var(--border);border-radius:4px;padding:3px 4px;background:var(--surface-2);
+  transition:border-color .2s,background .2s;
+}
+.c3-cell-i{font-size:8px;color:var(--text-faint);}
+.c3-cell-c{font-size:12px;color:var(--text);}
+.c3-cell-v{font-size:8.5px;color:var(--text-faint);}
+.c3-cell.nul{border-style:dashed;}
+.c3-cell.nul .c3-cell-c{color:var(--error);}
+.c3-cell.un{opacity:.45;}
+.c3-cell.hit{border-color:var(--execution);background:var(--execution-dim);}
+.c3-cell.hit .c3-cell-c{color:var(--execution);font-weight:700;}
+
+.c3-result{
+  margin-top:12px;padding:9px 11px;border:1px solid var(--memory);border-radius:7px;
+  background:var(--memory-dim);font-size:12px;
+}
+.c3-result-n{display:block;font-size:10px;color:var(--text-faint);margin-top:3px;}
+
+/* --- compare --- */
+.c3-pick{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:7px;}
+.c3-pick-k{font-size:9.5px;letter-spacing:.12em;color:var(--text-faint);width:14px;}
+.c3-cmp{margin-top:11px;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.c3-cmp-head,.c3-cmp-row{display:grid;grid-template-columns:minmax(120px,1fr) minmax(150px,1.4fr) minmax(150px,1.4fr);gap:0;}
+.c3-cmp-head{background:var(--surface);border-bottom:1px solid var(--border);}
+.c3-cmp-t{padding:8px 11px;border-left:1px solid var(--border);}
+.c3-cmp-t b{font-size:12.5px;display:block;margin-bottom:4px;}
+.c3-badges{display:flex;gap:4px;flex-wrap:wrap;}
+.c3-badge{
+  font-size:8.5px;letter-spacing:.05em;border:1px solid var(--border);border-radius:999px;
+  padding:1px 7px;color:var(--text-faint);
+}
+.c3-badge.on{border-color:var(--execution);color:var(--execution);}
+.c3-cmp-row{border-bottom:1px solid var(--border);font-size:10.5px;}
+.c3-cmp-row:last-child{border-bottom:none;}
+.c3-cmp-k{padding:7px 11px;color:var(--text-faint);background:var(--surface);}
+.c3-cmp-v{padding:7px 11px;border-left:1px solid var(--border);line-height:1.6;color:var(--text-faint);}
+.c3-cmp-row.differ .c3-cmp-v{color:var(--text);background:var(--execution-dim);}
+.c3-cmp-row.differ .c3-cmp-k{color:var(--execution);}
+.c3-cmp-row.run .c3-cmp-v{color:var(--memory);font-size:12px;}
+
+/* --- experiments --- */
+.c3-exps{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px;}
+.c3-exp-b{font-size:10.5px;color:var(--text-faint);margin-bottom:11px;}
+.c3-exp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;}
+.c3-exp-card{border:1px solid var(--border);border-radius:7px;padding:9px 11px;background:var(--surface);}
+.c3-exp-h{font-size:10.5px;color:var(--memory);margin-bottom:6px;}
+.c3-exp-r{font-size:11.5px;}
+.c3-exp-buf{font-size:11px;color:var(--text-faint);margin-top:3px;}
+.c3-lesson{
+  margin-top:12px;padding:9px 11px;border-left:2px solid var(--execution);
+  font-size:11px;line-height:1.65;color:var(--text);
+}
+
+/* --- reference card + mistakes --- */
+.c3-card-grid{display:grid;grid-template-columns:auto 1fr;gap:5px 13px;font-size:11px;align-items:baseline;}
+.c3-ck{font-size:9px;letter-spacing:.07em;color:var(--text-faint);text-transform:uppercase;white-space:nowrap;}
+.c3-cv{line-height:1.65;color:var(--text-faint);}
+.c3-mistake{border:1px solid var(--border);border-radius:7px;padding:9px 11px;margin-bottom:8px;background:var(--surface);}
+.c3-wrong,.c3-right{display:flex;gap:8px;font-size:10.5px;line-height:1.6;}
+.c3-wrong{color:var(--error);margin-bottom:6px;}
+.c3-right{color:var(--text-faint);padding-top:6px;border-top:1px dashed var(--border);}
+.c3-right span{color:var(--heap);}
+
+@media (max-width:900px){
+  .c3-two{grid-template-columns:1fr;}
+  .c3-cmp-head,.c3-cmp-row{grid-template-columns:1fr;}
+  .c3-cmp-t,.c3-cmp-v{border-left:none;border-top:1px solid var(--border);}
+}
 </style>
 </head>
 <body>
@@ -3440,10 +3583,194 @@ int main(void)
 	printf("%s\\n", str);
 	return (0);
 }
-`}
+`},
+/* ---- C03 string functions (Phase 7.5) ----
+   Real implementations, executed by the real engine. The source shown in the
+   editor IS the source that runs — nothing here is re-implemented natively. */
+c03_strcmp: {
+  needsInput:false, label:"strcmp — compare",
+  src:
+`int	ft_strcmp(char *s1, char *s2)
+{
+	int	i;
+
+	i = 0;
+	while (s1[i] && s1[i] == s2[i])
+		i++;
+	return (s1[i] - s2[i]);
+}
+
+int	main(void)
+{
+	char	a[4] = "abc";
+	char	b[4] = "abd";
+	int	r;
+
+	r = ft_strcmp(a, b);
+	return (0);
+}
+`},
+c03_strncmp: {
+  needsInput:false, label:"strncmp — compare, bounded",
+  src:
+`int	ft_strncmp(char *s1, char *s2, unsigned int n)
+{
+	unsigned int	i;
+
+	i = 0;
+	while (i < n && s1[i] && s1[i] == s2[i])
+		i++;
+	if (i == n)
+		return (0);
+	return (s1[i] - s2[i]);
+}
+
+int	main(void)
+{
+	char	a[5] = "abcX";
+	char	b[5] = "abcY";
+	int	r;
+
+	r = ft_strncmp(a, b, 3);
+	return (0);
+}
+`},
+c03_strcat: {
+  needsInput:false, label:"strcat — append",
+  src:
+`char	*ft_strcat(char *dest, char *src)
+{
+	int	i;
+	int	j;
+
+	i = 0;
+	while (dest[i])
+		i++;
+	j = 0;
+	while (src[j])
+	{
+		dest[i + j] = src[j];
+		j++;
+	}
+	dest[i + j] = 0;
+	return (dest);
+}
+
+int	main(void)
+{
+	char	dest[12] = "Hi";
+	char	src[4] = "ABC";
+	char	*r;
+
+	r = ft_strcat(dest, src);
+	return (0);
+}
+`},
+c03_strncat: {
+  needsInput:false, label:"strncat — append, bounded by source count",
+  src:
+`char	*ft_strncat(char *dest, char *src, int nb)
+{
+	int	i;
+	int	j;
+
+	i = 0;
+	while (dest[i])
+		i++;
+	j = 0;
+	while (j < nb && src[j])
+	{
+		dest[i + j] = src[j];
+		j++;
+	}
+	dest[i + j] = 0;
+	return (dest);
+}
+
+int	main(void)
+{
+	char	dest[12] = "Hi";
+	char	src[6] = "World";
+	char	*r;
+
+	r = ft_strncat(dest, src, 3);
+	return (0);
+}
+`},
+c03_strstr: {
+  needsInput:false, label:"strstr — search",
+  src:
+`char	*ft_strstr(char *str, char *to_find)
+{
+	int	i;
+	int	j;
+
+	if (to_find[0] == 0)
+		return (str);
+	i = 0;
+	while (str[i])
+	{
+		j = 0;
+		while (str[i + j] == to_find[j] && to_find[j])
+			j++;
+		if (to_find[j] == 0)
+			return (str + i);
+		i++;
+	}
+	return (0);
+}
+
+int	main(void)
+{
+	char	haystack[6] = "hello";
+	char	needle[3] = "ll";
+	char	*r;
+
+	r = ft_strstr(haystack, needle);
+	return (0);
+}
+`},
+c03_strlcat: {
+  needsInput:false, label:"strlcat — append, bounded by destination size",
+  src:
+`unsigned int	ft_strlcat(char *dest, char *src, unsigned int size)
+{
+	unsigned int	dlen;
+	unsigned int	slen;
+	unsigned int	i;
+
+	dlen = 0;
+	while (dest[dlen] && dlen < size)
+		dlen++;
+	slen = 0;
+	while (src[slen])
+		slen++;
+	if (dlen == size)
+		return (size + slen);
+	i = 0;
+	while (src[i] && dlen + i < size - 1)
+	{
+		dest[dlen + i] = src[i];
+		i++;
+	}
+	dest[dlen + i] = 0;
+	return (dlen + slen);
+}
+
+int	main(void)
+{
+	char		dest[10] = "Hi";
+	char		src[8] = "ABCDEFG";
+	unsigned int	r;
+
+	r = ft_strlcat(dest, src, 10);
+	return (0);
+}
+`},
 };
 
-const EXAMPLE_ORDER = ['ex6','ex8','ex10','ex9','ex11','ex1','ex2','ex3','ex4','ex5','ex7','exBug1','exBug2'];
+
+const EXAMPLE_ORDER = ['ex6','ex8','ex10','ex9','ex11','ex1','ex2','ex3','ex4','ex5','ex7','exBug1','exBug2','c03_strcmp','c03_strncmp','c03_strcat','c03_strncat','c03_strstr','c03_strlcat'];
 'use strict';
 /* ==== ENGINE START ==== */
 /* c-lab-tests/load-engine.js extracts everything between the ENGINE START and
@@ -11566,11 +11893,18 @@ const GROUPS = [
   { id:'ptr',     name:'Pointers',            icon:'➤', keys:['ex5','ex10'] },
   { id:'fn',      name:'Functions & recursion',icon:'ƒ', keys:['ex9','ex8'] },
   { id:'heap',    name:'Dynamic memory',      icon:'◈', keys:['ex7'] },
+  { id:'c03',     name:'C03 — String functions', icon:'⌗', keys:['c03_strcmp','c03_strncmp','c03_strcat','c03_strncat','c03_strstr','c03_strlcat'] },
   { id:'bugs',    name:'Bug demos',           icon:'⚠', keys:['exBug1','exBug2'] },
 ];
 // A real, distinct filename per exercise — "main.c" thirteen times tells the
 // user nothing about what they are opening.
 const FILES = {
+  c03_strcmp: 'ft_strcmp.c',
+  c03_strncmp: 'ft_strncmp.c',
+  c03_strcat: 'ft_strcat.c',
+  c03_strncat: 'ft_strncat.c',
+  c03_strstr: 'ft_strstr.c',
+  c03_strlcat: 'ft_strlcat.c',
   ex1:'variable.c', ex2:'if_statement.c', ex3:'while_loop.c', ex4:'char_array.c',
   ex5:'pointer_basics.c', ex6:'ft_strcapitalize.c', ex7:'malloc_free.c',
   ex8:'ft_factorial.c', ex9:'ft_putchar.c', ex10:'ft_swap.c', ex11:'ft_strupcase.c',
@@ -16204,6 +16538,7 @@ const LAB_TABS = [
   { id:'types',  label:'Types & Limits' },
   { id:'functions', label:'Functions' },
   { id:'syscalls',  label:'Libraries & Syscalls' },
+  { id:'c03',       label:'C03 Strings' },
 ];
 
 const lab = {
@@ -16230,6 +16565,10 @@ const lab = {
   fnStep: 0,                 // where the scrubber sits in that run
   fnRuns: null,              // cached engine runs, keyed by program
   fnRef: 'write',            // which reference card is open
+  // --- Phase 7.5: the C03 string-function project ---
+  c03Fn: 'strcmp', c03Step: 0, c03Runs: null,
+  c03A: 'strcmp', c03B: 'strncmp',
+  c03Exp: 'ncmp', c03ExpRuns: null,
 };
 
 function labType() { return (LAB_TYPES.find(t => t.id === lab.typeId) || LAB_TYPES[0]).make(); }
@@ -16520,6 +16859,7 @@ function renderLab() {
     case 'types':   body = labTypesHtml(); break;
     case 'functions': body = labFunctionsHtml(); break;
     case 'syscalls':  body = labSyscallsHtml(); break;
+    case 'c03':       body = labC03Html(); break;
   }
   root.innerHTML =
     '<div class="vl"><div class="vl-inner">' +
@@ -16530,7 +16870,7 @@ function renderLab() {
           '" data-labtab="' + t.id + '" role="tab" aria-selected="' + (t.id === lab.tab) + '">' +
           esc(t.label) + '</button>').join('') +
       '</div>' +
-      (lab.tab === 'functions' || lab.tab === 'syscalls' ? '' : labValueStrip()) +
+      (lab.tab === 'functions' || lab.tab === 'syscalls' || lab.tab === 'c03' ? '' : labValueStrip()) +
       '<div class="vl-body">' + body + '</div>' +
       '<div class="vl-foot">Widths, signedness and wrapping follow the simulated architecture (' +
         esc(CEngine.ARCH.short) + '). Arithmetic and comparisons are evaluated by the execution engine, ' +
@@ -16542,6 +16882,7 @@ function renderLab() {
 function wireLab() {
   if (typeof wireLabTypes === 'function') wireLabTypes();
   if (typeof wireLabFunctions === 'function') wireLabFunctions();
+  if (typeof wireLabC03 === 'function') wireLabC03();
   $$('#labRoot [data-labtab]').forEach(el => el.addEventListener('click', () => {
     lab.tab = el.dataset.labtab; renderLab();
   }));
@@ -17544,6 +17885,469 @@ function wireLabFunctions() {
   }));
 }
 /* ==== FNLAB END ==== */
+
+/* ==== C03LAB START ====
+   PHASE 7.5 — the C03 string functions, studied side by side.
+
+   Every program here is EXAMPLES[key].src — the same text the editor opens and
+   the same text the engine runs. Nothing in this file re-implements a string
+   function in JavaScript, and nothing is animated from a script: the pointer
+   positions, the destination bytes and the return values are all read out of
+   execution snapshots.
+
+   NOTE ON THE SUBJECT: the official C03 subject has not been supplied, so no
+   exercise number is claimed for any of these functions and no prototype is
+   presented as "the" required one. The implementations shown are ordinary,
+   readable versions written to be stepped through; when the real subject and
+   the user's own implementations arrive they replace the `src` in EXAMPLES and
+   everything here follows. */
+
+const C03_CATEGORIES = [
+  { id:'compare', label:'COMPARE', blurb:'Read two strings, report how they relate. Nothing is modified.' },
+  { id:'concat',  label:'CONCATENATE', blurb:'Append source onto destination. The destination IS modified.' },
+  { id:'search',  label:'SEARCH', blurb:'Look for one string inside another and report where.' },
+];
+
+/* One metadata record per function. The matrix, the cards, the compare view and
+   the badges all read THIS — the same fact is never written twice. */
+const C03_FUNCS = [
+  {
+    id:'strcmp', key:'c03_strcmp', cat:'compare',
+    prototype:'int ft_strcmp(char *s1, char *s2);',
+    idea:'Compare',
+    reads:'both strings', writes:'nothing', writesMem:false, usesSize:false, destMod:false,
+    returns:'< 0, 0, or > 0 — the difference at the first differing byte',
+    stops:'at the first difference, or at the \\0 of s1',
+    pointer:'walks both strings together; returns no pointer',
+    problem:'Which of two strings comes first, or whether they are identical.',
+    modifies:'Nothing. Both arguments are only read.',
+    traverse:'One index advances through BOTH strings at the same time.',
+    nul:'The \\0 of s1 ends the loop, so it also acts as a difference against a longer s2.',
+    ret:'The difference of the two bytes where they stopped.',
+    mistakes:[
+      ['“strcmp returns 1 when the strings differ.”',
+       'It returns a value that is negative, zero or positive. The exact magnitude is not specified by C — this implementation happens to return the byte difference, and comparing it against 1 or -1 is a real bug.'],
+      ['“It stops at whichever string ends first.”',
+       'This loop tests s1[i] only. It ends when s1 runs out or the bytes differ; a shorter s1 differs against the longer s2 at the \\0.'],
+    ],
+  },
+  {
+    id:'strncmp', key:'c03_strncmp', cat:'compare',
+    prototype:'int ft_strncmp(char *s1, char *s2, unsigned int n);',
+    idea:'Compare, bounded',
+    reads:'both strings, at most n bytes', writes:'nothing', writesMem:false, usesSize:true, destMod:false,
+    returns:'< 0, 0, or > 0 — and 0 once n bytes have matched',
+    stops:'at a difference, at \\0, OR after n bytes — whichever comes first',
+    pointer:'same walk as strcmp, with a counter; returns no pointer',
+    problem:'Whether the first n bytes of two strings agree.',
+    modifies:'Nothing.',
+    traverse:'Same single index, plus the test i < n.',
+    nul:'Still stops at \\0 — n is an upper bound, not a fixed length.',
+    ret:'0 if the bounded region matched, otherwise the byte difference.',
+    sizeMeans:'n = how many BYTES to compare.',
+    mistakes:[
+      ['“n is just strcmp with a shorter string.”',
+       'n is a limit on the comparison, not on the strings. The bytes past n are never even read — which is exactly why a difference beyond n is invisible.'],
+    ],
+  },
+  {
+    id:'strcat', key:'c03_strcat', cat:'concat',
+    prototype:'char *ft_strcat(char *dest, char *src);',
+    idea:'Append',
+    reads:'src, and dest up to its \\0', writes:'dest', writesMem:true, usesSize:false, destMod:true,
+    returns:'dest — the same pointer that was passed in',
+    stops:'when src runs out',
+    pointer:'finds dest’s \\0 first, then writes forward; returns dest unchanged',
+    problem:'Join src onto the end of dest.',
+    modifies:'dest, from its old \\0 onward, including a new \\0.',
+    traverse:'First a scan of dest to find the terminator, then a copy from src.',
+    nul:'dest’s old \\0 is overwritten by the first source byte, and a fresh \\0 is written at the end.',
+    ret:'The destination pointer, so calls can be chained.',
+    mistakes:[
+      ['“strcat checks that dest is big enough.”',
+       'It cannot. It never receives dest’s capacity — only its address. If dest is too small this writes past the end, which is exactly the buffer overflow this family is famous for.'],
+    ],
+  },
+  {
+    id:'strncat', key:'c03_strncat', cat:'concat',
+    prototype:'char *ft_strncat(char *dest, char *src, int nb);',
+    idea:'Append at most n source bytes',
+    reads:'src, at most nb bytes', writes:'dest', writesMem:true, usesSize:true, destMod:true,
+    returns:'dest — the same pointer that was passed in',
+    stops:'when src runs out OR after nb source bytes',
+    pointer:'same as strcat, with a source counter; returns dest',
+    problem:'Append part of src onto dest.',
+    modifies:'dest, from its old \\0 onward, plus a new \\0.',
+    traverse:'Scan dest, then copy while j < nb and src[j].',
+    nul:'A \\0 is always written after the copied bytes — so up to nb + 1 bytes are written.',
+    ret:'The destination pointer.',
+    sizeMeans:'nb = how many SOURCE bytes to append. It says nothing about dest’s capacity.',
+    mistakes:[
+      ['“nb is the size of the destination buffer.”',
+       'It is not. nb bounds how much of SRC is used. dest can still overflow: nb + 1 bytes are written after whatever dest already held, and the function was never told how big dest is.'],
+    ],
+  },
+  {
+    id:'strstr', key:'c03_strstr', cat:'search',
+    prototype:'char *ft_strstr(char *str, char *to_find);',
+    idea:'Find',
+    reads:'both strings', writes:'nothing', writesMem:false, usesSize:false, destMod:false,
+    returns:'a pointer INTO str where the match begins, or NULL',
+    stops:'at the first full match, or at the end of str',
+    pointer:'slides a candidate position through str; RETURNS a pointer into str',
+    problem:'Locate one string inside another.',
+    modifies:'Nothing.',
+    traverse:'An outer index picks a candidate start; an inner index compares from there.',
+    nul:'The needle’s \\0 is the success test: reaching it means every byte matched.',
+    ret:'str + i on success — an address inside the original buffer, not a copy.',
+    mistakes:[
+      ['“It returns a copy of the substring.”',
+       'It returns a POINTER into the original string. Writing through it modifies the haystack, and it stays valid only as long as the haystack does.'],
+      ['“Not found returns an empty string.”',
+       'Not found returns NULL. Dereferencing that without checking is a crash.'],
+    ],
+  },
+  {
+    id:'strlcat', key:'c03_strlcat', cat:'concat',
+    prototype:'unsigned int ft_strlcat(char *dest, char *src, unsigned int size);',
+    idea:'Append, bounded by the DESTINATION buffer',
+    reads:'src, and dest up to size', writes:'dest, never past size', writesMem:true, usesSize:true, destMod:true,
+    returns:'the length it TRIED to create: initial strlen(dest) + strlen(src)',
+    stops:'when src runs out OR when dest’s capacity is reached',
+    pointer:'writes within size; returns a length, not a pointer',
+    problem:'Append safely into a buffer whose total capacity you know.',
+    modifies:'dest, always leaving it \\0-terminated when there was room.',
+    traverse:'Measure dest, measure src, then copy while there is space for a terminator.',
+    nul:'Always terminates within size — that is the whole point of the contract.',
+    ret:'NOT the number of bytes copied. It is the length the result WOULD have had. If the return is >= size, the result was truncated.',
+    sizeMeans:'size = the TOTAL capacity of the destination buffer, terminator included.',
+    mistakes:[
+      ['“strlcat is strncat with a size.”',
+       'The third argument means a different thing. strncat’s n bounds the SOURCE; strlcat’s size bounds the DESTINATION. Passing one where the other is expected is a classic overflow.'],
+      ['“The return value is how many bytes were written.”',
+       'It is the length the result would have needed. Compare it against size to detect truncation.'],
+    ],
+  },
+];
+const c03Of = (id) => C03_FUNCS.find(f => f.id === id);
+
+/* One engine run per function, cached. Reads EXAMPLES[key].src so the source
+   the editor opens and the source that executes cannot diverge. */
+function c03Run(id) {
+  if (!lab.c03Runs) lab.c03Runs = {};
+  if (lab.c03Runs[id]) return lab.c03Runs[id];
+  const f = c03Of(id);
+  const ex = (typeof EXAMPLES === 'object' && EXAMPLES) ? EXAMPLES[f.key] : null;
+  if (!ex) return (lab.c03Runs[id] = { ok:false, error:'source not found for ' + id });
+  let r;
+  try { r = CEngine.runToCompletion(ex.src); }
+  catch (e) { return (lab.c03Runs[id] = { ok:false, error:e.message }); }
+  if (!r.history) return (lab.c03Runs[id] = { ok:false, error: r.message || 'did not run' });
+  const steps = [];
+  for (let i = 0; i < r.history.length; i++) steps.push({ i, step: r.history.steps[i], state: r.history.stateAt(i) });
+  // the value the caller actually received
+  let result = null;
+  for (let i = steps.length - 1; i >= 0 && result === null; i--) {
+    const v = steps[i].state.vars.find(x => x.name === 'r');
+    if (v && !v.uninitialized) result = v.valueText;
+  }
+  return (lab.c03Runs[id] = { ok:true, src: ex.src, steps, result, output: r.output });
+}
+
+/* ------------------------ the family tree ------------------------ */
+function c03TreeHtml() {
+  return '<div class="c3-block"><div class="c3-block-h">Three families, one habit of mind</div>' +
+    '<div class="c3-tree">' + C03_CATEGORIES.map(c => {
+      const fns = C03_FUNCS.filter(f => f.cat === c.id);
+      return '<div class="c3-fam c3-' + c.id + '">' +
+        '<div class="c3-fam-h">' + esc(c.label) + '</div>' +
+        '<div class="c3-fam-b">' + esc(c.blurb) + '</div>' +
+        '<div class="c3-fam-fns">' + fns.map(f =>
+          '<button class="c3-fn' + (f.id === lab.c03Fn ? ' on' : '') + '" data-c03fn="' + f.id + '">' +
+          esc(f.id) + '</button>').join('') + '</div></div>';
+    }).join('') + '</div>' +
+    '<div class="c3-note">The family tells you the two questions that matter: does it WRITE anywhere, and what does its ' +
+    'third argument bound? Everything else follows from those.</div></div>';
+}
+
+/* ------------------------ the comparison matrix ------------------------ */
+function c03MatrixHtml() {
+  const yes = (b) => b ? '<span class="c3-yes">yes</span>' : '<span class="c3-no">no</span>';
+  return '<div class="c3-block"><div class="c3-block-h">Comparison matrix</div>' +
+    '<div class="vl-table-wrap"><table class="vl-table c3-table"><thead><tr>' +
+    '<th>Function</th><th>Category</th><th>Reads</th><th>Writes</th><th>Returns</th>' +
+    '<th>Stops when</th><th>Uses size?</th><th>Dest modified?</th><th>Pointer behaviour</th>' +
+    '</tr></thead><tbody>' +
+    C03_FUNCS.map(f =>
+      '<tr class="vl-row' + (f.id === lab.c03Fn ? ' sel' : '') + '" data-c03fn="' + f.id + '" role="button" tabindex="0">' +
+      '<td class="mono">' + esc(f.id) + '</td>' +
+      '<td>' + esc((C03_CATEGORIES.find(c => c.id === f.cat) || {}).label || '') + '</td>' +
+      '<td>' + esc(f.reads) + '</td>' +
+      '<td>' + esc(f.writes) + '</td>' +
+      '<td>' + esc(f.returns) + '</td>' +
+      '<td>' + esc(f.stops) + '</td>' +
+      '<td>' + yes(f.usesSize) + '</td>' +
+      '<td>' + yes(f.destMod) + '</td>' +
+      '<td>' + esc(f.pointer) + '</td></tr>').join('') +
+    '</tbody></table></div>' +
+    '<div class="c3-note">Every cell is read from one metadata record per function, so the matrix, the cards and the ' +
+    'compare view cannot disagree with each other.</div></div>';
+}
+
+/* ------------------------ the stepper ------------------------ */
+function c03PointersHtml(state) {
+  const g = state.graph;
+  if (!g || !g.edges.length) return '<div class="c3-empty">no pointer is alive at this step</div>';
+  return '<div class="c3-ptrs">' + g.edges.map(e => {
+    const to = e.to ? g.nodes.find(n => n.id === e.to) : null;
+    return '<div class="c3-ptr' + (e.valid ? '' : ' bad') + '">' +
+      '<span class="mono c3-ptr-n">' + esc(e.name) + '</span>' +
+      '<span class="c3-ptr-arr">→</span>' +
+      '<span class="mono c3-ptr-t">' + esc(e.text || '') + '</span>' +
+      (to ? '<span class="c3-ptr-in">in ' + esc(to.label) + '</span>' : '') +
+      (e.targetValueText ? '<span class="c3-ptr-v mono">' + esc(e.targetValueText) + '</span>' : '') +
+      '</div>';
+  }).join('') + '</div>';
+}
+
+/* The buffers, byte by byte, straight from the engine's memory. */
+function c03BytesHtml(state, changed) {
+  // Every live frame, not just the innermost: the arrays belong to main while
+  // the string function that mutates them is the one on top.
+  const arrays = [];
+  for (const f of state.frames)
+    for (const v of f.vars) if (v.isArray && v.elements) arrays.push({ v, owner: f.name });
+  for (const v of state.globals || []) if (v.isArray && v.elements) arrays.push({ v, owner: null });
+  if (!arrays.length) return '<div class="c3-empty">no buffer is alive at this step</div>';
+  return '<div class="c3-bufs">' + arrays.map(({ v: a, owner }) =>
+    '<div class="c3-buf"><div class="c3-buf-h"><b class="mono">' + esc(a.name) + '</b>' +
+      '<span class="c3-buf-t mono">' + esc(a.typeName) + '</span>' +
+      (owner ? '<span class="c3-buf-t">in ' + esc(owner) + '()</span>' : '') +
+      '<span class="c3-buf-a mono">' + hexA(a.address) + '</span></div>' +
+      '<div class="c3-cells">' + a.elements.map((el, i) => {
+        const code = el.initialized ? Number(el.value) : null;
+        const ai = code === null ? null : CEngine.asciiInfo(code);
+        const isNul = code === 0;
+        const hit = changed && changed.indexOf(el.address) >= 0;
+        return '<span class="c3-cell' + (isNul ? ' nul' : '') + (hit ? ' hit' : '') +
+          (code === null ? ' un' : '') + '" title="' + hexA(el.address) + '">' +
+          '<span class="c3-cell-i">' + i + '</span>' +
+          '<span class="c3-cell-c mono">' + esc(code === null ? '?' : (isNul ? '\\0' : (ai && ai.printable ? ai.display : (ai ? ai.name : '·')))) + '</span>' +
+          '<span class="c3-cell-v mono">' + (code === null ? '??' : code) + '</span></span>';
+      }).join('') + '</div></div>').join('') + '</div>';
+}
+
+function c03StepperHtml(id) {
+  const f = c03Of(id);
+  const run = c03Run(id);
+  if (!run.ok) return '<div class="c3-block"><div class="vl-err">' + esc(run.error) + '</div></div>';
+  const idx = Math.max(0, Math.min(lab.c03Step ?? 0, run.steps.length - 1));
+  const cur = run.steps[idx];
+  const s = cur.step;
+  const lines = run.src.split('\n');
+  const changed = (s.changed || []).concat(s.memDiff ? [s.memDiff.address] : []);
+
+  let h = '<div class="c3-block"><div class="c3-block-h">' + esc(f.id) + ' — step through the real execution</div>';
+  h += '<div class="c3-open"><button class="vl-btn on" data-c03open="' + esc(f.key) + '">' +
+       'open ' + esc(f.key.replace('c03_', 'ft_') + '.c') + ' in the editor →</button>' +
+       '<span class="c3-open-n">the editor runs this exact source</span></div>';
+  h += '<div class="c3-two">';
+  // source, with the executing line lit
+  h += '<div class="c3-src-col"><pre class="c3-src mono">' + lines.map((l, i) =>
+    '<span class="c3-srcline' + (i + 1 === s.line ? ' on' : '') + '">' +
+    String(i + 1).padStart(2) + '  ' + esc(l || ' ') + '</span>').join('') + '</pre></div>';
+  h += '<div class="c3-state-col">' +
+    '<div class="c3-scrub">' +
+      '<button class="vl-btn" data-c03step="first">⏮</button>' +
+      '<button class="vl-btn" data-c03step="prev">◀</button>' +
+      '<input type="range" class="fn-range" min="0" max="' + (run.steps.length - 1) + '" value="' + idx + '" data-c03range="1" aria-label="Step">' +
+      '<button class="vl-btn" data-c03step="next">▶</button>' +
+      '<button class="vl-btn" data-c03step="last">⏭</button>' +
+      '<button class="vl-btn" data-c03step="reset">reset</button>' +
+      '<span class="fn-scrub-n mono">' + (idx + 1) + ' / ' + run.steps.length + '</span></div>' +
+    '<div class="c3-desc">' + esc(s.description || '') + '</div>' +
+    '<div class="c3-sub-h">POINTERS</div>' + c03PointersHtml(cur.state) +
+    '<div class="c3-sub-h">BUFFERS — bytes as the engine holds them</div>' + c03BytesHtml(cur.state, changed) +
+    '</div></div>';
+  h += '<div class="c3-result">result at the end of this run: <b class="mono">' +
+       esc(run.result === null ? '(not reached)' : run.result) + '</b>' +
+       '<span class="c3-result-n">' + esc(f.ret) + '</span></div>';
+  return h + '</div>';
+}
+
+/* ------------------------ the compare view ------------------------ */
+function c03CompareHtml() {
+  const A = c03Of(lab.c03A || 'strcmp'), B = c03Of(lab.c03B || 'strncmp');
+  const pick = (side, cur) => '<div class="c3-pick"><span class="c3-pick-k">' + side + '</span>' +
+    C03_FUNCS.map(f => '<button class="c3-fn' + (f.id === cur ? ' on' : '') + '" data-c03' + side.toLowerCase() +
+      '="' + f.id + '">' + esc(f.id) + '</button>').join('') + '</div>';
+  const rows = [
+    ['problem it solves', 'problem'], ['prototype', 'prototype'], ['reads', 'reads'],
+    ['writes', 'writes'], ['stop condition', 'stops'], ['third argument means', 'sizeMeans'],
+    ['returns', 'returns'], ['pointer behaviour', 'pointer'], ['what happens to \\0', 'nul'],
+  ];
+  const runA = c03Run(A.id), runB = c03Run(B.id);
+  const badge = (f) => '<span class="c3-badges">' +
+    '<span class="c3-badge' + (f.writesMem ? ' on' : '') + '">' + (f.writesMem ? 'WRITES MEMORY' : 'READ ONLY') + '</span>' +
+    '<span class="c3-badge' + (f.usesSize ? ' on' : '') + '">' + (f.usesSize ? 'HAS A LIMIT' : 'NO LIMIT') + '</span>' +
+    '<span class="c3-badge">' + esc(f.returns.split('—')[0].trim().slice(0, 22)) + '</span></span>';
+  return '<div class="c3-block"><div class="c3-block-h">Compare two functions</div>' +
+    pick('A', A.id) + pick('B', B.id) +
+    '<div class="c3-cmp"><div class="c3-cmp-head"><div></div>' +
+      '<div class="c3-cmp-t"><b class="mono">' + esc(A.id) + '</b>' + badge(A) + '</div>' +
+      '<div class="c3-cmp-t"><b class="mono">' + esc(B.id) + '</b>' + badge(B) + '</div></div>' +
+      rows.map(([label, k]) => {
+        const va = A[k] || '—', vb = B[k] || '—';
+        const differ = va !== vb;
+        return '<div class="c3-cmp-row' + (differ ? ' differ' : '') + '">' +
+          '<div class="c3-cmp-k">' + esc(label) + '</div>' +
+          '<div class="c3-cmp-v">' + esc(va) + '</div>' +
+          '<div class="c3-cmp-v">' + esc(vb) + '</div></div>';
+      }).join('') +
+      '<div class="c3-cmp-row run"><div class="c3-cmp-k">its own run returns</div>' +
+        '<div class="c3-cmp-v mono">' + esc(runA.ok ? String(runA.result) : 'did not run') + '</div>' +
+        '<div class="c3-cmp-v mono">' + esc(runB.ok ? String(runB.result) : 'did not run') + '</div></div>' +
+    '</div>' +
+    '<div class="c3-note">Rows where the two differ are marked. Those rows ARE the difference between the ' +
+    'functions — everything else is shared.</div></div>';
+}
+
+/* ------------------------ experiments ------------------------ */
+const C03_EXPERIMENTS = [
+  { id:'ncmp', title:'Changing n changes the answer',
+    blurb:'Two strings that agree for three bytes and differ at the fourth.',
+    variants:[
+      { label:'strncmp(a, b, 2)', n:2 }, { label:'strncmp(a, b, 3)', n:3 }, { label:'strncmp(a, b, 4)', n:4 },
+    ],
+    build:(v) => 'int\tft_strncmp(char *s1, char *s2, unsigned int n)\n{\n\tunsigned int\ti;\n\n\ti = 0;\n' +
+      '\twhile (i < n && s1[i] && s1[i] == s2[i])\n\t\ti++;\n\tif (i == n)\n\t\treturn (0);\n' +
+      '\treturn (s1[i] - s2[i]);\n}\n\nint\tmain(void)\n{\n\tchar\ta[5] = "abcX";\n\tchar\tb[5] = "abcY";\n' +
+      '\tint\tr;\n\n\tr = ft_strncmp(a, b, ' + v.n + ');\n\treturn (0);\n}\n',
+    lesson:'Below n the strings look identical, because the differing byte is never read.' },
+  { id:'cat', title:'The same append, three contracts',
+    blurb:'dest starts as "Hi" in a 10-byte buffer; src is "ABCDEFG".',
+    variants:[
+      { label:'strncat(dest, src, 3)', kind:'ncat' },
+      { label:'strlcat(dest, src, 10)', kind:'lcat' },
+    ],
+    build:(v) => v.kind === 'ncat'
+      ? 'char\t*ft_strncat(char *dest, char *src, int nb)\n{\n\tint\ti;\n\tint\tj;\n\n\ti = 0;\n' +
+        '\twhile (dest[i])\n\t\ti++;\n\tj = 0;\n\twhile (j < nb && src[j])\n\t{\n\t\tdest[i + j] = src[j];\n\t\tj++;\n\t}\n' +
+        '\tdest[i + j] = 0;\n\treturn (dest);\n}\n\nint\tmain(void)\n{\n\tchar\tdest[10] = "Hi";\n' +
+        '\tchar\tsrc[8] = "ABCDEFG";\n\tchar\t*r;\n\n\tr = ft_strncat(dest, src, 3);\n\treturn (0);\n}\n'
+      : 'unsigned int\tft_strlcat(char *dest, char *src, unsigned int size)\n{\n\tunsigned int\tdlen;\n' +
+        '\tunsigned int\tslen;\n\tunsigned int\ti;\n\n\tdlen = 0;\n\twhile (dest[dlen] && dlen < size)\n\t\tdlen++;\n' +
+        '\tslen = 0;\n\twhile (src[slen])\n\t\tslen++;\n\tif (dlen == size)\n\t\treturn (size + slen);\n\ti = 0;\n' +
+        '\twhile (src[i] && dlen + i < size - 1)\n\t{\n\t\tdest[dlen + i] = src[i];\n\t\ti++;\n\t}\n' +
+        '\tdest[dlen + i] = 0;\n\treturn (dlen + slen);\n}\n\nint\tmain(void)\n{\n\tchar\t\tdest[10] = "Hi";\n' +
+        '\tchar\t\tsrc[8] = "ABCDEFG";\n\tunsigned int\tr;\n\n\tr = ft_strlcat(dest, src, 10);\n\treturn (0);\n}\n',
+    lesson:'strncat’s 3 bounded the SOURCE. strlcat’s 10 bounded the DESTINATION — and its return is the length it wanted, not what it wrote.' },
+  { id:'find', title:'Where does strstr point?',
+    blurb:'A match, and a miss.',
+    variants:[ { label:'strstr("hello", "ll")', needle:'ll', nlen:3 }, { label:'strstr("hello", "xy")', needle:'xy', nlen:3 } ],
+    build:(v) => 'char\t*ft_strstr(char *str, char *to_find)\n{\n\tint\ti;\n\tint\tj;\n\n\tif (to_find[0] == 0)\n' +
+      '\t\treturn (str);\n\ti = 0;\n\twhile (str[i])\n\t{\n\t\tj = 0;\n\t\twhile (str[i + j] == to_find[j] && to_find[j])\n' +
+      '\t\t\tj++;\n\t\tif (to_find[j] == 0)\n\t\t\treturn (str + i);\n\t\ti++;\n\t}\n\treturn (0);\n}\n\n' +
+      'int\tmain(void)\n{\n\tchar\thaystack[6] = "hello";\n\tchar\tneedle[' + v.nlen + '] = "' + v.needle + '";\n' +
+      '\tchar\t*r;\n\n\tr = ft_strstr(haystack, needle);\n\treturn (0);\n}\n',
+    lesson:'A hit returns an address INSIDE haystack. A miss returns NULL — not an empty string.' },
+];
+
+function c03ExperimentHtml() {
+  const exp = C03_EXPERIMENTS.find(e => e.id === (lab.c03Exp || 'ncmp')) || C03_EXPERIMENTS[0];
+  if (!lab.c03ExpRuns) lab.c03ExpRuns = {};
+  const results = exp.variants.map(v => {
+    const cacheKey = exp.id + '|' + v.label;
+    if (!lab.c03ExpRuns[cacheKey]) {
+      const src = exp.build(v);
+      let out = { ok:false };
+      try {
+        const r = CEngine.runToCompletion(src);
+        if (r.history) {
+          let res = null, buf = null;
+          for (let i = r.history.length - 1; i >= 0 && res === null; i--) {
+            const st = r.history.stateAt(i);
+            const rv = st.vars.find(x => x.name === 'r');
+            const d = st.vars.find(x => x.name === 'dest' || x.name === 'haystack');
+            if (rv && !rv.uninitialized) { res = rv.valueText; buf = d ? d.valueText : null; }
+          }
+          out = { ok:true, res, buf, src };
+        } else out = { ok:false, err:r.message };
+      } catch (e) { out = { ok:false, err:e.message }; }
+      lab.c03ExpRuns[cacheKey] = out;
+    }
+    return { v, r: lab.c03ExpRuns[cacheKey] };
+  });
+  return '<div class="c3-block"><div class="c3-block-h">Experiment — same input, different contract</div>' +
+    '<div class="c3-exps">' + C03_EXPERIMENTS.map(e =>
+      '<button class="c3-fn' + (e.id === exp.id ? ' on' : '') + '" data-c03exp="' + e.id + '">' +
+      esc(e.title) + '</button>').join('') + '</div>' +
+    '<div class="c3-exp-b">' + esc(exp.blurb) + '</div>' +
+    '<div class="c3-exp-grid">' + results.map(({ v, r }) =>
+      '<div class="c3-exp-card"><div class="c3-exp-h mono">' + esc(v.label) + '</div>' +
+      (r.ok
+        ? '<div class="c3-exp-r">returned <b class="mono">' + esc(String(r.res)) + '</b></div>' +
+          (r.buf !== null && r.buf !== undefined ? '<div class="c3-exp-buf">buffer is now <b class="mono">' + esc(r.buf) + '</b></div>' : '')
+        : '<div class="vl-err">' + esc(r.err || 'did not run') + '</div>') +
+      '</div>').join('') + '</div>' +
+    '<div class="c3-lesson">' + esc(exp.lesson) + '</div>' +
+    '<div class="c3-note">Each variant is a complete program compiled and run by the engine; the values above are ' +
+    'what those runs actually produced.</div></div>';
+}
+
+/* ------------------------ mistakes + card ------------------------ */
+function c03CardHtml(id) {
+  const f = c03Of(id);
+  const rows = [
+    ['category', (C03_CATEGORIES.find(c => c.id === f.cat) || {}).label],
+    ['prototype', f.prototype], ['problem it solves', f.problem], ['reads', f.reads],
+    ['writes', f.writes], ['what it modifies', f.modifies], ['how it moves', f.traverse],
+    ['stop condition', f.stops], ['returns', f.returns], ['about the return', f.ret],
+    ['the \\0', f.nul], ['pointers', f.pointer],
+  ];
+  if (f.sizeMeans) rows.splice(2, 0, ['third argument', f.sizeMeans]);
+  return '<div class="c3-block"><div class="c3-block-h">' + esc(f.id) + ' — reference</div>' +
+    '<div class="c3-card-grid">' + rows.map(([k, v]) =>
+      '<span class="c3-ck">' + esc(k) + '</span><span class="c3-cv">' + esc(v || '—') + '</span>').join('') + '</div>' +
+    '<div class="c3-sub-h">COMMON MISTAKES</div>' +
+    f.mistakes.map(([wrong, right]) =>
+      '<div class="c3-mistake"><div class="c3-wrong"><span>✕</span>' + esc(wrong) + '</div>' +
+      '<div class="c3-right"><span>✓</span>' + esc(right) + '</div></div>').join('') +
+    '<div class="c3-note">The official C03 subject has not been supplied, so no exercise number is claimed and the ' +
+    'prototype above is the one this implementation uses — not a quoted requirement. When the subject arrives, the ' +
+    'source and the prototype are replaced and everything on this page follows.</div></div>';
+}
+
+function labC03Html() {
+  const id = lab.c03Fn || 'strcmp';
+  return c03TreeHtml() + c03MatrixHtml() + c03StepperHtml(id) + c03CardHtml(id) +
+         c03CompareHtml() + c03ExperimentHtml();
+}
+
+function wireLabC03() {
+  $$('#labRoot [data-c03fn]').forEach(el => el.addEventListener('click', () => {
+    lab.c03Fn = el.dataset.c03fn; lab.c03Step = 0; renderLab();
+  }));
+  $$('#labRoot [data-c03a]').forEach(el => el.addEventListener('click', () => { lab.c03A = el.dataset.c03a; renderLab(); }));
+  $$('#labRoot [data-c03b]').forEach(el => el.addEventListener('click', () => { lab.c03B = el.dataset.c03b; renderLab(); }));
+  $$('#labRoot [data-c03exp]').forEach(el => el.addEventListener('click', () => { lab.c03Exp = el.dataset.c03exp; renderLab(); }));
+  $$('#labRoot [data-c03step]').forEach(el => el.addEventListener('click', () => {
+    const run = c03Run(lab.c03Fn || 'strcmp');
+    if (!run.ok) return;
+    const n = run.steps.length, cur = lab.c03Step ?? 0;
+    const a = el.dataset.c03step;
+    lab.c03Step = a === 'first' || a === 'reset' ? 0 : a === 'last' ? n - 1
+      : a === 'next' ? Math.min(n - 1, cur + 1) : Math.max(0, cur - 1);
+    renderLab();
+  }));
+  const range = $('#labRoot [data-c03range]');
+  if (range) range.addEventListener('input', () => { lab.c03Step = +range.value; renderLab(); });
+  $$('#labRoot [data-c03open]').forEach(el => el.addEventListener('click', () => {
+    // the EXISTING loader, the EXISTING editor
+    if (typeof loadExample === 'function') loadExample(el.dataset.c03open);
+  }));
+}
+/* ==== C03LAB END ==== */
 
 /* ================================ WIRING ================================ */
 function inEditable(el) {
