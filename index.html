@@ -2058,6 +2058,123 @@ html[data-theme=light] .viz-node.vz-frame::after{
 .viz-host.viz-nofx .viz-node,
 .viz-host.viz-nofx .viz-edge,
 .viz-host.viz-nofx .viz-flow{transition:none !important;}
+
+/* ==================================================================
+   PHASE 12c — object → address → memory → value, and the pointer
+   relationships between them. Every value drawn here comes out of
+   state.graph; this stylesheet only decides how the engine's answer
+   looks. Colour carries meaning: a valid target, a deliberate NULL, an
+   uninitialized pointer and a stale one are four different states and
+   must never be four shades of the same thing.
+   ================================================================== */
+
+.pv-card{
+  border:1px solid var(--border);border-radius:8px;padding:10px 11px;margin-bottom:10px;
+  background:var(--surface-2);border-left:3px solid var(--border);
+}
+.pv-card.ok{border-left-color:var(--memory);}
+.pv-card.null{border-left-color:var(--text-faint);}
+.pv-card.warn{border-left-color:var(--execution);}
+.pv-card.dead{border-left-color:var(--error);}
+.pv-card-h{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+.pv-card-h b{font-size:12.5px;}
+.pv-kind{
+  font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;
+  border-radius:999px;border:1px solid var(--border);color:var(--text-faint);margin-left:auto;
+}
+.pv-kind-points-to{color:var(--memory);border-color:var(--memory);}
+.pv-kind-null{color:var(--text-faint);}
+.pv-kind-uninitialized{color:var(--execution);border-color:var(--execution);}
+.pv-kind-dangling,.pv-kind-wild{color:var(--error);border-color:var(--error);}
+
+/* --- the chain: boxes joined by arrows, drawn top to bottom --- */
+.pv-chain{display:flex;flex-direction:column;align-items:stretch;gap:0;}
+.pv-box{
+  border:1px solid var(--border);border-radius:7px;padding:7px 9px;background:var(--surface);
+  cursor:pointer;transition:border-color .15s,box-shadow .15s;
+}
+.pv-box:hover,.pv-box:focus-visible{border-color:var(--memory);outline:none;box-shadow:0 0 0 2px var(--memory-dim);}
+.pv-box.from{border-style:dashed;}
+.pv-box-head{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-bottom:5px;}
+.pv-box-head b{font-family:var(--mono);font-size:12px;}
+.pv-ty{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);}
+.pv-sec{
+  margin-left:auto;font-family:var(--mono);font-size:9.5px;padding:1px 6px;border-radius:999px;
+  border:1px solid var(--border);color:var(--text-faint);
+}
+.pv-sec-stack{color:var(--stack);border-color:var(--stack);}
+.pv-sec-heap{color:var(--heap);border-color:var(--heap);}
+.pv-sec-data,.pv-sec-bss{color:var(--globals);border-color:var(--globals);}
+.pv-sec-rodata,.pv-sec-text{color:var(--code-region);border-color:var(--code-region);}
+.pv-box-rows{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:11px;}
+.pv-k{color:var(--text-faint);}
+.pv-v{color:var(--text);}
+.pv-un{color:var(--execution);}
+.mono,.pv-v.mono,.pv-k.mono{font-family:var(--mono);}
+
+/* The arrow carries the sentence. "holds the address of" sits ON the arrow
+   because that is the fact the picture exists to teach. */
+.pv-arrow{
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  padding:5px 0;color:var(--text-faint);font-size:10.5px;
+}
+.pv-arrow .pv-a-line{font-size:13px;line-height:1;}
+.pv-arrow .pv-a-addr{font-size:10px;}
+.pv-arrow.ok{color:var(--memory);}
+.pv-arrow.null{color:var(--text-faint);}
+.pv-arrow.warn{color:var(--execution);}
+.pv-arrow.dead{color:var(--error);}
+.pv-a-lbl{letter-spacing:.02em;}
+
+.pv-why{
+  font-size:10.5px;line-height:1.6;color:var(--text-faint);margin-top:9px;
+  padding-top:8px;border-top:1px dashed var(--border);
+}
+
+/* --- pointer arithmetic strip --- */
+.pv-arith{margin-top:9px;}
+.pv-arith-h{font-size:10.5px;color:var(--text-faint);margin-bottom:6px;}
+.pv-arith-h b{color:var(--text);}
+.pv-arith-row{display:flex;gap:6px;flex-wrap:wrap;}
+.pv-step{
+  display:flex;flex-direction:column;gap:1px;border:1px solid var(--border);border-radius:6px;
+  padding:4px 7px;background:var(--surface);min-width:78px;
+}
+.pv-step.past{opacity:.5;border-style:dashed;}
+.pv-step-k{font-size:10px;color:var(--memory);}
+.pv-step-a{font-size:10.5px;}
+.pv-step-in{font-size:9.5px;color:var(--text-faint);}
+
+/* --- address inspector --- */
+.pv-inspect{
+  border:1px solid var(--memory);border-radius:8px;padding:10px 11px;margin-bottom:11px;
+  background:var(--memory-dim);
+}
+.pv-inspect-h{
+  display:flex;align-items:center;font-size:9.5px;letter-spacing:.12em;
+  color:var(--memory);margin-bottom:8px;
+}
+.pv-inspect-h button{margin-left:auto;}
+.pv-ins-grid{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:11px;}
+.pv-bytes-wrap{margin-top:9px;}
+.pv-bytes-h{font-size:9.5px;color:var(--text-faint);margin-bottom:5px;letter-spacing:.04em;}
+.pv-bytes{display:flex;gap:3px;flex-wrap:wrap;}
+.pv-byte{
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  border:1px solid var(--border);border-radius:4px;padding:3px 5px;background:var(--surface);
+}
+.pv-byte-a{font-size:8.5px;color:var(--text-faint);}
+.pv-byte-v{font-size:11px;}
+.pv-refs{font-size:10.5px;color:var(--text-faint);margin-top:9px;}
+.pv-refs b{color:var(--memory);font-family:var(--mono);}
+.pv-note{font-size:10.5px;line-height:1.6;color:var(--text-faint);margin-top:9px;}
+.pv-foot{
+  font-size:10.5px;line-height:1.65;color:var(--text-faint);
+  padding:8px 10px;border:1px dashed var(--border);border-radius:6px;
+}
+/* An uninitialized byte is not a zero byte. */
+.pv-byte.un{border-style:dashed;opacity:.7;}
+.pv-byte.un .pv-byte-v{color:var(--execution);}
 </style>
 </head>
 <body>
@@ -2821,7 +2938,13 @@ function typeName(t) {
   if (!t) return '?';
   switch (t.kind) {
     case 'scalar':  return (t.signed === false && t.base !== 'void' ? 'unsigned ' : '') + t.base;
-    case 'pointer': return typeName(t.to) + ' *';
+    // int * / int ** / char *, the way C is written. Stacking a space before
+    // every star produced "int * *", which is not a spelling a learner will
+    // ever see in a subject or a man page.
+    case 'pointer': {
+      const inner = typeName(t.to);
+      return inner + (inner.charAt(inner.length - 1) === '*' ? '*' : ' *');
+    }
     case 'array':   return typeName(t.of) + '[' + t.len + ']';
   }
   return '?';
@@ -4871,6 +4994,7 @@ class History {
     const blocks = this.I.blocks.slice(0, d.blockCount).map(b => ({
       id: b.id, base: b.base, size: b.size, label: b.label, region: b.region,
       section: b.section, sectionLabel: b.sectionLabel,
+      align: b.type ? alignof(b.type) : 1, entryPoint: !!b.entryPoint,
       frameName: b.frameName, typeName: b.type ? typeName(b.type) : null,
       state: stateMap.get(b.id) || 'live',
       readonly: !!b.readonly,
@@ -4983,9 +5107,153 @@ class History {
       return o;
     });
 
+    /* ------------------- the object / address / pointer graph -------------------
+       ONE derivation of every relationship in the program, built from the blocks
+       and the values already decoded above. Views read this; none of them may
+       resolve a pointer, invent an address or decode a value for themselves —
+       that is what keeps the pointer panel, the memory panel and the RAM map
+       incapable of disagreeing.
+
+       Nodes are BLOCKS, not variables, so the same structure describes a local,
+       a global, a string literal, an array, a heap allocation and a function
+       entry point without special-casing any of them. Edges are typed, so a
+       null pointer and a dangling pointer are different facts rather than a
+       missing arrow. */
+    const graph = (() => {
+      const nodeByBlock = new Map();
+      const nodes = objects.map(o => {
+        const blk = blocks.find(b => b.id === o.blockId);
+        const n = {
+          id: 'b' + o.blockId, blockId: o.blockId,
+          label: o.varName || o.label, varName: o.varName || null,
+          address: o.address, size: o.size, align: blk ? blk.align : 1,
+          section: o.section, sectionLabel: o.sectionLabel, region: o.region,
+          typeName: o.typeName || null, frameName: o.frameName || null,
+          readonly: !!o.readonly, entryPoint: blk ? !!blk.entryPoint : false,
+          isArray: !!o.isArray, isPointer: !!(o.typeName && o.typeName.indexOf('*') >= 0),
+          uninitialized: !!o.uninitialized, valueText: o.valueText ?? null,
+          bytes: o.bytes, elements: o.elements || null,
+        };
+        nodeByBlock.set(o.blockId, n);
+        return n;
+      });
+
+      /* One edge per pointer OBJECT — including a pointer sitting inside an
+         array of pointers later on — describing what it holds right now. */
+      const edges = [];
+      const addPointerEdge = (fromBlockId, name, pt, uninit) => {
+        const from = 'b' + fromBlockId;
+        if (uninit) {
+          edges.push({ from, to: null, name, kind: 'uninitialized', valid: false,
+                       text: 'holds no address yet',
+                       why: 'This pointer has never been assigned, so the bytes where its address would live still hold whatever was there. Reading it is undefined behaviour in real C; here it is trapped.' });
+          return;
+        }
+        if (!pt) return;
+        if (pt.kind === 'null') {
+          edges.push({ from, to: null, name, kind: 'null', valid: false, address: 0,
+                       text: 'NULL',
+                       why: 'NULL is a valid, deliberate value meaning "points at nothing". It is different from an uninitialized pointer, which holds an unknown address, and from a dangling pointer, which holds an address that used to be valid.' });
+          return;
+        }
+        if (pt.kind === 'wild') {
+          edges.push({ from, to: null, name, kind: 'wild', valid: false, address: pt.address,
+                       text: 'unmapped address', why: 'This address is not inside any object this program owns.' });
+          return;
+        }
+        if (pt.kind === 'freed' || pt.kind === 'destroyed') {
+          edges.push({ from, to: nodeByBlock.has(pt.blockId) ? 'b' + pt.blockId : null,
+                       name, kind: 'dangling', valid: false, address: pt.address,
+                       blockId: pt.blockId, text: pt.text,
+                       why: pt.kind === 'freed'
+                         ? 'The heap block this points at has been freed. The address is still stored, but the object is gone.'
+                         : 'The frame this points into has returned. The address is still stored, but that storage no longer belongs to the program.' });
+          return;
+        }
+        edges.push({
+          from, to: 'b' + pt.blockId, name, kind: 'points-to', valid: true,
+          address: pt.address, blockId: pt.blockId, offset: pt.offset,
+          elementIndex: pt.elementIndex, elemSize: pt.elemSize,
+          pointeeTypeName: pt.pointeeTypeName,
+          readable: pt.readable, initialized: pt.initialized,
+          text: hexAddr(pt.address), targetValueText: pt.valueText,
+          why: 'The pointer stores this address. Dereferencing it goes to that address and reads ' +
+               pt.elemSize + ' byte' + (pt.elemSize === 1 ? '' : 's') + ' as ' + pt.pointeeTypeName + '.',
+        });
+      };
+      for (const v of [...frames.flatMap(f => f.vars), ...globals]) {
+        if (!v.alive || !v.blockId) continue;
+        const isPtr = v.typeName && v.typeName.indexOf('*') >= 0 && !v.isArray;
+        if (!isPtr) continue;
+        addPointerEdge(v.blockId, v.name, v.pointerTarget, v.uninitialized);
+      }
+
+      /* Reverse index: what points AT this object. Answers "who still holds a
+         reference to the block I just freed?" without a second search. */
+      for (const n of nodes) n.referencedBy = [];
+      for (const e of edges) {
+        if (!e.to) continue;
+        const t = nodes.find(n => n.id === e.to);
+        if (t) t.referencedBy.push({ from: e.from, name: e.name, kind: e.kind, address: e.address });
+      }
+
+      /* Full multi-level walk, so int **pp -> int *p -> int x -> 42 is ONE
+         fact rather than something the view has to rediscover per level.
+         Guarded against a pointer cycle (p = (void*)&p style aliasing). */
+      const chainOf = (startBlockId) => {
+        const hops = [];
+        const seen = new Set();
+        let cur = 'b' + startBlockId;
+        for (let depth = 0; depth < 16; depth++) {
+          if (seen.has(cur)) { hops.push({ kind: 'cycle', text: 'this chain loops back on itself' }); break; }
+          seen.add(cur);
+          const n = nodes.find(x => x.id === cur);
+          if (!n) break;
+          const e = edges.find(x => x.from === cur);
+          hops.push({
+            kind: 'object', id: n.id, blockId: n.blockId, label: n.label,
+            typeName: n.typeName, address: n.address, section: n.section,
+            sectionLabel: n.sectionLabel, valueText: n.valueText,
+            isPointer: n.isPointer, uninitialized: n.uninitialized,
+          });
+          if (!e) break;
+          hops.push({ kind: 'edge', edgeKind: e.kind, text: e.text, valid: e.valid, why: e.why });
+          if (!e.valid || !e.to) break;
+          cur = e.to;
+        }
+        return hops;
+      };
+      const chains = {};
+      for (const e of edges) {
+        const startId = Number(e.from.slice(1));
+        if (!chains[startId]) chains[startId] = chainOf(startId);
+      }
+
+      /* Pointer arithmetic, in the units the TYPE defines rather than bytes.
+         p + 1 moving by sizeof(*p) is the single most common misunderstanding
+         this panel exists to correct. */
+      const arithmetic = {};
+      for (const e of edges) {
+        if (e.kind !== 'points-to' || !e.elemSize) continue;
+        const steps = [];
+        for (let k = 0; k <= 3; k++) {
+          const a = e.address + k * e.elemSize;
+          const inside = nodes.find(n => a >= n.address && a < n.address + n.size);
+          steps.push({ k, address: a, text: hexAddr(a),
+                       inside: inside ? inside.label : null,
+                       past: !inside });
+        }
+        arithmetic[Number(e.from.slice(1))] = {
+          elemSize: e.elemSize, pointeeTypeName: e.pointeeTypeName, steps,
+        };
+      }
+
+      return { nodes, edges, chains, arithmetic, pointerSize: ARCH.sizes.pointer };
+    })();
+
     return {
       arch: ARCH,
-      frames, globals, objects, blocks,
+      frames, globals, objects, blocks, graph,
       vars: top ? top.vars : [],
       activeVars: top ? top.vars.filter(v => !v.shadowed) : [],
       frameName: top ? top.name : null,
@@ -11653,29 +11921,159 @@ function byteDetail(b, o, state) {
 }
 
 /* ================================ POINTERS ================================ */
-function renderPointers(state) {
-  const ptrs = state.vars.concat(state.globals).filter(v => v.isPointer && !v.uninitialized && !v.shadowed);
-  $('#ptrTag').textContent = String(ptrs.length);
-  if (!ptrs.length) { $('#ptrPanel').innerHTML = '<div class="empty">No initialized pointers in scope.</div>'; return; }
-  let h = '';
-  for (const p of ptrs) {
-    const pt = p.pointerTarget || { kind: 'null' };
-    const dead = pt.kind === 'freed' || pt.kind === 'destroyed' || pt.kind === 'wild';
-    let target;
-    if (pt.kind === 'null') target = 'NULL — points at nothing';
-    else if (pt.kind === 'wild') target = 'unmapped address';
-    else if (pt.kind === 'freed') target = 'freed heap block <span class="ptr-badge">use-after-free</span>';
-    else if (pt.kind === 'destroyed') target = 'destroyed frame <span class="ptr-badge">use-after-return</span>';
-    else target = esc(pt.valueText) + ' at ' + hexA(pt.address) + (pt.label ? ' <span style="color:var(--text-faint)">in ' + esc(pt.label) + '</span>' : '');
-    h += '<div class="ptr-row' + (dead ? ' dead' : '') + '">' +
-      '<span class="ptr-box" data-block="' + p.blockId + '">' + esc(p.name) + ' = ' + esc(p.valueText) + '</span>' +
-      '<span style="color:var(--text-faint)">→</span>' +
-      '<span class="ptr-target"' + (pt.blockId ? ' data-block="' + pt.blockId + '"' : '') + '>' + target + '</span></div>';
+/* Why a pointer holds what it holds — one sentence per edge kind, shown next
+   to the arrow it explains rather than in a legend somewhere else. */
+const PTR_EDGE_NOTE = {
+  'points-to':     { cls:'ok',   verb:'holds the address of' },
+  'null':          { cls:'null', verb:'holds NULL' },
+  'uninitialized': { cls:'warn', verb:'holds no address yet' },
+  'dangling':      { cls:'dead', verb:'holds a stale address' },
+  'wild':          { cls:'dead', verb:'holds an unmapped address' },
+};
+
+// A node as a labelled box: name, type, address, and what it currently holds.
+function ptrNodeBox(n, role) {
+  if (!n) return '';
+  const val = n.uninitialized ? '?' : (n.valueText != null ? n.valueText : '—');
+  return '<div class="pv-box ' + role + '" data-block="' + n.blockId + '" role="button" tabindex="0">' +
+    '<div class="pv-box-head"><b>' + esc(n.label) + '</b>' +
+      (n.typeName ? '<span class="pv-ty">' + esc(n.typeName) + '</span>' : '') +
+      '<span class="pv-sec pv-sec-' + esc(n.section) + '">' + esc(n.sectionLabel) + '</span></div>' +
+    '<div class="pv-box-rows">' +
+      '<span class="pv-k">address</span><span class="pv-v mono">' + hexA(n.address) + '</span>' +
+      '<span class="pv-k">value</span><span class="pv-v mono' + (n.uninitialized ? ' pv-un' : '') + '">' + esc(val) + '</span>' +
+      '<span class="pv-k">size</span><span class="pv-v">' + n.size + ' B' +
+        (n.align > 1 ? ' · align ' + n.align : '') + '</span>' +
+    '</div></div>';
+}
+
+/* The chain, drawn as boxes joined by arrows. This is what makes int **pp one
+   picture instead of three lookups: the engine already walked it. */
+function ptrChainHtml(g, chain) {
+  let h = '<div class="pv-chain">';
+  for (let i = 0; i < chain.length; i++) {
+    const hop = chain[i];
+    if (hop.kind === 'object') {
+      const n = g.nodes.find(x => x.id === hop.id);
+      h += ptrNodeBox(n, i === 0 ? 'from' : 'to');
+    } else if (hop.kind === 'cycle') {
+      h += '<div class="pv-arrow dead"><span class="pv-a-line">↻</span><span class="pv-a-lbl">' + esc(hop.text) + '</span></div>';
+    } else {
+      const note = PTR_EDGE_NOTE[hop.edgeKind] || { cls:'warn', verb:'holds' };
+      h += '<div class="pv-arrow ' + note.cls + '">' +
+        '<span class="pv-a-lbl">' + note.verb + '</span>' +
+        '<span class="pv-a-line" aria-hidden="true">▼</span>' +
+        (hop.text && hop.edgeKind === 'points-to' ? '<span class="pv-a-addr mono">' + esc(hop.text) + '</span>' : '') +
+        (hop.edgeKind !== 'points-to' ? '<span class="pv-a-addr">' + esc(hop.text || '') + '</span>' : '') +
+        '</div>';
+    }
   }
+  return h + '</div>';
+}
+
+/* p + 1 moves by sizeof(*p), not by one byte. Showing the three addresses next
+   to each other, each labelled with the object it lands in, is the shortest
+   route to that idea. */
+function ptrArithHtml(a) {
+  if (!a) return '';
+  let h = '<div class="pv-arith"><div class="pv-arith-h">pointer arithmetic — each step moves ' +
+    'sizeof(' + esc(a.pointeeTypeName) + ') = <b>' + a.elemSize + ' byte' + (a.elemSize === 1 ? '' : 's') + '</b></div>' +
+    '<div class="pv-arith-row">';
+  for (const s of a.steps) {
+    h += '<span class="pv-step' + (s.past ? ' past' : '') + '">' +
+      '<span class="pv-step-k mono">p + ' + s.k + '</span>' +
+      '<span class="pv-step-a mono">' + esc(s.text) + '</span>' +
+      '<span class="pv-step-in">' + (s.inside ? esc(s.inside) : 'past the end') + '</span></span>';
+  }
+  return h + '</div></div>';
+}
+
+/* Part 14 — the address inspector. Every field is read straight off the graph
+   node the engine built; nothing here is recomputed from the address. */
+function ptrInspectorHtml(g) {
+  const n = g.nodes.find(x => x.blockId === ui.focusObject);
+  if (!n) return '';
+  /* A byte from the engine is {address, value, init, present} — not a number.
+     An uninitialized byte is shown as ?? rather than as 00, because "this has
+     never been written" and "this holds zero" are different facts and a byte
+     view that blurs them teaches the wrong lesson. */
+  const bytes = (n.bytes || []).map((by) => {
+    const known = by && by.init;
+    return '<span class="pv-byte' + (known ? '' : ' un') + '" title="' + hexA(by.address) +
+      (known ? '' : ' — never written') + '">' +
+      '<span class="pv-byte-a mono">' + hexA(by.address).slice(-4) + '</span>' +
+      '<span class="pv-byte-v mono">' + (known
+        ? Number(by.value).toString(16).toUpperCase().padStart(2, '0')
+        : '??') + '</span></span>';
+  }).join('');
+  const refs = (n.referencedBy || []);
+  return '<div class="pv-inspect">' +
+    '<div class="pv-inspect-h"><span>ADDRESS INSPECTOR</span>' +
+      '<button class="p-btn" id="pvClose" aria-label="Close the inspector">✕</button></div>' +
+    '<div class="pv-ins-grid">' +
+      '<span class="pv-k">object</span><span class="pv-v">' + esc(n.label) + '</span>' +
+      '<span class="pv-k">type</span><span class="pv-v">' + esc(n.typeName || '—') + '</span>' +
+      '<span class="pv-k">address</span><span class="pv-v mono">' + hexA(n.address) + '</span>' +
+      '<span class="pv-k">section</span><span class="pv-v">' + esc(n.sectionLabel) + '</span>' +
+      '<span class="pv-k">size</span><span class="pv-v">' + n.size + ' byte' + (n.size === 1 ? '' : 's') + '</span>' +
+      '<span class="pv-k">alignment</span><span class="pv-v">' + n.align + '</span>' +
+      (n.frameName ? '<span class="pv-k">frame</span><span class="pv-v">' + esc(n.frameName) + '()</span>' : '') +
+      '<span class="pv-k">value</span><span class="pv-v mono">' + esc(n.uninitialized ? 'uninitialized' : (n.valueText ?? '—')) + '</span>' +
+      (n.readonly ? '<span class="pv-k">access</span><span class="pv-v">read-only</span>' : '') +
+    '</div>' +
+    (n.entryPoint
+      ? '<div class="pv-note">A function entry point. This simulator models the ADDRESS a function starts at, not the instructions it compiles to, so it has no byte view.</div>'
+      : '<div class="pv-bytes-wrap"><div class="pv-bytes-h">bytes — ' +
+          esc(CEngine.ARCH.short) + '</div><div class="pv-bytes">' + bytes + '</div></div>') +
+    (refs.length
+      ? '<div class="pv-refs">pointed at by ' + refs.map(r => '<b>' + esc(r.name) + '</b>').join(', ') + '</div>'
+      : '') +
+    '</div>';
+}
+
+function renderPointers(state) {
+  const g = state.graph;
+  if (!g) { $('#ptrPanel').innerHTML = '<div class="empty">No execution state yet.</div>'; return; }
+  const edges = g.edges;
+  $('#ptrTag').textContent = String(edges.length);
+
+  let h = ptrInspectorHtml(g);
+  if (!edges.length) {
+    h += '<div class="empty">No pointers in scope. Declare one — <span class="mono">int *p = &x;</span> — to see the chain.</div>';
+    $('#ptrPanel').innerHTML = h;
+    wirePointerPanel();
+    return;
+  }
+  for (const e of edges) {
+    const startId = Number(e.from.slice(1));
+    const chain = g.chains[startId];
+    const note = PTR_EDGE_NOTE[e.kind] || { cls:'warn' };
+    h += '<div class="pv-card ' + note.cls + '">';
+    h += '<div class="pv-card-h"><b class="mono">' + esc(e.name) + '</b>' +
+         '<span class="pv-kind pv-kind-' + e.kind + '">' + esc(e.kind.replace('-', ' ')) + '</span></div>';
+    if (chain) h += ptrChainHtml(g, chain);
+    if (e.why) h += '<div class="pv-why">' + esc(e.why) + '</div>';
+    if (e.kind === 'points-to') h += ptrArithHtml(g.arithmetic[startId]);
+    h += '</div>';
+  }
+  h += '<div class="pv-foot">A pointer is ' + g.pointerSize + ' bytes on this simulated architecture ' +
+       '(' + esc(CEngine.ARCH.short) + ') whatever it points at. The pointed-to TYPE does not change the ' +
+       'pointer\'s size — it decides how many bytes a dereference reads and how far <span class="mono">+ 1</span> moves. ' +
+       'Pointer sizes are not the same on every real architecture.</div>';
   $('#ptrPanel').innerHTML = h;
-  $$('#ptrPanel [data-block]').forEach(el => el.addEventListener('click', () => {
-    ui.focusObject = +el.dataset.block; openPanel('panelMemory'); render();
-  }));
+  wirePointerPanel();
+}
+
+function wirePointerPanel() {
+  $$('#ptrPanel [data-block]').forEach(el => {
+    const go = () => { ui.focusObject = +el.dataset.block; render(); };
+    el.addEventListener('click', go);
+    el.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); go(); }
+    });
+  });
+  const c = $('#pvClose');
+  if (c) c.addEventListener('click', () => { ui.focusObject = null; render(); });
 }
 
 /* ================================ RAM MAP ================================ */
