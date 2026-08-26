@@ -2550,6 +2550,245 @@ html[data-theme=light] .viz-node.vz-frame::after{
   transition:background .15s;
 }
 .pv-open-lab:hover{background:var(--memory-dim);}
+
+/* ==================================================================
+   PHASE 7 — functions, libraries, system calls.
+   The frame cards carry the teaching: the top frame is lit, waiting
+   frames recede, and a destroyed frame simply stops being drawn. The
+   syscall boundary is the one hard visual break in the section,
+   because "this is where your process stops being in charge" is the
+   idea the whole page exists to land.
+   ================================================================== */
+
+.fn-block{
+  border:1px solid var(--border);border-radius:9px;padding:13px 14px;margin-bottom:14px;
+  background:var(--surface-2);
+}
+.fn-block-h{font-size:10px;letter-spacing:.13em;color:var(--text-faint);margin-bottom:11px;text-transform:uppercase;}
+.fn-code{
+  font-size:11.5px;line-height:1.6;background:var(--surface);border:1px solid var(--border);
+  border-radius:6px;padding:9px 11px;margin:0 0 11px;overflow-x:auto;color:var(--text);
+}
+.fn-note{font-size:10.5px;line-height:1.65;color:var(--text-faint);margin-top:11px;}
+.fn-note b{color:var(--text);}
+.fn-note.fn-warn{
+  border-left:2px solid var(--execution);padding:7px 0 7px 10px;color:var(--text-muted);
+}
+.fn-empty{font-size:10.5px;color:var(--text-faint);font-style:italic;padding:4px 0;}
+
+/* --- anatomy --- */
+.fn-anat{display:flex;flex-direction:column;gap:7px;}
+.fn-anat-row{display:flex;align-items:flex-start;gap:10px;}
+.fn-anat-frag{
+  background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:3px 8px;
+  font-size:11.5px;color:var(--memory);white-space:nowrap;flex-shrink:0;min-width:132px;
+}
+.fn-anat-arrow{color:var(--memory);font-size:11px;padding-top:3px;}
+.fn-anat-role{font-size:11.5px;}
+.fn-anat-why{font-size:10.5px;line-height:1.6;color:var(--text-faint);margin-top:2px;}
+
+/* --- two-up comparisons --- */
+.fn-split{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:11px;margin-top:12px;}
+.fn-half{border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--surface);}
+.fn-half-h{font-size:9.5px;letter-spacing:.12em;color:var(--text-faint);margin-bottom:8px;}
+.fn-half-b{font-size:11px;line-height:1.65;color:var(--text-faint);}
+.fn-half-b b{color:var(--text);}
+.fn-half.lib{border-color:var(--memory);} .fn-half.lib .fn-half-h{color:var(--memory);}
+.fn-half.sys{border-color:var(--error);}  .fn-half.sys .fn-half-h{color:var(--error);}
+
+/* --- the live walkthrough --- */
+.fn-progs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px;}
+.fn-prog{
+  background:var(--surface);border:1px solid var(--border);border-radius:999px;color:var(--text-faint);
+  font-size:10.5px;padding:3px 11px;cursor:pointer;transition:border-color .15s,color .15s;
+}
+.fn-prog:hover{color:var(--text);}
+.fn-prog.on{border-color:var(--memory);color:var(--memory);}
+.fn-src{max-height:220px;overflow:auto;}
+.fn-srcline{display:block;padding:0 4px;border-radius:3px;color:var(--text-faint);}
+.fn-srcline.on{background:var(--execution-dim);color:var(--text);border-left:2px solid var(--execution);}
+.fn-scrub{display:flex;align-items:center;gap:7px;margin-bottom:11px;flex-wrap:wrap;}
+.fn-range{flex:1;min-width:150px;accent-color:var(--memory);}
+.fn-scrub-n{font-size:11px;color:var(--text-faint);}
+.fn-story{display:flex;align-items:baseline;gap:11px;margin-bottom:7px;flex-wrap:wrap;}
+.fn-story-k{
+  font-size:9.5px;letter-spacing:.13em;color:var(--execution);border:1px solid var(--execution);
+  border-radius:999px;padding:2px 9px;flex-shrink:0;
+}
+.fn-story-b{font-size:11px;color:var(--text);}
+.fn-desc{font-size:10.5px;color:var(--text-faint);margin-bottom:12px;line-height:1.6;}
+
+.fn-cols{display:grid;grid-template-columns:minmax(150px,1fr) minmax(260px,2.2fr);gap:12px;}
+.fn-col-h{font-size:9.5px;letter-spacing:.12em;color:var(--text-faint);margin-bottom:7px;}
+.fn-cs{display:flex;flex-direction:column;gap:2px;}
+.fn-cs-row{
+  display:flex;align-items:center;gap:7px;border:1px solid var(--border);border-radius:6px;
+  padding:6px 9px;background:var(--surface);font-size:11px;color:var(--text-faint);
+}
+.fn-cs-row.top{border-color:var(--execution);color:var(--text);background:var(--execution-dim);}
+.fn-cs-tag{margin-left:auto;font-size:8.5px;letter-spacing:.09em;color:var(--execution);}
+
+/* --- stack frames --- */
+.fn-stack{display:flex;flex-direction:column;gap:7px;}
+.fn-frame{
+  border:1px solid var(--border);border-radius:8px;background:var(--surface);overflow:hidden;
+  opacity:.62;transition:opacity .2s,border-color .2s;
+}
+.fn-frame.top{opacity:1;border-color:var(--stack);box-shadow:0 0 0 1px var(--stack-dim);}
+.fn-frame-h{
+  display:flex;align-items:center;gap:9px;padding:7px 10px;background:var(--surface-2);
+  border-bottom:1px solid var(--border);flex-wrap:wrap;
+}
+.fn-frame-h b{font-size:12px;}
+.fn-frame-tag{font-size:8.5px;letter-spacing:.09em;color:var(--stack);border:1px solid var(--stack);border-radius:999px;padding:1px 7px;}
+.fn-frame-tag.waiting{color:var(--text-faint);border-color:var(--border);}
+.fn-frame-ret{margin-left:auto;font-size:9.5px;color:var(--text-faint);}
+.fn-vars{display:flex;flex-direction:column;}
+.fn-var{
+  display:grid;grid-template-columns:minmax(52px,1fr) minmax(48px,1fr) minmax(60px,1.2fr) auto;
+  gap:9px;padding:5px 10px;font-size:11px;border-bottom:1px solid var(--border);align-items:baseline;
+}
+.fn-var:last-child{border-bottom:none;}
+.fn-var-n{color:var(--text);}
+.fn-var-t{color:var(--text-faint);font-size:10px;}
+.fn-var-v{color:var(--memory);}
+.fn-var.un .fn-var-v{color:var(--execution);}
+.fn-var-a{color:var(--text-faint);font-size:9.5px;}
+.fn-stack-base{font-size:9.5px;color:var(--text-faint);text-align:center;padding-top:4px;}
+
+.fn-ret{
+  margin-top:12px;padding:9px 11px;border:1px solid var(--memory);border-radius:7px;
+  background:var(--memory-dim);font-size:11.5px;
+}
+.fn-ret-note{display:block;font-size:10px;color:var(--text-faint);margin-top:3px;}
+.fn-destroy{
+  margin-top:9px;padding:8px 11px;border:1px dashed var(--error);border-radius:7px;
+  font-size:11px;color:var(--text-muted);
+}
+
+/* --- lifetime --- */
+.fn-life{display:flex;flex-direction:column;align-items:center;gap:0;}
+.fn-life-step{
+  display:flex;align-items:center;gap:9px;border:1px solid var(--border);border-radius:7px;
+  padding:6px 14px;background:var(--surface);font-size:11px;color:var(--text-faint);min-width:230px;
+  transition:border-color .2s,color .2s,background .2s;
+}
+.fn-life-step.on{border-color:var(--execution);color:var(--text);background:var(--execution-dim);}
+.fn-life-n{
+  width:17px;height:17px;border-radius:50%;border:1px solid var(--border);
+  display:inline-flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;
+}
+.fn-life-step.on .fn-life-n{border-color:var(--execution);color:var(--execution);}
+.fn-life-arr{color:var(--text-faint);font-size:9px;padding:2px 0;}
+
+/* --- memory map --- */
+.fn-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;}
+.fn-map-sec{border:1px solid var(--border);border-radius:7px;padding:8px 10px;background:var(--surface);}
+.fn-map-h{font-size:10.5px;color:var(--memory);margin-bottom:6px;}
+.fn-map-o{display:flex;align-items:baseline;gap:7px;font-size:10.5px;padding:2px 0;flex-wrap:wrap;}
+.fn-map-a{color:var(--text-faint);font-size:9.5px;margin-left:auto;}
+.fn-map-f{font-size:9px;color:var(--text-faint);}
+
+/* --- the toolchain pipeline --- */
+.fn-pipe{display:flex;flex-direction:column;align-items:center;gap:0;margin:12px 0;}
+.fn-pipe-step{
+  display:flex;flex-direction:column;gap:2px;border:1px solid var(--border);border-radius:7px;
+  padding:7px 13px;background:var(--surface);min-width:290px;
+}
+.fn-pipe-step b{font-size:11.5px;}
+.fn-pipe-step span{font-size:10px;color:var(--text-faint);}
+.fn-pipe-arr{color:var(--memory);font-size:10px;padding:2px 0;}
+
+/* --- user / kernel --- */
+.fn-uk{display:flex;flex-direction:column;gap:0;}
+.fn-uk-zone{border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+.fn-uk-zone.user{border-color:var(--memory);background:var(--memory-dim);}
+.fn-uk-zone.kernel{border-color:var(--error);background:var(--error-dim);}
+.fn-uk-h{font-size:9.5px;letter-spacing:.13em;margin-bottom:6px;}
+.fn-uk-zone.user .fn-uk-h{color:var(--memory);}
+.fn-uk-zone.kernel .fn-uk-h{color:var(--error);}
+.fn-uk-b{font-size:11px;line-height:1.65;color:var(--text-faint);}
+.fn-uk-boundary{
+  display:flex;align-items:center;justify-content:center;padding:9px 0;position:relative;
+}
+.fn-uk-boundary::before{
+  content:'';position:absolute;left:0;right:0;top:50%;border-top:2px dashed var(--execution);
+}
+.fn-uk-boundary span{
+  position:relative;background:var(--surface-2);padding:0 11px;font-size:9.5px;
+  letter-spacing:.11em;color:var(--execution);
+}
+
+/* --- file descriptors --- */
+.fn-fds{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px;}
+.fn-fd{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:7px;padding:9px 11px;background:var(--surface);}
+.fn-fd-n{
+  width:26px;height:26px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;flex-shrink:0;border:1px solid var(--border);
+}
+.fn-fd.fd0 .fn-fd-n{color:var(--text-faint);}
+.fn-fd.fd1 .fn-fd-n{color:var(--memory);border-color:var(--memory);}
+.fn-fd.fd2 .fn-fd-n{color:var(--error);border-color:var(--error);}
+.fn-fd b{font-size:11.5px;display:block;}
+.fn-fd-why{font-size:10px;color:var(--text-faint);}
+
+/* --- the syscall visualization --- */
+.fn-sys{border:1px solid var(--border);border-radius:8px;padding:12px;background:var(--surface);margin-top:11px;}
+.fn-sys-h{font-size:9.5px;letter-spacing:.12em;color:var(--text-faint);margin-bottom:10px;}
+.fn-args{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px;}
+.fn-arg{display:flex;flex-direction:column;gap:2px;border:1px solid var(--border);border-radius:6px;padding:7px 10px;background:var(--surface-2);}
+.fn-arg-k{font-size:9px;letter-spacing:.09em;color:var(--text-faint);text-transform:uppercase;}
+.fn-arg b{font-size:14px;color:var(--memory);}
+.fn-arg-w{font-size:9.5px;color:var(--text-faint);}
+.fn-sys-arr{text-align:center;color:var(--memory);font-size:10.5px;padding:8px 0;}
+.fn-bytes{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;}
+.fn-byte{
+  display:flex;flex-direction:column;align-items:center;gap:1px;border:1px solid var(--border);
+  border-radius:5px;padding:4px 7px;background:var(--surface-2);
+}
+.fn-byte-a{font-size:8.5px;color:var(--text-faint);}
+.fn-byte-v{font-size:12px;color:var(--memory);}
+.fn-byte-c{font-size:10px;color:var(--text);}
+.fn-kernel{
+  text-align:center;border:1px solid var(--error);background:var(--error-dim);color:var(--error);
+  border-radius:7px;padding:9px;font-size:10.5px;letter-spacing:.13em;
+}
+.fn-stdout{
+  text-align:center;border:1px solid var(--memory);background:var(--memory-dim);
+  border-radius:7px;padding:9px;font-size:11.5px;
+}
+
+/* --- reference cards --- */
+.fn-refs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px;}
+.fn-ref{
+  background:var(--surface);border:1px solid var(--border);border-radius:999px;color:var(--text-faint);
+  font-family:var(--mono);font-size:10.5px;padding:3px 11px;cursor:pointer;
+}
+.fn-ref:hover{color:var(--text);}
+.fn-ref.on{border-color:var(--memory);color:var(--memory);}
+.fn-card{border:1px solid var(--border);border-radius:8px;padding:12px;background:var(--surface);}
+.fn-card-h{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.fn-card-h b{font-size:14px;}
+.fn-kind{font-size:9px;letter-spacing:.09em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--border);color:var(--text-faint);}
+.fn-kind-library{color:var(--memory);border-color:var(--memory);}
+.fn-kind-syscall{color:var(--error);border-color:var(--error);}
+.fn-card-grid{display:grid;grid-template-columns:auto 1fr;gap:6px 13px;font-size:11px;align-items:baseline;}
+.fn-ck{font-size:9px;letter-spacing:.08em;color:var(--text-faint);text-transform:uppercase;}
+.fn-cv{line-height:1.6;color:var(--text-faint);}
+.fn-cv.mono{color:var(--text);}
+.fn-conmap{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:11px;padding-top:10px;border-top:1px dashed var(--border);}
+.fn-con{font-size:10px;border:1px solid var(--border);border-radius:999px;padding:2px 9px;color:var(--text-faint);}
+.fn-viz-btn{margin-top:12px;}
+.fn-cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px;margin-top:13px;}
+.fn-cat{border:1px solid var(--border);border-radius:7px;padding:8px 10px;background:var(--surface);}
+.fn-cat b{font-size:11.5px;display:block;}
+.fn-cat-h{font-size:9.5px;color:var(--memory);display:block;margin:2px 0 4px;}
+.fn-cat-b{font-size:10px;color:var(--text-faint);line-height:1.55;}
+
+@media (max-width:820px){
+  .fn-cols{grid-template-columns:1fr;}
+  .fn-anat-frag{min-width:0;}
+}
 </style>
 </head>
 <body>
@@ -5386,14 +5625,31 @@ class Stepper {
     if (name === 'write') {
       const fd = Number(args[0].v), ptr = Number(args[1].v), len = Number(args[2].v);
       let s = '';
-      for (let k = 0; k < len; k++) { I.checkAccess(ptr + k, 1, 'write()'); s += String.fromCharCode(I.mem.getByte(ptr + k)); }
+      // The bytes are captured as they are read, so the syscall view shows the
+      // memory this call actually touched instead of re-reading it later.
+      const wroteBytes = [];
+      for (let k = 0; k < len; k++) {
+        I.checkAccess(ptr + k, 1, 'write()');
+        const by = I.mem.getByte(ptr + k);
+        wroteBytes.push({ address: ptr + k, value: by });
+        s += String.fromCharCode(by);
+      }
       if (fd === 1 || fd === 2) I.output += s;
       yield* this.step({
         phase: 'output', line,
         description: 'write(' + fd + ', ' + hexAddr(ptr) + ', ' + len + ') — ' + JSON.stringify(s) + ' sent to ' +
                      (fd === 2 ? 'standard error' : fd === 1 ? 'standard output' : 'fd ' + fd) + '.',
         why: 'write() is a raw system call: it copies exactly len bytes starting at the given address to a file descriptor. It does not stop at a \\0 and adds nothing of its own.',
-        detail: { wrote: s, fd, length: len },
+        detail: {
+          wrote: s, fd, length: len,
+          // Where the buffer really is, so the view can join this call to the
+          // object and the section that own those bytes.
+          buffer: ptr,
+          bufferBlockId: (() => { const b = I.blocks.find(x => ptr >= x.base && ptr < x.base + x.size); return b ? b.id : null; })(),
+          bufferSection: (() => { const b = I.blocks.find(x => ptr >= x.base && ptr < x.base + x.size); return b ? b.section : null; })(),
+          bytes: wroteBytes,
+          stream: fd === 0 ? 'stdin' : fd === 1 ? 'stdout' : fd === 2 ? 'stderr' : ('fd ' + fd),
+        },
       });
       return { type: T_INT, v: BigInt(len) };
     }
@@ -15946,6 +16202,8 @@ const LAB_TABS = [
   { id:'arith',  label:'Arithmetic' },
   { id:'compare',label:'Comparisons' },
   { id:'types',  label:'Types & Limits' },
+  { id:'functions', label:'Functions' },
+  { id:'syscalls',  label:'Libraries & Syscalls' },
 ];
 
 const lab = {
@@ -15967,6 +16225,11 @@ const lab = {
   bitSigned: false,          // which interpretation the switch is on
   ovExpr: 'unsigned char',   // which overflow demonstration is selected
   ovRun: null,
+  // --- Phase 7: functions, libraries, system calls ---
+  fnProg: 'add',             // which runnable example the walkthrough shows
+  fnStep: 0,                 // where the scrubber sits in that run
+  fnRuns: null,              // cached engine runs, keyed by program
+  fnRef: 'write',            // which reference card is open
 };
 
 function labType() { return (LAB_TYPES.find(t => t.id === lab.typeId) || LAB_TYPES[0]).make(); }
@@ -16255,6 +16518,8 @@ function renderLab() {
     case 'arith':   body = labExprPanel('arith'); break;
     case 'compare': body = labExprPanel('compare'); break;
     case 'types':   body = labTypesHtml(); break;
+    case 'functions': body = labFunctionsHtml(); break;
+    case 'syscalls':  body = labSyscallsHtml(); break;
   }
   root.innerHTML =
     '<div class="vl"><div class="vl-inner">' +
@@ -16265,7 +16530,7 @@ function renderLab() {
           '" data-labtab="' + t.id + '" role="tab" aria-selected="' + (t.id === lab.tab) + '">' +
           esc(t.label) + '</button>').join('') +
       '</div>' +
-      labValueStrip() +
+      (lab.tab === 'functions' || lab.tab === 'syscalls' ? '' : labValueStrip()) +
       '<div class="vl-body">' + body + '</div>' +
       '<div class="vl-foot">Widths, signedness and wrapping follow the simulated architecture (' +
         esc(CEngine.ARCH.short) + '). Arithmetic and comparisons are evaluated by the execution engine, ' +
@@ -16276,6 +16541,7 @@ function renderLab() {
 
 function wireLab() {
   if (typeof wireLabTypes === 'function') wireLabTypes();
+  if (typeof wireLabFunctions === 'function') wireLabFunctions();
   $$('#labRoot [data-labtab]').forEach(el => el.addEventListener('click', () => {
     lab.tab = el.dataset.labtab; renderLab();
   }));
@@ -16720,6 +16986,564 @@ function labShowObject(value, typeName) {
   showLab();
 }
 /* ==== TYPELAB END ==== */
+
+/* ==== FNLAB START ====
+   PHASE 7 — Functions, Libraries & System Calls.
+
+   The call walkthrough is not an animation script. It compiles the program with
+   CEngine.runToCompletion and renders the real step timeline: the frames it
+   shows at step N are history.stateAt(N).frames, the parameter values are the
+   values the engine bound, and the return value is the one the engine produced.
+   A frame disappears here because the engine popped it, not because a timer
+   said so.
+
+   The honesty contract from earlier phases applies with particular force in
+   this section, because almost everything interesting about function calls at
+   the machine level is ABI- and compiler-dependent. Anything that is a common
+   platform convention rather than a C language guarantee is labelled as such,
+   and the simulator never claims to model machine instructions or registers. */
+
+/* ----------------------- data models (Parts 14/24/25/26) -----------------------
+   These are data, not markup, so the C00-C07 subjects and the reproduction lab
+   can extend them later without touching any view code. */
+
+const FN_KIND = {
+  language: { label:'C language',        note:'Defined by the ISO C standard itself.' },
+  library:  { label:'library function',  note:'Ordinary code that runs in your process, in user space.' },
+  syscall:  { label:'system call',       note:'A request that crosses into the operating system kernel. Not ISO C.' },
+};
+
+/* A reference card. `visualize` names a program this lab can actually run, so
+   a card can always be backed by real execution rather than prose. */
+const FUNC_REFS = [
+  {
+    name:'write', kind:'syscall', header:'<unistd.h>',
+    prototype:'ssize_t write(int fd, const void *buf, size_t count);',
+    purpose:'Ask the operating system to write count bytes, starting at buf, to the open file descriptor fd.',
+    params:[['fd','an open file descriptor — 1 is conventionally standard output'],
+            ['buf','the address of the first byte to send'],
+            ['count','how many bytes to send — exactly this many, no more']],
+    returns:'The number of bytes actually written, or -1 on error. A short write is possible and is not an error.',
+    memory:'Reads count bytes from buf. It does not stop at a \\0 and it appends nothing of its own.',
+    concepts:['file descriptor','pointer/buffer','byte count','user space vs kernel space'],
+    portability:'POSIX, not ISO C. Windows has no write() with these semantics; it has its own API.',
+    visualize:'int\\tmain(void)\\n{\\n\\twrite(1, "ABC", 3);\\n\\treturn (0);\\n}',
+  },
+  {
+    name:'strlen', kind:'library', header:'<string.h>',
+    prototype:'size_t strlen(const char *s);',
+    purpose:'Count the characters in a NUL-terminated string, not including the terminator.',
+    params:[['s','a pointer to the first character of a NUL-terminated string']],
+    returns:'The number of characters before the terminating \\0.',
+    memory:'Reads forward from s until it finds a 0 byte. If there is no terminator it reads past the end — that is undefined behaviour, and the usual cause of a crash in string code.',
+    concepts:['char *','pointer traversal','\\0 terminator','size_t'],
+    portability:'ISO C. Runs entirely in user space; it makes no system call.',
+  },
+  {
+    name:'malloc', kind:'library', header:'<stdlib.h>',
+    prototype:'void *malloc(size_t size);',
+    purpose:'Ask the C library for a block of at least size bytes of dynamically allocated memory.',
+    params:[['size','how many bytes are needed']],
+    returns:'A pointer to the block, or NULL if the request could not be satisfied. The bytes are uninitialized.',
+    memory:'The block lives on the heap and stays valid until you free() it. Losing the only pointer to it is a leak.',
+    concepts:['heap','void *','NULL check','free'],
+    portability:'ISO C. It is a LIBRARY function, not a system call — though its implementation may ask the kernel for more memory when its own pool runs out.',
+    visualize:'int\\tmain(void)\\n{\\n\\tchar\\t*p;\\n\\n\\tp = malloc(4);\\n\\tfree(p);\\n\\treturn (0);\\n}',
+  },
+  {
+    name:'printf', kind:'library', header:'<stdio.h>',
+    prototype:'int printf(const char *format, ...);',
+    purpose:'Format values as text and write them to standard output.',
+    params:[['format','a format string; conversions such as %d and %s consume the arguments that follow'],
+            ['...','the values to format']],
+    returns:'The number of characters printed, or a negative value on error.',
+    memory:'Reads the format string and the arguments. Output is normally buffered, so what you print may not appear immediately.',
+    concepts:['format string','variadic arguments','buffering','stdout'],
+    portability:'ISO C, and a clear example of a library function that USES system calls internally without being one.',
+  },
+];
+
+/* Concept maps (Part 24) — data so the list can grow. */
+const CONCEPT_MAP = [
+  { fn:'strlen', nodes:['char *','pointer traversal','\\0 terminator','size_t result'] },
+  { fn:'strcmp', nodes:['two strings','pointer traversal','character comparison','int result'] },
+  { fn:'write',  nodes:['file descriptor','pointer / buffer','byte count','kernel interface'] },
+  { fn:'malloc', nodes:['size in bytes','heap','void * result','NULL on failure','must be freed'] },
+];
+
+/* Library categories (Part 14). Deliberately NOT populated with a guessed
+   Piscine list — the official C00-C07 subjects will fill this in. */
+const LIB_CATEGORIES = [
+  { id:'char',   label:'Character',        header:'<ctype.h>',  blurb:'Classifying and converting single characters.' },
+  { id:'string', label:'String',           header:'<string.h>', blurb:'Working with NUL-terminated character arrays.' },
+  { id:'mem',    label:'Memory',           header:'<string.h>', blurb:'Copying and comparing raw bytes, terminator or not.' },
+  { id:'io',     label:'I/O',              header:'<stdio.h>',  blurb:'Formatted input and output.' },
+  { id:'alloc',  label:'Allocation',       header:'<stdlib.h>', blurb:'Obtaining and releasing dynamic memory.' },
+  { id:'sys',    label:'System interfaces', header:'<unistd.h>', blurb:'Requests the operating system fulfils on your behalf.' },
+];
+
+/* Curriculum skeleton (Part 26). Empty on purpose: the subjects are the user's
+   to provide, and inventing exercise content would be worse than showing none. */
+const CURRICULUM = ['C00','C01','C02','C03','C04','C05','C06','C07'].map(id => ({
+  id, exercises: [], loaded: false,
+}));
+
+/* ----------------------- the runnable examples ----------------------- */
+const FN_PROGRAMS = {
+  add: {
+    label:'A call and a return',
+    src:['int\tadd(int a, int b)','{','\tint\tresult;','','\tresult = a + b;','\treturn (result);','}','',
+         'int\tmain(void)','{','\tint\tx;','','\tx = add(2, 3);','\treturn (0);','}'].join('\n'),
+  },
+  nested: {
+    label:'Nested calls',
+    src:['int\tsquare(int x)','{','\treturn (x * x);','}','',
+         'int\tdouble_square(int x)','{','\treturn (2 * square(x));','}','',
+         'int\tmain(void)','{','\tint\tr;','','\tr = double_square(3);','\treturn (0);','}'].join('\n'),
+  },
+  recursion: {
+    label:'Recursion',
+    src:['int\tfactorial(int n)','{','\tif (n <= 1)','\t\treturn (1);','\treturn (n * factorial(n - 1));','}','',
+         'int\tmain(void)','{','\tint\tr;','','\tr = factorial(3);','\treturn (0);','}'].join('\n'),
+  },
+  write: {
+    label:'A system call',
+    src:['int\tmain(void)','{','\tchar\t*s;','','\ts = "ABC";','\twrite(1, s, 3);','\treturn (0);','}'].join('\n'),
+  },
+};
+
+/* One run, cached per program. Everything the Functions tab draws is read out
+   of this — there is no second interpreter anywhere in this file. */
+function fnRun(key) {
+  if (!lab.fnRuns) lab.fnRuns = {};
+  if (lab.fnRuns[key]) return lab.fnRuns[key];
+  const prog = FN_PROGRAMS[key];
+  let r;
+  try { r = CEngine.runToCompletion(prog.src); }
+  catch (e) { return (lab.fnRuns[key] = { ok:false, error:e.message }); }
+  if (!r.history) return (lab.fnRuns[key] = { ok:false, error: r.message || 'did not run' });
+  const steps = [];
+  for (let i = 0; i < r.history.length; i++) {
+    steps.push({ i, step: r.history.steps[i], state: r.history.stateAt(i) });
+  }
+  return (lab.fnRuns[key] = { ok:true, src: prog.src, steps, output: r.output });
+}
+function fnCur(key) {
+  const run = fnRun(key);
+  if (!run.ok) return null;
+  const idx = Math.max(0, Math.min(lab.fnStep ?? 0, run.steps.length - 1));
+  return { run, idx, cur: run.steps[idx] };
+}
+
+/* ----------------------- Part 1/2/13: anatomy ----------------------- */
+const FN_ANATOMY = [
+  ['int', 'return type', 'What the function hands back to whoever called it. `void` means it hands back nothing.'],
+  ['add', 'name', 'How the rest of the program refers to it. The linker matches calls to definitions by this name.'],
+  ['(int a, int b)', 'parameters', 'Named local variables that receive the caller’s arguments. They exist only while the function runs.'],
+  ['{ … }', 'body', 'The statements that run when the function is called.'],
+  ['return (a + b);', 'return statement', 'Produces the value and ends the function immediately.'],
+];
+
+function fnAnatomyHtml() {
+  return '<div class="fn-block"><div class="fn-block-h">Anatomy of a function</div>' +
+    '<pre class="fn-code mono">int add(int a, int b)\n{\n    return (a + b);\n}</pre>' +
+    '<div class="fn-anat">' +
+      FN_ANATOMY.map(([frag, role, why]) =>
+        '<div class="fn-anat-row">' +
+          '<code class="fn-anat-frag mono">' + esc(frag) + '</code>' +
+          '<span class="fn-anat-arrow">→</span>' +
+          '<div><b class="fn-anat-role">' + esc(role) + '</b>' +
+          '<div class="fn-anat-why">' + esc(why) + '</div></div>' +
+        '</div>').join('') +
+    '</div>' +
+    '<div class="fn-split">' +
+      '<div class="fn-half"><div class="fn-half-h">DECLARATION</div>' +
+        '<pre class="fn-code mono">int add(int a, int b);</pre>' +
+        '<div class="fn-half-b">Tells the compiler the name, the return type and the parameter types — the ' +
+        '<b>interface</b>. No body, so no code is produced. This is what a prototype in a header gives you.</div></div>' +
+      '<div class="fn-half"><div class="fn-half-h">DEFINITION</div>' +
+        '<pre class="fn-code mono">int add(int a, int b)\n{\n    return (a + b);\n}</pre>' +
+        '<div class="fn-half-b">Supplies the <b>implementation</b>. This is what actually becomes code. ' +
+        'A program needs exactly one definition of a function, but may see its declaration many times.</div></div>' +
+    '</div>' +
+    '<div class="fn-note">Why prototypes matter: without one, the compiler reaches a call it has never seen and ' +
+    'cannot check the argument types or the return type against anything. Declaring the interface before use is ' +
+    'what lets it catch <span class="mono">add(2)</span> or <span class="mono">add("x", 3)</span> at compile time.</div>' +
+    '</div>';
+}
+
+/* ----------------------- Parts 3-6, 10, 11, 23: the live call ----------------------- */
+const FN_PHASE_STORY = {
+  'start':        ['ENTRY',   'The program starts and main’s frame is created.'],
+  'call-enter':   ['CALL',    'The caller stops at the call. A new frame is being pushed for the callee.'],
+  'call-bind':    ['PARAMETERS', 'The arguments are copied into the callee\u2019s parameters. They are ordinary local variables of the new frame.'],
+  'bind-param':   ['PARAMETERS', 'A parameter receives its argument value.'],
+  'decl':         ['LOCALS',  'A local variable is created inside the current frame.'],
+  'assign':       ['EXECUTE', 'A statement runs and changes a value in the current frame.'],
+  'call-return':  ['RETURN',  'The callee produces its return value and stops.'],
+  'call-exit':    ['DESTROY', 'The callee’s frame is destroyed. Its locals are gone.'],
+  'return':       ['RETURN',  'This function hands its value back to its caller.'],
+  'program-end':  ['END',     'The program is over and the last frame has been destroyed.'],
+};
+FN_PHASE_STORY['call-bind'] = ['PARAMETERS', 'The arguments are copied into the callee’s parameters. They are ordinary local variables.'];
+
+function fnFramesHtml(state, step) {
+  const frames = state.frames.slice().reverse();   // innermost at the top
+  if (!frames.length) return '<div class="fn-empty">No frame is alive — the program has ended.</div>';
+  return '<div class="fn-stack">' + frames.map((f, k) => {
+    const top = k === 0;
+    return '<div class="fn-frame' + (top ? ' top' : '') + '">' +
+      '<div class="fn-frame-h"><b class="mono">' + esc(f.name) + '()</b>' +
+        (top ? '<span class="fn-frame-tag">running</span>' : '<span class="fn-frame-tag waiting">waiting</span>') +
+        '<span class="fn-frame-ret mono">returns ' + esc(f.retTypeName || 'int') + '</span></div>' +
+      (f.vars.length
+        ? '<div class="fn-vars">' + f.vars.map(v =>
+            '<div class="fn-var' + (v.uninitialized ? ' un' : '') + '">' +
+              '<span class="fn-var-n mono">' + esc(v.name) + '</span>' +
+              '<span class="fn-var-t mono">' + esc(v.typeName) + '</span>' +
+              '<span class="fn-var-v mono">' + esc(v.uninitialized ? '?' : v.valueText) + '</span>' +
+              '<span class="fn-var-a mono">' + hexA(v.address) + '</span>' +
+            '</div>').join('') + '</div>'
+        : '<div class="fn-empty">no locals yet</div>') +
+      '</div>';
+  }).join('') + '<div class="fn-stack-base">stack grows downward — the newest frame is on top</div></div>';
+}
+
+function fnCallStackHtml(step) {
+  const cs = step.callStack || [];
+  if (!cs.length) return '';
+  return '<div class="fn-cs">' +
+    cs.slice().reverse().map((n, k) =>
+      '<div class="fn-cs-row' + (k === 0 ? ' top' : '') + '"><span class="mono">' + esc(n) + '()</span>' +
+      (k === 0 ? '<span class="fn-cs-tag">current</span>' : '') + '</div>').join('') +
+    '</div>';
+}
+
+function fnTimelineHtml(key) {
+  const c = fnCur(key);
+  if (!c) return '<div class="vl-err">' + esc(fnRun(key).error) + '</div>';
+  const { run, idx, cur } = c;
+  const s = cur.step;
+  const story = FN_PHASE_STORY[s.phase] || ['STEP', s.description || ''];
+  const srcLines = run.src.split('\n');
+
+  let h = '<div class="fn-block"><div class="fn-block-h">' + esc(FN_PROGRAMS[key].label) + '</div>';
+  h += '<div class="fn-progs">' + Object.keys(FN_PROGRAMS).map(k =>
+    '<button class="fn-prog' + (k === key ? ' on' : '') + '" data-fnprog="' + k + '">' +
+    esc(FN_PROGRAMS[k].label) + '</button>').join('') + '</div>';
+
+  // source with the current line marked
+  // Joined with '' on purpose: .fn-srcline is display:block, so a newline here
+  // would double every line's height inside the <pre>.
+  h += '<pre class="fn-code mono fn-src">' + srcLines.map((l, i) =>
+    '<span class="fn-srcline' + (i + 1 === s.line ? ' on' : '') + '">' +
+    String(i + 1).padStart(2) + '  ' + esc(l || ' ') + '</span>').join('') + '</pre>';
+
+  // scrubber
+  h += '<div class="fn-scrub">' +
+    '<button class="vl-btn" data-fnstep="first">⏮</button>' +
+    '<button class="vl-btn" data-fnstep="prev">◀</button>' +
+    '<input type="range" class="fn-range" min="0" max="' + (run.steps.length - 1) + '" value="' + idx + '" ' +
+      'data-fnrange="1" aria-label="Execution step">' +
+    '<button class="vl-btn" data-fnstep="next">▶</button>' +
+    '<button class="vl-btn" data-fnstep="last">⏭</button>' +
+    '<span class="fn-scrub-n mono">' + (idx + 1) + ' / ' + run.steps.length + '</span></div>';
+
+  h += '<div class="fn-story"><span class="fn-story-k">' + esc(story[0]) + '</span>' +
+       '<span class="fn-story-b">' + esc(story[1]) + '</span></div>';
+  h += '<div class="fn-desc">' + esc(s.description || '') + '</div>';
+
+  // the two columns that matter: the call stack and the frames
+  h += '<div class="fn-cols">' +
+    '<div class="fn-col"><div class="fn-col-h">CALL STACK</div>' + fnCallStackHtml(s) + '</div>' +
+    '<div class="fn-col wide"><div class="fn-col-h">STACK FRAMES</div>' + fnFramesHtml(cur.state, s) + '</div>' +
+    '</div>';
+
+  // return value, when the engine produced one on this step
+  if (s.returnValue !== undefined && s.returnValue !== null) {
+    h += '<div class="fn-ret">return value produced: <b class="mono">' + esc(String(s.returnValue)) + '</b>' +
+         '<span class="fn-ret-note">the caller receives this once the frame is destroyed</span></div>';
+  }
+  if (s.detail && s.detail.poppedFrame) {
+    h += '<div class="fn-destroy">frame <b class="mono">' + esc(s.detail.poppedFrame) + '()</b> destroyed — ' +
+         'its parameters and locals no longer exist</div>';
+  }
+  if (key === 'write' && s.detail && s.detail.buffer !== undefined) h += fnWriteDetailHtml(s.detail);
+
+  h += '<div class="fn-note">Every frame, value and address above is read from the execution snapshot at this step. ' +
+    'The <b>order</b> of these events is what C guarantees; the machine-level mechanics of a call — which ' +
+    'registers hold arguments, how the frame is laid out, whether a call is inlined away entirely — are decided ' +
+    'by the ABI and the compiler, and are not modelled here.</div>';
+  return h + '</div>';
+}
+
+/* Part 11/23 — the lifetime, with the current stage lit from the real phase. */
+const FN_LIFETIME = [
+  ['ENTRY', ['call-enter']],
+  ['FRAME CREATED', ['call-bind']],
+  ['PARAMETERS BOUND', ['call-bind', 'bind-param']],
+  ['LOCALS CREATED', ['decl']],
+  ['STATEMENTS EXECUTE', ['assign', 'condition', 'loop-condition', 'update', 'expr', 'output']],
+  ['RETURN VALUE', ['call-return', 'return']],
+  ['FRAME DESTROYED', ['call-exit', 'program-end']],
+];
+function fnLifetimeHtml(key) {
+  const c = fnCur(key);
+  const phase = c ? c.cur.step.phase : null;
+  return '<div class="fn-block"><div class="fn-block-h">Function lifetime</div><div class="fn-life">' +
+    FN_LIFETIME.map(([label, phases], i) =>
+      '<div class="fn-life-step' + (phases.indexOf(phase) >= 0 ? ' on' : '') + '">' +
+      '<span class="fn-life-n">' + (i + 1) + '</span><span>' + esc(label) + '</span></div>').join(
+      '<div class="fn-life-arr">▼</div>') +
+    '</div><div class="fn-note">The lit stage is the phase the engine reports for the step selected above.</div></div>';
+}
+
+/* Part 7/22 — where the pieces of this program live. */
+function fnMemoryMapHtml(key) {
+  const c = fnCur(key);
+  if (!c) return '';
+  const g = c.cur.state.graph;
+  const bySec = {};
+  for (const n of g.nodes) (bySec[n.section] = bySec[n.section] || []).push(n);
+  const order = ['text', 'rodata', 'data', 'bss', 'heap', 'stack'];
+  const nameOf = { text:'.text', rodata:'.rodata', data:'.data', bss:'.bss', heap:'heap', stack:'stack' };
+  return '<div class="fn-block"><div class="fn-block-h">Where this program lives</div>' +
+    '<div class="fn-map">' + order.filter(s => bySec[s]).map(s =>
+      '<div class="fn-map-sec"><div class="fn-map-h mono">' + nameOf[s] + '</div>' +
+      bySec[s].map(n => '<div class="fn-map-o"><span class="mono">' + esc(n.label) + '</span>' +
+        '<span class="fn-map-a mono">' + hexA(n.address) + '</span>' +
+        (n.frameName ? '<span class="fn-map-f">' + esc(n.frameName) + '()</span>' : '') + '</div>').join('') +
+      '</div>').join('') + '</div>' +
+    '<div class="fn-note">Functions appear in <span class="mono">.text</span> as <b>entry-point addresses only</b>. ' +
+    'This simulator does not compile to machine instructions, so it does not claim how many bytes a function’s ' +
+    'code occupies, and <span class="mono">.text</span> is not drawn to scale.</div></div>';
+}
+
+function labFunctionsHtml() {
+  const key = lab.fnProg || 'add';
+  return fnAnatomyHtml() + fnTimelineHtml(key) + fnLifetimeHtml(key) + fnMemoryMapHtml(key);
+}
+
+/* ============ Parts 12-21: libraries, syscalls, user/kernel space ============ */
+
+function fnHeaderVsLibHtml() {
+  return '<div class="fn-block"><div class="fn-block-h">Headers are not libraries</div>' +
+    '<pre class="fn-code mono">#include &lt;string.h&gt;</pre>' +
+    '<div class="fn-note fn-warn">This does <b>not</b> link the library. It is a preprocessor directive: it pastes ' +
+    'the header’s text — declarations — into your source before the compiler sees it.</div>' +
+    '<div class="fn-pipe">' +
+      [['source','what you wrote'],
+       ['preprocessor','#include pastes in the header’s DECLARATIONS'],
+       ['compiler','checks your calls against those declarations, emits object code'],
+       ['linker','resolves each call to an actual IMPLEMENTATION'],
+       ['executable','the implementation is now part of the program, or loaded at run time']]
+      .map(([k, v], i, a) => '<div class="fn-pipe-step"><b>' + esc(k) + '</b><span>' + esc(v) + '</span></div>' +
+        (i < a.length - 1 ? '<div class="fn-pipe-arr">▼</div>' : '')).join('') +
+    '</div>' +
+    '<div class="fn-split">' +
+      '<div class="fn-half"><div class="fn-half-h">HEADER</div><div class="fn-half-b">' +
+        'Declarations and types — the <b>interface</b>. Text, compiled as part of your translation unit. ' +
+        'Tells the compiler what <span class="mono">strlen</span> looks like.</div></div>' +
+      '<div class="fn-half"><div class="fn-half-h">LIBRARY</div><div class="fn-half-b">' +
+        'Compiled, linkable code — the <b>implementation</b>. Provides the actual bytes of ' +
+        '<span class="mono">strlen</span>. Nothing in the header contains them.</div></div>' +
+    '</div>' +
+    '<div class="fn-note">The C standard library is normally linked automatically, which is why ' +
+    '<span class="mono">&lt;string.h&gt;</span> appears to be enough. Other libraries must be named to the linker ' +
+    '(commonly <span class="mono">-lm</span>, <span class="mono">-lpthread</span>). Details vary by toolchain.</div>' +
+    '</div>';
+}
+
+function fnPrototypeHtml() {
+  const parts = [
+    ['size_t', 'return type', 'An unsigned integer type big enough for any object size. Not a keyword — a typedef from the standard headers.'],
+    ['strlen', 'function name', 'What the linker matches against the implementation.'],
+    ['const char *s', 'parameter', 'A pointer to characters the function promises not to modify.'],
+    [';', 'terminator', 'A semicolon instead of a body: this is a declaration, not a definition.'],
+  ];
+  return '<div class="fn-block"><div class="fn-block-h">Reading a prototype</div>' +
+    '<pre class="fn-code mono">size_t strlen(const char *s);</pre>' +
+    '<div class="fn-anat">' + parts.map(([f, r, w]) =>
+      '<div class="fn-anat-row"><code class="fn-anat-frag mono">' + esc(f) + '</code>' +
+      '<span class="fn-anat-arrow">→</span><div><b class="fn-anat-role">' + esc(r) + '</b>' +
+      '<div class="fn-anat-why">' + esc(w) + '</div></div></div>').join('') + '</div></div>';
+}
+
+function fnLibVsSysHtml() {
+  return '<div class="fn-block"><div class="fn-block-h">Library function vs system call</div>' +
+    '<div class="fn-split">' +
+      '<div class="fn-half lib"><div class="fn-half-h">LIBRARY FUNCTION</div>' +
+        '<div class="fn-half-b"><span class="mono">strlen()</span>, <span class="mono">malloc()</span>, ' +
+        '<span class="mono">printf()</span><br><br>Ordinary code, compiled like yours, running in <b>user space</b> ' +
+        'inside your process. Calling one is an ordinary function call.</div></div>' +
+      '<div class="fn-half sys"><div class="fn-half-h">SYSTEM CALL</div>' +
+        '<div class="fn-half-b"><span class="mono">write()</span>, <span class="mono">read()</span>, ' +
+        '<span class="mono">open()</span><br><br>A request for the <b>kernel</b> to do something your process is ' +
+        'not allowed to do itself — touch a device, a file, another process.</div></div>' +
+    '</div>' +
+    '<div class="fn-note fn-warn">A library function is <b>not</b> the opposite of a system call, and the two are ' +
+    'not mutually exclusive. <span class="mono">printf()</span> is a library function that ends up making a ' +
+    'system call to get characters out. <span class="mono">malloc()</span> is a library function that usually ' +
+    'satisfies requests from a pool it already owns, and asks the kernel for more memory only sometimes. ' +
+    'Neither <span class="mono">printf</span> nor <span class="mono">malloc</span> <i>is</i> a system call.</div>' +
+    '<div class="fn-note">Also worth separating: <span class="mono">write()</span> as you call it in C is a thin ' +
+    'library wrapper around the kernel entry point. How that boundary is crossed — which instruction, which ' +
+    'register carries the number — depends on the architecture and the operating system, and is not modelled here.</div>' +
+    '</div>';
+}
+
+function fnUserKernelHtml() {
+  return '<div class="fn-block"><div class="fn-block-h">User space and kernel space</div>' +
+    '<div class="fn-uk">' +
+      '<div class="fn-uk-zone user"><div class="fn-uk-h">USER SPACE</div>' +
+        '<div class="fn-uk-b">your C program · its variables and functions · the C library · ' +
+        'the stack, heap, .data, .bss, .rodata and .text of <i>this process</i></div></div>' +
+      '<div class="fn-uk-boundary"><span>system call boundary</span></div>' +
+      '<div class="fn-uk-zone kernel"><div class="fn-uk-h">KERNEL SPACE</div>' +
+        '<div class="fn-uk-b">the operating system · devices · the filesystem · process scheduling · ' +
+        'the memory your process is allowed to see</div></div>' +
+    '</div>' +
+    '<div class="fn-note fn-warn">This is a <b>process / operating-system</b> model. It is a different kind of thing ' +
+    'from <span class="mono">.text</span>, <span class="mono">.rodata</span>, <span class="mono">.data</span>, ' +
+    '<span class="mono">.bss</span>, the stack and the heap — those are all sections of your program, and they ' +
+    'all live in <b>user space</b>. Kernel space is not another section of your program.</div>' +
+    '<div class="fn-note">Privilege separation like this is how mainstream operating systems work; it is not ' +
+    'something the C language defines. Freestanding C on a microcontroller may have no kernel at all.</div>' +
+    '</div>';
+}
+
+function fnFdHtml() {
+  const fds = [[0, 'stdin', 'input', 'where the program reads from'],
+               [1, 'stdout', 'output', 'where normal output goes'],
+               [2, 'stderr', 'error', 'where errors go, so they can be kept separate from output']];
+  return '<div class="fn-block"><div class="fn-block-h">File descriptors</div>' +
+    '<div class="fn-fds">' + fds.map(([n, name, kind, why]) =>
+      '<div class="fn-fd fd' + n + '"><span class="fn-fd-n mono">' + n + '</span>' +
+      '<div><b class="mono">' + esc(name) + '</b><span class="fn-fd-why">' + esc(why) + '</span></div></div>').join('') +
+    '</div>' +
+    '<div class="fn-note">A file descriptor is a small non-negative integer the kernel gives your process to refer ' +
+    'to something it has opened. It is an index into a per-process table — not a pointer, and not a memory address.</div>' +
+    '<div class="fn-note fn-warn">0, 1 and 2 are <b>Unix/POSIX conventions</b>, not ISO C. Standard C describes ' +
+    '<span class="mono">stdin</span>, <span class="mono">stdout</span> and <span class="mono">stderr</span> as ' +
+    '<span class="mono">FILE *</span> streams, which is a different (higher-level, buffered) idea from a descriptor.</div>' +
+    '</div>';
+}
+
+/* Part 17 — write(), joined to the memory it actually read. */
+function fnWriteDetailHtml(d) {
+  const bytes = (d.bytes || []).map(b =>
+    '<span class="fn-byte"><span class="fn-byte-a mono">' + hexA(b.address).slice(-4) + '</span>' +
+    '<span class="fn-byte-v mono">' + Number(b.value).toString(16).toUpperCase().padStart(2, '0') + '</span>' +
+    '<span class="fn-byte-c mono">' + esc((() => { const a = CEngine.asciiInfo(b.value);
+      return a ? (a.printable ? a.display : a.name) : '?'; })()) + '</span></span>').join('');
+  return '<div class="fn-sys">' +
+    '<div class="fn-sys-h">THE CALL, AS THE ENGINE RAN IT</div>' +
+    '<div class="fn-args">' +
+      '<div class="fn-arg"><span class="fn-arg-k">fd</span><b class="mono">' + d.fd + '</b>' +
+        '<span class="fn-arg-w">' + esc(d.stream || '') + '</span></div>' +
+      '<div class="fn-arg"><span class="fn-arg-k">buffer</span><b class="mono">' + hexA(d.buffer) + '</b>' +
+        '<span class="fn-arg-w">in ' + esc(d.bufferSection ? '.' + d.bufferSection : 'memory') + '</span></div>' +
+      '<div class="fn-arg"><span class="fn-arg-k">count</span><b class="mono">' + d.length + '</b>' +
+        '<span class="fn-arg-w">bytes, exactly</span></div>' +
+    '</div>' +
+    '<div class="fn-sys-arr">▼ the bytes at that address</div>' +
+    '<div class="fn-bytes">' + bytes + '</div>' +
+    '<div class="fn-sys-arr">▼ system call boundary</div>' +
+    '<div class="fn-kernel">KERNEL</div>' +
+    '<div class="fn-sys-arr">▼</div>' +
+    '<div class="fn-stdout">' + esc(d.stream || 'stdout') + ' — <b class="mono">' + esc(d.wrote) + '</b></div>' +
+    '</div>';
+}
+
+function fnWriteSectionHtml() {
+  const c = fnCur('write');
+  let detail = '';
+  if (c) {
+    // find the step where write actually happened, so this section always shows it
+    const w = fnRun('write').steps.find(x => x.step.detail && x.step.detail.buffer !== undefined);
+    if (w) detail = fnWriteDetailHtml(w.step.detail);
+  }
+  return '<div class="fn-block"><div class="fn-block-h">write(1, "ABC", 3)</div>' +
+    '<pre class="fn-code mono">' + esc(FN_PROGRAMS.write.src) + '</pre>' + detail +
+    '<div class="fn-note">The address, the section and the bytes above come from the engine’s own record of the ' +
+    'call — the same run you can step through on the Functions tab. <span class="mono">write()</span> copies ' +
+    'exactly <span class="mono">count</span> bytes: it does not stop at a <span class="mono">\\0</span> and adds ' +
+    'nothing of its own, which is why it can print part of a string, or run past one.</div>' +
+    '<div class="fn-note fn-warn">The boundary drawn above is conceptual. Real implementations differ in how the ' +
+    'kernel is entered and what the C library does on the way; nothing here models instructions or registers.</div>' +
+    '</div>';
+}
+
+/* Parts 15/24 — reference cards and concept maps. */
+function fnRefCardsHtml() {
+  const sel = lab.fnRef || 'write';
+  const f = FUNC_REFS.find(x => x.name === sel) || FUNC_REFS[0];
+  const k = FN_KIND[f.kind];
+  const map = CONCEPT_MAP.find(m => m.fn === f.name);
+  return '<div class="fn-block"><div class="fn-block-h">Function reference</div>' +
+    '<div class="fn-refs">' + FUNC_REFS.map(x =>
+      '<button class="fn-ref' + (x.name === sel ? ' on' : '') + '" data-fnref="' + esc(x.name) + '">' +
+      esc(x.name) + '</button>').join('') + '</div>' +
+    '<div class="fn-card">' +
+      '<div class="fn-card-h"><b class="mono">' + esc(f.name) + '</b>' +
+        '<span class="fn-kind fn-kind-' + f.kind + '">' + esc(k.label) + '</span></div>' +
+      '<div class="fn-card-grid">' +
+        '<span class="fn-ck">header</span><span class="fn-cv mono">' + esc(f.header) + '</span>' +
+        '<span class="fn-ck">prototype</span><span class="fn-cv mono">' + esc(f.prototype) + '</span>' +
+        '<span class="fn-ck">purpose</span><span class="fn-cv">' + esc(f.purpose) + '</span>' +
+        '<span class="fn-ck">parameters</span><span class="fn-cv">' +
+          f.params.map(([n, d]) => '<b class="mono">' + esc(n) + '</b> — ' + esc(d)).join('<br>') + '</span>' +
+        '<span class="fn-ck">returns</span><span class="fn-cv">' + esc(f.returns) + '</span>' +
+        '<span class="fn-ck">memory</span><span class="fn-cv">' + esc(f.memory) + '</span>' +
+        '<span class="fn-ck">portability</span><span class="fn-cv">' + esc(f.portability) + '</span>' +
+      '</div>' +
+      (map ? '<div class="fn-conmap"><span class="fn-ck">depends on</span>' +
+        map.nodes.map(n => '<span class="fn-con">' + esc(n) + '</span>').join('') + '</div>' : '') +
+      (f.visualize ? '<button class="vl-btn on fn-viz-btn" data-fnviz="' + esc(f.name) + '">' +
+        'run this in the engine →</button>' : '') +
+    '</div>' +
+    '<div class="fn-cats"><div class="fn-col-h">LIBRARY AREAS</div>' +
+      LIB_CATEGORIES.map(c2 => '<div class="fn-cat"><b>' + esc(c2.label) + '</b>' +
+        '<span class="mono fn-cat-h">' + esc(c2.header) + '</span>' +
+        '<span class="fn-cat-b">' + esc(c2.blurb) + '</span></div>').join('') +
+    '</div>' +
+    '<div class="fn-note">These areas are placeholders for the official C00–C07 subjects. No Piscine function ' +
+    'list or restriction is claimed here until those subjects are supplied.</div>' +
+    '</div>';
+}
+
+function labSyscallsHtml() {
+  return fnHeaderVsLibHtml() + fnPrototypeHtml() + fnLibVsSysHtml() +
+         fnWriteSectionHtml() + fnFdHtml() + fnUserKernelHtml() + fnRefCardsHtml();
+}
+
+function wireLabFunctions() {
+  $$('#labRoot [data-fnprog]').forEach(el => el.addEventListener('click', () => {
+    lab.fnProg = el.dataset.fnprog; lab.fnStep = 0; renderLab();
+  }));
+  $$('#labRoot [data-fnstep]').forEach(el => el.addEventListener('click', () => {
+    const run = fnRun(lab.fnProg || 'add');
+    if (!run.ok) return;
+    const n = run.steps.length;
+    const cur = lab.fnStep ?? 0;
+    lab.fnStep = el.dataset.fnstep === 'first' ? 0
+      : el.dataset.fnstep === 'last' ? n - 1
+      : el.dataset.fnstep === 'next' ? Math.min(n - 1, cur + 1)
+      : Math.max(0, cur - 1);
+    renderLab();
+  }));
+  const range = $('#labRoot [data-fnrange]');
+  if (range) range.addEventListener('input', () => { lab.fnStep = +range.value; renderLab(); });
+  $$('#labRoot [data-fnref]').forEach(el => el.addEventListener('click', () => {
+    lab.fnRef = el.dataset.fnref; renderLab();
+  }));
+  $$('#labRoot [data-fnviz]').forEach(el => el.addEventListener('click', () => {
+    const name = el.dataset.fnviz;
+    lab.fnProg = name === 'write' ? 'write' : name === 'malloc' ? 'add' : 'add';
+    lab.fnStep = 0; lab.tab = 'functions'; renderLab();
+  }));
+}
+/* ==== FNLAB END ==== */
 
 /* ================================ WIRING ================================ */
 function inEditable(el) {
