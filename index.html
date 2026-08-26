@@ -2363,6 +2363,173 @@ html[data-theme=light] .viz-node.vz-frame::after{
   .vl-reps{gap:5px;}
   .vl-rep{min-width:64px;padding:4px 8px;}
 }
+
+/* ==================================================================
+   PHASE 12e — types, limits, two's complement, overflow.
+   The one contrast that must survive every theme: what the BITS did
+   versus what C GUARANTEES. Those two claims are deliberately styled
+   as different objects, because a learner who reads them as one
+   sentence has learned the wrong thing about signed overflow.
+   ================================================================== */
+
+.tl-block{
+  border:1px solid var(--border);border-radius:9px;padding:13px 14px;margin-bottom:14px;
+  background:var(--surface-2);
+}
+.tl-block-h{font-size:10px;letter-spacing:.13em;color:var(--text-faint);margin-bottom:11px;text-transform:uppercase;}
+
+/* --- type explorer --- */
+.tl-types{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;}
+.tl-type{
+  background:var(--surface);border:1px solid var(--border);border-radius:999px;color:var(--text-faint);
+  font-family:var(--mono);font-size:10.5px;padding:3px 10px;cursor:pointer;transition:border-color .15s,color .15s;
+}
+.tl-type:hover{color:var(--text);}
+.tl-type.on{border-color:var(--memory);color:var(--memory);}
+.tl-facts{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;}
+.tl-fact{
+  display:flex;flex-direction:column;gap:2px;background:var(--surface);
+  border:1px solid var(--border);border-radius:6px;padding:6px 11px;min-width:86px;
+}
+.tl-fact-k{font-size:9px;letter-spacing:.08em;color:var(--text-faint);text-transform:uppercase;}
+.tl-fact-v{font-size:12.5px;}
+.tl-fact.sg{border-color:var(--stack);} .tl-fact.sg .tl-fact-v{color:var(--stack);}
+.tl-fact.un{border-color:var(--heap);}  .tl-fact.un .tl-fact-v{color:var(--heap);}
+.tl-fact.min{border-color:var(--execution);} .tl-fact.min .tl-fact-v{color:var(--execution);}
+.tl-fact.max{border-color:var(--memory);}    .tl-fact.max .tl-fact-v{color:var(--memory);}
+
+.tl-ends{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.tl-end{
+  flex:1;min-width:210px;display:flex;flex-direction:column;gap:3px;
+  border:1px solid var(--border);border-radius:7px;padding:8px 11px;background:var(--surface);
+}
+.tl-end-k{font-size:9px;letter-spacing:.12em;color:var(--text-faint);}
+.tl-end b{font-size:15px;}
+.tl-end-b{font-size:11px;color:var(--text-faint);letter-spacing:.09em;}
+
+/* --- why 2^N --- */
+.tl-why{border-top:1px dashed var(--border);padding-top:11px;}
+.tl-why-h{font-size:11.5px;color:var(--text);margin-bottom:8px;}
+.tl-why-demo{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:9px;}
+.tl-pat{
+  font-size:11px;border:1px solid var(--border);border-radius:4px;padding:2px 7px;
+  background:var(--surface);color:var(--text-faint);letter-spacing:.08em;
+}
+.tl-why-chain{display:flex;align-items:center;gap:8px;font-size:11.5px;margin-bottom:5px;color:var(--text-faint);}
+.tl-why-chain b{color:var(--memory);}
+.tl-arr{color:var(--memory);}
+
+/* --- bit editor --- */
+.tl-widths{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:11px;}
+.tl-w{
+  background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-faint);
+  font-size:11px;padding:4px 11px;cursor:pointer;transition:border-color .15s,color .15s;
+}
+.tl-w:hover{color:var(--text);}
+.tl-w.on{border-color:var(--memory);color:var(--memory);}
+.tl-switch{display:flex;gap:0;margin-left:auto;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.tl-sw{
+  background:var(--surface);border:none;color:var(--text-faint);font-size:10px;letter-spacing:.09em;
+  padding:5px 13px;cursor:pointer;transition:background .18s,color .18s;
+}
+.tl-sw.on{background:var(--memory);color:var(--bg);}
+/* clickable bits read as controls */
+.vl-bits.live .vl-bitcell{cursor:pointer;}
+.vl-bits.live .vl-bitcell:hover{border-color:var(--memory);}
+.vl-bits.live .vl-bitcell:focus-visible{outline:2px solid var(--border-focus);outline-offset:1px;}
+.vl-bitcell.msb{position:relative;}
+.vl-bitcell.msb::after{
+  content:'MSB';position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+  font-size:7.5px;letter-spacing:.09em;color:var(--text-faint);
+}
+.tl-two{margin-top:22px;padding:11px;border:1px solid var(--border);border-radius:8px;background:var(--surface);}
+.tl-two-bits{font-size:16px;letter-spacing:.14em;text-align:center;margin-bottom:11px;}
+.tl-two-split{display:flex;gap:10px;flex-wrap:wrap;}
+.tl-read{
+  flex:1;min-width:170px;display:flex;flex-direction:column;gap:3px;align-items:center;
+  border:1px solid var(--border);border-radius:7px;padding:9px;opacity:.5;transition:opacity .2s,border-color .2s;
+}
+.tl-read.on{opacity:1;border-color:var(--memory);background:var(--memory-dim);}
+.tl-read-k{font-size:9.5px;letter-spacing:.07em;color:var(--text-faint);}
+.tl-read b{font-size:19px;}
+.tl-same{text-align:center;font-size:10.5px;color:var(--text-faint);margin-top:9px;}
+.tl-msb{font-size:10.5px;line-height:1.65;color:var(--text-faint);margin-top:11px;}
+.tl-msb b{color:var(--text);}
+
+/* --- two's complement stages --- */
+.tl-tc-note{font-size:11px;line-height:1.6;color:var(--text-faint);margin-bottom:11px;}
+.tl-stages{display:flex;flex-direction:column;align-items:center;gap:1px;}
+.tl-stage{
+  display:flex;align-items:center;gap:11px;border:1px solid var(--border);border-radius:6px;
+  padding:6px 13px;background:var(--surface);min-width:270px;justify-content:space-between;
+}
+.tl-stage.res{border-color:var(--memory);background:var(--memory-dim);}
+.tl-stage-k{font-size:9.5px;letter-spacing:.07em;color:var(--text-faint);}
+.tl-stage-v{font-size:13px;letter-spacing:.1em;}
+.tl-stage-arr{font-size:10px;color:var(--memory);padding:3px 0;}
+
+/* --- range comparison --- */
+.tl-range{margin-bottom:13px;}
+.tl-range-h{display:flex;align-items:baseline;gap:9px;font-size:11.5px;margin-bottom:6px;}
+.tl-range-n{font-size:10px;color:var(--text-faint);margin-left:auto;}
+.tl-range-bar{display:flex;align-items:center;gap:9px;}
+.tl-range-line{flex:1;height:5px;border-radius:3px;}
+.tl-range.sg .tl-range-line{background:linear-gradient(90deg,var(--execution),var(--stack));}
+.tl-range.un .tl-range-line{background:linear-gradient(90deg,var(--border),var(--heap));}
+.tl-range-min,.tl-range-max{font-size:11px;color:var(--text-faint);}
+.tl-range.sg .tl-range-min{color:var(--execution);}
+.tl-range.sg .tl-range-max,.tl-range.un .tl-range-max{color:var(--memory);}
+
+/* --- overflow --- */
+.tl-ovtabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px;}
+.tl-ovtab{
+  background:var(--surface);border:1px solid var(--border);border-radius:999px;color:var(--text-faint);
+  font-size:10.5px;padding:3px 11px;cursor:pointer;font-family:var(--mono);
+}
+.tl-ovtab:hover{color:var(--text);}
+.tl-ovtab.on{border-color:var(--memory);color:var(--memory);}
+.tl-ovsrc{
+  font-size:11px;line-height:1.55;color:var(--text-faint);background:var(--surface);
+  border:1px solid var(--border);border-radius:6px;padding:9px 11px;margin:0 0 12px;overflow-x:auto;
+}
+.tl-ovbits{display:flex;flex-direction:column;align-items:flex-end;gap:3px;margin-bottom:13px;}
+.tl-ovrow{font-size:13px;letter-spacing:.11em;display:flex;align-items:baseline;gap:11px;}
+.tl-ovrow.rule{border-top:1px solid var(--execution);padding-top:4px;color:var(--execution);}
+.tl-ovrow.stored{border-top:1px solid var(--memory);padding-top:4px;color:var(--memory);}
+.tl-ovop{color:var(--memory);margin-right:5px;}
+.tl-ovlab{font-size:10px;color:var(--text-faint);letter-spacing:0;font-family:var(--mono);min-width:170px;}
+.tl-ovcarry{font-size:10px;color:var(--execution);align-self:flex-end;}
+
+/* THE contrast of this phase */
+.tl-claims{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:11px;}
+.tl-claim{border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--surface);}
+.tl-claim-h{font-size:9.5px;letter-spacing:.13em;margin-bottom:7px;}
+.tl-claim-b{font-size:11px;line-height:1.65;color:var(--text-faint);}
+.tl-claim-b b{color:var(--text);}
+.tl-claim.bits{border-color:var(--border);}
+.tl-claim.bits .tl-claim-h{color:var(--text-faint);}
+.tl-claim.ub{border-color:var(--error);background:var(--error-dim);}
+.tl-claim.ub .tl-claim-h{color:var(--error);}
+.tl-claim.def{border-color:var(--memory);background:var(--memory-dim);}
+.tl-claim.def .tl-claim-h{color:var(--memory);}
+.tl-seq{font-size:10.5px;color:var(--text-faint);margin-top:11px;}
+.tl-seq .mono{color:var(--memory);}
+
+.tl-table td{font-size:11px;}
+@media (max-width:760px){
+  .tl-facts{gap:5px;}
+  .tl-fact{min-width:70px;padding:5px 8px;}
+  .tl-ovlab{min-width:0;}
+}
+
+/* the memory -> representation bridge */
+.pv-open-lab{
+  display:block;width:100%;margin-top:10px;background:var(--surface);
+  border:1px solid var(--memory);border-radius:6px;color:var(--memory);
+  font-size:10.5px;padding:6px 10px;cursor:pointer;text-align:left;
+  transition:background .15s;
+}
+.pv-open-lab:hover{background:var(--memory-dim);}
 </style>
 </head>
 <body>
@@ -3329,6 +3496,67 @@ function conversionSteps(value, to) {
   }
   return { method:'positional sum', base: 2, terms, read: mag.toString(10),
            note: 'Each 1 contributes its column weight; the weights are powers of two.' };
+}
+
+
+/* The range of an integer type, derived from its width and signedness alone.
+   ONE formula for every type and every width — nothing here is tabulated, so
+   these answers cannot drift from ARCH.sizes.
+
+   A two's-complement N-bit type has 2^N bit patterns either way. Unsigned
+   spends them all on non-negative values (0 .. 2^N-1); signed splits them so
+   that one half is negative (-2^(N-1) .. 2^(N-1)-1). Both hold 2^N values —
+   the sign does not cost a value, it re-labels which values you get. */
+function limitsOf(t) {
+  const bytes = isPointer(t) ? ARCH.sizes.pointer : sizeof(t);
+  const bits  = bytes * 8;
+  const signed = isInteger(t) ? isSigned(t) : false;
+  const patterns = 1n << BigInt(bits);
+  const min = signed ? -(1n << BigInt(bits - 1)) : 0n;
+  const max = signed ? (1n << BigInt(bits - 1)) - 1n : patterns - 1n;
+  return {
+    typeName: typeName(t), bits, bytes, isSigned: signed,
+    min: min.toString(), max: max.toString(), patterns: patterns.toString(),
+    // The bit patterns AT the endpoints, which is what makes the range concrete.
+    minBits: wrapInt(min, bytes, false).toString(2).padStart(bits, '0'),
+    maxBits: wrapInt(max, bytes, false).toString(2).padStart(bits, '0'),
+  };
+}
+
+/* Widths available to the range calculator, from the architecture rather than
+   from a hard-coded 8/16/32/64 list. */
+function limitsForWidth(bits, signed) {
+  const patterns = 1n << BigInt(bits);
+  const min = signed ? -(1n << BigInt(bits - 1)) : 0n;
+  const max = signed ? (1n << BigInt(bits - 1)) - 1n : patterns - 1n;
+  return { bits, bytes: bits / 8, isSigned: !!signed,
+           min: min.toString(), max: max.toString(), patterns: patterns.toString() };
+}
+
+/* How a negative value is BUILT in two's complement, stage by stage — the
+   invert-and-add-one the learner is asked to reproduce by hand. Runs in both
+   directions: give it +5 to see how -5 is formed, or a negative value to see
+   the magnitude recovered. */
+function twosComplementSteps(value, bits) {
+  const v = BigInt(value);
+  const width = BigInt(bits);
+  const mask = (1n << width) - 1n;
+  const stored = v & mask;
+  const negative = ((stored >> (width - 1n)) & 1n) === 1n;
+  const pad = (x) => (x & mask).toString(2).padStart(bits, '0');
+  const magnitude = negative ? ((~stored + 1n) & mask) : stored;
+  return {
+    bits, negative,
+    // the journey from the positive magnitude to the stored pattern
+    magnitude: magnitude.toString(),
+    magnitudeBits: pad(magnitude),
+    invertedBits: pad(~magnitude),
+    plusOneBits: pad((~magnitude) + 1n),
+    storedBits: pad(stored),
+    signBit: negative ? 1 : 0,
+    unsignedReading: stored.toString(),
+    signedReading: (negative ? stored - (1n << width) : stored).toString(),
+  };
 }
 
 /* =============================== ERRORS =================================== */
@@ -4845,11 +5073,20 @@ class Stepper {
     const wrapped = wrapTo(raw, t);
     const out = { type: t, v: wrapped };
     if (wrapped !== raw && ['+','-','*','<<'].includes(op)) {
+      // The range MUST come from limitsOf: this used to compute min/max as if
+      // every type were signed, so an unsigned overflow claimed a range of
+      // -128..127. `defined` is the C rule, not a description of the hardware:
+      // unsigned arithmetic is defined to wrap modulo 2^N, signed overflow is
+      // undefined behaviour however the bits happen to land.
+      const lim = limitsOf(t);
       out.overflow = {
-        typeName: typeName(t), bits: sizeof(t) * 8,
+        typeName: lim.typeName, bits: lim.bits, isSigned: lim.isSigned,
         exact: raw.toString(), wrapped: wrapped.toString(),
-        min: (-(1n << BigInt(sizeof(t)*8 - 1))).toString(),
-        max: ((1n << BigInt(sizeof(t)*8 - 1)) - 1n).toString(),
+        min: lim.min, max: lim.max,
+        defined: !lim.isSigned,
+        rule: lim.isSigned
+          ? 'Signed overflow is undefined behaviour in C. This simulator wraps, and real two\'s-complement hardware usually appears to, but the C standard does not promise it and optimising compilers may assume it never happens.'
+          : 'Unsigned arithmetic is defined by C to wrap modulo 2^' + lim.bits + '. This result is portable and guaranteed.',
       };
     }
     return out;
@@ -5479,6 +5716,9 @@ class History {
           readonly: !!o.readonly, entryPoint: blk ? !!blk.entryPoint : false,
           isArray: !!o.isArray, isPointer: !!(o.typeName && o.typeName.indexOf('*') >= 0),
           uninitialized: !!o.uninitialized, valueText: o.valueText ?? null,
+          // The undecorated number, for consumers that must compute with it.
+          valueRaw: (owner => owner && owner.value !== undefined ? owner.value : null)(
+            [...frames.flatMap(f => f.vars), ...globals].find(v => v.blockId === o.blockId)),
           bytes: o.bytes, elements: o.elements || null,
         };
         nodeByBlock.set(o.blockId, n);
@@ -5792,6 +6032,7 @@ const ENGINE = {
   // The representation lab's whole surface. Every view asks these; none of them
   // carries its own decimalToHex, asciiLookup or bit maths.
   asciiInfo, ASCII_TABLE, parseValueInput, conversionSteps, promote,
+  limitsOf, limitsForWidth, twosComplementSteps, isSigned,
 };
 if (typeof module !== 'undefined' && module.exports) module.exports = ENGINE;
 if (typeof window !== 'undefined') window.CEngine = ENGINE;
@@ -12340,6 +12581,9 @@ function ptrArithHtml(a) {
 
 /* Part 14 — the address inspector. Every field is read straight off the graph
    node the engine built; nothing here is recomputed from the address. */
+/* Only integer types have a range and a two's-complement reading to show. */
+const LAB_LINKABLE_TYPES = ['char','signed char','unsigned char','short','unsigned short',
+                            'int','unsigned int','long','unsigned long'];
 function ptrInspectorHtml(g) {
   const n = g.nodes.find(x => x.blockId === ui.focusObject);
   if (!n) return '';
@@ -12377,6 +12621,13 @@ function ptrInspectorHtml(g) {
           esc(CEngine.ARCH.short) + '</div><div class="pv-bytes">' + bytes + '</div></div>') +
     (refs.length
       ? '<div class="pv-refs">pointed at by ' + refs.map(r => '<b>' + esc(r.name) + '</b>').join(', ') + '</div>'
+      : '') +
+    // Integer objects can be opened in the representation lab at their real
+    // value and type, so "255" becomes a range, a bit pattern and two readings.
+    (!n.entryPoint && !n.isArray && !n.isPointer && !n.uninitialized && n.typeName &&
+     LAB_LINKABLE_TYPES.indexOf(n.typeName) >= 0
+      ? '<button class="pv-open-lab" id="pvOpenLab" data-val="' + esc(String(n.valueRaw ?? '')) +
+        '" data-ty="' + esc(n.typeName) + '">open ' + esc(n.typeName) + ' in the Types lab →</button>'
       : '') +
     '</div>';
 }
@@ -12424,6 +12675,10 @@ function wirePointerPanel() {
   });
   const c = $('#pvClose');
   if (c) c.addEventListener('click', () => { ui.focusObject = null; render(); });
+  const ol = $('#pvOpenLab');
+  if (ol) ol.addEventListener('click', () => {
+    if (typeof labShowObject === 'function') labShowObject(ol.dataset.val, ol.dataset.ty);
+  });
 }
 
 /* ================================ RAM MAP ================================ */
@@ -15665,6 +15920,7 @@ const LAB_TABS = [
   { id:'bits',   label:'Bits' },
   { id:'arith',  label:'Arithmetic' },
   { id:'compare',label:'Comparisons' },
+  { id:'types',  label:'Types & Limits' },
 ];
 
 const lab = {
@@ -15679,6 +15935,13 @@ const lab = {
   exprRun: null,
   cmp: "'A' >= 'a'",
   cmpRun: null,
+  // --- Phase 12e: types, limits, two's complement, overflow ---
+  limitTypeId: 'uchar',      // which type the explorer is showing
+  bitPattern: 255n,          // the pattern the bit editor is holding
+  bitWidth: 8,
+  bitSigned: false,          // which interpretation the switch is on
+  ovExpr: 'unsigned char',   // which overflow demonstration is selected
+  ovRun: null,
 };
 
 function labType() { return (LAB_TYPES.find(t => t.id === lab.typeId) || LAB_TYPES[0]).make(); }
@@ -15806,13 +16069,16 @@ function labStepsHtml(value, to) {
 /* ------------------------ 3. bit visualizer ------------------------
    Reusable on purpose: Phase 6 (signed/unsigned, two's complement, overflow)
    is meant to render its values through this same component. */
-function labBitsHtml(reprIn, compact) {
+function labBitsHtml(reprIn, compact, interactive) {
   const r = reprIn || labRepr();
   const cells = r.bitCells;
   const set = cells.filter(c => c.bit === 1);
-  let h = '<div class="vl-bits' + (compact ? ' compact' : '') + '">';
+  let h = '<div class="vl-bits' + (compact ? ' compact' : '') + (interactive ? ' live' : '') + '">';
   h += '<div class="vl-bitrow">' + cells.map(c =>
-    '<span class="vl-bitcell' + (c.bit ? ' on' : '') + '">' +
+    '<span class="vl-bitcell' + (c.bit ? ' on' : '') +
+      (c.index === cells.length - 1 && cells.length > 1 ? ' msb' : '') + '"' +
+      (interactive ? ' data-bit="' + c.index + '" role="button" tabindex="0"' +
+        ' aria-label="Toggle bit ' + c.index + ', worth ' + c.weight + '"' : '') + '>' +
       '<span class="vl-bit-i">' + c.index + '</span>' +
       '<span class="vl-bit-b mono">' + c.bit + '</span>' +
       '<span class="vl-bit-w mono">' + c.weight + '</span>' +
@@ -15825,8 +16091,8 @@ function labBitsHtml(reprIn, compact) {
       '</div>';
     h += '<div class="vl-dim">Bit <b>n</b> is worth 2<sup>n</sup>. ' +
       (r.isSigned
-        ? 'This is a signed ' + esc(r.typeName) + ': the top bit carries the sign, which is why the signed reading is ' + esc(r.signed) + '.'
-        : 'This is an unsigned ' + esc(r.typeName) + ': every bit counts toward the magnitude.') +
+        ? 'As <b>' + esc(r.typeName) + '</b> the top bit carries the sign, which is why this reads as ' + esc(r.signed) + '.'
+        : 'As <b>' + esc(r.typeName) + '</b> every bit counts toward the magnitude — there is no sign bit.') +
       '</div>';
   }
   return h + '</div>';
@@ -15963,6 +16229,7 @@ function renderLab() {
     case 'bits':    body = labBitsHtml(); break;
     case 'arith':   body = labExprPanel('arith'); break;
     case 'compare': body = labExprPanel('compare'); break;
+    case 'types':   body = labTypesHtml(); break;
   }
   root.innerHTML =
     '<div class="vl"><div class="vl-inner">' +
@@ -15983,6 +16250,7 @@ function renderLab() {
 }
 
 function wireLab() {
+  if (typeof wireLabTypes === 'function') wireLabTypes();
   $$('#labRoot [data-labtab]').forEach(el => el.addEventListener('click', () => {
     lab.tab = el.dataset.labtab; renderLab();
   }));
@@ -16062,6 +16330,371 @@ function labShowValue(v, typeId) {
   showLab();
 }
 /* ==== VALUELAB END ==== */
+
+/* ==== TYPELAB START ====
+   PHASE 12e — integer representation and limits.
+
+   Everything numeric here comes from CEngine.limitsOf / representation /
+   twosComplementSteps. There is no table of min and max values anywhere in this
+   file: a table would go stale the moment ARCH.sizes changed, and it would let
+   this page and the engine disagree about what an int is.
+
+   The honesty rule this phase turns on: unsigned wraparound is DEFINED by C and
+   signed overflow is UNDEFINED, however the bits happen to land. The overflow
+   section shows the bit-level story and the language rule as two separate
+   claims, because conflating them is the single most common way a teaching tool
+   misleads people about C. */
+
+const LIMIT_TYPES = [
+  { id:'char',   label:'char',           make: () => CEngine.scalarT('char', true) },
+  { id:'schar',  label:'signed char',    make: () => CEngine.scalarT('char', true) },
+  { id:'uchar',  label:'unsigned char',  make: () => CEngine.scalarT('char', false) },
+  { id:'short',  label:'short',          make: () => CEngine.scalarT('short', true) },
+  { id:'ushort', label:'unsigned short', make: () => CEngine.scalarT('short', false) },
+  { id:'int',    label:'int',            make: () => CEngine.scalarT('int', true) },
+  { id:'uint',   label:'unsigned int',   make: () => CEngine.scalarT('int', false) },
+  { id:'long',   label:'long',           make: () => CEngine.scalarT('long', true) },
+  { id:'ulong',  label:'unsigned long',  make: () => CEngine.scalarT('long', false) },
+];
+function limitType() { return (LIMIT_TYPES.find(t => t.id === lab.limitTypeId) || LIMIT_TYPES[2]); }
+function grouped(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+
+/* ---------------------- 1. the type explorer ---------------------- */
+function labTypeExplorer() {
+  const t = limitType();
+  const L = CEngine.limitsOf(t.make());
+  const row = (k, v, cls) => '<div class="tl-fact' + (cls ? ' ' + cls : '') + '">' +
+    '<span class="tl-fact-k">' + k + '</span><span class="tl-fact-v mono">' + esc(v) + '</span></div>';
+  return '<div class="tl-block">' +
+    '<div class="tl-types" role="group" aria-label="Integer type">' +
+      LIMIT_TYPES.map(x => '<button class="tl-type' + (x.id === lab.limitTypeId ? ' on' : '') +
+        '" data-limtype="' + x.id + '">' + esc(x.label) + '</button>').join('') +
+    '</div>' +
+    '<div class="tl-facts">' +
+      row('type', t.label) +
+      row('width', L.bits + ' bits') +
+      row('bytes', L.bytes) +
+      row('signedness', L.isSigned ? 'signed' : 'unsigned', L.isSigned ? 'sg' : 'un') +
+      row('minimum', grouped(L.min), 'min') +
+      row('maximum', grouped(L.max), 'max') +
+      row('bit patterns', grouped(L.patterns)) +
+    '</div>' +
+    (t.id === 'char'
+      ? '<div class="vl-note">Plain <b>char</b> is a third type, distinct from both signed char and ' +
+        'unsigned char, and whether it is signed is <b>implementation-defined</b> — it differs between ' +
+        'compilers and architectures. This simulator makes it signed; do not rely on that in portable code.</div>'
+      : '') +
+    '<div class="tl-ends">' +
+      '<div class="tl-end"><span class="tl-end-k">MIN</span>' +
+        '<b class="mono">' + esc(grouped(L.min)) + '</b>' +
+        '<span class="mono tl-end-b">' + L.minBits + '</span></div>' +
+      '<div class="tl-end"><span class="tl-end-k">MAX</span>' +
+        '<b class="mono">' + esc(grouped(L.max)) + '</b>' +
+        '<span class="mono tl-end-b">' + L.maxBits + '</span></div>' +
+    '</div>' +
+    labWhyPatterns(L) +
+    '</div>';
+}
+
+/* Why 2^N — with the small case enumerated, because 8 rows of 3 bits teaches
+   this faster than any amount of prose about exponents. */
+function labWhyPatterns(L) {
+  let three = '';
+  for (let i = 0; i < 8; i++) three += '<span class="tl-pat mono">' + i.toString(2).padStart(3, '0') + '</span>';
+  return '<div class="tl-why">' +
+    '<div class="tl-why-h">Why ' + grouped(L.patterns) + ' patterns?</div>' +
+    '<div class="tl-why-demo">' + three + '</div>' +
+    '<div class="tl-why-chain">' +
+      '<span>3 bits</span><span class="tl-arr">→</span><span class="mono">2³</span>' +
+      '<span class="tl-arr">→</span><span><b>8</b> patterns</span>' +
+    '</div>' +
+    '<div class="tl-why-chain">' +
+      '<span>' + L.bits + ' bits</span><span class="tl-arr">→</span>' +
+      '<span class="mono">2<sup>' + L.bits + '</sup></span><span class="tl-arr">→</span>' +
+      '<span><b>' + grouped(L.patterns) + '</b> patterns</span>' +
+    '</div>' +
+    '<div class="vl-note">Each extra bit doubles the number of patterns. Signed and unsigned types of the ' +
+      'same width have <b>exactly the same</b> number of patterns — ' + grouped(L.patterns) + ' either way. ' +
+      'What changes is which values those patterns are labelled with, not how many there are.</div>' +
+    '</div>';
+}
+
+/* ------------- 2. the bit editor: one pattern, two readings ------------- */
+function labBitEditor() {
+  const bits = lab.bitWidth;
+  const bytes = bits / 8;
+  const t = CEngine.scalarT(bytes === 1 ? 'char' : bytes === 2 ? 'short' : bytes === 4 ? 'int' : 'long', lab.bitSigned);
+  const tU = CEngine.scalarT(bytes === 1 ? 'char' : bytes === 2 ? 'short' : bytes === 4 ? 'int' : 'long', false);
+  const tS = CEngine.scalarT(bytes === 1 ? 'char' : bytes === 2 ? 'short' : bytes === 4 ? 'int' : 'long', true);
+  const rU = CEngine.representation(lab.bitPattern, tU);
+  const rS = CEngine.representation(lab.bitPattern, tS);
+  const active = lab.bitSigned ? rS : rU;
+  const a = rU.ascii;
+
+  let h = '<div class="tl-block"><div class="tl-block-h">Bit editor — click any bit</div>';
+  h += '<div class="tl-widths" role="group" aria-label="Width">' +
+    [8, 16, 32].map(w => '<button class="tl-w' + (w === bits ? ' on' : '') +
+      '" data-bitwidth="' + w + '">' + w + '-bit</button>').join('') +
+    '<div class="tl-switch" role="group" aria-label="Interpretation">' +
+      '<button class="tl-sw' + (!lab.bitSigned ? ' on' : '') + '" data-signed="0">UNSIGNED</button>' +
+      '<button class="tl-sw' + (lab.bitSigned ? ' on' : '') + '" data-signed="1">SIGNED</button>' +
+    '</div></div>';
+  h += labBitsHtml(active, bits > 16, true);
+
+  // The heart of the phase: identical bits, two labels.
+  h += '<div class="tl-two">' +
+    '<div class="tl-two-bits mono">' + active.binary.replace(/(.{8})(?=.)/g, '$1 ') + '</div>' +
+    '<div class="tl-two-split">' +
+      '<div class="tl-read' + (!lab.bitSigned ? ' on' : '') + '">' +
+        '<span class="tl-read-k">unsigned</span><b class="mono">' + esc(grouped(rU.unsigned)) + '</b></div>' +
+      '<div class="tl-read' + (lab.bitSigned ? ' on' : '') + '">' +
+        '<span class="tl-read-k">signed (two’s complement)</span><b class="mono">' + esc(grouped(rS.signed)) + '</b></div>' +
+    '</div>' +
+    '<div class="tl-same">The bits did not change. Only the interpretation did.</div>' +
+    '</div>';
+
+  h += '<div class="tl-msb">Bit ' + (bits - 1) + ' is the <b>most significant bit</b>. ' +
+    'Under the <b>signed</b> reading it is the sign bit: ' +
+    (rU.bitCells[0].bit ? 'it is <b>1</b> here, so the signed reading is negative.'
+                        : 'it is <b>0</b> here, so the signed reading is non-negative.') +
+    ' Under the <b>unsigned</b> reading that same bit is just worth ' +
+    grouped(rU.bitCells[0].weight) + ' like any other bit.</div>';
+
+  if (bits === 8 && a) {
+    h += '<div class="vl-note">As a character this byte is ' +
+      '<b class="mono">' + esc(a.literal || a.name) + '</b> — the same 8 bits again, read as ASCII. ' +
+      'A <b>char</b> is an integer type; ASCII is one interpretation of its value.</div>';
+  }
+  return h + '</div>';
+}
+
+/* --------------- 3. two's complement, stage by stage --------------- */
+function labTwosComplement() {
+  const bits = lab.bitWidth;
+  const st = CEngine.twosComplementSteps(lab.bitPattern, bits);
+  const stage = (k, v, cls) => '<div class="tl-stage' + (cls ? ' ' + cls : '') + '">' +
+    '<span class="tl-stage-k">' + k + '</span><span class="tl-stage-v mono">' + esc(v) + '</span></div>';
+  return '<div class="tl-block"><div class="tl-block-h">Two’s complement</div>' +
+    (st.negative
+      ? '<div class="tl-tc-note">This pattern is <b>negative</b> under the signed reading. ' +
+        'Here is the magnitude being recovered — invert and add one, the same operation in reverse.</div>'
+      : '<div class="tl-tc-note">This pattern is <b>non-negative</b>. Here is how its negative ' +
+        'counterpart would be built — invert every bit, then add one.</div>') +
+    '<div class="tl-stages">' +
+      stage(st.negative ? 'magnitude' : 'value', st.magnitudeBits + '  = ' + st.magnitude) +
+      '<div class="tl-stage-arr">▼ invert every bit</div>' +
+      stage('inverted', st.invertedBits) +
+      '<div class="tl-stage-arr">▼ add one</div>' +
+      stage('+ 1', st.plusOneBits, 'res') +
+      '<div class="tl-stage-arr">▼</div>' +
+      stage(st.negative ? 'this pattern' : 'is the pattern for',
+            st.negative ? st.storedBits + '  = ' + st.signedReading
+                        : st.plusOneBits + '  = -' + st.magnitude, 'res') +
+    '</div>' +
+    '<div class="vl-note">Two’s complement is chosen because it lets one adder handle both signs: ' +
+      'a − b is just a + (−b), and there is only one pattern for zero. It is also why the negative ' +
+      'range reaches one further than the positive one.</div>' +
+    '</div>';
+}
+
+/* ------------------ 4. range comparison at one width ------------------ */
+function labRangeCompare() {
+  const bits = lab.bitWidth;
+  const bytes = bits / 8;
+  const base = bytes === 1 ? 'char' : bytes === 2 ? 'short' : bytes === 4 ? 'int' : 'long';
+  const S = CEngine.limitsOf(CEngine.scalarT(base, true));
+  const U = CEngine.limitsOf(CEngine.scalarT(base, false));
+  const bar = (L, cls) => '<div class="tl-range ' + cls + '">' +
+    '<div class="tl-range-h"><b>' + esc(L.typeName) + '</b>' +
+      '<span class="tl-range-n">' + grouped(L.patterns) + ' values</span></div>' +
+    '<div class="tl-range-bar"><span class="tl-range-min mono">' + esc(grouped(L.min)) + '</span>' +
+      '<span class="tl-range-line"></span>' +
+      '<span class="tl-range-max mono">' + esc(grouped(L.max)) + '</span></div></div>';
+  return '<div class="tl-block"><div class="tl-block-h">Same width, two ranges</div>' +
+    bar(S, 'sg') + bar(U, 'un') +
+    '<div class="vl-note">Both hold <b>' + grouped(S.patterns) + '</b> patterns. The signed type spends ' +
+      'half of them on negative values, so its largest positive value is roughly half the unsigned ' +
+      'maximum — but it is not that "a bit was removed": every bit is still there, and the sign bit ' +
+      'still carries weight in the two’s-complement sum.</div>' +
+    '</div>';
+}
+
+/* ------------------ 5. the overflow laboratory ------------------
+   Both demonstrations are RUN, not described: the stored result comes out of
+   the engine's memory and the exact result comes out of the engine's own
+   arithmetic record. The difference between them is the story. */
+const OV_CASES = {
+  'unsigned char': { decl:'unsigned char', start:'255', op:'+ 1' },
+  'unsigned int':  { decl:'unsigned int',  start:'4294967295', op:'+ 1' },
+  'signed char':   { decl:'char',          start:'127', op:'+ 1' },
+  'signed int':    { decl:'int',           start:'2147483647', op:'+ 1' },
+};
+function labOverflowRun(key) {
+  const c = OV_CASES[key];
+  if (!c) return { ok:false, error:'unknown case' };
+  const src = 'int main(void)\n{\n\t' + c.decl + '\tx;\n\n\tx = ' + c.start + ';\n\tx = x ' + c.op + ';\n\treturn (0);\n}';
+  let r;
+  try { r = CEngine.runToCompletion(src); } catch (e) { return { ok:false, error:e.message }; }
+  if (!r.history) return { ok:false, error: r.message || 'did not run' };
+  let exact = null, before = null, after = null, typeName = null;
+  for (let i = 0; i < r.history.length; i++) {
+    const s = r.history.steps[i];
+    if (s.exprs) for (const e2 of s.exprs) if (e2.op === '+') exact = e2.result;
+  }
+  const states = [];
+  for (let i = 0; i < r.history.length; i++) {
+    const st = r.history.stateAt(i);
+    const v = st.vars.find(x => x.name === 'x');
+    if (v && !v.uninitialized) { states.push(v); typeName = v.typeName; }
+  }
+  if (states.length) { before = states[0].value; after = states[states.length - 1].value; }
+  return { ok:true, src, exact, before, after, typeName };
+}
+
+function labOverflow() {
+  const key = lab.ovExpr;
+  const run = lab.ovRun || (lab.ovRun = labOverflowRun(key));
+  const isSigned = key.indexOf('unsigned') < 0;
+  let h = '<div class="tl-block"><div class="tl-block-h">Overflow</div>';
+  h += '<div class="tl-ovtabs" role="group" aria-label="Overflow case">' +
+    Object.keys(OV_CASES).map(k => '<button class="tl-ovtab' + (k === key ? ' on' : '') +
+      '" data-ovcase="' + esc(k) + '">' + esc(k) + '</button>').join('') + '</div>';
+  if (!run.ok) return h + '<div class="vl-err">' + esc(run.error) + '</div></div>';
+
+  const bits = CEngine.limitsOf(CEngine.scalarT(
+    key.indexOf('char') >= 0 ? 'char' : 'int', isSigned)).bits;
+  const wide = (v) => { try { return BigInt(v).toString(2).padStart(bits + 1, '0'); } catch (e) { return '?'; } };
+  const narrow = (v) => { try { return CEngine.representation(BigInt(v), CEngine.scalarT(
+    key.indexOf('char') >= 0 ? 'char' : 'int', isSigned)).binary; } catch (e) { return '?'; } };
+
+  h += '<pre class="tl-ovsrc mono">' + esc(run.src) + '</pre>';
+  h += '<div class="tl-ovbits">' +
+    '<div class="tl-ovrow mono">' + narrow(run.before) + '<span class="tl-ovlab">' + grouped(run.before) + '</span></div>' +
+    '<div class="tl-ovrow mono"><span class="tl-ovop">+</span>' + narrow(1) + '<span class="tl-ovlab">1</span></div>' +
+    '<div class="tl-ovrow rule mono">' + wide(run.exact) + '<span class="tl-ovlab">' + grouped(run.exact) + ' — needs ' + (bits + 1) + ' bits</span></div>' +
+    '<div class="tl-ovcarry">the leading bit does not fit in ' + bits + ' bits and is discarded</div>' +
+    '<div class="tl-ovrow stored mono">' + narrow(run.after) + '<span class="tl-ovlab">stored: ' + grouped(run.after) + '</span></div>' +
+    '</div>';
+
+  // The two claims, kept visibly apart.
+  h += '<div class="tl-claims">' +
+    '<div class="tl-claim bits"><div class="tl-claim-h">WHAT THE BITS DID</div>' +
+      '<div class="tl-claim-b">The exact result ' + grouped(run.exact) + ' needs ' + (bits + 1) +
+      ' bits. Only ' + bits + ' are stored, so the top bit is lost and the pattern that remains ' +
+      'reads as <b class="mono">' + grouped(run.after) + '</b>. This is what this simulator did, and what ' +
+      'two’s-complement hardware typically does.</div></div>' +
+    (isSigned
+      ? '<div class="tl-claim ub"><div class="tl-claim-h">WHAT C GUARANTEES</div>' +
+        '<div class="tl-claim-b"><b>Nothing.</b> Signed integer overflow is <b>undefined behaviour</b> in C. ' +
+        'It is not "wrapping that you can rely on": a compiler is entitled to assume it never happens, and ' +
+        'optimisers really do delete checks written as <span class="mono">if (x + 1 &lt; x)</span> on that ' +
+        'basis. The rollover you see above is this simulator’s behaviour, not a portable C result.</div></div>'
+      : '<div class="tl-claim def"><div class="tl-claim-h">WHAT C GUARANTEES</div>' +
+        '<div class="tl-claim-b">This one is <b>defined</b>. Unsigned arithmetic in C is specified to wrap ' +
+        'modulo 2<sup>' + bits + '</sup>, so <b class="mono">' + grouped(run.after) + '</b> is the correct, ' +
+        'portable answer on every conforming implementation. Unsigned overflow is a tool; signed overflow ' +
+        'is a bug.</div></div>') +
+    '</div>';
+
+  if (!isSigned) {
+    h += '<div class="tl-seq">the sequence continues: ' +
+      ['0', '1', '2'].map((v, i) => '<span class="mono">' + v + '</span>').join(' → ') +
+      ' — counting resumes from the bottom of the range</div>';
+  }
+  return h + '</div>';
+}
+
+/* ------------------ 6. the limits reference table ------------------ */
+function labLimitsTable() {
+  let h = '<div class="tl-block"><div class="tl-block-h">Every integer type on this architecture</div>' +
+    '<div class="vl-table-wrap"><table class="vl-table tl-table"><thead><tr>' +
+    '<th>Type</th><th>Bits</th><th>Bytes</th><th>Signed</th><th>Minimum</th><th>Maximum</th><th>Values</th>' +
+    '</tr></thead><tbody>';
+  for (const t of LIMIT_TYPES) {
+    if (t.id === 'schar') continue;   // same type as char here; the note explains why
+    const L = CEngine.limitsOf(t.make());
+    h += '<tr class="' + (t.id === lab.limitTypeId ? 'sel ' : '') + 'vl-row" data-limtype="' + t.id + '" role="button" tabindex="0">' +
+      '<td class="mono">' + esc(t.label) + '</td>' +
+      '<td class="mono">' + L.bits + '</td><td class="mono">' + L.bytes + '</td>' +
+      '<td>' + (L.isSigned ? 'yes' : 'no') + '</td>' +
+      '<td class="mono">' + esc(grouped(L.min)) + '</td>' +
+      '<td class="mono">' + esc(grouped(L.max)) + '</td>' +
+      '<td class="mono">' + esc(grouped(L.patterns)) + '</td></tr>';
+  }
+  return h + '</tbody></table></div>' +
+    '<div class="vl-note">These come from the simulated architecture (' + esc(CEngine.ARCH.short) + '), ' +
+    'computed from each type’s width — they are not a copied table. On a real machine the widths of ' +
+    '<b>int</b> and <b>long</b> in particular depend on the compiler, the ABI and the platform: ' +
+    'long is 8 bytes on Linux x86-64 and 4 bytes on Windows x64. In portable code, ask ' +
+    '<span class="mono">&lt;limits.h&gt;</span> rather than assuming.</div></div>';
+}
+
+function labTypesHtml() {
+  return labTypeExplorer() + labBitEditor() + labTwosComplement() +
+         labRangeCompare() + labOverflow() + labLimitsTable();
+}
+
+function wireLabTypes() {
+  $$('#labRoot [data-limtype]').forEach(el => el.addEventListener('click', () => {
+    lab.limitTypeId = el.dataset.limtype;
+    // Keep the bit editor in step with the type being explored.
+    const L = CEngine.limitsOf(limitType().make());
+    if (L.bits <= 32) { lab.bitWidth = L.bits; lab.bitSigned = L.isSigned; }
+    renderLab();
+  }));
+  $$('#labRoot [data-bitwidth]').forEach(el => el.addEventListener('click', () => {
+    const w = +el.dataset.bitwidth;
+    const mask = (1n << BigInt(w)) - 1n;
+    lab.bitWidth = w;
+    lab.bitPattern = lab.bitPattern & mask;
+    renderLab();
+  }));
+  $$('#labRoot [data-signed]').forEach(el => el.addEventListener('click', () => {
+    lab.bitSigned = el.dataset.signed === '1';
+    renderLab();
+  }));
+  $$('#labRoot [data-bit]').forEach(el => {
+    const go = () => {
+      lab.bitPattern = lab.bitPattern ^ (1n << BigInt(el.dataset.bit));
+      renderLab();
+    };
+    el.addEventListener('click', go);
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
+    });
+  });
+  $$('#labRoot [data-ovcase]').forEach(el => el.addEventListener('click', () => {
+    lab.ovExpr = el.dataset.ovcase;
+    lab.ovRun = null;
+    renderLab();
+  }));
+}
+
+/* The bridge Phase 5 left unwired: a value clicked in memory opens here, in the
+   right type, with the range and the interpretation that object really has. */
+function labShowObject(value, typeName) {
+  const map = {
+    'char':'char', 'signed char':'schar', 'unsigned char':'uchar',
+    'short':'short', 'unsigned short':'ushort', 'int':'int', 'unsigned int':'uint',
+    'long':'long', 'unsigned long':'ulong',
+  };
+  const id = map[typeName];
+  if (id) {
+    lab.limitTypeId = id;
+    const L = CEngine.limitsOf(limitType().make());
+    if (L.bits <= 32) { lab.bitWidth = L.bits; lab.bitSigned = L.isSigned; }
+    const mask = (1n << BigInt(lab.bitWidth)) - 1n;
+    try { lab.bitPattern = BigInt(value) & mask; } catch (e) { /* keep the current pattern */ }
+  }
+  const tid = { 'char':'char','signed char':'char','unsigned char':'uchar','short':'short',
+                'unsigned short':'short','int':'int','unsigned int':'uint',
+                'long':'long','unsigned long':'long' }[typeName];
+  lab.tab = 'types';
+  labShowValue(value, tid);
+  lab.tab = 'types';
+  showLab();
+}
+/* ==== TYPELAB END ==== */
 
 /* ================================ WIRING ================================ */
 function inEditable(el) {
