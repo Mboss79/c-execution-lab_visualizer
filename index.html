@@ -2175,6 +2175,194 @@ html[data-theme=light] .viz-node.vz-frame::after{
 /* An uninitialized byte is not a zero byte. */
 .pv-byte.un{border-style:dashed;opacity:.7;}
 .pv-byte.un .pv-byte-v{color:var(--execution);}
+
+/* ==================================================================
+   PHASE 12d — Value & Representation Lab.
+   Transitions here exist to say "same value, different clothes": the
+   representation strip is one row so the eye reads across it, and the
+   bit cells light up rather than redraw. Nothing animates for decoration.
+   ================================================================== */
+#labRoot{display:none;position:absolute;inset:0;z-index:40;background:var(--bg);overflow:auto;}
+.vl{min-height:100%;padding:22px 24px 40px;}
+.vl-inner{max-width:1180px;margin:0 auto;}
+.vl-head h1{font-size:20px;margin:0 0 4px;letter-spacing:-.01em;}
+.vl-head p{margin:0 0 16px;color:var(--text-faint);font-size:12.5px;}
+
+.vl-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px;border-bottom:1px solid var(--border);}
+.vl-tab{
+  background:none;border:none;border-bottom:2px solid transparent;color:var(--text-faint);
+  padding:7px 13px;font-size:12px;cursor:pointer;transition:color .15s,border-color .15s;
+}
+.vl-tab:hover{color:var(--text);}
+.vl-tab.on{color:var(--memory);border-bottom-color:var(--memory);}
+
+/* --- the one-value strip: the spine of the whole lab --- */
+.vl-strip{
+  border:1px solid var(--memory);border-radius:9px;background:var(--memory-dim);
+  padding:11px 13px;margin-bottom:16px;
+}
+.vl-strip-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:9px;}
+.vl-strip-title{font-size:9.5px;letter-spacing:.14em;color:var(--memory);}
+.vl-types{display:flex;gap:3px;margin-left:auto;flex-wrap:wrap;}
+.vl-type{
+  background:var(--surface);border:1px solid var(--border);border-radius:999px;
+  color:var(--text-faint);font-family:var(--mono);font-size:10px;padding:2px 9px;cursor:pointer;
+  transition:border-color .15s,color .15s;
+}
+.vl-type:hover{color:var(--text);}
+.vl-type.on{border-color:var(--memory);color:var(--memory);}
+.vl-reps{display:flex;gap:7px;flex-wrap:wrap;}
+.vl-rep{
+  display:flex;flex-direction:column;gap:2px;background:var(--surface);
+  border:1px solid var(--border);border-radius:6px;padding:5px 10px;min-width:78px;
+  transition:border-color .2s;
+}
+.vl-rep.ok{border-color:var(--memory);}
+.vl-rep.na{opacity:.6;}
+.vl-rep-k{font-size:9px;letter-spacing:.08em;color:var(--text-faint);text-transform:uppercase;}
+.vl-rep-v{font-size:12px;color:var(--text);}
+
+/* --- ASCII table --- */
+.vl-search-row{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap;}
+.vl-input{
+  flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:6px;
+  color:var(--text);padding:6px 10px;font-size:12px;font-family:inherit;
+}
+.vl-input:focus{outline:none;border-color:var(--memory);}
+.vl-count{font-size:10.5px;color:var(--text-faint);}
+.vl-btn{
+  background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text-faint);
+  padding:6px 12px;font-size:11.5px;cursor:pointer;transition:border-color .15s,color .15s;
+}
+.vl-btn:hover{color:var(--text);}
+.vl-btn.on{border-color:var(--memory);color:var(--memory);}
+.vl-table-wrap{max-height:420px;overflow:auto;border:1px solid var(--border);border-radius:8px;}
+.vl-table{width:100%;border-collapse:collapse;font-size:11.5px;}
+.vl-table th{
+  position:sticky;top:0;background:var(--surface-2);color:var(--text-faint);text-align:left;
+  padding:7px 10px;font-weight:600;font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  border-bottom:1px solid var(--border);z-index:1;
+}
+.vl-table td{padding:5px 10px;border-bottom:1px solid var(--border);}
+.vl-row{cursor:pointer;transition:background .12s;}
+.vl-row:hover{background:var(--surface-2);}
+.vl-row.sel{background:var(--memory-dim);}
+.vl-row.sel td{color:var(--text);}
+.vl-bin{color:var(--text-faint);letter-spacing:.04em;}
+.vl-ch{font-weight:600;}
+.vl-k-control .vl-ch{color:var(--execution);}
+.vl-k-whitespace .vl-ch{color:var(--execution);}
+.vl-k-digit .vl-ch{color:var(--memory);}
+.vl-k-upper .vl-ch{color:var(--stack);}
+.vl-k-lower .vl-ch{color:var(--heap);}
+.vl-dim{color:var(--text-faint);}
+
+/* --- the character -> code -> hex/binary chain --- */
+.vl-flow{
+  margin-top:14px;padding:13px;border:1px dashed var(--border);border-radius:8px;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+}
+.vl-flow-step{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:6px 16px;
+}
+.vl-flow-k{font-size:9px;letter-spacing:.1em;color:var(--text-faint);}
+.vl-flow-step b{font-size:15px;}
+.vl-flow-arrow{color:var(--memory);font-size:10.5px;padding:5px 0;text-align:center;}
+.vl-flow-split{display:flex;gap:12px;}
+
+/* --- conversion steps --- */
+.vl-detect{font-size:11px;color:var(--text-faint);margin-bottom:9px;}
+.vl-detect b{color:var(--memory);}
+.vl-warn{
+  font-size:11px;line-height:1.6;color:var(--text);background:var(--execution-dim);
+  border:1px solid var(--execution);border-radius:6px;padding:8px 10px;margin-bottom:10px;
+}
+.vl-err{
+  font-size:11.5px;color:var(--error);border:1px solid var(--error);border-radius:6px;
+  padding:8px 10px;background:var(--error-dim);
+}
+.vl-steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:11px;margin:12px 0;}
+.vl-steps{border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--surface-2);}
+.vl-steps-h{font-size:10.5px;color:var(--text);margin-bottom:7px;}
+.vl-steps-body{font-size:11.5px;line-height:1.75;color:var(--text-faint);}
+.vl-rem{color:var(--memory);}
+.vl-on{color:var(--memory);}
+.vl-off{opacity:.45;}
+.vl-steps-read{margin-top:7px;font-size:11.5px;}
+.vl-steps-note{font-size:10px;margin-top:6px;}
+
+/* --- bit visualizer (reused by Phase 6) --- */
+.vl-bits{margin-top:14px;}
+.vl-bitrow{display:flex;gap:3px;flex-wrap:wrap;}
+.vl-bitcell{
+  display:flex;flex-direction:column;align-items:center;gap:1px;min-width:34px;
+  border:1px solid var(--border);border-radius:5px;padding:4px 3px;background:var(--surface);
+  transition:border-color .25s,background .25s;
+}
+.vl-bitcell.on{border-color:var(--memory);background:var(--memory-dim);}
+.vl-bit-i{font-size:8.5px;color:var(--text-faint);}
+.vl-bit-b{font-size:14px;font-weight:600;color:var(--text-faint);}
+.vl-bitcell.on .vl-bit-b{color:var(--memory);}
+.vl-bit-w{font-size:8.5px;color:var(--text-faint);}
+.vl-bitcell.on .vl-bit-w{color:var(--text);}
+.vl-bitsum{margin-top:10px;font-size:12.5px;}
+.vl-bits.compact .vl-bitcell{min-width:22px;padding:2px;}
+.vl-bits.compact .vl-bit-w,.vl-bits.compact .vl-bit-i{display:none;}
+
+/* --- expression inspector --- */
+.vl-presets{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px;}
+.vl-preset{
+  background:var(--surface);border:1px solid var(--border);border-radius:999px;color:var(--text-faint);
+  font-size:10.5px;padding:3px 10px;cursor:pointer;transition:border-color .15s,color .15s;
+}
+.vl-preset:hover{border-color:var(--memory);color:var(--memory);}
+.vl-engine-badge{
+  font-size:10px;color:var(--text-faint);margin-bottom:12px;letter-spacing:.02em;
+  padding-left:9px;border-left:2px solid var(--memory);
+}
+.vl-expr{border:1px solid var(--border);border-radius:9px;padding:13px;margin-bottom:12px;background:var(--surface-2);}
+.vl-expr-src{font-size:13px;margin-bottom:11px;color:var(--text);}
+.vl-expr-row{display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap;}
+.vl-opnd{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  border:1px solid var(--border);border-radius:7px;padding:7px 13px;background:var(--surface);min-width:92px;
+}
+.vl-opnd.skipped{border-style:dashed;opacity:.6;}
+.vl-opnd-src{font-size:11px;color:var(--text-faint);}
+.vl-opnd-val{font-size:15px;color:var(--text);}
+.vl-opnd-ascii{font-size:10px;color:var(--memory);}
+.vl-opnd-ty{font-size:9.5px;color:var(--text-faint);font-family:var(--mono);}
+.vl-opnd-skip{font-size:10px;color:var(--execution);}
+.vl-op{font-size:19px;color:var(--memory);}
+.vl-expr-res{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  border:1px solid var(--memory);border-radius:7px;padding:7px 15px;background:var(--memory-dim);
+  align-self:center;margin:0 auto;width:max-content;
+}
+.vl-expr-res.t{border-color:var(--success,var(--memory));}
+.vl-expr-res.f{border-color:var(--error);background:var(--error-dim);}
+.vl-expr-res-v{font-size:16px;}
+.vl-binops{
+  margin-top:12px;padding-top:10px;border-top:1px dashed var(--border);
+  display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:12.5px;letter-spacing:.08em;
+}
+.vl-binop.rule{border-top:1px solid var(--memory);padding-top:3px;color:var(--memory);}
+.vl-op-sm{color:var(--memory);margin-right:6px;}
+.vl-note{
+  font-size:10.5px;line-height:1.6;color:var(--text-faint);margin-top:10px;
+  padding-top:8px;border-top:1px dashed var(--border);
+}
+.vl-final{font-size:12.5px;padding:9px 11px;border:1px solid var(--memory);border-radius:7px;background:var(--memory-dim);}
+.vl-foot{
+  margin-top:18px;font-size:10.5px;line-height:1.65;color:var(--text-faint);
+  padding:9px 11px;border:1px dashed var(--border);border-radius:6px;
+}
+@media (max-width:760px){
+  .vl{padding:16px 14px 30px;}
+  .vl-reps{gap:5px;}
+  .vl-rep{min-width:64px;padding:4px 8px;}
+}
 </style>
 </head>
 <body>
@@ -2242,6 +2430,7 @@ html[data-theme=light] .viz-node.vz-frame::after{
       <div class="rail-sp"></div>
       <button class="rail-btn" id="railExplorer" title="Exercises and memory-error lessons (Ctrl+B)" aria-label="Open the library" aria-pressed="false">☰</button>
       <button class="rail-btn" id="railErrLab" title="Memory Error Lab" aria-label="Open the memory error lab" aria-pressed="false">⚠</button>
+      <button class="rail-btn" id="railLab" title="Value &amp; Representation Lab — ASCII, bases, bits, arithmetic (Ctrl+2)" aria-label="Open the value and representation lab">⌗</button>
       <button class="rail-btn" id="rail3d"      title="3D visualization (V)" aria-label="3D visualization" aria-pressed="false">◈</button>
       <button class="rail-btn" id="railDock"     title="Toggle bottom dock (Ctrl+`)" aria-label="Toggle bottom dock">▬</button>
       <button class="rail-btn" id="railHelp"     title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
@@ -2590,6 +2779,7 @@ html[data-theme=light] .viz-node.vz-frame::after{
 </div>
 
 <div id="dashRoot"></div>
+<div id="labRoot"></div>
 <div id="modalRoot"></div>
 <div id="popRoot"></div>
 <script>
@@ -2991,6 +3181,11 @@ function representation(bv, t) {
   const mask = (1n << bits) - 1n;
   const raw  = bv & mask;
   const sgn  = ((raw >> (bits - 1n)) & 1n) === 1n ? raw - (1n << bits) : raw;
+  const bitCells = [];
+  for (let i = Number(bits) - 1; i >= 0; i--) {
+    bitCells.push({ index: i, bit: ((raw >> BigInt(i)) & 1n) === 1n ? 1 : 0,
+                    weight: (1n << BigInt(i)).toString() });
+  }
   return {
     size,
     decimal:  bv.toString(10),
@@ -2998,7 +3193,142 @@ function representation(bv, t) {
     binary:   raw.toString(2).padStart(size * 8, '0'),
     signed:   sgn.toString(10),
     unsigned: raw.toString(10),
+    // --- widened for the representation lab; all derived from the same raw ---
+    bits:     Number(bits),
+    octal:    raw === 0n ? '0' : '0' + raw.toString(8),
+    typeName: typeName(t),
+    isSigned: isInteger(t) ? isSigned(t) : true,
+    // ASCII is 7-bit. A byte holding 200 is a byte, not a character, and this
+    // reports null rather than inventing a glyph for it.
+    ascii:    asciiInfo(raw <= 127n ? Number(raw) : -1),
+    bitCells,
   };
+}
+
+
+/* ============================ ASCII, AS DATA =============================
+   The single source of truth for character codes in this application. The
+   table, the converter, the arithmetic view and the memory byte view all read
+   THIS — none of them may carry its own lookup.
+
+   ASCII is a 7-bit encoding: codes 0..127 and nothing else. A byte holding 200
+   is a perfectly good byte, but it is not an ASCII character, and this model
+   says so rather than inventing a glyph for it. */
+const ASCII_CONTROL_NAMES = [
+  'NUL','SOH','STX','ETX','EOT','ENQ','ACK','BEL','BS','TAB','LF','VT','FF','CR','SO','SI',
+  'DLE','DC1','DC2','DC3','DC4','NAK','SYN','ETB','CAN','EM','SUB','ESC','FS','GS','RS','US',
+];
+const ASCII_CONTROL_DESC = {
+  0:'null — the terminator that ends every C string',
+  7:'bell', 8:'backspace', 9:'horizontal tab', 10:'line feed — newline in C',
+  11:'vertical tab', 12:'form feed', 13:'carriage return', 27:'escape', 127:'delete',
+};
+const C_ESCAPES = { 0:'\\0', 7:'\\a', 8:'\\b', 9:'\\t', 10:'\\n', 11:'\\v', 12:'\\f', 13:'\\r' };
+
+function asciiInfo(code) {
+  const n = Number(code);
+  if (!Number.isInteger(n) || n < 0 || n > 127) return null;
+  let kind, name, display;
+  if (n < 32)        { kind = 'control';     name = ASCII_CONTROL_NAMES[n]; display = name; }
+  else if (n === 32) { kind = 'whitespace';  name = 'SPACE';  display = 'SPACE'; }
+  else if (n === 127){ kind = 'control';     name = 'DEL';    display = 'DEL'; }
+  else               { display = String.fromCharCode(n);
+                       if (n >= 48 && n <= 57)       { kind = 'digit';       name = 'digit ' + display; }
+                       else if (n >= 65 && n <= 90)  { kind = 'upper';       name = 'uppercase ' + display; }
+                       else if (n >= 97 && n <= 122) { kind = 'lower';       name = 'lowercase ' + display; }
+                       else                          { kind = 'punctuation'; name = 'punctuation ' + display; } }
+  return {
+    code: n, kind, name, display,
+    printable: n >= 32 && n !== 127,
+    escape: C_ESCAPES[n] || null,
+    description: ASCII_CONTROL_DESC[n] || null,
+    literal: (n >= 32 && n !== 127) ? "'" + display + "'" : (C_ESCAPES[n] ? "'" + C_ESCAPES[n] + "'" : null),
+  };
+}
+const ASCII_TABLE = (() => { const a = []; for (let i = 0; i < 128; i++) a.push(asciiInfo(i)); return a; })();
+
+/* ------------------- reading a value the learner typed -------------------
+   The base is DETECTED and then reported back, never guessed silently: the
+   spec wants 01000001 to read as binary, which is exactly the case where a
+   silent guess would be indistinguishable from decimal 1000001. */
+function parseValueInput(text) {
+  const s = String(text == null ? '' : text).trim();
+  if (!s) return { ok: false, error: 'Type a value.' };
+  const neg = s[0] === '-';
+  const body = neg ? s.slice(1).trim() : s;
+
+  const charLit = body.match(/^'(\\.|[^'])'$/);
+  if (charLit) {
+    const c = charLit[1];
+    let code;
+    if (c[0] === '\\') {
+      const map = { n:10, t:9, r:13, '0':0, a:7, b:8, f:12, v:11, '\\':92, "'":39, '"':34 };
+      if (!(c[1] in map)) return { ok: false, error: 'Unknown escape ' + c + '.' };
+      code = map[c[1]];
+    } else code = c.charCodeAt(0);
+    return { ok: true, value: BigInt(neg ? -code : code), from: 'char', detected: 'character literal' };
+  }
+  if (/^0[xX][0-9a-fA-F]+$/.test(body))
+    return { ok: true, value: BigInt(neg ? '-' + body : body), from: 'hex', detected: 'hexadecimal (0x prefix)' };
+  if (/^0[bB][01]+$/.test(body)) {
+    const v = BigInt(parseInt(body.slice(2), 2));
+    return { ok: true, value: neg ? -v : v, from: 'binary', detected: 'binary (0b prefix)' };
+  }
+  // A run of 0s and 1s at least 4 long reads as BINARY, and this must be tested
+  // before the octal rule: 01000001 matches both, and binary is the reading the
+  // ASCII lab is for. Where C would disagree, say so rather than choose silently.
+  if (/^[01]{4,}$/.test(body)) {
+    const v = BigInt(parseInt(body, 2));
+    const out = { ok: true, value: neg ? -v : v, from: 'binary', detected: 'binary (only 0s and 1s)' };
+    if (body[0] === '0') {
+      const asOctal = BigInt(parseInt(body, 8));
+      out.ambiguous = {
+        note: 'A C compiler would read this as OCTAL, because of the leading zero.',
+        as: 'octal', value: asOctal.toString(),
+      };
+    }
+    return out;
+  }
+  if (/^0[0-7]+$/.test(body)) {
+    const v = BigInt(parseInt(body, 8));
+    return { ok: true, value: neg ? -v : v, from: 'octal', detected: 'octal (leading 0, C notation)' };
+  }
+  if (/^[0-9]+$/.test(body))
+    return { ok: true, value: BigInt(neg ? '-' + body : body), from: 'decimal', detected: 'decimal' };
+  if (body.length === 1)
+    return { ok: true, value: BigInt(neg ? -body.charCodeAt(0) : body.charCodeAt(0)), from: 'char', detected: 'single character' };
+  return { ok: false, error: 'Not a decimal, hex (0x41), binary (01000001), octal (0101) or character.' };
+}
+
+/* ---- how the conversion is actually done, not just its answer (Part 6) ---- */
+function conversionSteps(value, to) {
+  const v = BigInt(value);
+  const mag = v < 0n ? -v : v;
+  if (to === 'binary' || to === 'octal' || to === 'hex') {
+    const base = to === 'binary' ? 2n : to === 'octal' ? 8n : 16n;
+    const rows = [];
+    let n = mag;
+    if (n === 0n) rows.push({ from:'0', base:base.toString(), quotient:'0', remainder:'0' });
+    while (n > 0n) {
+      rows.push({ from: n.toString(), base: base.toString(),
+                  quotient: (n / base).toString(),
+                  remainder: (n % base).toString(base === 16n ? 16 : 10).toUpperCase() });
+      n = n / base;
+    }
+    return { method:'repeated division', base: Number(base), rows,
+             read: rows.map(r => r.remainder).reverse().join(''),
+             note: 'Divide by ' + base + ' and keep the remainders, then read them UPWARD.' };
+  }
+  // to decimal: positional expansion of the binary the value already has
+  const bin = mag.toString(2);
+  const terms = [];
+  for (let i = 0; i < bin.length; i++) {
+    const bit = bin[i];
+    const weight = 1n << BigInt(bin.length - 1 - i);
+    terms.push({ bit, weight: weight.toString(), contributes: bit === '1' ? weight.toString() : '0' });
+  }
+  return { method:'positional sum', base: 2, terms, read: mag.toString(10),
+           note: 'Each 1 contributes its column weight; the weights are powers of two.' };
 }
 
 /* =============================== ERRORS =================================== */
@@ -4376,14 +4706,31 @@ class Stepper {
       }
       case 'Logical': {
         const l = yield* this.ev(node.left, ln);
+        const noteLogical = (r, res, shorted) => {
+          I.noteExpr({
+            kind: 'logical', op: node.op, line: ln, expr: exprToStr(node),
+            operands: shorted
+              ? [operandDesc(node.left, l), { text: exprToStr(node.right), kind: node.right.kind,
+                  value: null, valueText: 'not evaluated', typeName: null, address: null,
+                  shortCircuited: true }]
+              : [operandDesc(node.left, l), operandDesc(node.right, r)],
+            shortCircuited: shorted,
+            result: res.toString(), resultText: res === 1n ? 'true (1)' : 'false (0)',
+            typeName: 'int',
+          });
+        };
         if (node.op === '&&') {
-          if (l.v === 0n) return cvInt(0n, T_INT);            // short-circuit
+          if (l.v === 0n) { noteLogical(null, 0n, true); return cvInt(0n, T_INT); }
           const r = yield* this.ev(node.right, ln);
-          return cvInt(r.v !== 0n ? 1n : 0n, T_INT);
+          const res = r.v !== 0n ? 1n : 0n;
+          noteLogical(r, res, false);
+          return cvInt(res, T_INT);
         }
-        if (l.v !== 0n) return cvInt(1n, T_INT);              // short-circuit
+        if (l.v !== 0n) { noteLogical(null, 1n, true); return cvInt(1n, T_INT); }
         const r = yield* this.ev(node.right, ln);
-        return cvInt(r.v !== 0n ? 1n : 0n, T_INT);
+        const res = r.v !== 0n ? 1n : 0n;
+        noteLogical(r, res, false);
+        return cvInt(res, T_INT);
       }
       case 'Cond': {
         const c = yield* this.ev(node.test, ln);
@@ -5442,6 +5789,9 @@ const ENGINE = {
   tokenize, parseC, Parser, compile, createRun, runToCompletion, evalWatch,
   Interp, Memory, Stepper, History, CError, MemSafetyError, RuntimeCError,
   exprToStr, KEYFRAME_INTERVAL,
+  // The representation lab's whole surface. Every view asks these; none of them
+  // carries its own decimalToHex, asciiLookup or bit maths.
+  asciiInfo, ASCII_TABLE, parseValueInput, conversionSteps, promote,
 };
 if (typeof module !== 'undefined' && module.exports) module.exports = ENGINE;
 if (typeof window !== 'undefined') window.CEngine = ENGINE;
@@ -12387,6 +12737,7 @@ function showDashboard() {
   ui.view = 'dashboard';
   $('#railHome').classList.add('active');
   $('#railWork').classList.remove('active');
+  if (typeof hideLab === 'function') hideLab();
   renderDashboard();
   $('#dashRoot').style.display = 'block';
 }
@@ -12396,6 +12747,7 @@ function showWorkspace() {
   $('#railWork').classList.add('active');
   $('#dashRoot').style.display = 'none';
   $('#dashRoot').innerHTML = '';
+  if (typeof hideLab === 'function') hideLab();
 }
 function renderDashboard() {
   const last = ui.exampleKey && EXAMPLES[ui.exampleKey] ? EXAMPLES[ui.exampleKey] : null;
@@ -15283,6 +15635,434 @@ function execFocus(s) {
 let lastExecAddr = null;
 /* ==== ERRLAB END ==== */
 
+/* ==== VALUELAB START ====
+   PHASE 12d — the Value & Representation Laboratory.
+
+   ONE value, many representations. Every tab in here reads
+   CEngine.representation(lab.value, lab.type); none of them carries its own
+   decimalToHex, asciiLookup or bit arithmetic. That is the whole design: a
+   learner should see 'A', 65, 0x41 and 01000001 as one value wearing different
+   clothes, and the only way a UI can make that convincing is to genuinely
+   derive them all from the same place.
+
+   The arithmetic and comparison tabs do NOT evaluate anything. They compile a
+   real C program and run it through the real execution engine, then read the
+   operand records the engine wrote while it worked. There is no second
+   "educational calculator" anywhere in this file — if the engine and this panel
+   ever disagreed, that would be a bug rather than a rounding difference. */
+
+const LAB_TYPES = [
+  { id:'char',  label:'char',           make: () => CEngine.scalarT('char', true) },
+  { id:'uchar', label:'unsigned char',  make: () => CEngine.scalarT('char', false) },
+  { id:'short', label:'short',          make: () => CEngine.scalarT('short', true) },
+  { id:'int',   label:'int',            make: () => CEngine.scalarT('int', true) },
+  { id:'uint',  label:'unsigned int',   make: () => CEngine.scalarT('int', false) },
+  { id:'long',  label:'long',           make: () => CEngine.scalarT('long', true) },
+];
+const LAB_TABS = [
+  { id:'ascii',  label:'ASCII' },
+  { id:'convert',label:'Conversions' },
+  { id:'bits',   label:'Bits' },
+  { id:'arith',  label:'Arithmetic' },
+  { id:'compare',label:'Comparisons' },
+];
+
+const lab = {
+  tab: 'ascii',
+  value: 65n,
+  typeId: 'char',
+  search: '',
+  input: '65',
+  parsed: null,
+  showSteps: false,
+  expr: "'A' + 1",
+  exprRun: null,
+  cmp: "'A' >= 'a'",
+  cmpRun: null,
+};
+
+function labType() { return (LAB_TYPES.find(t => t.id === lab.typeId) || LAB_TYPES[0]).make(); }
+function labRepr() { return CEngine.representation(lab.value, labType()); }
+
+/* Every representation of the current value, in one strip. This is the object
+   the whole lab is about, so it sits above every tab rather than inside one. */
+function labValueStrip() {
+  const r = labRepr();
+  const a = r.ascii;
+  const cell = (k, v, cls) =>
+    '<div class="vl-rep' + (cls ? ' ' + cls : '') + '"><span class="vl-rep-k">' + k + '</span>' +
+    '<span class="vl-rep-v mono">' + esc(v) + '</span></div>';
+  return '<div class="vl-strip">' +
+    '<div class="vl-strip-head">' +
+      '<span class="vl-strip-title">ONE VALUE</span>' +
+      '<div class="vl-types" role="group" aria-label="Interpret as type">' +
+        LAB_TYPES.map(t => '<button class="vl-type' + (t.id === lab.typeId ? ' on' : '') +
+          '" data-labtype="' + t.id + '">' + esc(t.label) + '</button>').join('') +
+      '</div>' +
+    '</div>' +
+    '<div class="vl-reps">' +
+      cell('decimal', r.decimal) +
+      cell('hex', r.hex) +
+      cell('octal', r.octal) +
+      cell('binary', r.binary.replace(/(.{8})(?=.)/g, '$1 ')) +
+      cell('ascii', a ? (a.literal || a.name) : 'not ASCII', a ? 'ok' : 'na') +
+      cell('width', r.bits + ' bits · ' + r.size + ' B') +
+      cell('signed', r.isSigned ? 'signed' : 'unsigned') +
+    '</div>' +
+    (a ? '' : '<div class="vl-note">ASCII covers codes 0–127 only. ' +
+        esc(r.unsigned) + ' is a valid ' + esc(r.typeName) + ' value but not an ASCII character.</div>') +
+    '</div>';
+}
+
+/* ---------------------------- 1. ASCII table ---------------------------- */
+function labAsciiHtml() {
+  const q = lab.search.trim().toLowerCase();
+  const rows = CEngine.ASCII_TABLE.filter(a => {
+    if (!q) return true;
+    if (String(a.code) === q) return true;
+    if (a.display.toLowerCase() === q) return true;
+    if (a.name.toLowerCase().indexOf(q) >= 0) return true;
+    if (('0x' + a.code.toString(16)).indexOf(q) === 0) return true;
+    if (a.code.toString(16) === q.replace(/^0x/, '')) return true;
+    return false;
+  });
+  let h = '<div class="vl-search-row">' +
+    '<input id="labSearch" class="vl-input" placeholder="search: A, 65, 0x41, tab, uppercase…" ' +
+      'value="' + esc(lab.search) + '" aria-label="Search the ASCII table">' +
+    '<span class="vl-count">' + rows.length + ' of 128</span></div>';
+  h += '<div class="vl-table-wrap"><table class="vl-table"><thead><tr>' +
+    '<th>Dec</th><th>Hex</th><th>Octal</th><th>Binary</th><th>Char</th><th>Name</th></tr></thead><tbody>';
+  for (const a of rows) {
+    const r = CEngine.representation(BigInt(a.code), CEngine.scalarT('char', false));
+    h += '<tr class="vl-row vl-k-' + a.kind + (BigInt(a.code) === lab.value ? ' sel' : '') +
+      '" data-code="' + a.code + '" role="button" tabindex="0">' +
+      '<td class="mono">' + a.code + '</td>' +
+      '<td class="mono">' + r.hex + '</td>' +
+      '<td class="mono">' + r.octal + '</td>' +
+      '<td class="mono vl-bin">' + r.binary + '</td>' +
+      '<td class="mono vl-ch">' + esc(a.printable ? a.display : (a.escape || a.name)) + '</td>' +
+      '<td>' + esc(a.name) + (a.description ? ' <span class="vl-dim">— ' + esc(a.description) + '</span>' : '') + '</td>' +
+      '</tr>';
+  }
+  if (!rows.length) h += '<tr><td colspan="6" class="vl-dim">Nothing matches that.</td></tr>';
+  return h + '</tbody></table></div>' + labAsciiFlowHtml();
+}
+
+// The chain the spec asks for: character -> code -> hex/binary.
+function labAsciiFlowHtml() {
+  const r = labRepr();
+  const a = r.ascii;
+  if (!a) return '';
+  return '<div class="vl-flow">' +
+    '<div class="vl-flow-step"><span class="vl-flow-k">CHARACTER</span><b class="mono">' +
+      esc(a.literal || a.name) + '</b></div>' +
+    '<div class="vl-flow-arrow">▼ ASCII assigns a number to each character</div>' +
+    '<div class="vl-flow-step"><span class="vl-flow-k">CODE</span><b class="mono">' + r.decimal + '</b></div>' +
+    '<div class="vl-flow-split">' +
+      '<div class="vl-flow-step"><span class="vl-flow-k">HEX</span><b class="mono">' + r.hex + '</b></div>' +
+      '<div class="vl-flow-step"><span class="vl-flow-k">BINARY</span><b class="mono">' + r.binary + '</b></div>' +
+    '</div></div>';
+}
+
+/* ---------------------------- 2. converter ---------------------------- */
+function labConvertHtml() {
+  const p = lab.parsed || CEngine.parseValueInput(lab.input);
+  let h = '<div class="vl-search-row">' +
+    '<input id="labInput" class="vl-input" placeholder="65   0x41   01000001   0101   &#39;A&#39;" ' +
+      'value="' + esc(lab.input) + '" aria-label="Value to convert">' +
+    '<button class="vl-btn' + (lab.showSteps ? ' on' : '') + '" id="labSteps">Show steps</button></div>';
+  if (!p.ok) return h + '<div class="vl-err">' + esc(p.error) + '</div>';
+  h += '<div class="vl-detect">read as <b>' + esc(p.detected) + '</b></div>';
+  if (p.ambiguous) {
+    h += '<div class="vl-warn"><b>Ambiguous.</b> ' + esc(p.ambiguous.note) +
+      ' As ' + esc(p.ambiguous.as) + ' it would be <b class="mono">' + esc(p.ambiguous.value) + '</b>.</div>';
+  }
+  if (lab.showSteps) {
+    h += '<div class="vl-steps-grid">' +
+      labStepsHtml(lab.value, 'binary') + labStepsHtml(lab.value, 'decimal') + '</div>';
+  }
+  return h;
+}
+
+function labStepsHtml(value, to) {
+  const s = CEngine.conversionSteps(value, to);
+  let h = '<div class="vl-steps"><div class="vl-steps-h">' +
+    (to === 'binary' ? 'decimal → binary' : 'binary → decimal') +
+    '<span class="vl-dim"> · ' + esc(s.method) + '</span></div>';
+  if (s.rows) {
+    h += '<div class="vl-steps-body mono">' +
+      s.rows.map(r => r.from + ' ÷ ' + r.base + ' = ' + r.quotient +
+        '<span class="vl-rem"> remainder ' + r.remainder + '</span>').join('<br>') +
+      '</div><div class="vl-steps-read">read the remainders upward → <b class="mono">' + esc(s.read) + '</b></div>';
+  } else {
+    h += '<div class="vl-steps-body mono">' +
+      s.terms.map(t => '<span class="' + (t.bit === '1' ? 'vl-on' : 'vl-off') + '">' +
+        t.bit + ' × ' + t.weight + '</span>').join('<br>+ ') +
+      '</div><div class="vl-steps-read">= <b class="mono">' + esc(s.read) + '</b></div>';
+  }
+  return h + '<div class="vl-dim vl-steps-note">' + esc(s.note) + '</div></div>';
+}
+
+/* ------------------------ 3. bit visualizer ------------------------
+   Reusable on purpose: Phase 6 (signed/unsigned, two's complement, overflow)
+   is meant to render its values through this same component. */
+function labBitsHtml(reprIn, compact) {
+  const r = reprIn || labRepr();
+  const cells = r.bitCells;
+  const set = cells.filter(c => c.bit === 1);
+  let h = '<div class="vl-bits' + (compact ? ' compact' : '') + '">';
+  h += '<div class="vl-bitrow">' + cells.map(c =>
+    '<span class="vl-bitcell' + (c.bit ? ' on' : '') + '">' +
+      '<span class="vl-bit-i">' + c.index + '</span>' +
+      '<span class="vl-bit-b mono">' + c.bit + '</span>' +
+      '<span class="vl-bit-w mono">' + c.weight + '</span>' +
+    '</span>').join('') + '</div>';
+  if (!compact) {
+    h += '<div class="vl-bitsum">' +
+      (set.length
+        ? set.map(c => '<b class="mono">' + c.weight + '</b>').join(' + ') + ' = <b class="mono">' + r.unsigned + '</b>'
+        : 'every bit is 0, so the value is <b class="mono">0</b>') +
+      '</div>';
+    h += '<div class="vl-dim">Bit <b>n</b> is worth 2<sup>n</sup>. ' +
+      (r.isSigned
+        ? 'This is a signed ' + esc(r.typeName) + ': the top bit carries the sign, which is why the signed reading is ' + esc(r.signed) + '.'
+        : 'This is an unsigned ' + esc(r.typeName) + ': every bit counts toward the magnitude.') +
+      '</div>';
+  }
+  return h + '</div>';
+}
+
+/* ------------- 4/5. arithmetic and comparison, from the ENGINE -------------
+   labEvaluate compiles a real one-expression program and runs it through the
+   real engine, then reads back the operand records the engine wrote. This is
+   what keeps the lab from being a second implementation of C semantics: integer
+   promotion, char-to-int, wrapping and short-circuit are whatever the engine
+   really did, not what this file believes should happen. */
+function labEvaluate(exprText) {
+  const src = 'int main(void)\n{\n\tint\t_result;\n\n\t_result = (' + exprText + ');\n\treturn (0);\n}';
+  let r;
+  try { r = CEngine.runToCompletion(src); }
+  catch (e) { return { ok:false, error: e.message }; }
+  if (!r.ok && !r.history) return { ok:false, error: r.message || 'That expression did not compile.' };
+  const exprs = [];
+  for (let i = 0; i < r.history.length; i++) {
+    const st = r.history.steps[i];
+    if (st.exprs) for (const ex of st.exprs) exprs.push(ex);
+  }
+  if (!exprs.length) return { ok:false, error: 'No operation to show — that expression has no operator.' };
+  // The result of the whole expression is the value that reached _result.
+  let finalText = null, finalVal = null, finalType = null;
+  for (let i = r.history.length - 1; i >= 0 && finalText === null; i--) {
+    const st = r.history.stateAt(i);
+    const v = st.vars.find(x => x.name === '_result');
+    if (v && !v.uninitialized) { finalText = v.valueText; finalVal = v.value; finalType = v.typeName; }
+  }
+  return { ok:true, exprs, finalText, finalVal, finalType, error: r.ok ? null : r.message };
+}
+
+// One operation, staged: operands -> their numeric values -> operator -> result.
+function labExprCardHtml(ex) {
+  // Character-flavoured means: the engine typed it as char, or the learner
+  // wrote it as a character literal. A plain int is left alone.
+  const asChar = (o) => {
+    if (o.value === null || o.value === undefined) return null;
+    const looksCharacter = o.typeName === 'char' || o.typeName === 'unsigned char' ||
+                           /^'.*'$/.test(String(o.text || '').trim());
+    if (!looksCharacter) return null;
+    let n;
+    try { n = BigInt(o.value); } catch (e) { return null; }
+    return CEngine.asciiInfo(n >= 0n && n <= 127n ? Number(n) : -1);
+  };
+  const opndHtml = (o) => {
+    const a = asChar(o);
+    return '<div class="vl-opnd' + (o.shortCircuited ? ' skipped' : '') + '">' +
+      '<div class="vl-opnd-src mono">' + esc(o.text) + '</div>' +
+      (o.shortCircuited
+        ? '<div class="vl-opnd-skip">not evaluated — short-circuited</div>'
+        : '<div class="vl-opnd-val mono">' + esc(o.valueText == null ? '?' : o.valueText) + '</div>' +
+          (a ? '<div class="vl-opnd-ascii">' + esc(a.literal || a.name) + ' = ' + a.code + '</div>' : '') +
+          (o.typeName ? '<div class="vl-opnd-ty">' + esc(o.typeName) + '</div>' : '')) +
+      '</div>';
+  };
+  const isCmp = ['==','!=','<','>','<=','>='].indexOf(ex.op) >= 0;
+  const resAscii = (() => {
+    if (isCmp || ex.kind === 'logical' || ex.result == null) return null;
+    let n; try { n = BigInt(ex.result); } catch (e) { return null; }
+    return CEngine.asciiInfo(n >= 0n && n <= 127n ? Number(n) : -1);
+  })();
+  let h = '<div class="vl-expr' + (isCmp || ex.kind === 'logical' ? ' vl-bool' : '') + '">';
+  h += '<div class="vl-expr-src mono">' + esc(ex.expr) + '</div>';
+  h += '<div class="vl-expr-row">' + opndHtml(ex.operands[0]) +
+       '<div class="vl-op mono">' + esc(ex.op) + '</div>' +
+       opndHtml(ex.operands[1]) + '</div>';
+  h += '<div class="vl-flow-arrow">▼</div>';
+  h += '<div class="vl-expr-res' + (isCmp || ex.kind === 'logical'
+        ? (ex.result === '1' ? ' t' : ' f') : '') + '">' +
+    '<span class="vl-expr-res-v mono">' + esc(ex.resultText == null ? '?' : ex.resultText) + '</span>' +
+    (ex.typeName ? '<span class="vl-opnd-ty">' + esc(ex.typeName) + '</span>' : '') +
+    (resAscii ? '<span class="vl-opnd-ascii">as ASCII: ' + esc(resAscii.literal || resAscii.name) + '</span>' : '') +
+    '</div>';
+  // Bits, for the operations where bits are the point.
+  if (!isCmp && ex.kind === 'binary' && ex.result != null) {
+    try {
+      const t = CEngine.scalarT('char', false);
+      const a0 = BigInt(ex.operands[0].value), a1 = BigInt(ex.operands[1].value), rr = BigInt(ex.result);
+      if ([a0, a1, rr].every(v => v >= 0n && v <= 255n)) {
+        h += '<div class="vl-binops">' +
+          '<div class="vl-binop mono">' + CEngine.representation(a0, t).binary + '</div>' +
+          '<div class="vl-binop mono"><span class="vl-op-sm">' + esc(ex.op) + '</span> ' +
+            CEngine.representation(a1, t).binary + '</div>' +
+          '<div class="vl-binop rule mono">' + CEngine.representation(rr, t).binary + '</div>' +
+          '</div>';
+      }
+    } catch (e) { /* not an integer operation — the bit view simply does not apply */ }
+  }
+  if (ex.shortCircuited) {
+    h += '<div class="vl-note">' + esc(ex.op) + ' stops as soon as the answer is certain, so the ' +
+      'right-hand side never ran. In C that is a guarantee you can rely on, not an optimisation.</div>';
+  }
+  if (ex.kind === 'binary' && ex.operands.some(o => o.typeName === 'char')) {
+    h += '<div class="vl-note">Both operands were promoted to <b>int</b> before the operation — that is C’s ' +
+      'integer promotion, and it is why the result type here is <b>' + esc(ex.typeName) + '</b> rather than char.</div>';
+  }
+  return h + '</div>';
+}
+
+function labExprPanel(which) {
+  const isCmp = which === 'compare';
+  const key = isCmp ? 'cmp' : 'expr';
+  const runKey = isCmp ? 'cmpRun' : 'exprRun';
+  const presets = isCmp
+    ? ["'A' >= 'a'", "'A' < 'a'", "'z' >= 'a' && 'z' <= 'z'", "'5' >= '0' && '5' <= '9'", "'A' == 'A'"]
+    : ["'A' + 1", "'a' - 'A'", "'7' - '0'", "5 + 3", "'A' + 32"];
+  const run = lab[runKey] || (lab[runKey] = labEvaluate(lab[key]));
+  let h = '<div class="vl-search-row">' +
+    '<input id="labExprInput" class="vl-input mono" data-key="' + key + '" value="' + esc(lab[key]) + '" ' +
+      'aria-label="C expression to evaluate">' +
+    '<button class="vl-btn on" id="labExprGo">Evaluate</button></div>';
+  h += '<div class="vl-presets">' + presets.map(p =>
+    '<button class="vl-preset mono" data-preset="' + esc(p) + '" data-key="' + key + '">' + esc(p) + '</button>').join('') + '</div>';
+  h += '<div class="vl-engine-badge">evaluated by the execution engine — the same one that runs your programs</div>';
+  if (!run.ok) return h + '<div class="vl-err">' + esc(run.error) + '</div>';
+  for (const ex of run.exprs) h += labExprCardHtml(ex);
+  if (run.finalText !== null) {
+    h += '<div class="vl-final">whole expression → <b class="mono">' + esc(run.finalText) + '</b>' +
+      (run.finalType ? ' <span class="vl-opnd-ty">' + esc(run.finalType) + '</span>' : '') + '</div>';
+  }
+  return h;
+}
+
+/* ------------------------------ the view ------------------------------ */
+function renderLab() {
+  const root = $('#labRoot');
+  if (!root) return;
+  let body = '';
+  switch (lab.tab) {
+    case 'ascii':   body = labAsciiHtml(); break;
+    case 'convert': body = labConvertHtml() + labBitsHtml(); break;
+    case 'bits':    body = labBitsHtml(); break;
+    case 'arith':   body = labExprPanel('arith'); break;
+    case 'compare': body = labExprPanel('compare'); break;
+  }
+  root.innerHTML =
+    '<div class="vl"><div class="vl-inner">' +
+      '<div class="vl-head"><h1>Value &amp; Representation Lab</h1>' +
+        '<p>A C value is a number. Everything below is the same number, written differently.</p></div>' +
+      '<div class="vl-tabs" role="tablist">' +
+        LAB_TABS.map(t => '<button class="vl-tab' + (t.id === lab.tab ? ' on' : '') +
+          '" data-labtab="' + t.id + '" role="tab" aria-selected="' + (t.id === lab.tab) + '">' +
+          esc(t.label) + '</button>').join('') +
+      '</div>' +
+      labValueStrip() +
+      '<div class="vl-body">' + body + '</div>' +
+      '<div class="vl-foot">Widths, signedness and wrapping follow the simulated architecture (' +
+        esc(CEngine.ARCH.short) + '). Arithmetic and comparisons are evaluated by the execution engine, ' +
+        'not recomputed here.</div>' +
+    '</div></div>';
+  wireLab();
+}
+
+function wireLab() {
+  $$('#labRoot [data-labtab]').forEach(el => el.addEventListener('click', () => {
+    lab.tab = el.dataset.labtab; renderLab();
+  }));
+  $$('#labRoot [data-labtype]').forEach(el => el.addEventListener('click', () => {
+    lab.typeId = el.dataset.labtype; renderLab();
+  }));
+  $$('#labRoot .vl-row').forEach(el => {
+    const go = () => { lab.value = BigInt(el.dataset.code); lab.input = el.dataset.code;
+                       lab.parsed = CEngine.parseValueInput(el.dataset.code); renderLab(); };
+    el.addEventListener('click', go);
+    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  });
+  const search = $('#labSearch');
+  if (search) search.addEventListener('input', () => {
+    lab.search = search.value;
+    const pos = search.selectionStart;
+    renderLab();
+    const s2 = $('#labSearch');
+    if (s2) { s2.focus(); try { s2.setSelectionRange(pos, pos); } catch (e) {} }
+  });
+  const input = $('#labInput');
+  if (input) input.addEventListener('input', () => {
+    lab.input = input.value;
+    const p = CEngine.parseValueInput(lab.input);
+    lab.parsed = p;
+    if (p.ok) lab.value = p.value;
+    const pos = input.selectionStart;
+    renderLab();
+    const i2 = $('#labInput');
+    if (i2) { i2.focus(); try { i2.setSelectionRange(pos, pos); } catch (e) {} }
+  });
+  const steps = $('#labSteps');
+  if (steps) steps.addEventListener('click', () => { lab.showSteps = !lab.showSteps; renderLab(); });
+  const go = $('#labExprGo'), ei = $('#labExprInput');
+  const evalNow = () => {
+    if (!ei) return;
+    const key = ei.dataset.key;
+    lab[key] = ei.value;
+    lab[key === 'cmp' ? 'cmpRun' : 'exprRun'] = labEvaluate(ei.value);
+    renderLab();
+  };
+  if (go) go.addEventListener('click', evalNow);
+  if (ei) ei.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); evalNow(); } });
+  $$('#labRoot [data-preset]').forEach(el => el.addEventListener('click', () => {
+    const key = el.dataset.key;
+    lab[key] = el.dataset.preset;
+    lab[key === 'cmp' ? 'cmpRun' : 'exprRun'] = labEvaluate(el.dataset.preset);
+    renderLab();
+  }));
+}
+
+function showLab() {
+  ui.view = 'lab';
+  $('#dashRoot').style.display = 'none';
+  $('#railHome').classList.remove('active');
+  $('#railWork').classList.remove('active');
+  const b = $('#railLab');
+  if (b) b.classList.add('active');
+  renderLab();
+  $('#labRoot').style.display = 'block';
+}
+function hideLab() {
+  const r = $('#labRoot');
+  if (r) { r.style.display = 'none'; r.innerHTML = ''; }
+  const b = $('#railLab');
+  if (b) b.classList.remove('active');
+}
+/* Open the lab already looking at a value the learner just clicked elsewhere —
+   this is the bridge from the memory/pointer views into the representation of
+   whatever byte they were inspecting. */
+function labShowValue(v, typeId) {
+  lab.value = BigInt(v);
+  if (typeId) lab.typeId = typeId;
+  lab.input = String(v);
+  lab.parsed = CEngine.parseValueInput(lab.input);
+  lab.tab = 'convert';
+  showLab();
+}
+/* ==== VALUELAB END ==== */
+
 /* ================================ WIRING ================================ */
 function inEditable(el) {
   return el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.isContentEditable);
@@ -15329,6 +16109,10 @@ window.addEventListener('DOMContentLoaded', () => {
   /* ---- rail ---- */
   $('#railHome').addEventListener('click', showDashboard);
   $('#railWork').addEventListener('click', showWorkspace);
+  const railLab = $('#railLab');
+  if (railLab) railLab.addEventListener('click', () => {
+    if (ui.view === 'lab') showWorkspace(); else showLab();
+  });
   $('#railExplorer').addEventListener('click', () => toggleLibrary('files'));
   $('#railErrLab').addEventListener('click', () => toggleLibrary('errors'));
   $('#libClose').addEventListener('click', closeLibrary);
