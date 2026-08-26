@@ -3358,6 +3358,188 @@ html[data-theme=light] .viz-node.vz-frame::after{
   .pl-two{grid-template-columns:1fr;}
   .pl-rung-w{margin-left:0;width:100%;}
 }
+
+/* ==================================================================
+   PHASE 11 — argc / argv.
+   The array of char * is the centre of the page, so it is drawn as an
+   actual column of slots with the address on the left and the target
+   on the right. The NULL slot is styled as an absence rather than as
+   another value, because "argv[argc] is NULL" is the fact the whole
+   sentinel idea rests on.
+   ================================================================== */
+
+.av-block{
+  border:1px solid var(--border);border-radius:9px;padding:13px 14px;margin-bottom:14px;
+  background:var(--surface-2);
+}
+.av-block-h{font-size:10px;letter-spacing:.13em;color:var(--text-faint);margin-bottom:11px;text-transform:uppercase;}
+.av-note{font-size:10.5px;line-height:1.65;color:var(--text-faint);margin-top:11px;}
+.av-note b{color:var(--text);}
+.av-note.av-warn{border-left:2px solid var(--execution);padding:7px 0 7px 10px;color:var(--text-muted);}
+.av-empty{font-size:10.5px;color:var(--text-faint);font-style:italic;}
+.av-col-h{font-size:9px;letter-spacing:.12em;color:var(--text-faint);margin-bottom:8px;}
+
+/* --- modes / examples --- */
+.av-modes{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:13px;}
+.av-mode{
+  background:var(--surface);border:1px solid var(--border);border-radius:999px;color:var(--text-faint);
+  font-size:10.5px;padding:3px 12px;cursor:pointer;text-transform:capitalize;
+}
+.av-mode:hover{color:var(--text);}
+.av-mode.on{border-color:var(--memory);color:var(--memory);}
+.av-mode-n{font-size:10px;color:var(--text-faint);margin-left:6px;}
+.av-exs{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+.av-ex{
+  background:var(--surface);border:1px solid var(--border);border-radius:999px;color:var(--text-faint);
+  font-size:10.5px;padding:3px 10px;cursor:pointer;
+}
+.av-ex:hover{color:var(--text);}
+.av-ex.on{border-color:var(--memory);color:var(--memory);}
+.av-ex-t{font-size:10.5px;color:var(--text);margin-left:6px;}
+
+/* --- the argument builder --- */
+.av-controls{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;
+  padding:8px 10px;border:1px solid var(--border);border-radius:7px;background:var(--surface);
+}
+.av-cmd{font-size:12px;color:var(--text);}
+.av-arg{
+  display:inline-flex;align-items:center;gap:4px;background:var(--memory-dim);
+  border:1px solid var(--memory);border-radius:999px;padding:1px 4px 1px 8px;color:var(--memory);
+}
+.av-x{
+  background:none;border:none;color:var(--memory);cursor:pointer;font-size:12px;line-height:1;
+  padding:0 3px;opacity:.7;
+}
+.av-x:hover{opacity:1;}
+.av-new{max-width:170px;flex:0 1 170px;}
+
+/* --- timeline --- */
+.av-two{display:grid;grid-template-columns:minmax(240px,1fr) minmax(300px,1.2fr);gap:12px;}
+.av-src{
+  font-size:11px;line-height:1.55;background:var(--surface);border:1px solid var(--border);
+  border-radius:6px;padding:9px 0;margin:0 0 9px;max-height:250px;overflow:auto;
+}
+.av-srcline{display:block;padding:0 9px;color:var(--text-faint);white-space:pre;}
+.av-srcline.on{background:var(--execution-dim);color:var(--text);box-shadow:inset 2px 0 0 var(--execution);}
+.av-scrub{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+.av-desc{font-size:10.5px;line-height:1.6;color:var(--text-faint);}
+.av-out{font-size:11px;margin-top:8px;color:var(--text-faint);}
+.av-out b{color:var(--heap);}
+.av-teach{
+  margin-top:12px;padding:9px 11px;border-left:2px solid var(--memory);
+  font-size:11px;line-height:1.65;color:var(--text);
+}
+.av-stopped{
+  margin-top:11px;padding:9px 11px;border:1px solid var(--error);border-radius:7px;
+  background:var(--error-dim);font-size:10.5px;line-height:1.6;color:var(--text);
+}
+
+/* --- argc / argv and the array --- */
+.av-vars{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:9px;}
+.av-var{
+  display:flex;flex-direction:column;gap:2px;flex:1;min-width:135px;
+  border:1px solid var(--border);border-radius:7px;padding:8px 11px;background:var(--surface);
+}
+.av-var.ptr{border-style:dashed;border-color:var(--memory);}
+.av-k{font-size:9px;letter-spacing:.1em;color:var(--text-faint);text-transform:uppercase;}
+.av-var b{font-size:15px;color:var(--text);}
+.av-n{font-size:9.5px;line-height:1.5;color:var(--text-faint);}
+.av-arrow{text-align:center;font-size:10px;color:var(--memory);padding:5px 0;}
+.av-vec{border:1px solid var(--memory);border-radius:8px;overflow:hidden;background:var(--surface);}
+.av-vec-h{
+  display:flex;align-items:baseline;gap:8px;padding:6px 11px;background:var(--memory-dim);
+  font-size:9.5px;letter-spacing:.09em;color:var(--memory);border-bottom:1px solid var(--border);
+}
+.av-vec-s{margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--text-faint);letter-spacing:0;}
+.av-slot{
+  display:grid;grid-template-columns:62px 92px 14px 1fr;gap:8px;align-items:baseline;
+  padding:6px 11px;border-top:1px solid var(--border);font-size:10.5px;cursor:pointer;
+}
+.av-slot:first-of-type{border-top:none;}
+.av-slot:hover{background:var(--surface-2);}
+.av-slot-i{color:var(--memory);}
+.av-slot-a{color:var(--text-faint);font-size:9.5px;}
+.av-slot-g{color:var(--text-faint);}
+.av-slot-v{color:var(--text);word-break:break-all;}
+.av-slot.nul{cursor:default;border-style:dashed;}
+.av-slot.nul:hover{background:none;}
+.av-slot.nul .av-slot-v{color:var(--error);letter-spacing:.09em;}
+.av-slot.nul .av-slot-i{color:var(--text-faint);}
+
+/* --- the ladder --- */
+.av-idx{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+.av-ib{
+  background:var(--surface);border:1px solid var(--border);border-radius:999px;color:var(--text-faint);
+  font-family:var(--mono);font-size:10.5px;padding:3px 10px;cursor:pointer;
+}
+.av-ib:hover{color:var(--text);}
+.av-ib.on{border-color:var(--memory);color:var(--memory);}
+.av-ladder{display:flex;flex-direction:column;gap:3px;}
+.av-rung{
+  display:grid;grid-template-columns:minmax(110px,1fr) 70px minmax(110px,1fr) 2fr;gap:9px;align-items:baseline;
+  border:1px solid var(--border);border-radius:6px;padding:6px 11px;background:var(--surface);
+}
+.av-rung-e{font-size:11.5px;color:var(--memory);}
+.av-rung-t{font-size:9.5px;color:var(--text-faint);}
+.av-rung-v{font-size:11px;color:var(--text);}
+.av-rung-w{font-size:10px;color:var(--text-faint);}
+.av-bytes-h{font-size:9.5px;color:var(--text-faint);margin:11px 0 6px;}
+.av-bytes{display:flex;gap:3px;flex-wrap:wrap;}
+.av-byte{
+  display:flex;flex-direction:column;align-items:center;gap:1px;min-width:30px;
+  border:1px solid var(--border);border-radius:5px;padding:4px 5px;background:var(--surface);
+}
+.av-byte.nul{border-style:dashed;}
+.av-byte.nul .av-byte-c{color:var(--error);}
+.av-byte-a{font-size:8px;color:var(--text-faint);}
+.av-byte-v{font-size:11.5px;color:var(--memory);}
+.av-byte-c{font-size:10px;color:var(--text);}
+
+/* --- types + counts + flow --- */
+.av-types{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;}
+.av-type{
+  display:flex;flex-direction:column;gap:4px;border:1px solid var(--border);border-radius:7px;
+  padding:9px 11px;background:var(--surface);
+}
+.av-type b{font-size:13px;color:var(--memory);}
+.av-type-w{font-size:10.5px;line-height:1.55;color:var(--text-faint);}
+.av-type-e{font-size:10px;color:var(--text);}
+.av-counts{display:flex;flex-direction:column;gap:5px;}
+.av-count{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;font-size:11px;}
+.av-count-c{color:var(--text-faint);min-width:180px;}
+.av-count-a{color:var(--memory);}
+.av-count b{color:var(--text);}
+.av-flow{display:flex;flex-direction:column;align-items:center;gap:0;}
+.av-fstep{
+  display:flex;flex-direction:column;gap:2px;border:1px solid var(--border);border-radius:7px;
+  padding:7px 13px;background:var(--surface);min-width:min(100%,330px);
+}
+.av-fstep b{font-size:9.5px;letter-spacing:.1em;color:var(--text-faint);}
+.av-fstep span{font-size:11px;color:var(--text);word-break:break-all;}
+.av-farr{color:var(--memory);font-size:10px;padding:3px 0;}
+
+/* --- quiz + advanced --- */
+.av-quiz{display:flex;flex-direction:column;gap:5px;}
+.av-q{
+  display:flex;align-items:center;gap:11px;border:1px solid var(--border);border-radius:6px;
+  padding:6px 11px;background:var(--surface);font-size:11px;flex-wrap:wrap;
+}
+.av-q-t{color:var(--text-faint);flex:1;min-width:180px;}
+.av-q-a{color:var(--memory);font-size:12px;}
+.av-q-b{padding:2px 10px;font-size:10px;}
+.av-adv{display:flex;flex-direction:column;gap:9px;}
+.av-adv-row{display:flex;flex-direction:column;gap:3px;}
+.av-adv-row b{font-size:11px;}
+.av-adv-row span{font-size:10.5px;line-height:1.65;color:var(--text-faint);}
+.av-links{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px;}
+
+@media (max-width:880px){
+  .av-two{grid-template-columns:1fr;}
+  .av-slot{grid-template-columns:56px 1fr;gap:4px;}
+  .av-slot-g{display:none;}
+  .av-rung{grid-template-columns:1fr;gap:2px;}
+}
 </style>
 </head>
 <body>
@@ -4263,6 +4445,9 @@ function staticInitIsAllZero(init) {
 }
 
 const SIMPLIFICATIONS = [
+  'argv[0] is spelled "./a.out" here. What argv[0] actually contains is decided by whatever launched the program; a real system may pass a full path, a bare name, or nothing useful at all.',
+  'The argument strings and the argv array live in writable static storage in this simulator. A real system normally builds them at the top of the stack, above main’s frame — the addresses and the placement here are conventions, not guarantees.',
+  'Process start-up is not modelled. The simulator lays out the argument vector and enters main() directly: there is no exec, no loader, no environment block and no C run-time initialisation.',
   'Stack addresses are never recycled during a run. Real C reuses stack memory; this simulator does not, so a pointer into a destroyed frame is always reported as use-after-return instead of silently returning stale data.',
   'struct, union, float and double are not modelled.',
   'Alignment padding is applied inside frames and arrays; struct layout rules are not modelled.',
@@ -4744,6 +4929,14 @@ class Interp {
     b.readonly = true;
     b.entryPoint = true;
     return b;
+  }
+  /* The argument vector. Writable — POSIX allows a program to modify the
+     strings argv points at — and owned by no stack frame, because it is set
+     up before main() is entered and is not part of main's locals. */
+  allocArgv(size, align, label, type) {
+    const base = alignUp(this.dataPtr, align);
+    this.dataPtr = base + size;
+    return this._register(makeBlock(base, size, label, 'data', type, null, null));
   }
   /* String literals and other read-only constants: .rodata.
      .rodata is NOT physical ROM — it is ordinary writable RAM that the loader
@@ -5569,20 +5762,67 @@ class Stepper {
       why: 'Execution begins here. A stack frame is created to hold this function’s parameters and local variables.',
     });
 
-    // A standalone function under test gets its pointer parameter bound to input.
-    for (const p of target.params) {
-      const info = I.declare(p.name, p.type, target.line);
-      if (isPointer(p.type) && p.type.to.base === 'char' && this.opts.inputString != null) {
-        const blk = I.allocStringLiteral(this.opts.inputString);
-        blk.label = 'input string';
-        blk.readonly = false;
-        I.writeValue(info.address, p.type, BigInt(blk.base));
-        yield* this.step({
-          phase: 'bind-param', line: target.line,
-          description: "Parameter '" + p.name + "' points at the input string stored at " + hexAddr(blk.base) + '.',
-          why: 'The caller passes the address of the first character. The string itself lives in memory the caller owns.',
-          changed: [info.address],
-        });
+    /* main(int argc, char **argv): the two parameters are recognised by TYPE,
+       not by name, so `int ac, char **av` works exactly the same. */
+    const ps = target.params;
+    const wantsArgv = ps.length >= 2 &&
+      isInteger(ps[0].type) &&
+      isPointer(ps[1].type) && isPointer(ps[1].type.to) && ps[1].type.to.to.base === 'char';
+
+    const infos = ps.map(p => I.declare(p.name, p.type, target.line));
+
+    if (wantsArgv) {
+      const args = Array.isArray(this.opts.args) ? this.opts.args.slice() : [];
+      const argv = [this.opts.argv0 != null ? this.opts.argv0 : './a.out'].concat(args);
+      // one writable block per argument string
+      const strBlocks = argv.map((s, i) => {
+        const b = I.allocArgv(s.length + 1, 1, 'argv[' + i + '] "' + s + '"', arrayT(T_CHAR, s.length + 1));
+        for (let k = 0; k < s.length; k++) I.mem.setByte(b.base + k, s.charCodeAt(k) & 0xff, true);
+        I.mem.setByte(b.base + s.length, 0, true);
+        return b;
+      });
+      // the array of char * — one slot per argument plus the NULL sentinel
+      const psz = ARCH.sizes.pointer;
+      const vec = I.allocArgv((argv.length + 1) * psz, psz, 'argv array',
+                              arrayT(ptrT(T_CHAR), argv.length + 1));
+      for (let i = 0; i < argv.length; i++)
+        I.mem.writeInt(vec.base + i * psz, psz, BigInt(strBlocks[i].base));
+      // argv[argc] is NULL. This is the only element C guarantees past the args.
+      I.mem.writeInt(vec.base + argv.length * psz, psz, 0n);
+      for (let k = 0; k < (argv.length + 1) * psz; k++) I.mem.init.set(vec.base + k, true);
+
+      I.writeValue(infos[0].address, ps[0].type, BigInt(argv.length));
+      I.writeValue(infos[1].address, ps[1].type, BigInt(vec.base));
+      yield* this.step({
+        phase: 'bind-param', line: target.line,
+        description: 'The program was started with ' + argv.length + ' argument' +
+                     (argv.length === 1 ? '' : 's') + ': ' +
+                     argv.map(a => JSON.stringify(a)).join(', ') + '. ' +
+                     ps[0].name + ' = ' + argv.length + ', ' + ps[1].name + ' = ' + hexAddr(vec.base) + '.',
+        why: 'Before main() runs, the start-up code lays out the argument strings and an array of pointers to ' +
+             'them, then passes the count and the address of that array. argv[' + argv.length + '] is NULL — ' +
+             'that sentinel is the only element past the arguments that C guarantees.',
+        changed: [infos[0].address, infos[1].address],
+        detail: { argv: { argc: argv.length, vector: vec.base, pointerSize: psz,
+                          strings: argv.map((s, i) => ({ index: i, text: s, address: strBlocks[i].base })),
+                          nullAt: vec.base + argv.length * psz } },
+      });
+    } else {
+      // A standalone function under test gets its pointer parameter bound to input.
+      for (let i = 0; i < ps.length; i++) {
+        const p = ps[i], info = infos[i];
+        if (isPointer(p.type) && p.type.to.base === 'char' && this.opts.inputString != null) {
+          const blk = I.allocStringLiteral(this.opts.inputString);
+          blk.label = 'input string';
+          blk.readonly = false;
+          I.writeValue(info.address, p.type, BigInt(blk.base));
+          yield* this.step({
+            phase: 'bind-param', line: target.line,
+            description: "Parameter '" + p.name + "' points at the input string stored at " + hexAddr(blk.base) + '.',
+            why: 'The caller passes the address of the first character. The string itself lives in memory the caller owns.',
+            changed: [info.address],
+          });
+        }
       }
     }
 
@@ -16983,6 +17223,7 @@ const LAB_TABS = [
   { id:'c03',       label:'C03 Strings' },
   { id:'repr',      label:'Data Representation' },
   { id:'ptr',       label:'Pointers & Dereferencing' },
+  { id:'argv',      label:'argc / argv' },
 ];
 
 const lab = {
@@ -17021,6 +17262,9 @@ const lab = {
   ptrEx: 'basic', ptrStep: null, ptrRuns: null, ptrMode: 'beginner',
   ptrPrec: '(*p)++', ptrState: 'null', ptrStateRuns: null,
   ptrExplain: false, ptrLit: null,
+  // --- Phase 11: argc / argv ---
+  avEx: 'count', avArgs: null, avStep: null, avRuns: null,
+  avMode: 'beginner', avIndex: null, avCounts: null, avQuiz: null,
 };
 
 function labType() { return (LAB_TYPES.find(t => t.id === lab.typeId) || LAB_TYPES[0]).make(); }
@@ -17314,6 +17558,7 @@ function renderLab() {
     case 'c03':       body = labC03Html(); break;
     case 'repr':      body = labReprHtml(); break;
     case 'ptr':       body = labPtrHtml(); break;
+    case 'argv':      body = labArgvHtml(); break;
   }
   root.innerHTML =
     '<div class="vl"><div class="vl-inner">' +
@@ -17324,7 +17569,7 @@ function renderLab() {
           '" data-labtab="' + t.id + '" role="tab" aria-selected="' + (t.id === lab.tab) + '">' +
           esc(t.label) + '</button>').join('') +
       '</div>' +
-      (lab.tab === 'functions' || lab.tab === 'syscalls' || lab.tab === 'c03' || lab.tab === 'repr' || lab.tab === 'ptr' ? '' : labValueStrip()) +
+      (lab.tab === 'functions' || lab.tab === 'syscalls' || lab.tab === 'c03' || lab.tab === 'repr' || lab.tab === 'ptr' || lab.tab === 'argv' ? '' : labValueStrip()) +
       '<div class="vl-body">' + body + '</div>' +
       '<div class="vl-foot">Widths, signedness and wrapping follow the simulated architecture (' +
         esc(CEngine.ARCH.short) + '). Arithmetic and comparisons are evaluated by the execution engine, ' +
@@ -17339,6 +17584,7 @@ function wireLab() {
   if (typeof wireLabC03 === 'function') wireLabC03();
   if (typeof wireLabRepr === 'function') wireLabRepr();
   if (typeof wireLabPtr === 'function') wireLabPtr();
+  if (typeof wireLabArgv === 'function') wireLabArgv();
   $$('#labRoot [data-labtab]').forEach(el => el.addEventListener('click', () => {
     lab.tab = el.dataset.labtab; renderLab();
   }));
@@ -19807,6 +20053,446 @@ function wireLabPtr() {
 }
 /* ==== PTRLAB END ==== */
 
+/* ==== ARGVLAB START ====
+   PHASE 11 — argc, argv and command-line arguments.
+
+   The audit found the engine already executed every shape argv needs; the only
+   gap was that main's parameters were declared and never populated. That is now
+   done in the engine, so this file evaluates NOTHING. It runs an example with
+   real arguments and reads back the ordinary snapshot:
+
+     argc / argv values   history.stateAt(i).frames
+     the argv array       state.graph.nodes  (a char *[] block in .data)
+     the arrows           state.graph.edges  (the Phase 4 graph, unchanged)
+     the NULL sentinel    an edge of kind 'null'
+     argv + i             state.graph.arithmetic
+     the string bytes     the same snapshot
+     ASCII                CEngine.asciiInfo
+
+   The argument builder here and `./a.out hello world` in the terminal reach the
+   same launch(): there is one execution path. */
+
+const ARGV_EXAMPLES = [
+  { id:'count', label:'1 · how many arguments?', args:['hello', 'world'],
+    src:'int\tmain(int argc, char **argv)\n{\n\tint\tn;\n\n\tn = argc;\n\treturn (0);\n}\n',
+    teach:'argc counts every argument INCLUDING the program name, so ./a.out hello world gives 3.' },
+  { id:'index', label:'2 · reaching one argument', args:['hello'],
+    src:'int\tmain(int argc, char **argv)\n{\n\tchar\t*first;\n\tchar\tc;\n\n' +
+        '\tfirst = argv[1];\n\tc = argv[1][0];\n\treturn (0);\n}\n',
+    teach:'argv[1] is a char *. argv[1][0] follows it one step further, to a char.' },
+  { id:'nullterm', label:'3 · the NULL sentinel', args:['a', 'b'],
+    src:'int\tmain(int argc, char **argv)\n{\n\tint\tn;\n\n\tn = 0;\n' +
+        '\twhile (argv[n] != NULL)\n\t\tn++;\n\treturn (0);\n}\n',
+    teach:'argv[argc] is NULL. That sentinel is what lets a loop stop without being told the count.' },
+  { id:'write', label:'4 · printing an argument', args:['hello'],
+    src:'int\tmain(int argc, char **argv)\n{\n\twrite(1, argv[1], 5);\n\treturn (0);\n}\n',
+    teach:'argv[1] is an ordinary char * — write() takes it like any other buffer address.' },
+  { id:'guard', label:'5 · checking before you index', args:[],
+    src:'int\tmain(int argc, char **argv)\n{\n\tif (argc > 1)\n\t\twrite(1, argv[1], 5);\n\treturn (0);\n}\n',
+    teach:'With no arguments, argv[1] IS the NULL sentinel. The guard is what stops the program dereferencing it.' },
+  { id:'walk', label:'6 · walking the array yourself', args:['ab', 'cd'],
+    src:'int\tmain(int argc, char **argv)\n{\n\tchar\t**p;\n\tchar\t*s;\n\tchar\tc;\n\n' +
+        '\tp = argv;\n\ts = *(p + 1);\n\tc = **(p + 1);\n\treturn (0);\n}\n',
+    teach:'*(p + 1) is exactly what argv[1] means. The brackets are shorthand for the arithmetic.' },
+];
+const argvEx = () => ARGV_EXAMPLES.find(e => e.id === lab.avEx) || ARGV_EXAMPLES[0];
+const argvArgs = () => (lab.avArgs != null ? lab.avArgs : argvEx().args).slice();
+const avMode = () => lab.avMode || 'beginner';
+const avShow = (lvl) => ({ beginner:0, intermediate:1, expert:2 })[avMode()] >=
+                        ({ beginner:0, intermediate:1, expert:2 })[lvl];
+
+function argvRun() {
+  const ex = argvEx();
+  const args = argvArgs();
+  const key = ex.id + '|' + args.join(' ');
+  if (!lab.avRuns) lab.avRuns = {};
+  if (lab.avRuns[key]) return lab.avRuns[key];
+  let r;
+  try { r = CEngine.runToCompletion(ex.src, { args, argv0: './a.out' }); }
+  catch (e) { return (lab.avRuns[key] = { ok:false, error:e.message }); }
+  if (!r.history) return (lab.avRuns[key] = { ok:false, error: r.message || 'did not run' });
+  const steps = [];
+  for (let i = 0; i < r.history.length; i++)
+    steps.push({ i, step: r.history.steps[i], state: r.history.stateAt(i) });
+  return (lab.avRuns[key] = { ok:true, src: ex.src, steps, output: r.output,
+                              error: r.ok ? null : r.message, kind: r.kind });
+}
+/* Open on a step where argv is actually bound, not the empty end. */
+function argvDefaultStep(run) {
+  for (let i = run.steps.length - 1; i >= 0; i--) {
+    const v = run.steps[i].state.vars.find(x => x.name === 'argv');
+    if (v && !v.uninitialized) return i;
+  }
+  return Math.max(0, run.steps.length - 1);
+}
+function argvCur() {
+  const run = argvRun();
+  if (!run.ok) return null;
+  const d = argvDefaultStep(run);
+  const i = Math.max(0, Math.min(lab.avStep == null ? d : lab.avStep, run.steps.length - 1));
+  return { run, i, cur: run.steps[i] };
+}
+/* The argv layout, read out of the snapshot — never rebuilt here. */
+function argvLayout(state) {
+  const g = state.graph;
+  const argvVar = state.vars.find(v => v.name === 'argv');
+  const argcVar = state.vars.find(v => v.name === 'argc');
+  const vec = g.nodes.find(n => n.label === 'argv array');
+  const strings = g.nodes.filter(n => /^argv\[\d+\]/.test(n.label))
+    .sort((a, b) => a.address - b.address);
+  return { argvVar, argcVar, vec, strings, g };
+}
+
+/* ---------------- the argument builder ---------------- */
+function argvControlsHtml() {
+  const args = argvArgs();
+  return '<div class="av-controls">' +
+    '<span class="av-cmd mono">$ ./a.out' + args.map(a =>
+      ' <span class="av-arg">' + esc(/\s/.test(a) ? '"' + a + '"' : a) +
+      '<button class="av-x" data-avdel="' + esc(a) + '" aria-label="Remove argument ' + esc(a) + '">×</button></span>').join('') +
+    '</span>' +
+    '<input id="avNew" class="vl-input av-new" placeholder="add an argument" aria-label="New argument">' +
+    '<button class="vl-btn" id="avAdd">+ Add</button>' +
+    '<button class="vl-btn" id="avReset">reset</button>' +
+    '</div>' +
+    '<div class="av-note">This runs through the same launch() the terminal uses — typing ' +
+    '<span class="mono">./a.out ' + esc(args.join(' ')) + '</span> there does exactly this.</div>';
+}
+
+/* ---------------- argc, and the array ---------------- */
+function argvArrayHtml(state) {
+  const L = argvLayout(state);
+  if (!L.vec || !L.argvVar || L.argvVar.uninitialized)
+    return '<div class="av-empty">argv is not bound yet at this step</div>';
+  const psz = CEngine.ARCH.sizes.pointer;
+  const slots = [];
+  for (let i = 0; i < L.vec.size / psz; i++) {
+    const at = L.vec.address + i * psz;
+    const target = L.strings.find(s => s.label.indexOf('argv[' + i + ']') === 0);
+    slots.push({ i, at, target, isNull: !target });
+  }
+  return '<div class="av-layout">' +
+    '<div class="av-vars">' +
+      '<div class="av-var"><span class="av-k">argc</span>' +
+        '<b class="mono">' + esc(L.argcVar && !L.argcVar.uninitialized ? L.argcVar.valueText : '?') + '</b>' +
+        '<span class="av-n">how many arguments, program name included</span></div>' +
+      '<div class="av-var ptr"><span class="av-k">argv</span>' +
+        '<b class="mono">' + esc(L.argvVar.valueText) + '</b>' +
+        '<span class="av-n">a <span class="mono">char **</span> holding the address of the array below</span></div>' +
+    '</div>' +
+    '<div class="av-arrow">▼ points at the first element of</div>' +
+    '<div class="av-vec"><div class="av-vec-h">THE ARRAY OF <span class="mono">char *</span>' +
+      '<span class="av-vec-s">' + esc(L.vec.sectionLabel) + ' · ' + L.vec.size + ' B</span></div>' +
+      slots.map(s =>
+        '<div class="av-slot' + (s.isNull ? ' nul' : '') + '"' +
+          (s.target ? ' data-avslot="' + s.target.blockId + '" role="button" tabindex="0"' : '') + '>' +
+          '<span class="av-slot-i mono">argv[' + s.i + ']</span>' +
+          '<span class="av-slot-a mono">' + hexA(s.at) + '</span>' +
+          '<span class="av-slot-g">' + (s.isNull ? '' : '→') + '</span>' +
+          '<span class="av-slot-v mono">' + (s.isNull ? 'NULL'
+            : hexA(s.target.address) + '  ' + esc(argvText(s.target))) + '</span>' +
+        '</div>').join('') +
+    '</div>' +
+    '<div class="av-note">Every address above is the one the engine chose. ' +
+    '<span class="mono">argv[' + (slots.length - 1) + ']</span> is <b>NULL</b> — the one element past the ' +
+    'arguments that C guarantees, and the reason a loop can stop without knowing argc.</div>' +
+    '</div>';
+}
+function argvText(node) {
+  if (!node || !node.bytes) return '';
+  let s = '';
+  for (const b of node.bytes) { const v = Number(b.value); if (!v) break; s += String.fromCharCode(v); }
+  return '"' + s + '"';
+}
+
+/* ---------------- one element, all the way down ---------------- */
+function argvLadderHtml(state) {
+  const L = argvLayout(state);
+  if (!L.vec || !L.argvVar || L.argvVar.uninitialized) return '';
+  const idx = Math.min(lab.avIndex == null ? 1 : lab.avIndex, L.strings.length - 1);
+  const target = L.strings.find(s => s.label.indexOf('argv[' + idx + ']') === 0);
+  const psz = CEngine.ARCH.sizes.pointer;
+  const slotAt = L.vec.address + idx * psz;
+  const firstChar = target && target.bytes.length ? Number(target.bytes[0].value) : null;
+  const ai = firstChar != null ? CEngine.asciiInfo(firstChar) : null;
+  const rung = (expr, type, val, what) =>
+    '<div class="av-rung"><span class="av-rung-e mono">' + esc(expr) + '</span>' +
+    '<span class="av-rung-t mono">' + esc(type) + '</span>' +
+    '<span class="av-rung-v mono">' + esc(val) + '</span>' +
+    '<span class="av-rung-w">' + esc(what) + '</span></div>';
+  return '<div class="av-block"><div class="av-block-h">One element, all the way down</div>' +
+    '<div class="av-idx">' + L.strings.map((s, i) =>
+      '<button class="av-ib' + (i === idx ? ' on' : '') + '" data-avidx="' + i + '">argv[' + i + ']</button>').join('') +
+    '</div>' +
+    (target ? '<div class="av-ladder">' +
+      rung('argv', L.argvVar.typeName, L.argvVar.valueText, 'the parameter — holds the array’s address') +
+      rung('argv + ' + idx, L.argvVar.typeName, hexA(slotAt),
+           'moves ' + idx + ' × sizeof(char *) = ' + (idx * psz) + ' bytes') +
+      rung('argv[' + idx + ']', 'char *', hexA(target.address),
+           'the same as *(argv + ' + idx + ') — follows the slot') +
+      rung('argv[' + idx + '][0]', 'char',
+           ai ? (ai.literal || ai.name) + '  (' + firstChar + ')' : String(firstChar),
+           'the same as **(argv + ' + idx + ') — the first character') +
+      '</div>' +
+      '<div class="av-bytes-h">the bytes at ' + hexA(target.address) + '</div>' +
+      '<div class="av-bytes">' + target.bytes.map((b, i) => {
+        const v = Number(b.value);
+        const a = CEngine.asciiInfo(v);
+        return '<span class="av-byte' + (v === 0 ? ' nul' : '') + '">' +
+          '<span class="av-byte-a mono">' + hexA(b.address).slice(-4) + '</span>' +
+          '<span class="av-byte-v mono">' + v.toString(16).toUpperCase().padStart(2, '0') + '</span>' +
+          '<span class="av-byte-c mono">' + esc(a ? (a.printable ? a.display : a.name) : '?') + '</span></span>';
+      }).join('') + '</div>' +
+      '<div class="av-note">The last byte is <b>00</b> — the terminator that makes this a C string. ' +
+      'Those are the engine’s bytes, read through the same ASCII table the rest of the lab uses.</div>'
+      : '<div class="av-empty">that element is the NULL sentinel</div>') +
+    '</div>';
+}
+
+/* ---------------- char ** built up from char ---------------- */
+function argvTypesHtml() {
+  return '<div class="av-block"><div class="av-block-h">Why argv is <span class="mono">char **</span></div>' +
+    '<div class="av-types">' + [
+      ['char', 'a single character', "'h'"],
+      ['char *', 'the address of a character — which is how C represents a string', '"hello"'],
+      ['char **', 'the address of a <span class="mono">char *</span>', 'the argv array'],
+    ].map(([t, w, ex]) =>
+      '<div class="av-type"><b class="mono">' + esc(t) + '</b>' +
+      '<span class="av-type-w">' + w + '</span>' +
+      '<span class="av-type-e mono">' + esc(ex) + '</span></div>').join('') + '</div>' +
+    '<div class="av-note"><b>A precise point:</b> argv is not "a pointer to a pointer variable". ' +
+    'It points at the <b>first element of an array</b> whose elements happen to be ' +
+    '<span class="mono">char *</span>. That is why <span class="mono">argv[1]</span> works: indexing steps ' +
+    'through consecutive array elements, which would be meaningless if it merely pointed at one lone pointer.</div>' +
+    '<div class="av-links"><button class="vl-btn" data-avgo="ptr">the full pointer lab →</button></div></div>';
+}
+
+/* ---------------- argc, by example ---------------- */
+function argvCountsHtml() {
+  if (!lab.avCounts) {
+    const src = 'int\tmain(int argc, char **argv)\n{\n\tint\tn;\n\n\tn = argc;\n\treturn (0);\n}\n';
+    lab.avCounts = [[], ['hello'], ['hello', 'world']].map(args => {
+      try {
+        const r = CEngine.runToCompletion(src, { args, argv0: './a.out' });
+        let n = null;
+        if (r.history) for (let i = r.history.length - 1; i >= 0 && n === null; i--) {
+          const v = r.history.stateAt(i).vars.find(x => x.name === 'n');
+          if (v && !v.uninitialized) n = v.valueText;
+        }
+        return { args, n };
+      } catch (e) { return { args, n: null }; }
+    });
+  }
+  return '<div class="av-block"><div class="av-block-h">argc counts the program name too</div>' +
+    '<div class="av-counts">' + lab.avCounts.map(c =>
+      '<div class="av-count"><span class="mono av-count-c">$ ./a.out ' + esc(c.args.join(' ')) + '</span>' +
+      '<span class="av-count-a">→</span><b class="mono">argc = ' + esc(String(c.n)) + '</b></div>').join('') +
+    '</div>' +
+    '<div class="av-note">Each row is a real run. The count is always one more than the number of arguments you ' +
+    'typed, because <span class="mono">argv[0]</span> is the program name.</div></div>';
+}
+
+/* ---------------- the timeline ---------------- */
+function argvTimelineHtml() {
+  const c = argvCur();
+  if (!c) return '<div class="av-block"><div class="vl-err">' + esc(argvRun().error) + '</div></div>';
+  const { run, i, cur } = c;
+  const ex = argvEx();
+  const s = cur.step;
+  const lines = run.src.split('\n');
+  let h = '<div class="av-block"><div class="av-block-h">' + esc(ex.label) + '</div>';
+  h += '<div class="av-exs">' + ARGV_EXAMPLES.map(e =>
+    '<button class="av-ex' + (e.id === ex.id ? ' on' : '') + '" data-avex="' + e.id + '">' +
+    esc(e.label.split('·')[0].trim()) + '</button>').join('') +
+    '<span class="av-ex-t">' + esc(ex.label.split('·').slice(1).join('·').trim()) + '</span></div>';
+  h += argvControlsHtml();
+  h += '<div class="av-two">' +
+    '<div><pre class="av-src mono">' + lines.map((l, k) =>
+      '<span class="av-srcline' + (k + 1 === s.line ? ' on' : '') + '">' +
+      String(k + 1).padStart(2) + '  ' + esc(l || ' ') + '</span>').join('') + '</pre>' +
+      '<div class="av-scrub">' +
+        '<button class="vl-btn" data-avstep="first">⏮</button>' +
+        '<button class="vl-btn" data-avstep="prev">◀</button>' +
+        '<input type="range" class="fn-range" min="0" max="' + (run.steps.length - 1) + '" value="' + i + '" ' +
+          'data-avrange="1" aria-label="Execution step">' +
+        '<button class="vl-btn" data-avstep="next">▶</button>' +
+        '<button class="vl-btn" data-avstep="last">⏭</button>' +
+        '<span class="fn-scrub-n mono">' + (i + 1) + ' / ' + run.steps.length + '</span></div>' +
+      '<div class="av-desc">' + esc(s.description || '') + '</div>' +
+      (cur.state.output ? '<div class="av-out">output: <b class="mono">' + esc(cur.state.output) + '</b></div>' : '') +
+    '</div>' +
+    '<div><div class="av-col-h">argc / argv AT THIS STEP</div>' + argvArrayHtml(cur.state) + '</div>' +
+    '</div>';
+  h += '<div class="av-teach">' + esc(ex.teach) + '</div>';
+  if (run.error) {
+    h += '<div class="av-stopped"><b>' +
+      esc(run.kind ? (CEngine.MEM_SAFETY_LABELS[run.kind] || run.kind) : 'stopped') + '</b><br>' +
+      esc(run.error) + '</div>';
+    if (argvArgs().length === 0) h += '<div class="av-note">This is the lesson of example 5: with no arguments, ' +
+      '<span class="mono">argv[1]</span> is the NULL sentinel, and dereferencing it is exactly what C says you ' +
+      'must not do. Add an argument above, or guard with <span class="mono">if (argc > 1)</span>.</div>';
+  }
+  return h + '</div>';
+}
+
+/* ---------------- startup, conceptually ---------------- */
+function argvStartupHtml() {
+  const args = argvArgs();
+  return '<div class="av-block"><div class="av-block-h">How the arguments reach main</div>' +
+    '<div class="av-flow">' + [
+      ['THE COMMAND', './a.out ' + args.join(' ')],
+      ['SPLIT INTO WORDS', ['./a.out'].concat(args).map(a => JSON.stringify(a)).join(', ')],
+      ['LAID OUT IN MEMORY', 'each word copied, plus an array of pointers to them, plus a NULL'],
+      ['PASSED TO main', 'argc = ' + (args.length + 1) + ', argv = the array’s address'],
+      ['YOUR CODE RUNS', 'argv[i] is now an ordinary char *'],
+    ].map(([k, v], i, a) =>
+      '<div class="av-fstep"><b>' + esc(k) + '</b><span class="mono">' + esc(v) + '</span></div>' +
+      (i < a.length - 1 ? '<div class="av-farr">▼</div>' : '')).join('') + '</div>' +
+    '<div class="av-note av-warn">This is a <b>conceptual</b> model. The simulator lays out the argument vector ' +
+    'and enters main() directly — there is no exec, no loader, no environment block and no C run-time start-up. ' +
+    'A real system also decides what <span class="mono">argv[0]</span> contains; the spelling ' +
+    '<span class="mono">"./a.out"</span> is this lab’s convention, not a rule.</div></div>';
+}
+
+/* ---------------- expert notes + concept check ---------------- */
+const AV_QUIZ = [
+  { q:'What is the type of <span class="mono">argv</span>?', a:'char **' },
+  { q:'What is the type of <span class="mono">argv[0]</span>?', a:'char *' },
+  { q:'What is the type of <span class="mono">*argv</span>?', a:'char *' },
+  { q:'What is the type of <span class="mono">**argv</span>?', a:'char' },
+  { q:'What does <span class="mono">argv + 1</span> point at?', a:'the slot holding argv[1]' },
+  { q:'What is <span class="mono">argv[argc]</span>?', a:'NULL' },
+];
+function argvQuizHtml() {
+  const c = argvCur();
+  const state = c ? c.cur.state : null;
+  // the type answers are taken from the engine's own type names where possible
+  const live = {};
+  if (state) {
+    const v = state.vars.find(x => x.name === 'argv');
+    if (v) live['char **'] = v.typeName;
+    const L = argvLayout(state);
+    if (L.strings.length) live['char *'] = 'char *';
+  }
+  return '<div class="av-block"><div class="av-block-h">Check yourself</div>' +
+    '<div class="av-quiz">' + AV_QUIZ.map((q, i) =>
+      '<div class="av-q"><span class="av-q-t">' + q.q + '</span>' +
+      (lab.avQuiz && lab.avQuiz[i]
+        ? '<b class="mono av-q-a">' + esc(q.a) + '</b>'
+        : '<button class="vl-btn av-q-b" data-avq="' + i + '">reveal</button>') + '</div>').join('') +
+    '</div>' +
+    (live['char **'] ? '<div class="av-note">The engine reports argv’s type as ' +
+      '<b class="mono">' + esc(live['char **']) + '</b> in the running program above.</div>' : '') +
+    '</div>';
+}
+function argvExpertHtml() {
+  return '<div class="av-block"><div class="av-block-h">Technical notes</div><div class="av-adv">' +
+    [['Where the storage lives',
+      'This simulator puts the argument strings and the pointer array in writable static storage. A real system ' +
+      'normally builds them at the top of the stack, above main’s frame. Either way they outlive nothing you ' +
+      'control and belong to no function’s locals.'],
+     ['argv[0] is not guaranteed',
+      'What it contains is decided by whatever launched the program. A full path, a bare name, or nothing useful ' +
+      'are all possible. Never parse it expecting a particular shape.'],
+     ['The strings are modifiable',
+      'POSIX allows a program to modify the strings argv points at — unlike a string literal, which lives in ' +
+      'read-only memory. That is why they are writable here.'],
+     ['Only argv[argc] is promised',
+      'Reading argv[i] for i > argc is undefined. The NULL at argv[argc] is the single guarantee past the ' +
+      'arguments, which is why the sentinel loop is safe and a hard-coded index is not.'],
+     ['Pointer arithmetic scales by the pointee',
+      'argv + 1 moves sizeof(char *) = ' + CEngine.ARCH.sizes.pointer + ' bytes on this architecture, not one byte. ' +
+      'The pointer size comes from the architecture configuration.'],
+    ].map(([k, v]) => '<div class="av-adv-row"><b>' + esc(k) + '</b><span>' + esc(v) + '</span></div>').join('') +
+    '</div></div>';
+}
+
+function labArgvHtml() {
+  let h = '<div class="av-modes" role="group" aria-label="Detail level">' +
+    ['beginner', 'intermediate', 'expert'].map(m =>
+      '<button class="av-mode' + (avMode() === m ? ' on' : '') + '" data-avmode="' + m + '">' + m + '</button>').join('') +
+    '<span class="av-mode-n">the program and its values never change — only how much is explained</span></div>';
+  h += argvTimelineHtml() + argvCountsHtml() + argvLadderHtml((argvCur() || {}).cur ? argvCur().cur.state : null);
+  h += argvTypesHtml();
+  if (avShow('intermediate')) h += argvStartupHtml() + argvQuizHtml();
+  if (avShow('expert')) {
+    h += argvExpertHtml();
+    h += '<div class="av-block"><div class="av-block-h">Where to go next</div><div class="rp-links">' +
+      '<button class="rp-link" data-avgo="ptr"><b>Pointers &amp; Dereferencing</b><span>char ** from the ground up</span></button>' +
+      '<button class="rp-link" data-avgo="repr"><b>Data Representation</b><span>the bytes behind these strings</span></button>' +
+      '<button class="rp-link" data-avgo="syscalls"><b>Libraries &amp; Syscalls</b><span>how write() takes argv[1]</span></button>' +
+      '<button class="rp-link" data-avgo="terminal"><b>Terminal</b><span>run ./a.out with your own arguments</span></button>' +
+      '</div></div>';
+  }
+  return h;
+}
+// argvLadderHtml takes a state; guard when nothing has run
+const _avLadder = argvLadderHtml;
+argvLadderHtml = function (state) { return state ? _avLadder(state) : ''; };
+
+function wireLabArgv() {
+  $$('#labRoot [data-avex]').forEach(el => el.addEventListener('click', () => {
+    lab.avEx = el.dataset.avex; lab.avArgs = null; lab.avStep = null; lab.avIndex = null; renderLab();
+  }));
+  $$('#labRoot [data-avmode]').forEach(el => el.addEventListener('click', () => {
+    lab.avMode = el.dataset.avmode; renderLab();
+  }));
+  $$('#labRoot [data-avidx]').forEach(el => el.addEventListener('click', () => {
+    lab.avIndex = +el.dataset.avidx; renderLab();
+  }));
+  $$('#labRoot [data-avq]').forEach(el => el.addEventListener('click', () => {
+    if (!lab.avQuiz) lab.avQuiz = {};
+    lab.avQuiz[+el.dataset.avq] = true; renderLab();
+  }));
+  $$('#labRoot [data-avdel]').forEach(el => el.addEventListener('click', () => {
+    const args = argvArgs();
+    const k = args.indexOf(el.dataset.avdel);
+    if (k >= 0) args.splice(k, 1);
+    lab.avArgs = args; lab.avStep = null; renderLab();
+  }));
+  const add = () => {
+    const inp = $('#avNew');
+    if (!inp || !inp.value.trim()) return;
+    lab.avArgs = argvArgs().concat([inp.value.trim()]);
+    lab.avStep = null; renderLab();
+  };
+  const addBtn = $('#avAdd');
+  if (addBtn) addBtn.addEventListener('click', add);
+  const inp = $('#avNew');
+  if (inp) inp.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); add(); }
+  });
+  const rst = $('#avReset');
+  if (rst) rst.addEventListener('click', () => { lab.avArgs = null; lab.avStep = null; renderLab(); });
+  $$('#labRoot [data-avstep]').forEach(el => el.addEventListener('click', () => {
+    const run = argvRun();
+    if (!run.ok) return;
+    const n = run.steps.length;
+    const cur = lab.avStep == null ? argvDefaultStep(run) : lab.avStep;
+    const a = el.dataset.avstep;
+    lab.avStep = a === 'first' ? 0 : a === 'last' ? n - 1
+      : a === 'next' ? Math.min(n - 1, cur + 1) : Math.max(0, cur - 1);
+    renderLab();
+  }));
+  const range = $('#labRoot [data-avrange]');
+  if (range) range.addEventListener('input', () => { lab.avStep = +range.value; renderLab(); });
+  $$('#labRoot [data-avslot]').forEach(el => {
+    const go = () => { ui.focusObject = +el.dataset.avslot; renderLab(); };
+    el.addEventListener('click', go);
+    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  });
+  $$('#labRoot [data-avgo]').forEach(el => el.addEventListener('click', () => {
+    const to = el.dataset.avgo;
+    if (to === 'terminal') {
+      if (typeof showWorkspace === 'function') showWorkspace();
+      if (typeof setDockTab === 'function') setDockTab('terminal');
+      return;
+    }
+    lab.tab = to; renderLab();
+  }));
+}
+/* ==== ARGVLAB END ==== */
+
 /* ==== TERM START ====
    PHASE 8 — the simulated C / 1337 terminal.
 
@@ -20063,17 +20749,17 @@ const TERM_COMMANDS = {
     },
   },
   './a.out': {
-    usage: './a.out', blurb: 'run the simulated executable',
-    detail: 'Executes the compiled source through the lab’s execution engine and shows what that run really produced.',
+    usage: './a.out [args...]', blurb: 'run the simulated executable, with arguments',
+    detail: 'Executes the compiled source through the lab’s execution engine and shows what that run really produced. Anything after ./a.out becomes argv: a main(int argc, char **argv) receives it, a main(void) ignores it.',
     run(argv) {
       if (!term.aout) {
         termErr('./a.out: No such file or directory');
         termNote('nothing has been compiled yet — run: cc ' + (termCurrentFile() || '<file>'));
         return;
       }
-      if (argv.length) {
-        termNote('[simulation limitation: argc/argv are not modelled, so arguments are ignored]');
-      }
+      // The arguments go into the run itself. main(int argc, char **argv)
+      // receives them; a main(void) simply ignores them, as in real C.
+      const cmdArgs = argv.slice();
       const live = termSourceOf(term.aout.key);
       if (live !== term.aout.src) {
         termErr('a.out is out of date — ' + term.aout.file + ' has changed since it was compiled.');
@@ -20083,7 +20769,8 @@ const TERM_COMMANDS = {
       // The REAL execution the visualiser drives. Not a re-implementation.
       const before = ui.exampleKey;
       if (term.aout.key !== before) loadExample(term.aout.key);
-      const ok = (typeof launch === 'function') ? launch(term.aout.src, {}) : false;
+      const ok = (typeof launch === 'function')
+        ? launch(term.aout.src, { args: cmdArgs, argv0: './a.out' }) : false;
       if (!ok) { termErr('./a.out: the program did not start'); return; }
       // run it to completion so the terminal shows the whole output
       let last = -2;
@@ -20098,6 +20785,10 @@ const TERM_COMMANDS = {
       if (run.error) {
         termErr(String(run.error.message || run.error));
         termNote('[stderr — the run stopped here]');
+      }
+      if (cmdArgs.length) {
+        termNote('argc = ' + (cmdArgs.length + 1) + ', argv[0] = "./a.out"' +
+          cmdArgs.map((a, i) => ', argv[' + (i + 1) + '] = ' + JSON.stringify(a)).join(''));
       }
       const steps = run.history ? run.history.length : 0;
       termNote('[' + steps + ' execution steps recorded — try: inspect, memory, pointers, stack, timeline]');
