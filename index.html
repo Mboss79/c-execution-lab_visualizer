@@ -3723,6 +3723,58 @@ html[data-theme=light] .viz-node.vz-frame::after{
   #labRoot .rl-var { grid-template-columns:1fr auto; }
 }
 /* ==== REPROCSS END ==== */
+
+/* ==== HOMECSS START ==== Home / dashboard.
+
+   Additions only. The existing .dash / .dcard / .ex-row language is reused
+   unchanged — this file adds the few pieces the entry-point layout needs and
+   nothing else. Every selector is scoped under .dash so it cannot reach a lab,
+   which is the rule Phase 8 taught the hard way with an unscoped .vl-row. */
+
+.dash .dash-hero2 { margin-bottom: 26px; }
+.dash .dash-brand { display: flex; align-items: center; gap: 11px; margin-bottom: 8px; }
+.dash .dash-mark {
+  width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 15px; font-weight: 700;
+  background: var(--execution-dim); color: var(--execution); border: 1px solid var(--execution);
+}
+.dash .dash-cta { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 16px; }
+
+/* Section furniture */
+.dash .dash-note { font-size: 11px; color: var(--text-faint); flex-shrink: 0; }
+.dash .dash-sub { margin-bottom: 15px; }
+.dash .dash-sub:last-child { margin-bottom: 0; }
+.dash .dash-sub-h {
+  margin: 0 0 7px; font-size: 11px; font-weight: 700; color: var(--text-muted);
+  letter-spacing: .02em;
+}
+
+/* The honest empty state, rather than a fabricated "continue" card. */
+.dash .dash-empty {
+  border: 1px dashed var(--border); border-radius: var(--radius);
+  padding: 16px 17px; font-size: 12.5px; color: var(--text-faint); line-height: 1.6;
+}
+
+.dash .dash-colophon {
+  margin: 16px 0 0; font-size: 11.5px; color: var(--text-faint);
+  line-height: 1.65; max-width: 640px;
+}
+.dash .dash-colophon b { color: var(--text-muted); font-weight: 600; }
+
+/* Focus must stay visible on every dashboard control: several of these are the
+   only route to a whole area of the app. */
+.dash .dcard:focus-visible,
+.dash .ex-row:focus-visible,
+.dash .dbtn:focus-visible {
+  outline: 2px solid var(--execution); outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .dash .dash-inner { padding: 24px 16px 48px; }
+  .dash .dash-cta .dbtn { flex: 1 1 auto; }
+}
+/* ==== HOMECSS END ==== */
 </style>
 </head>
 <body>
@@ -3785,12 +3837,16 @@ html[data-theme=light] .viz-node.vz-frame::after{
   <!-- ============================ MAIN ============================ -->
   <div class="main">
     <nav class="rail" aria-label="Views">
+      <!-- Destinations, in the order a learner meets them. -->
       <button class="rail-btn" id="railHome"    title="Dashboard (Ctrl+0)" aria-label="Dashboard">⌂</button>
       <button class="rail-btn active" id="railWork" title="Workspace (Ctrl+1)" aria-label="Workspace">▦</button>
-      <div class="rail-sp"></div>
+      <button class="rail-btn" id="railLab" title="Labs — ASCII, types, memory, pointers, functions (Ctrl+2)" aria-label="Open the labs">⌗</button>
       <button class="rail-btn" id="railExplorer" title="Exercises and memory-error lessons (Ctrl+B)" aria-label="Open the library" aria-pressed="false">☰</button>
       <button class="rail-btn" id="railErrLab" title="Memory Error Lab" aria-label="Open the memory error lab" aria-pressed="false">⚠</button>
-      <button class="rail-btn" id="railLab" title="Value &amp; Representation Lab — ASCII, bases, bits, arithmetic (Ctrl+2)" aria-label="Open the value and representation lab">⌗</button>
+      <!-- The flexible gap belongs HERE: between where you can go and what you
+           can toggle. Before, it sat after the second button and split the
+           destinations in half. -->
+      <div class="rail-sp"></div>
       <button class="rail-btn" id="rail3d"      title="3D visualization (V)" aria-label="3D visualization" aria-pressed="false">◈</button>
       <button class="rail-btn" id="railDock"     title="Toggle bottom dock (Ctrl+`)" aria-label="Toggle bottom dock">▬</button>
       <button class="rail-btn" id="railHelp"     title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
@@ -11998,6 +12054,8 @@ const hexA = (a) => CEngine.hexAddr(a);
 /* ------------------------------- UI STATE ------------------------------- */
 const ui = {
   view: 'dashboard',       // 'dashboard' | 'workspace'
+  lastExample: null,       // last example opened, restored from storage
+  lastLabTab: null,        // last lab tab opened, restored from storage
   theme: 'dark',
   lang: 'en',
   split: 42,               // % width of the left pane
@@ -12152,6 +12210,9 @@ function saveUI() {
       explorerOpen: ui.explorerOpen, collapsed: ui.collapsed, watches: ui.watches,
       dockH: ui.dockH, srcExpanded: ui.srcExpanded, libTab: ui.libTab,
       animSpeed: ui.animSpeed,
+      // Where the learner last was, so the dashboard can say something true.
+      exampleKey: ui.exampleKey,
+      labTab: (typeof lab === 'object' && lab) ? lab.tab : null,
       view3d: (typeof viz === 'object' && viz) ? viz.open : false,
       viz3dFlat: (typeof viz === 'object' && viz) ? viz.flat : false,
     }));
@@ -12179,6 +12240,10 @@ function loadUI() {
     if (Array.isArray(o.watches)) ui.watches = o.watches.filter(x => typeof x === 'string').slice(0, 20);
     if (typeof o.dockH === 'number' && o.dockH >= 80 && o.dockH <= 2000) ui.dockH = o.dockH;
     if (typeof o.view3d === 'boolean') ui.view3d = o.view3d;
+    // Restored only if the target still exists — a renamed example or a removed
+    // lab tab must not resurrect a dead destination on the dashboard.
+    if (typeof o.exampleKey === 'string' && EXAMPLES[o.exampleKey]) ui.lastExample = o.exampleKey;
+    if (typeof o.labTab === 'string') ui.lastLabTab = o.labTab;
     if (typeof o.viz3dFlat === 'boolean' && typeof viz === 'object' && viz) viz.flat = o.viz3dFlat;
   } catch (e) { /* ignore corrupt state and start fresh */ }
 }
@@ -12983,7 +13048,9 @@ function updateModePill() {
   p.textContent = t(key);
 }
 
-function loadExample(key) {
+/* remember=false is for boot only: putting the default file in the editor is
+   not something the learner did, and must not show up as recent activity. */
+function loadExample(key, remember) {
   const ex = EXAMPLES[key];
   if (!ex) return;
   // Opening an ordinary exercise leaves the Memory Error Lab: the lesson
@@ -12997,6 +13064,7 @@ function loadExample(key) {
   switchToEditing();
   renderExplorer();
   showWorkspace();
+  if (remember !== false) { ui.lastExample = key; saveUI(); }
 }
 function switchToEditing() {
   $('#sourceEdit').style.display = 'block';
@@ -14484,58 +14552,182 @@ function showWorkspace() {
   $('#dashRoot').innerHTML = '';
   if (typeof hideLab === 'function') hideLab();
 }
+/* Grouping metadata ONLY. Every label and id comes from LAB_TABS, so adding a
+   lab tab shows up here automatically and a removed one disappears — there is
+   no second list of labs to keep in step. */
+const DASH_LAB_GROUPS = [
+  { name:'Execution',            ids:['functions', 'repro'] },
+  { name:'Memory & pointers',    ids:['ptr', 'argv'] },
+  { name:'Characters & numbers', ids:['ascii', 'convert', 'bits', 'arith', 'compare'] },
+  { name:'Types & data',         ids:['types', 'repr'] },
+  { name:'Libraries',            ids:['syscalls', 'c03'] },
+];
+const DASH_LAB_DESC = {
+  ascii:'The table, and what a character really is.',
+  convert:'Decimal, hex, binary and octal, one value at a time.',
+  bits:'Individual bits and what each one is worth.',
+  arith:'Operations shown with their operands and result.',
+  compare:'Comparison and equality, including the traps.',
+  types:'Sizes, ranges, signedness and overflow.',
+  functions:'Calls, frames, recursion and the call stack.',
+  syscalls:'What the library does and where the kernel starts.',
+  c03:'The C03 string functions, executed and compared.',
+  repr:'A declaration taken down to its bytes and back.',
+  ptr:'Addresses, dereferencing and pointer arithmetic.',
+  argv:'Command-line arguments as the program receives them.',
+  repro:'Take a real function apart by running it.',
+};
+
+/* A destination is drawn only if the thing it opens actually exists — that is
+   what stops the dashboard advertising features that were never built, and (as
+   the audit found) features that WERE built but stayed marked "coming next"
+   five phases later. Plain typeof guards: this project does not use eval. */
 function renderDashboard() {
-  const last = ui.exampleKey && EXAMPLES[ui.exampleKey] ? EXAMPLES[ui.exampleKey] : null;
-  let h = '<div class="dash"><div class="dash-inner">' +
-    '<div class="dash-hero"><h1>C Execution Lab</h1>' +
-    '<p>Step through C one operation at a time and watch memory change byte by byte. ' +
-    'Every value comes from this page executing your code against an ' + esc(CEngine.ARCH.label.toLowerCase()) + '.</p></div>';
+  const labs = (typeof LAB_TABS !== 'undefined') ? LAB_TABS : [];
+  const labById = {};
+  for (const t of labs) labById[t.id] = t;
 
-  h += '<div class="dash-sec"><div class="dash-sec-head"><h2>Continue</h2><div class="dl"></div></div><div class="dash-grid">' +
-    '<button class="dcard primary wide" data-open="' + esc(ui.exampleKey) + '">' +
-    '<div class="dc-top"><span class="dc-ico">▶</span><span class="dc-title">' + esc(last ? last.label : 'Start') + '</span></div>' +
-    '<div class="dc-desc">Resume in the Execution Lab workspace.</div>' +
-    '<div class="dc-meta">' + esc(fileNameFor(ui.exampleKey)) + '</div></button></div></div>';
+  let h = '<div class="dash"><div class="dash-inner">';
 
-  h += '<div class="dash-sec"><div class="dash-sec-head"><h2>Exercises</h2><div class="dl"></div></div>';
+  /* ---- what this is, and two things you can actually do ---- */
+  h += '<header class="dash-hero dash-hero2">' +
+    '<div class="dash-brand"><span class="dash-mark" aria-hidden="true">C</span>' +
+    '<h1>C Execution Lab</h1></div>' +
+    '<p>An interactive C environment for 1337/42-style programming. Write C, run it one ' +
+    'operation at a time, and watch memory, pointers and the call stack change as it goes. ' +
+    'Everything executes in this page against an ' + esc(CEngine.ARCH.label.toLowerCase()) + '.</p>' +
+    '<div class="dash-cta">' +
+      '<button class="dbtn primary" id="dashStart">Open the Workspace</button>' +
+      (labs.length ? '<button class="dbtn" id="dashLabs">Explore the Labs</button>' : '') +
+    '</div></header>';
+
+  /* ---- Continue: only what genuinely happened ---- */
+  const lastKey = ui.lastExample && EXAMPLES[ui.lastExample] ? ui.lastExample : null;
+  const lastTab = ui.lastLabTab && labById[ui.lastLabTab] ? ui.lastLabTab : null;
+  h += dashSec('Continue');
+  if (!lastKey && !lastTab) {
+    h += '<div class="dash-empty">No recent activity yet. Open an exercise or a lab and ' +
+      'this is where you will pick it back up.</div>';
+  } else {
+    h += '<div class="dash-grid">';
+    if (lastKey) h += '<button class="dcard primary" data-open="' + esc(lastKey) + '">' +
+      '<div class="dc-top"><span class="dc-ico" aria-hidden="true">▶</span>' +
+      '<span class="dc-title">' + esc(EXAMPLES[lastKey].label) + '</span></div>' +
+      '<div class="dc-desc">Back to this exercise in the workspace.</div>' +
+      '<div class="dc-meta">' + esc(fileNameFor(lastKey)) + '</div></button>';
+    if (lastTab) h += '<button class="dcard" data-lab="' + esc(lastTab) + '">' +
+      '<div class="dc-top"><span class="dc-ico" aria-hidden="true">⌗</span>' +
+      '<span class="dc-title">' + esc(labById[lastTab].label) + '</span></div>' +
+      '<div class="dc-desc">Back to this lab.</div></button>';
+    h += '</div>';
+  }
+  h += '</section>';
+
+  /* ---- Labs: the half of the product Home never mentioned ---- */
+  if (labs.length) {
+    h += dashSec('Labs', labs.length + ' available');
+    for (const g of DASH_LAB_GROUPS) {
+      const mine = g.ids.filter(id => labById[id]);
+      if (!mine.length) continue;
+      h += '<div class="dash-sub"><h3 class="dash-sub-h">' + esc(g.name) + '</h3><div class="dash-grid">' +
+        mine.map(id => '<button class="dcard" data-lab="' + esc(id) + '">' +
+          '<div class="dc-top"><span class="dc-ico" aria-hidden="true">⌗</span>' +
+          '<span class="dc-title">' + esc(labById[id].label) + '</span></div>' +
+          '<div class="dc-desc">' + esc(DASH_LAB_DESC[id] || '') + '</div></button>').join('') +
+        '</div></div>';
+    }
+    // Any tab not placed in a group still gets a home, so a new lab is never lost.
+    const placed = DASH_LAB_GROUPS.reduce((acc, g) => acc.concat(g.ids), []);
+    const rest = labs.filter(t => placed.indexOf(t.id) < 0);
+    if (rest.length) h += '<div class="dash-sub"><h3 class="dash-sub-h">More</h3><div class="dash-grid">' +
+      rest.map(t => '<button class="dcard" data-lab="' + esc(t.id) + '">' +
+        '<div class="dc-top"><span class="dc-ico" aria-hidden="true">⌗</span>' +
+        '<span class="dc-title">' + esc(t.label) + '</span></div>' +
+        '<div class="dc-desc">' + esc(DASH_LAB_DESC[t.id] || '') + '</div></button>').join('') +
+      '</div></div>';
+    h += '</section>';
+  }
+
+  /* ---- Exercises: unchanged, it already worked ---- */
+  h += dashSec('Exercises');
   for (const g of GROUPS) {
-    h += '<div style="margin-bottom:14px;"><div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:6px;">' +
-      g.icon + '  ' + esc(g.name) + '</div><div class="ex-list">';
+    h += '<div class="dash-sub"><h3 class="dash-sub-h">' + esc(g.icon + '  ' + g.name) + '</h3><div class="ex-list">';
     for (const k of g.keys) {
       const ex = EXAMPLES[k];
       if (!ex) continue;
-      h += '<button class="ex-row" data-open="' + k + '"><span class="er-i">·</span>' +
+      h += '<button class="ex-row" data-open="' + k + '"><span class="er-i" aria-hidden="true">·</span>' +
         '<span class="er-n">' + esc(fileNameFor(k)) + '</span>' +
         '<span class="er-d">' + esc(ex.label) + '</span></button>';
     }
     h += '</div></div>';
   }
-  h += '</div>';
+  h += '</section>';
 
-  h += '<div class="dash-sec"><div class="dash-sec-head"><h2>Tools</h2><div class="dl"></div></div><div class="dash-grid">' +
-    tool('▶', 'Execution Lab', 'Step, inspect frames and travel through the timeline.', 'work') +
-    tool('▦', 'Memory Lab', 'Byte-level view with pointer targets and the RAM map.', 'memory') +
-    tool('⚙', 'Compiler Lab', 'Conceptual compiler and CPU view for the current step.', 'deep') +
-    toolSoon('✓', 'Norm Lab') + toolSoon('⚗', 'Moulinette Lab') + toolSoon('◷', 'Trace Analyzer') + toolSoon('⏱', 'Exam Mode') +
-    '</div></div>';
+  /* ---- Tools: every one verified to exist before it is drawn ---- */
+  const tools = [
+    ['▶', 'Execution', 'Step, inspect frames and travel the timeline.', 'panel', 'panelSource'],
+    ['▦', 'Memory', 'Byte-level view with pointer targets and the RAM map.', 'panel', 'panelMemory'],
+    ['◈', 'Pointers', 'Every live pointer and what it points at.', 'panel', 'panelPointers'],
+    ['⚙', 'Compiler & CPU', 'The conceptual compiler view for the current step.', 'panel', 'panelDeep'],
+    ['✓', 'Problems', 'Norm and compiler diagnostics for the open file.', 'dock', 'problems'],
+    ['⚗', 'Tests', 'The local educational runner — not the official Moulinette.', 'dock', 'tests'],
+    ['◷', 'Trace', 'Replay a recorded execution trace.', 'dock', 'trace'],
+    ['❯', 'Terminal', 'A simulated shell. Nothing on your machine is touched.', 'dock', 'terminal'],
+  ].filter(t => t[3] !== 'panel' || document.getElementById(t[4]));
+  h += dashSec('Tools') + '<div class="dash-grid">' +
+    tools.map(([ico, title, desc, kind, id]) =>
+      '<button class="dcard" data-d' + kind + '="' + esc(id) + '">' +
+      '<div class="dc-top"><span class="dc-ico" aria-hidden="true">' + ico + '</span>' +
+      '<span class="dc-title">' + esc(title) + '</span></div>' +
+      '<div class="dc-desc">' + esc(desc) + '</div></button>').join('') +
+    '</div></section>';
 
-  h += '<div class="dash-sec"><div class="dash-sec-head"><h2>Model</h2><div class="dl"></div></div><div class="dash-grid">' +
-    '<button class="dcard wide" id="dashModel"><div class="dc-top"><span class="dc-ico">▥</span>' +
-    '<span class="dc-title">' + esc(CEngine.ARCH.label) + '</span></div>' +
-    '<div class="dc-desc">char 1 · short 2 · int 4 · long 8 · pointer 8, little-endian. See exactly what is and is not simulated.</div></button>' +
-    '</div></div>';
+  /* ---- About: the model, and who made it, in that order ---- */
+  h += dashSec('About') +
+    '<div class="dash-grid">' +
+      '<button class="dcard" id="dashModel"><div class="dc-top"><span class="dc-ico" aria-hidden="true">▥</span>' +
+      '<span class="dc-title">' + esc(CEngine.ARCH.label) + '</span></div>' +
+      '<div class="dc-desc">char 1 · short 2 · int 4 · long 8 · pointer 8, little-endian. ' +
+      'See exactly what is and is not simulated.</div></button>' +
+      '<button class="dcard" id="dashKeys"><div class="dc-top"><span class="dc-ico" aria-hidden="true">?</span>' +
+      '<span class="dc-title">Keyboard shortcuts</span></div>' +
+      '<div class="dc-desc">Every view and control has one.</div></button>' +
+    '</div>' +
+    '<p class="dash-colophon">Built by <b>mbousebe</b> (Mboss) for 1337 / 42 students. ' +
+    'Not affiliated with 1337 or 42; the norm, compiler and test runners here are ' +
+    'educational and are not the official tooling.</p></section>';
 
   h += '</div></div>';
   $('#dashRoot').innerHTML = h;
-  $$('#dashRoot [data-open]').forEach(b => b.addEventListener('click', () => loadExample(b.dataset.open)));
-  $$('#dashRoot [data-tool]').forEach(b => b.addEventListener('click', () => {
-    showWorkspace();
-    const map = { work:'panelSource', memory:'panelMemory', deep:'panelDeep' };
-    openPanel(map[b.dataset.tool] || 'panelSource');
+
+  /* Wiring. Every handler targets something the app already provides. */
+  $$('#dashRoot [data-open]').forEach(x => x.addEventListener('click', () => loadExample(x.dataset.open)));
+  $$('#dashRoot [data-lab]').forEach(x => x.addEventListener('click', () => openLabTab(x.dataset.lab)));
+  $$('#dashRoot [data-dpanel]').forEach(x => x.addEventListener('click', () => {
+    showWorkspace(); openPanel(x.dataset.dpanel);
   }));
+  $$('#dashRoot [data-ddock]').forEach(x => x.addEventListener('click', () => {
+    showWorkspace(); setDockTab(x.dataset.ddock);
+  }));
+  const start = $('#dashStart');
+  if (start) start.addEventListener('click', () => {
+    if (ui.lastExample && EXAMPLES[ui.lastExample]) loadExample(ui.lastExample);
+    else showWorkspace();
+  });
+  const dl = $('#dashLabs');
+  if (dl) dl.addEventListener('click', () => openLabTab(ui.lastLabTab || (LAB_TABS[0] && LAB_TABS[0].id)));
   const dm = $('#dashModel');
   if (dm) dm.addEventListener('click', showModelModal);
+  const dk = $('#dashKeys');
+  if (dk) dk.addEventListener('click', showShortcuts);
 }
+/* One section header, so spacing and the rule line cannot drift between
+   sections the way they would if each were hand-written. */
+function dashSec(title, note) {
+  return '<section class="dash-sec"><div class="dash-sec-head"><h2>' + esc(title) + '</h2>' +
+    '<div class="dl"></div>' + (note ? '<span class="dash-note">' + esc(note) + '</span>' : '') + '</div>';
+}
+
 function tool(ico, title, desc, id) {
   return '<button class="dcard" data-tool="' + id + '"><div class="dc-top"><span class="dc-ico">' + ico + '</span>' +
     '<span class="dc-title">' + esc(title) + '</span></div><div class="dc-desc">' + esc(desc) + '</div></button>';
@@ -14759,7 +14951,9 @@ function closeMenus() {
 const MENUS = {
   mProject: () => EXAMPLE_ORDER.slice(0, 8).map(k => ({ n: EXAMPLES[k].label, ico:'·', a: () => loadExample(k) }))
     .concat(['-', { n:t('lib.open'), ico:'☰', k:'Ctrl+B', a:() => openLibrary('files') },
-             { n:t('errlab.title'), ico:'⚠', a:() => openLibrary('errors') },
+             { n:'Labs — ASCII, types, memory, pointers, functions', ico:'⌗', k:'Ctrl+2',
+      a:() => openLabTab(ui.lastLabTab || null) },
+    { n:t('errlab.title'), ico:'⚠', a:() => openLibrary('errors') },
              { n:'Dashboard', ico:'⌂', k:'Ctrl+0', a: showDashboard }]),
   mRun: () => [
     { n:'Step', ico:'▶', k:'Space', a:doStep },
@@ -17836,6 +18030,14 @@ function showLab() {
   if (b) b.classList.add('active');
   renderLab();
   $('#labRoot').style.display = 'block';
+}
+/* The one way to open the lab at a given tab. The dashboard, the menus and the
+   in-lab cross-links all go through here, so none of them can drift from
+   LAB_TABS or invent a second way to navigate. */
+function openLabTab(id) {
+  if (id && LAB_TABS.some(t => t.id === id)) lab.tab = id;
+  showLab();
+  saveUI();
 }
 function hideLab() {
   const r = $('#labRoot');
@@ -22010,7 +22212,10 @@ window.addEventListener('DOMContentLoaded', () => {
   $('#sbArch').textContent = CEngine.ARCH.short;
   renderExplorer();
   renderErrLabList();
-  loadExample(ui.exampleKey);
+  // Reopen where the learner left off, when that file still exists; the
+  // compiled-in default is only the first-visit fallback.
+  const resume = ui.lastExample && EXAMPLES[ui.lastExample] ? ui.lastExample : null;
+  loadExample(resume || ui.exampleKey, !!resume);
   showDashboard();
 
   /* ---- title bar ---- */
