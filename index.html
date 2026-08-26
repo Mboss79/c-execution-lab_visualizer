@@ -2992,6 +2992,190 @@ html[data-theme=light] .viz-node.vz-frame::after{
   .tm-prompt{max-width:38%;font-size:10.5px;}
   .tm-out{font-size:10.5px;padding:7px 8px;}
 }
+
+/* ==================================================================
+   PHASE 9 — data representation.
+   The page has one job: carry the eye from a declaration down to the
+   bytes at real addresses and back up again. So the chain is a single
+   vertical spine, and the endianness panel is the one place where two
+   columns are deliberately set against each other — value on the left
+   written the way we write numbers, memory on the right in address
+   order. That contrast IS the lesson.
+   ================================================================== */
+
+.rp-block{
+  border:1px solid var(--border);border-radius:9px;padding:13px 14px;margin-bottom:14px;
+  background:var(--surface-2);
+}
+.rp-block-h{font-size:10px;letter-spacing:.13em;color:var(--text-faint);margin-bottom:11px;text-transform:uppercase;}
+.rp-note{font-size:10.5px;line-height:1.65;color:var(--text-faint);margin-top:11px;}
+.rp-note b{color:var(--text);}
+.rp-code{
+  font-size:11.5px;line-height:1.6;background:var(--surface);border:1px solid var(--border);
+  border-radius:6px;padding:9px 11px;margin:0 0 12px;overflow-x:auto;color:var(--text);
+}
+.rp-bad{color:var(--error);}
+
+/* --- controls --- */
+.rp-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.rp-types,.rp-pick{display:flex;gap:4px;flex-wrap:wrap;}
+.rp-type{
+  background:var(--surface);border:1px solid var(--border);border-radius:999px;color:var(--text-faint);
+  font-family:var(--mono);font-size:10.5px;padding:3px 10px;cursor:pointer;transition:border-color .15s,color .15s;
+}
+.rp-type:hover{color:var(--text);}
+.rp-type.on{border-color:var(--memory);color:var(--memory);}
+.rp-vlabel{font-size:10px;letter-spacing:.09em;color:var(--text-faint);text-transform:uppercase;}
+.rp-value{max-width:200px;flex:0 1 200px;}
+.rp-detect{font-size:10.5px;color:var(--text-faint);margin-bottom:10px;}
+.rp-detect b{color:var(--memory);}
+
+/* --- the chain: one vertical spine --- */
+.rp-chain{display:flex;flex-direction:column;align-items:center;gap:0;}
+.rp-step{
+  display:flex;align-items:baseline;gap:11px;border:1px solid var(--border);border-radius:7px;
+  padding:7px 13px;background:var(--surface);min-width:min(100%,430px);
+}
+.rp-step-k{font-size:9px;letter-spacing:.12em;color:var(--text-faint);width:74px;flex-shrink:0;}
+.rp-step-v{font-size:13px;color:var(--text);word-break:break-all;}
+.rp-step-n{font-size:9.5px;color:var(--text-faint);margin-left:auto;flex-shrink:0;}
+.rp-arrow{color:var(--memory);font-size:10px;padding:3px 0;}
+
+/* --- endianness: the deliberate two-column contrast --- */
+.rp-endian{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;}
+.rp-col-h{font-size:9px;letter-spacing:.12em;color:var(--text-faint);margin-bottom:6px;text-align:center;}
+.rp-col-n{font-size:9.5px;color:var(--text-faint);margin-top:6px;text-align:center;max-width:210px;line-height:1.5;}
+.rp-bigval{font-size:20px;color:var(--memory);text-align:center;letter-spacing:.03em;}
+.rp-arrow-h{color:var(--memory);font-size:16px;}
+.rp-mem{border:1px solid var(--border);border-radius:7px;overflow:hidden;background:var(--surface);}
+.rp-mem-cap{
+  font-size:8.5px;letter-spacing:.1em;color:var(--text-faint);text-align:center;padding:3px 8px;
+  background:var(--surface-2);
+}
+.rp-mem-row{
+  display:flex;align-items:baseline;gap:11px;padding:5px 11px;border-top:1px solid var(--border);
+}
+.rp-mem-row.first{border-top:none;}
+.rp-mem-a{font-size:10px;color:var(--text-faint);}
+.rp-mem-b{font-size:14px;color:var(--memory);min-width:22px;}
+.rp-mem-i{font-size:9px;color:var(--text-faint);margin-left:auto;}
+
+/* --- nibbles --- */
+.rp-nib{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;}
+.rp-nib-col{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  border:1px solid var(--border);border-radius:6px;padding:6px 9px;background:var(--surface);
+}
+.rp-nib-b{font-size:11px;color:var(--text-faint);letter-spacing:.09em;}
+.rp-nib-arr{font-size:9px;color:var(--memory);}
+.rp-nib-h{font-size:15px;color:var(--memory);}
+
+/* --- declaration --- */
+.rp-decl{display:flex;flex-direction:column;gap:7px;}
+.rp-decl-row{display:flex;align-items:flex-start;gap:10px;}
+.rp-frag{
+  background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:3px 9px;
+  font-size:11.5px;color:var(--memory);white-space:nowrap;flex-shrink:0;min-width:96px;text-align:center;
+}
+.rp-decl-arr{color:var(--memory);font-size:11px;padding-top:3px;}
+.rp-decl-row b{font-size:11.5px;}
+.rp-decl-w{font-size:10.5px;line-height:1.6;color:var(--text-faint);margin-top:2px;}
+
+/* --- sizeof --- */
+.rp-sizeof{display:flex;gap:8px;flex-wrap:wrap;}
+.rp-sz{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  border:1px solid var(--border);border-radius:7px;padding:8px 13px;background:var(--surface);
+}
+.rp-sz-k{font-size:10px;color:var(--text-faint);}
+.rp-sz-v{font-size:18px;color:var(--memory);}
+.rp-sz-n{font-size:9px;color:var(--text-faint);}
+
+/* --- size bars --- */
+.rp-bars{display:flex;flex-direction:column;gap:5px;}
+.rp-bar-row{display:flex;align-items:center;gap:10px;}
+.rp-bar-n{font-size:10.5px;color:var(--text-faint);min-width:118px;flex-shrink:0;}
+.rp-bar{flex:1;min-width:60px;height:11px;background:var(--surface);border:1px solid var(--border);border-radius:3px;overflow:hidden;}
+.rp-bar-fill{display:block;height:100%;}
+.rp-bar-fill.sg{background:var(--stack);}
+.rp-bar-fill.un{background:var(--heap);}
+.rp-bar-fill.ptr{background:var(--memory);}
+.rp-bar-v{font-size:10px;color:var(--text-faint);min-width:92px;text-align:right;flex-shrink:0;}
+
+/* --- comparison --- */
+.rp-pick{align-items:center;margin-bottom:6px;}
+.rp-pick-k{font-size:9.5px;letter-spacing:.12em;color:var(--text-faint);width:14px;flex-shrink:0;}
+.rp-pattern{font-size:11px;color:var(--text-faint);margin:10px 0;text-align:center;}
+.rp-pattern b{color:var(--text);font-size:13px;letter-spacing:.1em;display:block;margin:4px 0;}
+.rp-pattern-n{font-size:9.5px;}
+.rp-cmp{border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.rp-cmp-head,.rp-cmp-row{display:grid;grid-template-columns:minmax(110px,1fr) minmax(110px,1fr) minmax(110px,1fr);}
+.rp-cmp-head{background:var(--surface);border-bottom:1px solid var(--border);}
+.rp-cmp-t{padding:7px 11px;border-left:1px solid var(--border);font-size:11.5px;color:var(--text);}
+.rp-cmp-row{border-bottom:1px solid var(--border);font-size:10.5px;}
+.rp-cmp-row:last-child{border-bottom:none;}
+.rp-cmp-k{padding:6px 11px;color:var(--text-faint);background:var(--surface);}
+.rp-cmp-v{padding:6px 11px;border-left:1px solid var(--border);color:var(--text-faint);word-break:break-all;}
+.rp-cmp-row.differ .rp-cmp-v{color:var(--text);background:var(--execution-dim);}
+.rp-cmp-row.differ .rp-cmp-k{color:var(--execution);}
+
+/* --- arrays --- */
+.rp-arr{display:flex;flex-direction:column;gap:3px;}
+.rp-arr-row{
+  display:flex;align-items:baseline;gap:11px;border:1px solid var(--border);border-radius:6px;
+  padding:5px 11px;background:var(--surface);font-size:10.5px;flex-wrap:wrap;
+}
+.rp-arr-i{color:var(--memory);min-width:44px;}
+.rp-arr-a{color:var(--text);}
+.rp-arr-v{color:var(--heap);}
+.rp-arr-d{color:var(--text-faint);margin-left:auto;font-size:9.5px;}
+
+/* --- conversions --- */
+.rp-convs{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;}
+.rp-conv{border:1px solid var(--border);border-radius:7px;padding:9px 11px;background:var(--surface);}
+.rp-conv-h{font-size:10px;color:var(--text);margin-bottom:6px;}
+.rp-conv-b{font-size:10.5px;line-height:1.7;color:var(--text-faint);}
+.rp-rem{color:var(--memory);}
+.rp-conv-r{font-size:10.5px;margin-top:6px;color:var(--text-faint);}
+.rp-conv-r b{color:var(--memory);}
+.rp-reps{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;}
+.rp-rep{
+  display:flex;flex-direction:column;gap:2px;border:1px solid var(--border);border-radius:6px;
+  padding:5px 11px;background:var(--surface);min-width:80px;
+}
+.rp-rep.ok{border-color:var(--memory);}
+.rp-rep.na{opacity:.6;}
+.rp-rep-k{font-size:9px;letter-spacing:.08em;color:var(--text-faint);text-transform:uppercase;}
+.rp-rep-v{font-size:12px;color:var(--text);}
+
+/* --- table --- */
+.rp-table td{font-size:11px;}
+
+/* --- advanced + links --- */
+.rp-adv-shut{display:flex;align-items:center;gap:11px;flex-wrap:wrap;}
+.rp-adv-n{font-size:10.5px;color:var(--text-faint);}
+.rp-adv{display:flex;flex-direction:column;gap:9px;margin-top:11px;}
+.rp-adv-row{display:flex;flex-direction:column;gap:3px;}
+.rp-adv-row b{font-size:11px;}
+.rp-adv-row span{font-size:10.5px;line-height:1.65;color:var(--text-faint);}
+.rp-links{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;}
+.rp-link{
+  display:flex;flex-direction:column;gap:2px;text-align:left;
+  background:var(--surface);border:1px solid var(--border);border-radius:7px;
+  padding:8px 12px;cursor:pointer;transition:border-color .15s;
+}
+.rp-link:hover{border-color:var(--memory);}
+.rp-link b{font-size:11.5px;color:var(--text);}
+.rp-link span{font-size:9.5px;color:var(--text-faint);}
+
+@media (max-width:820px){
+  .rp-endian{flex-direction:column;}
+  .rp-arrow-h{transform:rotate(90deg);}
+  .rp-cmp-head,.rp-cmp-row{grid-template-columns:1fr;}
+  .rp-cmp-t,.rp-cmp-v{border-left:none;border-top:1px solid var(--border);}
+  .rp-step{min-width:0;width:100%;}
+  .rp-step-n{margin-left:0;}
+}
 </style>
 </head>
 <body>
@@ -16600,6 +16784,7 @@ const LAB_TABS = [
   { id:'functions', label:'Functions' },
   { id:'syscalls',  label:'Libraries & Syscalls' },
   { id:'c03',       label:'C03 Strings' },
+  { id:'repr',      label:'Data Representation' },
 ];
 
 const lab = {
@@ -16630,6 +16815,10 @@ const lab = {
   c03Fn: 'strcmp', c03Step: 0, c03Runs: null,
   c03A: 'strcmp', c03B: 'strncmp',
   c03Exp: 'ncmp', c03ExpRuns: null,
+  // --- Phase 9: types and data representation ---
+  reprType: 'uchar', reprValue: '255', reprRuns: null,
+  reprA: 'schar', reprB: 'uchar', reprPattern: null,
+  reprAdvanced: false, reprSizeof: null, reprArray: null,
 };
 
 function labType() { return (LAB_TYPES.find(t => t.id === lab.typeId) || LAB_TYPES[0]).make(); }
@@ -16921,6 +17110,7 @@ function renderLab() {
     case 'functions': body = labFunctionsHtml(); break;
     case 'syscalls':  body = labSyscallsHtml(); break;
     case 'c03':       body = labC03Html(); break;
+    case 'repr':      body = labReprHtml(); break;
   }
   root.innerHTML =
     '<div class="vl"><div class="vl-inner">' +
@@ -16931,7 +17121,7 @@ function renderLab() {
           '" data-labtab="' + t.id + '" role="tab" aria-selected="' + (t.id === lab.tab) + '">' +
           esc(t.label) + '</button>').join('') +
       '</div>' +
-      (lab.tab === 'functions' || lab.tab === 'syscalls' || lab.tab === 'c03' ? '' : labValueStrip()) +
+      (lab.tab === 'functions' || lab.tab === 'syscalls' || lab.tab === 'c03' || lab.tab === 'repr' ? '' : labValueStrip()) +
       '<div class="vl-body">' + body + '</div>' +
       '<div class="vl-foot">Widths, signedness and wrapping follow the simulated architecture (' +
         esc(CEngine.ARCH.short) + '). Arithmetic and comparisons are evaluated by the execution engine, ' +
@@ -16944,6 +17134,7 @@ function wireLab() {
   if (typeof wireLabTypes === 'function') wireLabTypes();
   if (typeof wireLabFunctions === 'function') wireLabFunctions();
   if (typeof wireLabC03 === 'function') wireLabC03();
+  if (typeof wireLabRepr === 'function') wireLabRepr();
   $$('#labRoot [data-labtab]').forEach(el => el.addEventListener('click', () => {
     lab.tab = el.dataset.labtab; renderLab();
   }));
@@ -18409,6 +18600,489 @@ function wireLabC03() {
   }));
 }
 /* ==== C03LAB END ==== */
+
+/* ==== REPRLAB START ====
+   PHASE 9 — C types and data representation.
+
+   Phase 6 already built the Types & Limits tab: the type selector, the range
+   arithmetic, the bit editor, two's complement and the overflow lab. None of
+   that is repeated here. This tab adds the part that was missing — the chain
+   from a DECLARATION down to the individual bytes at real addresses, and back
+   up to the different ways those bytes can be read.
+
+   Everything numeric comes from the engine:
+     sizes / limits      CEngine.limitsOf
+     representations     CEngine.representation
+     bit cells           labBitsHtml (the Phase 5 grid, reused)
+     conversions         CEngine.conversionSteps
+     ASCII               CEngine.asciiInfo
+     value parsing       CEngine.parseValueInput
+     bytes and addresses A REAL RUN — a tiny program is compiled and executed,
+                         and the bytes shown are the ones that ended up in the
+                         simulated memory, at the addresses the engine chose.
+
+   There is no table of type sizes in this file, and no byte is computed here. */
+
+const REPR_TYPES = [
+  { id:'char',   decl:'char',           make:() => CEngine.scalarT('char', true) },
+  { id:'schar',  decl:'signed char',    make:() => CEngine.scalarT('char', true) },
+  { id:'uchar',  decl:'unsigned char',  make:() => CEngine.scalarT('char', false) },
+  { id:'short',  decl:'short',          make:() => CEngine.scalarT('short', true) },
+  { id:'ushort', decl:'unsigned short', make:() => CEngine.scalarT('short', false) },
+  { id:'int',    decl:'int',            make:() => CEngine.scalarT('int', true) },
+  { id:'uint',   decl:'unsigned int',   make:() => CEngine.scalarT('int', false) },
+  { id:'long',   decl:'long',           make:() => CEngine.scalarT('long', true) },
+  { id:'ulong',  decl:'unsigned long',  make:() => CEngine.scalarT('long', false) },
+  { id:'ptr',    decl:'int *',          make:() => CEngine.ptrT(CEngine.scalarT('int', true)), pointer:true },
+];
+function reprType() { return REPR_TYPES.find(t => t.id === lab.reprType) || REPR_TYPES[2]; }
+
+/* A real object, in real memory. The program is generated, compiled and RUN;
+   the bytes and addresses below are whatever that run produced. */
+function reprRun() {
+  const t = reprType();
+  const key = t.id + '|' + lab.reprValue;
+  if (!lab.reprRuns) lab.reprRuns = {};
+  if (lab.reprRuns[key]) return lab.reprRuns[key];
+  let out;
+  if (t.pointer) {
+    const src = 'int\tmain(void)\n{\n\tint\tx;\n\tint\t*p;\n\n\tx = 42;\n\tp = &x;\n\treturn (0);\n}\n';
+    out = reprExecute(src, 'p');
+  } else {
+    const src = 'int\tmain(void)\n{\n\t' + t.decl + '\tx;\n\n\tx = ' + lab.reprValue + ';\n\treturn (0);\n}\n';
+    out = reprExecute(src, 'x');
+  }
+  return (lab.reprRuns[key] = out);
+}
+function reprExecute(src, varName) {
+  let r;
+  try { r = CEngine.runToCompletion(src); }
+  catch (e) { return { ok:false, error:e.message, src }; }
+  if (!r.history) return { ok:false, error: r.message || 'did not run', src };
+  for (let i = r.history.length - 1; i >= 0; i--) {
+    const st = r.history.stateAt(i);
+    const v = st.vars.find(x => x.name === varName);
+    if (v && !v.uninitialized) return { ok:true, src, v, st, steps: r.history.length };
+  }
+  return { ok:false, error:'the value never became initialized', src };
+}
+
+/* ---------------------- 1. the chain ---------------------- */
+function reprChainHtml() {
+  const t = reprType();
+  const run = reprRun();
+  const L = CEngine.limitsOf(t.make());
+  let h = '<div class="rp-block"><div class="rp-block-h">Declaration → type → bits → bytes → memory</div>';
+
+  h += '<div class="rp-controls">' +
+    '<div class="rp-types" role="group" aria-label="C type">' +
+      REPR_TYPES.map(x => '<button class="rp-type' + (x.id === t.id ? ' on' : '') +
+        '" data-rptype="' + x.id + '">' + esc(x.decl) + '</button>').join('') + '</div>' +
+    '<label class="rp-vlabel" for="rpValue">value</label>' +
+    '<input id="rpValue" class="vl-input rp-value" value="' + esc(String(lab.reprValue)) + '" ' +
+      'aria-label="Value to store" placeholder="42   0x2A   00101010   052">' +
+    '</div>';
+
+  const parsed = CEngine.parseValueInput(String(lab.reprValue));
+  if (!t.pointer) {
+    h += '<div class="rp-detect">' + (parsed.ok
+      ? 'read as <b>' + esc(parsed.detected) + '</b>'
+      : '<span class="rp-bad">' + esc(parsed.error) + '</span>') + '</div>';
+    if (parsed.ok && parsed.ambiguous) {
+      h += '<div class="vl-warn"><b>Ambiguous.</b> ' + esc(parsed.ambiguous.note) +
+        ' As ' + esc(parsed.ambiguous.as) + ' it would be <b class="mono">' + esc(parsed.ambiguous.value) + '</b>.</div>';
+    }
+  }
+  if (!run.ok) return h + '<div class="vl-err">' + esc(run.error) + '</div></div>';
+
+  const v = run.v;
+  const rep = v.repr;
+  const step = (k, val, note) =>
+    '<div class="rp-step"><span class="rp-step-k">' + k + '</span>' +
+    '<span class="rp-step-v mono">' + val + '</span>' +
+    (note ? '<span class="rp-step-n">' + note + '</span>' : '') + '</div>';
+  const arrow = '<div class="rp-arrow">▼</div>';
+
+  h += '<pre class="rp-code mono">' + esc(run.src.split('\n').filter(l => /\tx;|x = |\*p|p = /.test(l)).join('\n').trim()) + '</pre>';
+  h += '<div class="rp-chain">' +
+    step('TYPE', esc(v.typeName), L.isSigned ? 'signed' : 'unsigned') + arrow +
+    step('SIZE', v.size + (v.size === 1 ? ' byte' : ' bytes'), rep ? rep.bits + ' bits' : '') + arrow +
+    (rep ? step('BITS', rep.binary.replace(/(.{8})(?=.)/g, '$1 ')) + arrow : '') +
+    step('BYTES', v.bytes.map(b => Number(b.value).toString(16).toUpperCase().padStart(2, '0')).join(' '),
+         'as stored, low address first') + arrow +
+    step('ADDRESS', hexA(v.address), 'in the ' + esc(run.st.graph.nodes.find(n => n.label === v.name).sectionLabel) + ' section') + arrow +
+    step('VALUE', esc(v.valueText)) +
+    '</div>';
+  return h + '</div>';
+}
+
+/* ---------------------- 2. bytes in memory, and endianness ---------------------- */
+function reprBytesHtml() {
+  const run = reprRun();
+  if (!run.ok) return '';
+  const v = run.v, rep = v.repr;
+  if (!rep) return '';
+  const little = CEngine.ARCH.endian === 'little';
+  let h = '<div class="rp-block"><div class="rp-block-h">The same value, byte by byte</div>';
+  h += '<div class="rp-endian">' +
+    '<div class="rp-val-col"><div class="rp-col-h">VALUE</div>' +
+      '<div class="rp-bigval mono">' + esc(rep.hex) + '</div>' +
+      '<div class="rp-col-n">most significant byte on the left, as we write numbers</div></div>' +
+    '<div class="rp-arrow-h">→</div>' +
+    '<div class="rp-mem-col"><div class="rp-col-h">MEMORY</div>' +
+      '<div class="rp-mem">' +
+        '<div class="rp-mem-cap">low address</div>' +
+        v.bytes.map((b, i) =>
+          '<div class="rp-mem-row' + (i === 0 ? ' first' : '') + '">' +
+            '<span class="rp-mem-a mono">' + hexA(b.address) + '</span>' +
+            '<span class="rp-mem-b mono">' + Number(b.value).toString(16).toUpperCase().padStart(2, '0') + '</span>' +
+            '<span class="rp-mem-i">byte ' + i + '</span></div>').join('') +
+        '<div class="rp-mem-cap">high address</div>' +
+      '</div></div>' +
+    '</div>';
+  h += '<div class="rp-note"><b>' + esc(CEngine.ARCH.endian) + '-endian:</b> ' +
+    (little
+      ? 'the <b>least</b> significant byte is stored at the <b>lowest</b> address. That is why the bytes above read ' +
+        'in the opposite order to the way the number is written.'
+      : 'the <b>most</b> significant byte is stored at the lowest address.') +
+    ' This is a property of the architecture, not of C — the standard does not fix a byte order, and both ' +
+    'orders exist in real hardware. This lab models ' + esc(CEngine.ARCH.short) + '.</div>';
+  if (v.size === 1) {
+    h += '<div class="rp-note">A one-byte type has nothing to reorder, which is why byte order never matters for ' +
+      '<span class="mono">char</span>.</div>';
+  }
+  return h + '</div>';
+}
+
+/* ---------------------- 3. bits → nibbles → hex ---------------------- */
+function reprNibbleHtml() {
+  const run = reprRun();
+  if (!run.ok || !run.v.repr) return '';
+  const bin = run.v.repr.binary;
+  const nibbles = bin.match(/.{4}/g) || [];
+  return '<div class="rp-block"><div class="rp-block-h">Why hexadecimal fits bytes so well</div>' +
+    '<div class="rp-nib">' + nibbles.map(n =>
+      '<div class="rp-nib-col"><span class="rp-nib-b mono">' + n + '</span>' +
+      '<span class="rp-nib-arr">↓</span>' +
+      '<span class="rp-nib-h mono">' + parseInt(n, 2).toString(16).toUpperCase() + '</span></div>').join('') +
+    '</div>' +
+    '<div class="rp-note">Four bits have 2<sup>4</sup> = 16 possible patterns, and hexadecimal has exactly 16 ' +
+    'digits — so <b>one hex digit is exactly four bits</b>, and two hex digits are exactly one byte. That is the ' +
+    'whole reason hex is used for memory: the grouping is exact, with nothing left over. Decimal has no such ' +
+    'alignment, which is why <span class="mono">255</span> tells you much less about a byte than ' +
+    '<span class="mono">0xFF</span> does.</div></div>';
+}
+
+/* ---------------------- 4. the declaration, piece by piece ---------------------- */
+function reprDeclHtml() {
+  const t = reprType();
+  if (t.pointer) {
+    return '<div class="rp-block"><div class="rp-block-h">Reading the declaration</div>' +
+      '<pre class="rp-code mono">int *p = &amp;x;</pre>' +
+      '<div class="rp-decl">' + [
+        ['int', 'pointee type', 'What p points AT. It decides how many bytes a dereference reads, and how far p + 1 moves.'],
+        ['*', 'pointer', 'p is not an int; it holds the ADDRESS of one.'],
+        ['p', 'identifier', 'The name of the pointer object itself.'],
+        ['&x', 'initializer', 'The address-of operator produces x’s address, which is what p stores.'],
+      ].map(([frag, role, why]) =>
+        '<div class="rp-decl-row"><code class="rp-frag mono">' + esc(frag) + '</code>' +
+        '<span class="rp-decl-arr">→</span><div><b>' + esc(role) + '</b>' +
+        '<div class="rp-decl-w">' + esc(why) + '</div></div></div>').join('') + '</div></div>';
+  }
+  const parts = [];
+  const words = t.decl.split(' ');
+  if (words.length > 1) parts.push([words[0], 'signedness', words[0] === 'unsigned'
+    ? 'No bit is spent on a sign, so every pattern is a non-negative value.'
+    : 'The top bit carries the sign under the two’s-complement reading.']);
+  parts.push([words[words.length - 1], 'base type', 'Chooses the width — and the width is what fixes the range.']);
+  parts.push(['x', 'identifier', 'The name of the object. The name is for you; the compiler works with its address.']);
+  parts.push(['=', 'assignment', 'Stores a value into the object that was just created.']);
+  parts.push([String(lab.reprValue), 'initializer', 'The value to store. If it does not fit the type, it is converted on the way in.']);
+  return '<div class="rp-block"><div class="rp-block-h">Reading the declaration</div>' +
+    '<pre class="rp-code mono">' + esc(t.decl + ' x = ' + lab.reprValue + ';') + '</pre>' +
+    '<div class="rp-decl">' + parts.map(([frag, role, why]) =>
+      '<div class="rp-decl-row"><code class="rp-frag mono">' + esc(frag) + '</code>' +
+      '<span class="rp-decl-arr">→</span><div><b>' + esc(role) + '</b>' +
+      '<div class="rp-decl-w">' + esc(why) + '</div></div></div>').join('') + '</div></div>';
+}
+
+/* ---------------------- 5. sizeof, run for real ---------------------- */
+function reprSizeofHtml() {
+  if (!lab.reprSizeof) {
+    const src = 'int\tmain(void)\n{\n\tunsigned int\ta;\n\tunsigned int\tb;\n\tunsigned int\tc;\n' +
+      '\tunsigned int\td;\n\tunsigned int\te;\n\n\ta = sizeof(char);\n\tb = sizeof(short);\n' +
+      '\tc = sizeof(int);\n\td = sizeof(long);\n\te = sizeof(unsigned char);\n\treturn (0);\n}\n';
+    let got = null;
+    try {
+      const r = CEngine.runToCompletion(src);
+      if (r.history) {
+        for (let i = r.history.length - 1; i >= 0 && !got; i--) {
+          const st = r.history.stateAt(i);
+          if (st.vars.length && st.vars.every(v => !v.uninitialized)) {
+            got = { src, vals: st.vars.map(v => v.value) };
+          }
+        }
+      }
+    } catch (e) { got = { src, err: e.message }; }
+    lab.reprSizeof = got || { src, err: 'did not run' };
+  }
+  const sz = lab.reprSizeof;
+  const names = ['char', 'short', 'int', 'long', 'unsigned char'];
+  let h = '<div class="rp-block"><div class="rp-block-h">sizeof, executed</div>' +
+    '<pre class="rp-code mono">' + esc(sz.src.split('\n').filter(l => /sizeof/.test(l)).map(l => l.trim()).join('\n')) + '</pre>';
+  if (sz.err) return h + '<div class="vl-err">' + esc(sz.err) + '</div></div>';
+  h += '<div class="rp-sizeof">' + sz.vals.map((val, i) =>
+    '<div class="rp-sz"><span class="rp-sz-k mono">sizeof(' + esc(names[i]) + ')</span>' +
+    '<span class="rp-sz-v mono">' + esc(val) + '</span>' +
+    '<span class="rp-sz-n">byte' + (val === '1' ? '' : 's') + '</span></div>').join('') + '</div>';
+  h += '<div class="rp-note"><b>sizeof</b> gives the size of a type or object <b>in bytes</b>, and a byte is ' +
+    'the unit C measures everything in — <span class="mono">sizeof(char)</span> is 1 by definition. These ' +
+    'numbers were produced by running that program in the engine, not read from a table. On a real machine ' +
+    'they depend on the compiler and the ABI: <span class="mono">long</span> is 8 bytes on Linux x86-64 and ' +
+    '4 on Windows x64.</div></div>';
+  return h;
+}
+
+/* ---------------------- 6. size comparison ---------------------- */
+function reprSizeBarsHtml() {
+  const rows = REPR_TYPES.filter(t => !t.pointer && t.id !== 'schar').map(t => {
+    const L = CEngine.limitsOf(t.make());
+    return { decl: t.decl, bits: L.bits, bytes: L.bytes, signed: L.isSigned };
+  });
+  const maxBits = Math.max(...rows.map(r => r.bits));
+  const ptr = CEngine.limitsOf(CEngine.ptrT(CEngine.scalarT('int', true)));
+  rows.push({ decl:'int * (pointer)', bits: ptr.bits, bytes: ptr.bytes, signed:false, isPtr:true });
+  return '<div class="rp-block"><div class="rp-block-h">How much room each type takes</div>' +
+    '<div class="rp-bars">' + rows.map(r =>
+      '<div class="rp-bar-row"><span class="rp-bar-n mono">' + esc(r.decl) + '</span>' +
+      '<span class="rp-bar"><span class="rp-bar-fill' + (r.isPtr ? ' ptr' : (r.signed ? ' sg' : ' un')) +
+        '" style="width:' + Math.round((r.bits / maxBits) * 100) + '%"></span></span>' +
+      '<span class="rp-bar-v mono">' + r.bits + ' bits · ' + r.bytes + ' B</span></div>').join('') +
+    '</div>' +
+    '<div class="rp-note">Every number above is computed from the type’s width on this simulated architecture ' +
+    '(' + esc(CEngine.ARCH.short) + '); none of it is a table. <b>Pointer size is architecture-dependent</b> — ' +
+    'it comes from the architecture configuration, not from the type it points at, and a pointer to a char is ' +
+    'the same size as a pointer to a long.</div></div>';
+}
+
+/* ---------------------- 7. two types, side by side ---------------------- */
+function reprCompareHtml() {
+  const A = REPR_TYPES.find(t => t.id === (lab.reprA || 'schar')) || REPR_TYPES[1];
+  const B = REPR_TYPES.find(t => t.id === (lab.reprB || 'uchar')) || REPR_TYPES[2];
+  const LA = CEngine.limitsOf(A.make()), LB = CEngine.limitsOf(B.make());
+  const pattern = lab.reprPattern != null ? lab.reprPattern : 255n;
+  const width = Math.min(LA.bits, LB.bits);
+  const mask = (1n << BigInt(width)) - 1n;
+  const p = pattern & mask;
+  const rA = CEngine.representation(p, A.make()), rB = CEngine.representation(p, B.make());
+  const pick = (side, cur) => '<div class="rp-pick"><span class="rp-pick-k">' + side + '</span>' +
+    REPR_TYPES.filter(t => !t.pointer).map(t =>
+      '<button class="rp-type' + (t.id === cur ? ' on' : '') + '" data-rp' + side.toLowerCase() +
+      '="' + t.id + '">' + esc(t.decl) + '</button>').join('') + '</div>';
+  const row = (k, a, b2) => {
+    const differ = String(a) !== String(b2);
+    return '<div class="rp-cmp-row' + (differ ? ' differ' : '') + '">' +
+      '<div class="rp-cmp-k">' + esc(k) + '</div>' +
+      '<div class="rp-cmp-v mono">' + esc(a) + '</div>' +
+      '<div class="rp-cmp-v mono">' + esc(b2) + '</div></div>';
+  };
+  return '<div class="rp-block"><div class="rp-block-h">Two types, one bit pattern</div>' +
+    pick('A', A.id) + pick('B', B.id) +
+    '<div class="rp-pattern">bit pattern <b class="mono">' + rA.binary.replace(/(.{8})(?=.)/g, '$1 ') + '</b>' +
+      '<span class="rp-pattern-n">identical in both columns — only the reading changes</span></div>' +
+    '<div class="rp-cmp"><div class="rp-cmp-head"><div></div>' +
+      '<div class="rp-cmp-t mono">' + esc(A.decl) + '</div>' +
+      '<div class="rp-cmp-t mono">' + esc(B.decl) + '</div></div>' +
+      row('size', LA.bytes + ' B', LB.bytes + ' B') +
+      row('bits', LA.bits, LB.bits) +
+      row('signed', LA.isSigned ? 'yes' : 'no', LB.isSigned ? 'yes' : 'no') +
+      row('minimum', LA.min, LB.min) +
+      row('maximum', LA.max, LB.max) +
+      row('this pattern reads as', LA.isSigned ? rA.signed : rA.unsigned, LB.isSigned ? rB.signed : rB.unsigned) +
+    '</div>' +
+    '<div class="rp-note">Rows that differ are marked. When two types have the <b>same size</b> the bits are ' +
+    'interchangeable and only the interpretation differs; when they have <b>different sizes</b> the range ' +
+    'changes because there are more or fewer bits to work with.</div>' +
+    '<div class="rp-links"><button class="vl-btn" data-rpgo="types">open Types &amp; Limits for the full range picture →</button></div>' +
+    '</div>';
+}
+
+/* ---------------------- 8. arrays and pointers, from real runs ---------------------- */
+function reprArrayHtml() {
+  if (!lab.reprArray) {
+    const src = 'int\tmain(void)\n{\n\tint\ta[4] = {1, 2, 3, 4};\n\n\treturn (0);\n}\n';
+    lab.reprArray = reprExecute(src, 'a');
+  }
+  const r = lab.reprArray;
+  if (!r.ok) return '';
+  const a = r.v;
+  const elem = a.elements.length > 1 ? a.elements[1].address - a.elements[0].address : a.size;
+  return '<div class="rp-block"><div class="rp-block-h">Where a type’s size shows up: arrays</div>' +
+    '<pre class="rp-code mono">int a[4] = {1, 2, 3, 4};</pre>' +
+    '<div class="rp-arr">' + a.elements.map(el =>
+      '<div class="rp-arr-row"><span class="rp-arr-i mono">a[' + el.index + ']</span>' +
+      '<span class="rp-arr-a mono">' + hexA(el.address) + '</span>' +
+      '<span class="rp-arr-v mono">' + esc(el.valueText) + '</span>' +
+      '<span class="rp-arr-d">' + (el.index === 0 ? 'base' : '+ ' + (el.address - a.elements[0].address) + ' bytes') +
+      '</span></div>').join('') + '</div>' +
+    '<div class="rp-note">Each element sits <b>' + elem + ' bytes</b> after the previous one, because that is ' +
+    '<span class="mono">sizeof(int)</span> here. This is the same arithmetic that makes ' +
+    '<span class="mono">p + 1</span> move by one element rather than one byte — the type is what supplies the ' +
+    'step. These addresses came from running that program.</div>' +
+    '<div class="rp-links"><button class="vl-btn" data-rpgo="pointers">see the pointer graph →</button>' +
+    '<button class="vl-btn" data-rpgo="memory">inspect in Memory →</button></div></div>';
+}
+
+/* ---------------------- 9. conversions and ASCII ---------------------- */
+function reprConvertHtml() {
+  const run = reprRun();
+  if (!run.ok || !run.v.repr) return '';
+  const rep = run.v.repr;
+  let raw;
+  try { raw = BigInt(rep.unsigned); } catch (e) { return ''; }
+  const box = (to, title) => {
+    const s = CEngine.conversionSteps(raw, to);
+    let b = '<div class="rp-conv"><div class="rp-conv-h">' + esc(title) + '</div><div class="rp-conv-b mono">';
+    if (s.rows) {
+      b += s.rows.map(r2 => r2.from + ' ÷ ' + r2.base + ' = ' + r2.quotient +
+        '<span class="rp-rem"> r ' + r2.remainder + '</span>').join('<br>');
+      b += '</div><div class="rp-conv-r">read upward → <b>' + esc(s.read) + '</b></div>';
+    } else {
+      b += s.terms.filter(t2 => t2.bit === '1').map(t2 => t2.weight).join(' + ');
+      b += '</div><div class="rp-conv-r">= <b>' + esc(s.read) + '</b></div>';
+    }
+    return b + '</div>';
+  };
+  let h = '<div class="rp-block"><div class="rp-block-h">How each representation is reached</div>' +
+    '<div class="rp-convs">' + box('binary', 'decimal → binary') + box('hex', 'decimal → hexadecimal') +
+    box('octal', 'decimal → octal') + box('decimal', 'binary → decimal') + '</div>';
+  const a = rep.ascii;
+  h += '<div class="rp-reps">' +
+    ['decimal', 'hex', 'octal'].map(k =>
+      '<div class="rp-rep"><span class="rp-rep-k">' + k + '</span><span class="rp-rep-v mono">' +
+      esc(rep[k]) + '</span></div>').join('') +
+    '<div class="rp-rep' + (a ? ' ok' : ' na') + '"><span class="rp-rep-k">ascii</span>' +
+      '<span class="rp-rep-v mono">' + esc(a ? (a.literal || a.name) : 'not ASCII') + '</span></div>' +
+    '</div>';
+  if (!a) h += '<div class="rp-note">ASCII covers 0–127 only, so this value has no ASCII reading. It is still a ' +
+    'perfectly good ' + esc(run.v.typeName) + ' value.</div>';
+  h += '<div class="rp-links">' +
+    '<button class="vl-btn" data-rpgo="ascii">open the ASCII lab →</button>' +
+    '<button class="vl-btn" data-rpgo="convert">open Conversions →</button></div></div>';
+  return h;
+}
+
+/* ---------------------- 10. the reference table ---------------------- */
+function reprTableHtml() {
+  const rows = REPR_TYPES.filter(t => t.id !== 'schar').map(t => {
+    const L = CEngine.limitsOf(t.make());
+    return { decl: t.decl, L, ptr: !!t.pointer };
+  });
+  return '<div class="rp-block"><div class="rp-block-h">Every type on this simulated architecture</div>' +
+    '<div class="vl-table-wrap"><table class="vl-table rp-table"><thead><tr>' +
+    '<th>Type</th><th>Bytes</th><th>Bits</th><th>Signed</th><th>Minimum</th><th>Maximum</th>' +
+    '</tr></thead><tbody>' + rows.map(r =>
+      '<tr class="vl-row" data-rptype="' + esc(REPR_TYPES.find(x => x.decl === r.decl).id) + '" role="button" tabindex="0">' +
+      '<td class="mono">' + esc(r.decl) + '</td>' +
+      '<td class="mono">' + r.L.bytes + '</td><td class="mono">' + r.L.bits + '</td>' +
+      '<td>' + (r.L.isSigned ? 'yes' : 'no') + '</td>' +
+      '<td class="mono">' + esc(r.L.min) + '</td><td class="mono">' + esc(r.L.max) + '</td></tr>').join('') +
+    '</tbody></table></div>' +
+    '<div class="rp-note">Computed from each type’s width, not tabulated. <b>Plain <span class="mono">char</span> ' +
+    'is signed in this simulator</b>, but whether it is signed is <b>implementation-defined</b> in C — it differs ' +
+    'between compilers and platforms, which is why portable code writes <span class="mono">signed char</span> or ' +
+    '<span class="mono">unsigned char</span> when the sign matters.</div></div>';
+}
+
+/* ---------------------- 11. advanced notes ---------------------- */
+function reprAdvancedHtml() {
+  if (!lab.reprAdvanced) {
+    return '<div class="rp-block rp-adv-shut">' +
+      '<button class="vl-btn" data-rpadv="1">▸ Technical details</button>' +
+      '<span class="rp-adv-n">object representation, byte order, and what C actually guarantees</span></div>';
+  }
+  return '<div class="rp-block"><div class="rp-block-h">Technical details</div>' +
+    '<button class="vl-btn" data-rpadv="0">▾ hide</button>' +
+    '<div class="rp-adv">' + [
+      ['Object representation',
+       'Every object occupies a sequence of bytes. Those bytes ARE the object as far as memory is concerned; ' +
+       'the type is what tells the compiler how to read them back.'],
+      ['Byte order is not C',
+       'The C standard does not fix a byte order. Little-endian and big-endian machines both exist, and code ' +
+       'that reads a multi-byte object one byte at a time is only portable if it says which order it expects.'],
+      ['Widths are not fixed either',
+       'C guarantees minimum ranges, not exact sizes: an int is at least 16 bits, a long at least 32. Everything ' +
+       'shown here is this architecture (' + esc(CEngine.ARCH.short) + '). Use <span class="mono">&lt;stdint.h&gt;</span> ' +
+       'when you need an exact width.'],
+      ['Two’s complement',
+       'C2x requires two’s complement for signed integers; before that it was one of three permitted schemes. ' +
+       'This simulator uses two’s complement, which is what essentially all current hardware does.'],
+      ['Plain char',
+       'A third type, distinct from signed char and unsigned char, whose signedness is implementation-defined.'],
+      ['This is a simulation',
+       'These addresses and bytes come from the lab’s own memory model. It is not a dump of your computer’s RAM, ' +
+       'and the addresses are chosen to be reproducible rather than realistic.'],
+    ].map(([k, v]) => '<div class="rp-adv-row"><b>' + esc(k) + '</b><span>' + v + '</span></div>').join('') +
+    '</div></div>';
+}
+
+/* ---------------------- 12. cross-links ---------------------- */
+function reprLinksHtml() {
+  return '<div class="rp-block"><div class="rp-block-h">Where to go next</div>' +
+    '<div class="rp-links">' + [
+      ['types', 'Types & Limits', 'ranges, the bit editor, overflow'],
+      ['ascii', 'ASCII', 'characters as numbers'],
+      ['convert', 'Conversions', 'bases, both directions'],
+      ['memory', 'Memory', 'the whole address space'],
+      ['pointers', 'Pointers', 'addresses and what they point at'],
+      ['terminal', 'Terminal', 'compile and run this yourself'],
+    ].map(([id, label, note]) =>
+      '<button class="rp-link" data-rpgo="' + id + '"><b>' + esc(label) + '</b>' +
+      '<span>' + esc(note) + '</span></button>').join('') + '</div></div>';
+}
+
+function labReprHtml() {
+  return reprChainHtml() + reprBytesHtml() + reprNibbleHtml() + reprDeclHtml() +
+         reprConvertHtml() + reprSizeofHtml() + reprSizeBarsHtml() + reprArrayHtml() +
+         reprCompareHtml() + reprTableHtml() + reprAdvancedHtml() + reprLinksHtml();
+}
+
+function wireLabRepr() {
+  $$('#labRoot [data-rptype]').forEach(el => el.addEventListener('click', () => {
+    lab.reprType = el.dataset.rptype; renderLab();
+  }));
+  $$('#labRoot [data-rpa]').forEach(el => el.addEventListener('click', () => { lab.reprA = el.dataset.rpa; renderLab(); }));
+  $$('#labRoot [data-rpb]').forEach(el => el.addEventListener('click', () => { lab.reprB = el.dataset.rpb; renderLab(); }));
+  $$('#labRoot [data-rpadv]').forEach(el => el.addEventListener('click', () => {
+    lab.reprAdvanced = el.dataset.rpadv === '1'; renderLab();
+  }));
+  const val = $('#rpValue');
+  if (val) val.addEventListener('input', () => {
+    const p = CEngine.parseValueInput(val.value);
+    lab.reprValue = p.ok ? String(p.value) : val.value;
+    lab.reprRaw = val.value;
+    const pos = val.selectionStart;
+    renderLab();
+    const again = $('#rpValue');
+    if (again) { again.value = val.value; again.focus(); try { again.setSelectionRange(pos, pos); } catch (e) {} }
+  });
+  $$('#labRoot [data-rpgo]').forEach(el => el.addEventListener('click', () => {
+    const to = el.dataset.rpgo;
+    if (to === 'memory' || to === 'pointers') {
+      if (typeof showWorkspace === 'function') showWorkspace();
+      if (typeof openPanel === 'function') openPanel(to === 'memory' ? 'panelMemory' : 'panelPointers');
+      return;
+    }
+    if (to === 'terminal') {
+      if (typeof showWorkspace === 'function') showWorkspace();
+      if (typeof setDockTab === 'function') setDockTab('terminal');
+      return;
+    }
+    lab.tab = to === 'types' ? 'types' : to === 'ascii' ? 'ascii' : 'convert';
+    renderLab();
+  }));
+}
+/* ==== REPRLAB END ==== */
 
 /* ==== TERM START ====
    PHASE 8 — the simulated C / 1337 terminal.
