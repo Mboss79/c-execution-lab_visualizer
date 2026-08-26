@@ -217,7 +217,13 @@ body.dock-resizing{cursor:row-resize;user-select:none;}
   display:grid;grid-template-columns:var(--split) 7px 1fr;
   min-height:0;min-width:0;overflow:hidden;background:var(--border);
 }
-body.stacked .panes{grid-template-columns:1fr;grid-template-rows:1fr 7px 1fr;}
+/* Stacked mode must honour --split exactly as the side-by-side layout does.
+   It used to hard-code `1fr 7px 1fr`, so the divider — whose drag handler is
+   already axis-aware and was correctly writing a vertical percentage into
+   --split — moved nothing, and the source row kept half the workspace however
+   little code it held. That is what buried the visualization under an empty
+   editor. One variable, both orientations. */
+body.stacked .panes{grid-template-columns:1fr;grid-template-rows:var(--split) 7px 1fr;}
 
 /* ---- resizable divider ---- */
 .divider{
@@ -339,7 +345,7 @@ body.stacked .pane > .panel{overflow:visible;}
 textarea#sourceEdit{
   width:100%;height:100%;min-height:220px;resize:none;border:none;outline:none;display:block;
   background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12.5px;
-  padding:10px 14px;line-height:1.65;tab-size:4;
+  padding:10px 14px;line-height:1.65;   /* tab-size: see --tab-size in p11_css */
 }
 .codeline{display:flex;white-space:pre;position:relative;border-left:3px solid transparent;line-height:1.65;}
 .codeline .ln{
@@ -1836,8 +1842,21 @@ textarea#sourceEdit{
   position:absolute;top:0;z-index:2;
   margin:0;padding:0 12px 0 0;border:none;outline:none;resize:none;overflow:hidden;
   background:transparent;color:transparent;caret-color:var(--text);
-  font-family:var(--mono);font-size:12.5px;line-height:1.65;tab-size:4;
+  font-family:var(--mono);font-size:12.5px;line-height:1.65;
   white-space:pre;word-wrap:normal;
+}
+/* ONE tab stop for BOTH layers, from a single declaration.
+   The caret bug: the textarea declared tab-size:4 while the rendered view
+   inherited the CSS initial value of 8, so every leading tab put the caret four
+   columns to the left of the glyph the learner had clicked — and Piscine code is
+   tab-indented, so it hit essentially every line inside a function. Two leading
+   tabs measured a ten-character error. Neither layer may declare a tab size of
+   its own again: they both read this property. */
+:root{--tab-size:4;}
+textarea#sourceEdit,
+#sourceView .codeline,
+#sourceView .codeline .code{
+  -moz-tab-size:var(--tab-size);tab-size:var(--tab-size);
 }
 textarea#sourceEdit::selection{background:var(--execution-dim);color:transparent;}
 textarea#sourceEdit::-moz-selection{background:var(--execution-dim);color:transparent;}
@@ -10425,9 +10444,16 @@ function syncEditorMetrics() {
   const code = view.querySelector('.codeline .code');
   if (!code) return;
   const vr = view.getBoundingClientRect(), cr = code.getBoundingClientRect();
-  const gutter = Math.round(cr.left - vr.left);
+  // getBoundingClientRect returns the BORDER box, but glyphs start after the
+  // element's padding. Aligning the textarea to cr.left put its text one
+  // character left of the rendered text (.code carries padding-left). Measure
+  // the CONTENT box on both axes so the two layers share a text origin.
+  const cs = getComputedStyle(code);
+  const codeTextLeft = cr.left + parseFloat(cs.paddingLeft || 0);
+  const codeTextTop  = cr.top  + parseFloat(cs.paddingTop  || 0);
+  const gutter = Math.round(codeTextLeft - vr.left);
   ta.style.left = gutter + 'px';
-  ta.style.paddingTop = Math.round(cr.top - vr.top) + 'px';
+  ta.style.paddingTop = Math.round(codeTextTop - vr.top) + 'px';
   // Sized to the content, never to the viewport: the ONE scroll container is
   // .src-scroll, so the textarea must not grow a second scrollbar of its own.
   ta.style.width = Math.max(0, view.scrollWidth - gutter) + 'px';
