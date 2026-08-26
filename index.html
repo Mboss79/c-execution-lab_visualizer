@@ -666,8 +666,24 @@ textarea#sourceEdit{
 .ram-seg-fill{height:4px;margin-top:6px;border-radius:2px;background:var(--border);width:0%;transition:width .3s ease;}
 .ram-seg[data-seg=stack]{border-left-color:var(--stack);} .ram-seg[data-seg=stack] .ram-seg-fill{background:var(--stack);}
 .ram-seg[data-seg=heap]{border-left-color:var(--heap);} .ram-seg[data-seg=heap] .ram-seg-fill{background:var(--heap);}
-.ram-seg[data-seg=globals]{border-left-color:var(--globals);} .ram-seg[data-seg=globals] .ram-seg-fill{background:var(--globals);}
-.ram-seg[data-seg=code]{border-left-color:var(--code-region);} .ram-seg[data-seg=code] .ram-seg-fill{background:var(--code-region);width:100%;}
+/* One colour per SECTION. .data and .bss are deliberately close but not equal:
+   they are both static storage, and the difference between them is the lesson. */
+.ram-seg[data-seg=bss]{border-left-color:var(--globals);} .ram-seg[data-seg=bss] .ram-seg-fill{background:var(--globals);opacity:.55;}
+.ram-seg[data-seg=data]{border-left-color:var(--globals);} .ram-seg[data-seg=data] .ram-seg-fill{background:var(--globals);}
+.ram-seg[data-seg=rodata]{border-left-color:var(--code-region);} .ram-seg[data-seg=rodata] .ram-seg-fill{background:var(--code-region);opacity:.6;}
+.ram-seg[data-seg=text]{border-left-color:var(--code-region);} .ram-seg[data-seg=text] .ram-seg-fill{background:var(--code-region);}
+/* Address range under each section, and the high/low captions that make the map
+   read as ONE address space rather than four unrelated boxes. */
+.ram-seg-addr{font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:3px;letter-spacing:.02em;}
+.ram-addr-cap{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--text-faint);
+  text-align:center;padding:3px 0;opacity:.75;
+}
+.ram-note{
+  font-size:10.5px;line-height:1.65;color:var(--text-faint);margin-top:10px;
+  padding:8px 10px;border:1px dashed var(--border);border-radius:6px;
+}
+.ram-note b{color:var(--text);font-weight:600;}
 .ram-objs{margin-top:6px;display:flex;flex-direction:column;gap:2px;}
 .ram-o{
   display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:4px;background:var(--surface);
@@ -2394,8 +2410,10 @@ html[data-theme=light] .viz-node.vz-frame::after{
                 <div class="ram-nav" id="ramNav" role="group" aria-label="Focus a memory region">
                   <button data-seg="stack">▤ Stack</button>
                   <button data-seg="heap">◈ Heap</button>
-                  <button data-seg="globals">◉ Globals</button>
-                  <button data-seg="code">▣ Code</button>
+                  <button data-seg="bss">◌ .bss</button>
+                  <button data-seg="data">◉ .data</button>
+                  <button data-seg="rodata">◍ .rodata</button>
+                  <button data-seg="text">▣ .text</button>
                 </div>
                 <div id="ramPanel"></div>
               </div>
@@ -2708,11 +2726,50 @@ const ARCH = {
   aligns: { char:1, short:2, int:4, long:8, pointer:8, void:1 },
   endian: 'little',
   regions: {
-    staticBase: 0x00601000,   // globals + string literals, grows up
+    staticBase: 0x00601000,   // kept: .data starts here, so familiar addresses do not move
     heapBase:   0x00A01000,   // malloc, grows up
     stackTop:   0x7FFEE000,   // stack, grows DOWN
   },
+  /* The linker sections a real C program is laid out in, low address to high.
+     A linker groups objects BY SECTION rather than by declaration order, which
+     is exactly why .data and .bss get their own address ranges here instead of
+     sharing one "static" area: a learner who sees an uninitialized global sat
+     next to an initialized one has been taught the wrong picture. Which section
+     an object lands in is decided by the same rule a real toolchain uses — see
+     staticInitIsAllZero. The numbers themselves are illustrative; a real
+     program's addresses depend on the toolchain, the ABI and whether the binary
+     is position-independent. */
+  sections: {
+    textBase:   0x00401000,   // compiled instructions, read + execute
+    rodataBase: 0x00500000,   // string literals and other read-only constants
+    dataBase:   0x00601000,   // statics WITH a non-zero initializer
+    bssBase:    0x00602000,   // statics with no initializer, or an all-zero one
+  },
 };
+
+/* Section -> the coarse storage class the rest of the app already speaks.
+   `section` is the fact the engine decides; `region` is derived from it and
+   never assigned independently, so the two can never disagree. */
+const SECTION_REGION = {
+  text:'text', rodata:'static', data:'global', bss:'global', heap:'heap', stack:'stack',
+};
+const SECTION_LABEL = {
+  text:'.text', rodata:'.rodata', data:'.data', bss:'.bss', heap:'heap', stack:'stack',
+};
+
+/* A real linker puts a static-storage object in .bss when its initializer is
+   absent or entirely zero, and in .data otherwise — .bss costs no bytes in the
+   executable file because the loader zeroes it. C requires these initializers to
+   be constant expressions, which is what makes the question decidable here. */
+function staticInitIsAllZero(init) {
+  if (!init) return true;
+  if (init.kind === 'Num')      return init.value === 0n;
+  if (init.kind === 'CharLit')  return init.value.charCodeAt(0) === 0;
+  if (init.kind === 'NullLit')  return true;
+  if (init.kind === 'StringLit') return false;
+  if (init.kind === 'InitList') return init.items.every(staticInitIsAllZero);
+  return false;
+}
 
 const SIMPLIFICATIONS = [
   'Stack addresses are never recycled during a run. Real C reuses stack memory; this simulator does not, so a pointer into a destroyed frame is always reported as use-after-return instead of silently returning stale data.',
@@ -2721,6 +2778,9 @@ const SIMPLIFICATIONS = [
   'The assembly / CPU view is conceptual illustration, not real compiler output.',
   'Reading an uninitialized object is undefined behaviour in real C; here it is deterministically trapped and reported.',
   'Addresses are simulated. Region bases are fixed so runs are reproducible.',
+  'Functions are given an entry-point address in .text, but the simulator does not compile to machine instructions, so the SIZE of a function\'s code is not modelled and .text is not drawn to scale.',
+  'Section bases (.text/.rodata/.data/.bss) are illustrative. A real program\'s layout depends on the toolchain, the ABI, and whether the binary is position-independent — with ASLR the addresses differ on every run.',
+  '.rodata is not physical ROM. It is ordinary RAM the loader maps without write permission, which is why writing through a pointer to a string literal faults at run time rather than being rejected at compile time.',
 ];
 
 /* ============================ TYPE SYSTEM ================================= */
@@ -2898,9 +2958,12 @@ class Memory {
 let BLOCK_SEQ = 0, SCOPE_SEQ = 0, FRAME_SEQ = 0;
 function resetSeqs() { BLOCK_SEQ = 0; SCOPE_SEQ = 0; FRAME_SEQ = 0; }
 
-function makeBlock(base, size, label, region, type, frameId, frameName) {
+function makeBlock(base, size, label, section, type, frameId, frameName) {
   return {
-    id: ++BLOCK_SEQ, base, size, label, region,   // 'global'|'static'|'stack'|'heap'
+    id: ++BLOCK_SEQ, base, size, label,
+    section,                                     // 'text'|'rodata'|'data'|'bss'|'stack'|'heap'
+    region: SECTION_REGION[section] || section,  // derived — never assigned on its own
+    sectionLabel: SECTION_LABEL[section] || section,
     type: type || null, frameId: frameId ?? null, frameName: frameName || null,
     state: 'live',                                 // 'live'|'freed'|'destroyed'
     freedAtStep: null, destroyedAtStep: null,
@@ -2944,7 +3007,12 @@ class Interp {
     this.globalScope = new Scope(null, 'global', null);
     this.frames = [];
     this.output = '';
-    this.staticPtr = ARCH.regions.staticBase;
+    // One bump pointer per section: a linker groups by section, not by the
+    // order the declarations happen to appear in.
+    this.textPtr   = ARCH.sections.textBase;
+    this.rodataPtr = ARCH.sections.rodataBase;
+    this.dataPtr   = ARCH.sections.dataBase;
+    this.bssPtr    = ARCH.sections.bssBase;
     this.heapPtr   = ARCH.regions.heapBase;
     this.stackPtr  = ARCH.regions.stackTop;
     this.stepIndex = -1;
@@ -2965,15 +3033,36 @@ class Interp {
     return block;
   }
 
-  allocStatic(size, align, label, type) {
-    const base = alignUp(this.staticPtr, align);
-    this.staticPtr = base + size;
-    return this._register(makeBlock(base, size, label, 'static', type, null, null));
+  /* A function's entry point in .text. The block is one byte wide because that
+     is the honest answer: the entry ADDRESS is modelled, the instruction stream
+     is not, so no byte count is invented for it. .text is mapped read+execute,
+     which is why it is marked read-only here. */
+  allocText(name) {
+    const base = alignUp(this.textPtr, 16);
+    this.textPtr = base + 16;
+    const b = this._register(makeBlock(base, 1, name + '()', 'text', null, null, null));
+    b.readonly = true;
+    b.entryPoint = true;
+    return b;
   }
-  allocGlobal(size, align, label, type) {
-    const base = alignUp(this.staticPtr, align);
-    this.staticPtr = base + size;
-    return this._register(makeBlock(base, size, label, 'global', type, null, null));
+  /* String literals and other read-only constants: .rodata.
+     .rodata is NOT physical ROM — it is ordinary writable RAM that the loader
+     maps without write permission, which is why writing through a pointer to a
+     literal faults at run time rather than being rejected by the compiler. */
+  allocStatic(size, align, label, type) {
+    const base = alignUp(this.rodataPtr, align);
+    this.rodataPtr = base + size;
+    return this._register(makeBlock(base, size, label, 'rodata', type, null, null));
+  }
+  /* Static storage duration. The caller passes the initializer so the object
+     lands in the section a real linker would choose for it. */
+  allocGlobal(size, align, label, type, initNode) {
+    const zero = staticInitIsAllZero(initNode);
+    const section = zero ? 'bss' : 'data';
+    const key = zero ? 'bssPtr' : 'dataPtr';
+    const base = alignUp(this[key], align);
+    this[key] = base + size;
+    return this._register(makeBlock(base, size, label, section, type, null, null));
   }
   allocHeap(size, label) {
     const base = alignUp(this.heapPtr, 16);
@@ -3140,7 +3229,7 @@ class Interp {
     return dead;
   }
 
-  declare(name, type, line) {
+  declare(name, type, line, staticInit) {
     const scope = this.currentScope;
     if (scope.lookupLocal(name)) {
       throw new RuntimeCError("Redeclaration of '" + name + "' in the same scope.", line);
@@ -3148,7 +3237,7 @@ class Interp {
     const size = sizeof(type), align = alignof(type);
     const isGlobal = this.frames.length === 0;
     const block = isGlobal
-      ? this.allocGlobal(size, align, name, type)
+      ? this.allocGlobal(size, align, name, type, staticInit)
       : this.allocStack(size, align, name, type);
     const info = {
       name, type, address: block.base, size, blockId: block.id,
@@ -3729,16 +3818,29 @@ class Stepper {
   *_run() {
     const I = this.I;
 
+    // 0. Every function gets an entry-point address in .text, so "where does a
+    //    function live?" has an answer and code can be seen occupying the
+    //    lowest addresses. This simulator does not compile to machine
+    //    instructions, so it does NOT claim how many bytes a function's code
+    //    occupies — each block marks the entry point only. See SIMPLIFICATIONS.
+    for (const f of this.funcs) I.allocText(f.name);
+
     // 1. globals first - they exist before main() runs.
     for (const g of this.globals) {
       for (const d of g.decls) {
-        const info = I.declare(d.name, this._resolveDeclType(d, g.line), g.line);
+        const info = I.declare(d.name, this._resolveDeclType(d, g.line), g.line, d.init);
         const gInitDesc = yield* this.initializeObject(info, d.init, g.line);
+        const gBlk = I.blocks.find(b => b.id === info.blockId);
+        const gSect = gBlk ? gBlk.sectionLabel : '.bss';
         yield* this.step({
           phase: 'global-decl', line: g.line,
           description: 'Global ' + typeName(info.type) + " '" + d.name + "' created at " + hexAddr(info.address) +
+                       ' in ' + gSect +
                        ' (' + sizeof(info.type) + ' byte' + (sizeof(info.type)===1?'':'s') + ')' + gInitDesc + '.',
-          why: 'Globals have static storage duration: they are created before main() starts, live for the whole program, and are zero-initialized unless you give them a value.',
+          why: 'Globals have static storage duration: they are created before main() starts, live for the whole program, and are zero-initialized unless you give them a value. ' +
+               (gSect === '.bss'
+                 ? 'With no initializer — or an all-zero one — it goes in .bss, which occupies no space in the executable file: the loader simply zeroes that range at start-up.'
+                 : 'Because it has a non-zero initializer it goes in .data, and those exact bytes are stored inside the executable file.'),
           changed: [info.address],
         });
       }
@@ -4664,7 +4766,20 @@ class History {
       outLen: I.output.length,
       frameView: this._captureFrameView(I),
       globalView: this._captureScopeVars(I.globalScope, 0),
-      regions: { staticPtr: I.staticPtr, heapPtr: I.heapPtr, stackPtr: I.stackPtr },
+      regions: {
+        // staticPtr is kept for callers that predate the section split; it is the
+        // high-water mark of static storage as a whole, derived, never assigned.
+        staticPtr: Math.max(I.dataPtr, I.bssPtr, I.rodataPtr),
+        heapPtr: I.heapPtr, stackPtr: I.stackPtr,
+      },
+      sections: {
+        text:   { base: ARCH.sections.textBase,   ptr: I.textPtr },
+        rodata: { base: ARCH.sections.rodataBase, ptr: I.rodataPtr },
+        data:   { base: ARCH.sections.dataBase,   ptr: I.dataPtr },
+        bss:    { base: ARCH.sections.bssBase,    ptr: I.bssPtr },
+        heap:   { base: ARCH.regions.heapBase,    ptr: I.heapPtr },
+        stack:  { base: ARCH.regions.stackTop,    ptr: I.stackPtr },
+      },
     };
   }
 
@@ -4755,6 +4870,7 @@ class History {
     const stateMap = new Map(d.nonLive);
     const blocks = this.I.blocks.slice(0, d.blockCount).map(b => ({
       id: b.id, base: b.base, size: b.size, label: b.label, region: b.region,
+      section: b.section, sectionLabel: b.sectionLabel,
       frameName: b.frameName, typeName: b.type ? typeName(b.type) : null,
       state: stateMap.get(b.id) || 'live',
       readonly: !!b.readonly,
@@ -4795,6 +4911,7 @@ class History {
       const ok = offset + esz <= blk.size;
       return {
         kind:'live', address:a, blockId:blk.id, label:blk.label, region:blk.region,
+        section:blk.section, sectionLabel:blk.sectionLabel,
         offset, elementIndex: esz > 0 ? Math.floor(offset / esz) : 0,
         readable: ok, initialized: ok ? allInit(a, esz) : false,
         value: ok && allInit(a, esz) ? decode(a, pointeeType).toString() : null,
@@ -4854,7 +4971,8 @@ class History {
 
     // Memory objects: every live allocation, byte-accurate, decoded by the engine.
     const objects = blocks.filter(b => b.state === 'live').map(b => {
-      const o = { blockId:b.id, label:b.label, region:b.region, address:b.base, size:b.size,
+      const o = { blockId:b.id, label:b.label, region:b.region, section:b.section,
+                  sectionLabel:b.sectionLabel, address:b.base, size:b.size,
                   typeName:b.typeName, readonly:b.readonly, state:b.state, bytes: readBytes(b.base, b.size) };
       const owner = [...frames.flatMap(f=>f.vars), ...globals].find(v => v.blockId === b.id);
       if (owner) {
@@ -11334,15 +11452,17 @@ function renderMemory(s, state) {
   const focus = typeof execFocus === 'function' ? execFocus(s) : null;
   const changed = new Set();
   if (s.memDiff) for (let k = 0; k < s.memDiff.size; k++) changed.add(s.memDiff.address + k);
-  const order = { stack: 0, heap: 1, global: 2, static: 3 };
-  const filtered = ui.focusRegion
-    ? objs.filter(o => ui.focusRegion === 'globals' ? (o.region === 'global' || o.region === 'static') : o.region === ui.focusRegion)
-    : objs;
-  const list = (filtered.length ? filtered : objs).sort((a, b) => (order[a.region] - order[b.region]) || (b.address - a.address));
+  // Sorted and filtered by SECTION, so this panel and the RAM map can never
+  // disagree about where an object lives — they read the same engine field.
+  const order = { stack: 0, heap: 1, bss: 2, data: 3, rodata: 4, text: 5 };
+  const secOf = (o) => o.section || o.region;
+  const filtered = ui.focusRegion ? objs.filter(o => secOf(o) === ui.focusRegion) : objs;
+  const list = (filtered.length ? filtered : objs)
+    .sort((a, b) => ((order[secOf(a)] ?? 9) - (order[secOf(b)] ?? 9)) || (b.address - a.address));
 
   let h = '', multiByte = false;
   if (ui.focusRegion && filtered.length) {
-    h += '<div class="inspect-note"><span>▥</span><span>Showing the ' + esc(ui.focusRegion) + ' region only.</span>' +
+    h += '<div class="inspect-note"><span>▥</span><span>Showing ' + esc(RAM_SECTIONS.find(x=>x.id===ui.focusRegion) ? RAM_SECTIONS.find(x=>x.id===ui.focusRegion).name : ui.focusRegion) + ' only.</span>' +
          '<button class="p-btn" id="clearRegion" style="margin-left:auto;" aria-label="Show all regions">✕</button></div>';
   }
   for (const o of list) {
@@ -11559,24 +11679,52 @@ function renderPointers(state) {
 }
 
 /* ================================ RAM MAP ================================ */
+/* The process address space, HIGH address at the top — the order a C program is
+   actually laid out in, and the order every textbook diagram uses.
+
+   These are the linker SECTIONS the engine assigns, not four coarse buckets:
+   which section an object lands in is decided in the engine by the rule a real
+   toolchain uses, and this view only reads that decision back. The old map
+   lumped globals, statics and string literals together and drew a "Code"
+   segment that was hard-coded to one block at 100% — a picture of nothing. */
+const RAM_SECTIONS = [
+  { id:'stack',  name:'STACK ↓',   what:'Locals, parameters, one frame per call — grows DOWN' },
+  { id:'heap',   name:'HEAP ↑',    what:'malloc / calloc / realloc — you must free it — grows UP' },
+  { id:'bss',    name:'.bss',      what:'Statics with no initializer, or an all-zero one — costs no bytes in the file; the loader zeroes it' },
+  { id:'data',   name:'.data',     what:'Statics with a non-zero initializer — those bytes are stored in the executable' },
+  { id:'rodata', name:'.rodata',   what:'String literals and read-only constants — writable RAM mapped without write permission, NOT physical ROM' },
+  { id:'text',   name:'.text',     what:'Compiled instructions — mapped read + execute. Entry points only: this simulator does not model code size' },
+];
+function ramSectionOf(b) { return b.section || b.region; }
 function renderRam(state) {
   const c = state.counts, blocks = state.blocks;
   const live = blocks.filter(b => b.state === 'live');
-  const byRegion = (r) => live.filter(b => r === 'globals' ? (b.region === 'global' || b.region === 'static') : b.region === r);
-  const segs = [
-    { id:'stack',   name:'Stack ↓',  desc:'Function-local storage — grows down with each call', n: byRegion('stack').length,  fill: Math.min(100, c.frames * 14) },
-    { id:'heap',    name:'Heap ↑',   desc:'malloc blocks — you must free them',                 n: byRegion('heap').length,   fill: Math.min(100, c.heapLive * 18) },
-    { id:'globals', name:'Globals / static / RO-data', desc:'Globals and string literals',       n: byRegion('globals').length,fill: Math.min(100, c.staticBlocks * 10) },
-    { id:'code',    name:'Code / text', desc:'Executable instructions (not modelled byte-wise)', n: 1, fill: 100 },
-  ];
-  let h = '<div class="ram-map">';
+  const byRegion = (r) => live.filter(b => ramSectionOf(b) === r);
+  // Fill is proportional to the bytes REALLY allocated in each section, scaled
+  // against the biggest one, so the bars compare something true. .text has no
+  // modelled size, so it gets no bar rather than an invented one.
+  const bytesIn = (r) => byRegion(r).reduce((s, b) => s + (r === 'text' ? 0 : b.size), 0);
+  const maxBytes = Math.max(1, ...RAM_SECTIONS.map(s => bytesIn(s.id)));
+  const segs = RAM_SECTIONS.map(s => {
+    const bs = byRegion(s.id);
+    const lo = bs.length ? Math.min(...bs.map(b => b.base)) : null;
+    const hi = bs.length ? Math.max(...bs.map(b => b.base + b.size)) : null;
+    return { id:s.id, name:s.name, desc:s.what, n:bs.length, bytes:bytesIn(s.id), lo, hi,
+             fill: s.id === 'text' ? 0 : Math.round((bytesIn(s.id) / maxBytes) * 100) };
+  });
+  let h = '<div class="ram-addr-cap">HIGH ADDRESS</div><div class="ram-map">';
   for (const sg of segs) {
     const focused = ui.focusRegion === sg.id;
+    const range = sg.lo !== null
+      ? hexA(sg.lo) + ' – ' + hexA(sg.hi)
+      : 'nothing allocated';
     h += '<div class="ram-seg' + (focused ? ' focused' : '') + '" data-seg="' + sg.id + '" role="button" tabindex="0">' +
       '<div class="ram-seg-label"><span>' + esc(sg.name) + '</span><span class="rs-n">' + sg.n + '</span></div>' +
       '<div class="ram-seg-desc">' + esc(sg.desc) + '</div>' +
+      '<div class="ram-seg-addr">' + esc(range) +
+        (sg.id !== 'text' && sg.bytes ? ' · ' + sg.bytes + ' B' : '') + '</div>' +
       '<div class="ram-seg-fill" style="width:' + sg.fill + '%"></div>';
-    if (focused && sg.id !== 'code') {
+    if (focused) {
       h += '<div class="ram-objs">';
       const objs = byRegion(sg.id);
       if (!objs.length) h += '<div class="frame-empty">nothing allocated here yet</div>';
@@ -11591,7 +11739,12 @@ function renderRam(state) {
     }
     h += '</div>';
   }
-  h += '</div>';
+  h += '</div><div class="ram-addr-cap">LOW ADDRESS</div>';
+  h += '<div class="ram-note">This is the <b>virtual address space of one process</b>, not physical RAM. ' +
+       'The operating system maps these addresses onto whatever physical pages it likes, and two running ' +
+       'programs can both hold address ' + hexA(ARCH.sections.dataBase) + ' meaning different memory. ' +
+       'Section bases here are fixed so runs are reproducible; a real program is laid out by its toolchain ' +
+       'and ABI, and with ASLR the addresses change on every run.</div>';
 
   // pointer chain: p -> address -> object
   const ptr = state.vars.find(v => v.isPointer && !v.uninitialized && v.pointerTarget && v.pointerTarget.kind === 'live');
