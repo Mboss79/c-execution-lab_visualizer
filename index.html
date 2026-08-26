@@ -2932,6 +2932,66 @@ html[data-theme=light] .viz-node.vz-frame::after{
   .c3-cmp-head,.c3-cmp-row{grid-template-columns:1fr;}
   .c3-cmp-t,.c3-cmp-v{border-left:none;border-top:1px solid var(--border);}
 }
+
+/* ==================================================================
+   PHASE 8 — the simulated terminal.
+   It has to read as a terminal without becoming a foreign object in
+   the application: the panel chrome, spacing, borders and theme
+   tokens are the ones every other dock panel uses. The SIMULATION
+   badge is the one deliberately loud element, because that claim has
+   to survive skim-reading.
+   ================================================================== */
+
+.tm{display:flex;flex-direction:column;height:100%;min-height:0;background:var(--bg);}
+.tm-bar{
+  display:flex;align-items:center;gap:9px;padding:5px 10px;flex-shrink:0;
+  background:var(--surface);border-bottom:1px solid var(--border);
+}
+.tm-title{font-size:9.5px;letter-spacing:.14em;color:var(--text-faint);}
+.tm-sim{
+  font-size:8.5px;letter-spacing:.13em;color:var(--execution);
+  border:1px solid var(--execution);border-radius:999px;padding:1px 8px;cursor:help;
+}
+.tm-spring{flex:1;}
+.tm-btn{
+  background:var(--surface-2);border:1px solid var(--border);border-radius:5px;
+  color:var(--text-faint);font-size:10px;padding:2px 9px;cursor:pointer;
+}
+.tm-btn:hover{color:var(--text);border-color:var(--border-strong);}
+
+.tm-out{
+  flex:1;min-height:0;overflow:auto;padding:9px 11px;
+  font-family:var(--mono);font-size:11.5px;line-height:1.55;
+}
+.tm-out:focus-visible{outline:2px solid var(--border-focus);outline-offset:-2px;}
+.tm-line{white-space:pre-wrap;word-break:break-word;color:var(--text-muted);}
+.tm-cmd{color:var(--text);}
+.tm-err{color:var(--error);}
+.tm-ok{color:var(--heap);}
+.tm-note{color:var(--text-faint);font-style:italic;}
+.tm-src{color:var(--text-muted);}
+.tm-stdout{color:var(--text);}
+.tm-exe{color:var(--heap);}
+
+.tm-in{
+  display:flex;align-items:center;gap:8px;padding:7px 11px;flex-shrink:0;
+  border-top:1px solid var(--border);background:var(--surface);
+}
+.tm-prompt{
+  font-family:var(--mono);font-size:11.5px;color:var(--memory);white-space:nowrap;
+  flex-shrink:0;max-width:52%;overflow:hidden;text-overflow:ellipsis;
+}
+.tm-input{
+  flex:1;min-width:0;background:none;border:none;outline:none;
+  color:var(--text);font-family:var(--mono);font-size:11.5px;padding:2px 0;
+}
+.tm-input::placeholder{color:var(--text-faint);}
+.tm-in:focus-within{box-shadow:inset 0 1px 0 var(--border-focus);}
+
+@media (max-width:760px){
+  .tm-prompt{max-width:38%;font-size:10.5px;}
+  .tm-out{font-size:10.5px;padding:7px 8px;}
+}
 </style>
 </head>
 <body>
@@ -12126,6 +12186,7 @@ function loadExample(key) {
   // panel must never describe a program that is no longer in the editor.
   ui.lesson = null;
   ui.exampleKey = key;
+  if (typeof termSyncToProject === 'function') termSyncToProject(key);
   $('#sourceEdit').value = ex.src;
   $('#sourceDesc').textContent = fileNameFor(key) + '  ·  ' + ex.label;
   resetAll();
@@ -13593,9 +13654,9 @@ function renderDock() {
     renderTraceDock();
     return;
   } else if (ui.dockTab === 'terminal') {
-    host.innerHTML = '<div class="term"><span class="term-prompt">c-execution-lab $</span> <span class="term-dim">' +
-      'This is a simulated shell surface. Build, test and norm commands land here in a later phase.</span>\n' +
-      '<span class="term-prompt">c-execution-lab $</span> <span class="term-dim">▌</span></div>';
+    // Phase 8: a real (simulated) terminal over the existing engine. It keeps
+    // its own DOM across re-renders so typing survives an execution step.
+    renderTerminal(host);
   } else {
     host.innerHTML = '<div class="empty"><span class="coming">coming next</span><div style="margin-top:10px;">' +
       'Moulinette-style tests arrive in a later phase.</div></div>';
@@ -18348,6 +18409,608 @@ function wireLabC03() {
   }));
 }
 /* ==== C03LAB END ==== */
+
+/* ==== TERM START ====
+   PHASE 8 — the simulated C / 1337 terminal.
+
+   This is an INTERFACE, not an engine. Every command delegates:
+     cc          -> CEngine.createRun (the real parser/compiler)
+     ./a.out     -> launch() (the real execution the visualiser already drives)
+     cat         -> $('#sourceEdit').value (the ONE source of truth)
+     ls / cd     -> GROUPS + EXAMPLES + FILES (the existing project model)
+     memory/…    -> openPanel() on the existing views
+   There is no second parser, no second memory model and no second copy of any
+   source anywhere in this file.
+
+   It is a SIMULATION and says so. It never touches the host filesystem, never
+   spawns a process, and never evaluates its input as code — commands are looked
+   up in a registry by name, and every byte of output is escaped before it
+   reaches the DOM. */
+
+const TERM_MAX_LINES = 400;
+
+const term = {
+  lines: [],          // { kind, text } — terminal-owned output only
+  history: [],        // commands typed this session
+  histAt: -1,         // where Arrow-Up/Down is sitting
+  cwd: [],            // simulated path segments below ~
+  aout: null,         // { key, src, file } captured at `cc` time
+  greeted: false,
+  draft: '',
+};
+
+/* ---------------------- the simulated filesystem ----------------------
+   Derived from the EXISTING project model. Nothing is hard-coded: a new
+   GROUPS entry or a new example appears here automatically. */
+function termFs() {
+  const root = {};
+  for (const g of GROUPS) {
+    const dir = {};
+    for (const k of g.keys) {
+      if (!EXAMPLES[k]) continue;
+      const file = fileNameFor(k);
+      const stem = file.replace(/\.c$/, '').replace(/^ft_/, '');
+      dir[stem] = { kind: 'dir', key: k, files: [file] };
+    }
+    if (Object.keys(dir).length) root[g.id] = { kind: 'dir', label: g.name, children: dir };
+  }
+  return root;
+}
+function termResolve(segs) {
+  const fs = termFs();
+  if (!segs.length) return { kind: 'root', children: fs };
+  const g = fs[segs[0]];
+  if (!g) return null;
+  if (segs.length === 1) return { kind: 'group', id: segs[0], children: g.children };
+  const e = g.children[segs[1]];
+  if (!e) return null;
+  if (segs.length === 2) return { kind: 'exercise', id: segs[1], key: e.key, files: e.files };
+  return null;
+}
+function termPath() { return '~' + (term.cwd.length ? '/' + term.cwd.join('/') : ''); }
+function termPrompt() { return 'mbousebe@c-lab:' + termPath() + '$'; }
+
+/* The exercise the terminal is "in" — or, at the root, whatever the editor has
+   open, so `cat` and `cc` always mean something. */
+function termCurrentKey() {
+  const node = termResolve(term.cwd);
+  if (node && node.kind === 'exercise') return node.key;
+  return ui.exampleKey || null;
+}
+function termCurrentFile() {
+  const k = termCurrentKey();
+  return k ? fileNameFor(k) : null;
+}
+/* THE source of truth. The editor buffer, never a terminal copy. */
+function termSourceOf(key) {
+  if (key && ui.exampleKey === key) return $('#sourceEdit').value;
+  if (key && EXAMPLES[key]) return EXAMPLES[key].src;
+  return $('#sourceEdit').value;
+}
+
+/* ---------------------- output ---------------------- */
+function termEcho(text, kind) {
+  for (const line of String(text).split('\n')) term.lines.push({ kind: kind || 'out', text: line });
+  if (term.lines.length > TERM_MAX_LINES) term.lines.splice(0, term.lines.length - TERM_MAX_LINES);
+}
+function termErr(text) { termEcho(text, 'err'); }
+function termNote(text) { termEcho(text, 'note'); }
+
+/* ---------------------- parsing ----------------------
+   Split on whitespace, honouring quotes. The result is data: a command NAME
+   looked up in a registry and a list of string arguments. Input is never
+   evaluated, interpolated or turned into markup. */
+function termParse(input) {
+  const argv = [];
+  let cur = '', q = null;
+  for (let i = 0; i < input.length; i++) {
+    const c = input[i];
+    if (q) { if (c === q) q = null; else cur += c; continue; }
+    if (c === '"' || c === "'") { q = c; continue; }
+    if (/\s/.test(c)) { if (cur) { argv.push(cur); cur = ''; } continue; }
+    cur += c;
+  }
+  if (cur) argv.push(cur);
+  return argv;
+}
+
+/* ---------------------- the command registry ---------------------- */
+const TERM_COMMANDS = {
+  help: {
+    usage: 'help [command]', blurb: 'list the simulated commands',
+    run(argv) {
+      if (argv[0]) {
+        const c = TERM_COMMANDS[argv[0]];
+        if (!c) { termErr("No help for '" + argv[0] + "' — it is not a command here."); return; }
+        termEcho(argv[0] + ' — ' + c.blurb + '\n  usage: ' + c.usage);
+        if (c.detail) termNote(c.detail);
+        return;
+      }
+      termEcho('C LAB TERMINAL — SIMULATED COMMANDS\n');
+      const groups = [
+        ['Navigation', ['pwd', 'ls', 'cd']],
+        ['Files', ['cat']],
+        ['C execution', ['cc', './a.out']],
+        ['Piscine', ['norminette']],
+        ['Terminal', ['clear', 'history', 'echo']],
+        ['Visualization', ['inspect', 'memory', 'pointers', 'stack', 'timeline']],
+      ];
+      for (const [g, names] of groups) {
+        termEcho(g + ':');
+        for (const n of names) {
+          const c = TERM_COMMANDS[n];
+          termEcho('  ' + n.padEnd(12) + (c ? c.blurb : ''));
+        }
+        termEcho('');
+      }
+      termNote('Use: help <command>. This terminal simulates common C/Piscine commands using the ' +
+               'lab’s educational execution engine. It is not a real operating-system shell.');
+    },
+  },
+  clear: {
+    usage: 'clear', blurb: 'clear the terminal output only',
+    detail: 'Clears what is printed here. It does not reset the project, the editor, the execution or the history.',
+    run() { term.lines = []; },
+  },
+  pwd: {
+    usage: 'pwd', blurb: 'print the simulated working directory',
+    run() { termEcho(termPath()); },
+  },
+  ls: {
+    usage: 'ls', blurb: 'list what is in this simulated directory',
+    run() {
+      const node = termResolve(term.cwd);
+      if (!node) { termErr('ls: this directory no longer exists'); return; }
+      if (node.kind === 'root') {
+        for (const id of Object.keys(node.children)) termEcho(id + '/');
+        return;
+      }
+      if (node.kind === 'group') {
+        for (const id of Object.keys(node.children)) termEcho(id + '/');
+        return;
+      }
+      for (const f of node.files) termEcho(f);
+      if (term.aout && term.aout.key === node.key) termEcho('a.out*', 'exe');
+    },
+  },
+  cd: {
+    usage: 'cd <dir> | cd .. | cd ~', blurb: 'move around the simulated project tree',
+    run(argv) {
+      const t = argv[0];
+      if (!t || t === '~' || t === '/') { term.cwd = []; return; }
+      // A leading ~ or / means "from home"; otherwise the path is relative.
+      const absolute = /^[~/]/.test(t);
+      const parts = t.replace(/^~?\/?/, '').replace(/\/+$/, '').split('/').filter(Boolean);
+      let next = absolute ? [] : term.cwd.slice();
+      for (const seg of parts) {
+        if (seg === '.') continue;
+        if (seg === '..') { next = next.slice(0, -1); continue; }
+        next = next.concat([seg]);
+      }
+      const node = termResolve(next);
+      if (!node) { termErr('cd: no such directory: ' + t); return; }
+      term.cwd = next;
+      // Entering an exercise opens it, so the terminal and the editor agree.
+      if (node.kind === 'exercise' && node.key !== ui.exampleKey) {
+        loadExample(node.key);
+        termNote('opened ' + fileNameFor(node.key) + ' in the editor');
+      }
+    },
+  },
+  cat: {
+    usage: 'cat <file>', blurb: 'print a source file',
+    detail: 'Reads the editor buffer, so it always shows what you have actually typed.',
+    run(argv) {
+      const key = termCurrentKey();
+      if (!key) { termErr('cat: no project file is open'); return; }
+      const file = fileNameFor(key);
+      if (!argv[0]) { termErr('cat: missing file operand\n  usage: cat ' + file); return; }
+      if (argv[0] !== file) {
+        termErr('cat: ' + argv[0] + ': No such file');
+        termNote('this directory holds: ' + file);
+        return;
+      }
+      termEcho(termSourceOf(key), 'src');
+    },
+  },
+  echo: {
+    usage: 'echo <text>', blurb: 'print text back',
+    run(argv) { termEcho(argv.join(' ')); },
+  },
+  history: {
+    usage: 'history', blurb: 'the commands entered this session',
+    run() {
+      if (!term.history.length) { termNote('no commands yet'); return; }
+      term.history.forEach((h, i) => termEcho(String(i + 1).padStart(3) + '  ' + h));
+    },
+  },
+
+  /* ---------------- the C toolchain, delegated to the real engine ---------------- */
+  cc: {
+    usage: 'cc <file>', blurb: 'compile with the lab’s simulated compiler',
+    detail: 'Runs the lab’s real parser and compiler over the source. It is not your system’s cc, and it does not produce a native binary.',
+    run(argv) {
+      const key = termCurrentKey();
+      if (!key) { termErr('cc: no source file is open'); return; }
+      const file = fileNameFor(key);
+      if (!argv[0]) { termErr('cc: no input files\n  usage: cc ' + file); return; }
+      if (argv[0].indexOf('*') >= 0) {
+        termErr('cc: wildcards are not supported in this simulation');
+        termNote('[simulation limitation] each exercise here holds a single translation unit; ' +
+                 'name the file directly, e.g. cc ' + file);
+        return;
+      }
+      if (argv[0] !== file) { termErr('cc: ' + argv[0] + ': No such file or directory'); return; }
+      termNote('[simulated compiler — the lab’s own parser, not your system cc]');
+      const src = termSourceOf(key);
+      const r = CEngine.createRun(src, {});
+      if (!r.ok) {
+        const e = r.error || {};
+        const line = (typeof e.line === 'number') ? e.line : '?';
+        termErr(file + ':' + line + ': error: ' + (e.message || 'compilation failed'));
+        term.aout = null;
+        termNote('the failing line is highlighted in the editor; the Build panel has the full diagnostic');
+        // showCompileError ends with setDockTab('build'), which would rip the
+        // terminal out from under the user. Let it record the diagnostic, then
+        // put the dock back where it was.
+        if (typeof showCompileError === 'function') {
+          const back = ui.dockTab;
+          showCompileError(r.error);
+          if (ui.dockTab !== back && typeof setDockTab === 'function') setDockTab(back);
+        }
+        return;
+      }
+      term.aout = { key, src, file };
+      termEcho('Compilation successful.');
+      termEcho('Generated simulated executable: a.out');
+    },
+  },
+  './a.out': {
+    usage: './a.out', blurb: 'run the simulated executable',
+    detail: 'Executes the compiled source through the lab’s execution engine and shows what that run really produced.',
+    run(argv) {
+      if (!term.aout) {
+        termErr('./a.out: No such file or directory');
+        termNote('nothing has been compiled yet — run: cc ' + (termCurrentFile() || '<file>'));
+        return;
+      }
+      if (argv.length) {
+        termNote('[simulation limitation: argc/argv are not modelled, so arguments are ignored]');
+      }
+      const live = termSourceOf(term.aout.key);
+      if (live !== term.aout.src) {
+        termErr('a.out is out of date — ' + term.aout.file + ' has changed since it was compiled.');
+        termNote('run: cc ' + term.aout.file);
+        return;
+      }
+      // The REAL execution the visualiser drives. Not a re-implementation.
+      const before = ui.exampleKey;
+      if (term.aout.key !== before) loadExample(term.aout.key);
+      const ok = (typeof launch === 'function') ? launch(term.aout.src, {}) : false;
+      if (!ok) { termErr('./a.out: the program did not start'); return; }
+      // run it to completion so the terminal shows the whole output
+      let last = -2;
+      for (let i = 0; i < 20000 && !run.stopped; i++) {
+        if (run.index === last && run.history) break;
+        last = run.index;
+        doStep();
+      }
+      const out = (run.history && run.history.length)
+        ? (run.history.stateAt(run.history.length - 1).output || '') : '';
+      if (out) termEcho(out, 'stdout');
+      if (run.error) {
+        termErr(String(run.error.message || run.error));
+        termNote('[stderr — the run stopped here]');
+      }
+      const steps = run.history ? run.history.length : 0;
+      termNote('[' + steps + ' execution steps recorded — try: inspect, memory, pointers, stack, timeline]');
+    },
+  },
+
+  norminette: {
+    usage: 'norminette <file>', blurb: 'check a subset of the norm, in the browser',
+    detail: 'A SIMULATED checker. It runs only the rules listed in its output — it is not the real norminette binary, and passing here does not mean passing the real one.',
+    run(argv) {
+      const key = termCurrentKey();
+      if (!key) { termErr('norminette: no source file is open'); return; }
+      const file = fileNameFor(key);
+      if (argv[0] && argv[0] !== file) { termErr('norminette: ' + argv[0] + ': No such file'); return; }
+      termNote('[simulated norm check — a subset of the rules, run in the browser]');
+      termEcho('Checking ' + file + '...');
+      const src = termSourceOf(key);
+      const findings = termNormCheck(src);
+      for (const r of findings.checks) {
+        termEcho((r.ok ? '  ✓ ' : '  ✗ ') + r.label, r.ok ? 'ok' : 'err');
+        for (const d of r.details) termErr('      ' + file + ':' + d.line + ': ' + d.msg);
+      }
+      termEcho('');
+      termEcho(findings.failed ? 'FAILED — ' + findings.failed + ' rule(s) with findings' : 'OK', findings.failed ? 'err' : 'ok');
+      termNote('Not checked here: the 42 header, forbidden constructs, naming conventions and ' +
+               'declaration placement. The real norminette checks far more than this — run it ' +
+               'through the Norm Lab with the bridge for the genuine tool.');
+    },
+  },
+
+  /* ---------------- inspection: navigate to the EXISTING views ---------------- */
+  inspect: {
+    usage: 'inspect [last-write]', blurb: 'summarise the current execution state',
+    run(argv) {
+      if (argv[0] === 'last-write') return termInspectWrite();
+      if (!run.history) { termNote('nothing has run yet — try: cc <file> then ./a.out'); return; }
+      const st = run.history.stateAt(run.index);
+      const s = run.history.steps[run.index];
+      termEcho('step        ' + (run.index + 1) + ' / ' + run.history.length);
+      termEcho('line        ' + s.line);
+      termEcho('call stack  ' + ((s.callStack || []).join(' > ') || '(empty)'));
+      termEcho('frames      ' + (st.frames.map(f => f.name + '()').join(', ') || '(none)'));
+      const g = st.graph;
+      termEcho('objects     ' + g.nodes.length + '  (pointers: ' + g.edges.length + ')');
+      termEcho('output      ' + JSON.stringify(st.output || ''));
+      if (run.error) termErr('stopped     ' + (run.error.message || run.error));
+    },
+  },
+  memory: { usage: 'memory', blurb: 'show memory, and open the memory view',
+    run() { termMemoryDump(); termOpen('panelMemory'); } },
+  pointers: { usage: 'pointers', blurb: 'show pointer relationships, and open the view',
+    run() { termPointerDump(); termOpen('panelPointers'); } },
+  stack: { usage: 'stack', blurb: 'show the call stack, and open the view',
+    run() { termStackDump(); termOpen('panelStack'); } },
+  timeline: { usage: 'timeline', blurb: 'open the execution timeline',
+    run() {
+      if (!run.history) { termNote('nothing has run yet'); return; }
+      termEcho(run.history.length + ' steps recorded; currently at step ' + (run.index + 1));
+      termOpen('panelTimeline');
+    } },
+};
+
+/* Aliases the muscle memory expects. */
+TERM_COMMANDS['a.out'] = TERM_COMMANDS['./a.out'];
+
+function termOpen(panel) {
+  if (typeof showWorkspace === 'function') showWorkspace();
+  if (typeof openPanel === 'function') openPanel(panel);
+  if (typeof setDockTab === 'function') setDockTab('terminal');
+  termNote('opened ' + panel.replace('panel', '') + ' in the workspace');
+}
+
+/* ---- compact dumps, all read from the existing snapshot ---- */
+function termNeedRun() {
+  if (!run.history) { termNote('nothing has run yet — try: cc <file> then ./a.out'); return false; }
+  return true;
+}
+function termMemoryDump() {
+  if (!termNeedRun()) return;
+  const g = run.history.stateAt(run.index).graph;
+  const order = ['stack', 'heap', 'bss', 'data', 'rodata', 'text'];
+  const label = { stack:'STACK', heap:'HEAP', bss:'.BSS', data:'.DATA', rodata:'.RODATA', text:'.TEXT' };
+  for (const sec of order) {
+    const ns = g.nodes.filter(n => n.section === sec);
+    if (!ns.length) continue;
+    termEcho(label[sec]);
+    for (const n of ns) {
+      termEcho('  ' + hexA(n.address).padEnd(12) + String(n.label).padEnd(14) +
+               String(n.typeName || '').padEnd(10) +
+               (n.uninitialized ? '?' : (n.valueText != null ? String(n.valueText) : '')));
+    }
+  }
+}
+function termPointerDump() {
+  if (!termNeedRun()) return;
+  const g = run.history.stateAt(run.index).graph;
+  if (!g.edges.length) {
+    termNote('no pointer is alive at step ' + (run.index + 1) + '.');
+    termNote('scrub the timeline to a step inside the program: timeline');
+    return;
+  }
+  for (const e of g.edges) {
+    const to = e.to ? g.nodes.find(n => n.id === e.to) : null;
+    termEcho(e.name);
+    termEcho('  └── ' + e.kind + ' → ' + (e.text || '') +
+             (to ? '  (' + to.label + ')' : '') +
+             (e.targetValueText ? '  = ' + e.targetValueText : ''));
+  }
+}
+function termStackDump() {
+  if (!termNeedRun()) return;
+  const st = run.history.stateAt(run.index);
+  if (!st.frames.length) {
+    termNote('no frame is alive at step ' + (run.index + 1) + ' — the program has finished.');
+    termNote('scrub the timeline back to a step where a function was running: timeline');
+    return;
+  }
+  for (const f of st.frames.slice().reverse()) {
+    termEcho(f.name + '()');
+    if (!f.vars.length) { termEcho('  (no locals)'); continue; }
+    f.vars.forEach((v, i) => {
+      const last = i === f.vars.length - 1;
+      termEcho('  ' + (last ? '└── ' : '├── ') + v.name + ' = ' +
+               (v.uninitialized ? '?' : v.valueText));
+    });
+  }
+}
+/* Phase 7 recorded where write()'s buffer was; this reads that record back. */
+function termInspectWrite() {
+  if (!termNeedRun()) return;
+  let d = null;
+  for (let i = run.history.length - 1; i >= 0 && !d; i--) {
+    const s = run.history.steps[i];
+    if (s.detail && s.detail.buffer !== undefined) d = s.detail;
+  }
+  if (!d) { termNote('this run made no write() call'); return; }
+  termEcho('FD           ' + d.fd);
+  termEcho('Destination  ' + d.stream);
+  termEcho('Buffer       ' + hexA(d.buffer));
+  termEcho('Section      ' + (d.bufferSection ? '.' + d.bufferSection : '(unmapped)'));
+  termEcho('Count        ' + d.length);
+  termEcho('Bytes');
+  for (const b of d.bytes) {
+    const a = CEngine.asciiInfo(b.value);
+    termEcho('  ' + hexA(b.address) + '  ' +
+             Number(b.value).toString(16).toUpperCase().padStart(2, '0') + '  ' +
+             (a ? (a.printable ? a.display : a.name) : '?'));
+  }
+}
+
+/* ---- the simulated norm subset: only rules genuinely checked here ---- */
+function termNormCheck(src) {
+  const lines = src.split('\n');
+  const checks = [];
+  const add = (label, details) => checks.push({ label, ok: !details.length, details });
+  add('line length ≤ 80 columns',
+      lines.map((l, i) => ({ l, i })).filter(x => x.l.length > 80)
+        .map(x => ({ line: x.i + 1, msg: 'line is ' + x.l.length + ' columns' })));
+  add('indentation uses tabs, not spaces',
+      lines.map((l, i) => ({ l, i })).filter(x => /^ +/.test(x.l))
+        .map(x => ({ line: x.i + 1, msg: 'line starts with spaces' })));
+  add('no trailing whitespace',
+      lines.map((l, i) => ({ l, i })).filter(x => /[ \t]+$/.test(x.l))
+        .map(x => ({ line: x.i + 1, msg: 'trailing whitespace' })));
+  // function length: count lines between braces at column 0
+  const longFns = [];
+  let start = -1, count = 0;
+  for (let i = 0; i < lines.length; i++) {
+    if (/^\{/.test(lines[i])) { start = i; count = 0; continue; }
+    if (start >= 0 && /^\}/.test(lines[i])) {
+      if (count > 25) longFns.push({ line: start + 1, msg: 'function body is ' + count + ' lines (max 25)' });
+      start = -1; continue;
+    }
+    if (start >= 0) count++;
+  }
+  add('function body ≤ 25 lines', longFns);
+  add('file ends with a newline',
+      src.length && !/\n$/.test(src) ? [{ line: lines.length, msg: 'no newline at end of file' }] : []);
+  return { checks, failed: checks.filter(c => !c.ok).length };
+}
+
+/* ---------------------- execution ---------------------- */
+function termRun(input) {
+  const line = String(input == null ? '' : input);
+  const trimmed = line.trim();
+  term.lines.push({ kind: 'cmd', text: termPrompt() + ' ' + line });
+  if (!trimmed) return;
+  term.history.push(trimmed);
+  term.histAt = term.history.length;
+  const argv = termParse(trimmed);
+  const name = argv[0];
+  const cmd = Object.prototype.hasOwnProperty.call(TERM_COMMANDS, name) ? TERM_COMMANDS[name] : null;
+  if (!cmd) {
+    termErr("Command '" + name + "' is not available in the simulated terminal.");
+    termNote('Try: help');
+    return;
+  }
+  try { cmd.run(argv.slice(1)); }
+  catch (e) { termErr('the simulated terminal hit an internal error: ' + (e && e.message)); }
+}
+
+/* ---------------------- rendering ----------------------
+   Every line is escaped. Terminal text never becomes markup. */
+function termLinesHtml() {
+  return term.lines.map(l =>
+    '<div class="tm-line tm-' + l.kind + '">' + esc(l.text) + '</div>').join('');
+}
+function renderTerminal(host) {
+  if (!term.greeted) {
+    term.greeted = true;
+    termEcho('C LAB TERMINAL — SIMULATION');
+    termNote('This terminal simulates common C/Piscine commands using the lab’s educational ' +
+             'execution engine. It is not a real operating-system shell, and it cannot see your ' +
+             'computer’s files.');
+    termEcho("Type 'help' to see the available commands.");
+    termEcho('');
+  }
+  // Rebuild only when the shell is not already mounted, so typing survives the
+  // re-render that every execution step triggers.
+  let out = host.querySelector('#termOut');
+  if (!out) {
+    host.innerHTML =
+      '<div class="tm" role="region" aria-label="Simulated terminal">' +
+        '<div class="tm-bar"><span class="tm-title">C LAB TERMINAL</span>' +
+          '<span class="tm-sim" title="Nothing here runs on your operating system">SIMULATION</span>' +
+          '<span class="tm-spring"></span>' +
+          '<button class="tm-btn" id="termCopy" type="button">copy</button>' +
+          '<button class="tm-btn" id="termClear" type="button">clear</button></div>' +
+        '<div class="tm-out" id="termOut" tabindex="0" role="log" aria-live="polite" aria-label="Terminal output"></div>' +
+        '<div class="tm-in"><label class="tm-prompt" id="termPrompt" for="termInput"></label>' +
+          '<input class="tm-input" id="termInput" type="text" autocomplete="off" spellcheck="false" ' +
+            'aria-label="Terminal command input" placeholder="type a command, or help">' +
+        '</div>' +
+      '</div>';
+    wireTerminal();
+    out = host.querySelector('#termOut');
+  }
+  out.innerHTML = termLinesHtml();
+  out.scrollTop = out.scrollHeight;
+  const p = host.querySelector('#termPrompt');
+  if (p) p.textContent = termPrompt();
+  const inp = host.querySelector('#termInput');
+  if (inp && document.activeElement !== inp) inp.value = term.draft;
+}
+
+function wireTerminal() {
+  const inp = $('#termInput');
+  if (!inp) return;
+  inp.addEventListener('input', () => { term.draft = inp.value; });
+  inp.addEventListener('keydown', (e) => {
+    // The terminal owns these keys while it has focus; nothing bubbles out to
+    // the application shortcuts.
+    if (e.key === 'Enter') {
+      e.preventDefault(); e.stopPropagation();
+      const v = inp.value;
+      inp.value = ''; term.draft = '';
+      termRun(v);
+      renderDock();
+      const again = $('#termInput'); if (again) again.focus();
+      return;
+    }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault(); e.stopPropagation();
+      if (!term.history.length) return;
+      term.histAt = e.key === 'ArrowUp'
+        ? Math.max(0, (term.histAt < 0 ? term.history.length : term.histAt) - 1)
+        : Math.min(term.history.length, term.histAt + 1);
+      inp.value = term.histAt >= term.history.length ? '' : term.history[term.histAt];
+      term.draft = inp.value;
+      return;
+    }
+    if (e.key === 'Tab') {
+      e.preventDefault(); e.stopPropagation();
+      const cur = inp.value.trim();
+      if (!cur || cur.indexOf(' ') >= 0) return;
+      const hits = Object.keys(TERM_COMMANDS).filter(n => n.indexOf(cur) === 0);
+      if (hits.length === 1) { inp.value = hits[0] + ' '; term.draft = inp.value; }
+      else if (hits.length > 1) { termEcho(hits.join('  ')); renderDock(); $('#termInput').focus(); }
+      return;
+    }
+    if (e.key === 'l' && e.ctrlKey) {
+      e.preventDefault(); e.stopPropagation();
+      term.lines = []; renderDock(); $('#termInput').focus();
+      return;
+    }
+    e.stopPropagation();
+  });
+  const clear = $('#termClear');
+  if (clear) clear.addEventListener('click', () => { term.lines = []; renderDock(); $('#termInput').focus(); });
+  const copy = $('#termCopy');
+  if (copy) copy.addEventListener('click', () => {
+    const text = term.lines.map(l => l.text).join('\n');
+    if (navigator.clipboard) navigator.clipboard.writeText(text).catch(() => {});
+    termNote('output copied'); renderDock();
+  });
+  const out = $('#termOut');
+  if (out) out.addEventListener('click', () => { const i = $('#termInput'); if (i) i.focus(); });
+}
+
+/* When the project changes elsewhere, the terminal follows it. */
+function termSyncToProject(key) {
+  if (!key) return;
+  for (const g of GROUPS) {
+    if (g.keys.indexOf(key) < 0) continue;
+    const stem = fileNameFor(key).replace(/\.c$/, '').replace(/^ft_/, '');
+    term.cwd = [g.id, stem];
+    return;
+  }
+}
+/* ==== TERM END ==== */
 
 /* ================================ WIRING ================================ */
 function inEditable(el) {
