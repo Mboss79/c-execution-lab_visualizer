@@ -3176,6 +3176,188 @@ html[data-theme=light] .viz-node.vz-frame::after{
   .rp-step{min-width:0;width:100%;}
   .rp-step-n{margin-left:0;}
 }
+
+/* ==================================================================
+   PHASE 10 — pointers and dereferencing.
+   One visual rule drives the whole tab: a POINTER box is drawn
+   differently from an object box, and the arrow between them carries
+   the words "points to". The three-way split (address of / value in /
+   object reached) is the single most important panel on the page, so
+   it gets the strongest borders.
+   ================================================================== */
+
+.pl-block{
+  border:1px solid var(--border);border-radius:9px;padding:13px 14px;margin-bottom:14px;
+  background:var(--surface-2);
+}
+.pl-block-h{font-size:10px;letter-spacing:.13em;color:var(--text-faint);margin-bottom:11px;text-transform:uppercase;}
+.pl-note{font-size:10.5px;line-height:1.65;color:var(--text-faint);margin-top:11px;}
+.pl-note b{color:var(--text);}
+.pl-empty{font-size:10.5px;color:var(--text-faint);font-style:italic;}
+
+/* --- modes --- */
+.pl-modes{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:13px;}
+.pl-mode{
+  background:var(--surface);border:1px solid var(--border);border-radius:999px;color:var(--text-faint);
+  font-size:10.5px;padding:3px 12px;cursor:pointer;text-transform:capitalize;
+}
+.pl-mode:hover{color:var(--text);}
+.pl-mode.on{border-color:var(--memory);color:var(--memory);}
+.pl-mode-n{font-size:10px;color:var(--text-faint);margin-left:6px;}
+
+/* --- examples + timeline --- */
+.pl-exs{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:11px;}
+.pl-ex{
+  background:var(--surface);border:1px solid var(--border);border-radius:999px;color:var(--text-faint);
+  font-size:10.5px;padding:3px 10px;cursor:pointer;
+}
+.pl-ex:hover{color:var(--text);}
+.pl-ex.on{border-color:var(--memory);color:var(--memory);}
+.pl-ex-t{font-size:10.5px;color:var(--text);margin-left:6px;}
+.pl-two{display:grid;grid-template-columns:minmax(250px,1fr) minmax(280px,1.15fr);gap:12px;}
+.pl-src{
+  font-size:11px;line-height:1.55;background:var(--surface);border:1px solid var(--border);
+  border-radius:6px;padding:9px 0;margin:0 0 9px;max-height:300px;overflow:auto;
+}
+.pl-srcline{display:block;padding:0 9px;color:var(--text-faint);white-space:pre;}
+.pl-srcline.on{background:var(--execution-dim);color:var(--text);box-shadow:inset 2px 0 0 var(--execution);}
+.pl-scrub{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+.pl-desc{font-size:10.5px;line-height:1.6;color:var(--text-faint);}
+.pl-out{font-size:11px;margin-top:8px;color:var(--text-faint);}
+.pl-out b{color:var(--heap);}
+.pl-col-h{font-size:9px;letter-spacing:.12em;color:var(--text-faint);margin-bottom:8px;}
+.pl-teach{
+  margin-top:12px;padding:9px 11px;border-left:2px solid var(--memory);
+  font-size:11px;line-height:1.65;color:var(--text);
+}
+.pl-stopped{
+  margin-top:10px;padding:8px 11px;border:1px solid var(--error);border-radius:6px;
+  background:var(--error-dim);font-size:10.5px;color:var(--text);
+}
+
+/* --- object and pointer boxes --- */
+.pl-boxes{display:flex;flex-direction:column;gap:8px;}
+.pl-box{
+  border:1px solid var(--border);border-radius:8px;background:var(--surface);padding:8px 10px;
+  cursor:pointer;transition:border-color .15s,box-shadow .15s;
+}
+.pl-box:hover,.pl-box:focus-visible{border-color:var(--memory);outline:none;}
+.pl-box.ptr{border-style:dashed;}
+.pl-box.focus{border-color:var(--memory);box-shadow:0 0 0 2px var(--memory-dim);}
+.pl-box-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+.pl-box-h b{font-size:12.5px;}
+.pl-ty{font-size:10px;color:var(--text-faint);}
+.pl-sec{
+  margin-left:auto;font-family:var(--mono);font-size:9px;padding:1px 6px;border-radius:999px;
+  border:1px solid var(--border);color:var(--text-faint);
+}
+.pl-sec-stack{color:var(--stack);border-color:var(--stack);}
+.pl-sec-heap{color:var(--heap);border-color:var(--heap);}
+.pl-sec-rodata{color:var(--code-region);border-color:var(--code-region);}
+.pl-sec-data,.pl-sec-bss{color:var(--globals);border-color:var(--globals);}
+.pl-box-g{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:11px;}
+.pl-k{color:var(--text-faint);}
+.pl-v{color:var(--text);}
+.pl-v.un{color:var(--execution);}
+.pl-arrow{
+  display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:7px;
+  border-top:1px dashed var(--border);font-size:10.5px;
+}
+.pl-arrow.ok{color:var(--memory);}
+.pl-arrow.bad{color:var(--error);}
+.pl-arrow-g{font-size:14px;}
+.pl-arrow-t{color:var(--text);}
+.pl-refs{font-size:9.5px;color:var(--text-faint);margin-top:6px;}
+.pl-refs b{color:var(--memory);}
+
+/* --- the three-way split: the most important panel here --- */
+.pl-triple{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;}
+.pl-tri{
+  display:flex;flex-direction:column;gap:4px;border:1px solid var(--border-strong);
+  border-radius:8px;padding:10px 12px;background:var(--surface);
+}
+.pl-tri.ok{border-color:var(--memory);}
+.pl-tri.na{opacity:.65;}
+.pl-tri-k{font-size:9px;letter-spacing:.1em;color:var(--text-faint);}
+.pl-tri b{font-size:15px;color:var(--text);word-break:break-all;}
+.pl-tri-n{font-size:10px;line-height:1.55;color:var(--text-faint);}
+
+/* --- the dereference ladder --- */
+.pl-ladder{margin-top:13px;border-top:1px dashed var(--border);padding-top:11px;}
+.pl-ladder-h{font-size:10.5px;color:var(--text-faint);margin-bottom:8px;}
+.pl-rung{
+  display:flex;align-items:baseline;gap:10px;padding:5px 10px;border:1px solid var(--border);
+  border-radius:6px;background:var(--surface);margin-bottom:3px;flex-wrap:wrap;
+}
+.pl-rung.addr{border-style:dashed;}
+.pl-rung.invalid{opacity:.55;border-style:dashed;}
+.pl-rung-e{font-size:12px;color:var(--memory);min-width:64px;}
+.pl-rung-a{color:var(--text-faint);}
+.pl-rung-v{font-size:11.5px;color:var(--text);}
+.pl-rung-t{font-size:9.5px;color:var(--text-faint);}
+.pl-rung-w{font-size:10px;color:var(--text-faint);margin-left:auto;}
+
+/* --- arithmetic --- */
+.pl-arith-h{font-size:10.5px;color:var(--text-faint);margin-bottom:8px;}
+.pl-arith-h b{color:var(--text);}
+.pl-arith{display:flex;gap:6px;flex-wrap:wrap;}
+.pl-astep{
+  display:flex;flex-direction:column;gap:1px;border:1px solid var(--border);border-radius:6px;
+  padding:5px 9px;background:var(--surface);min-width:96px;
+}
+.pl-astep.past{opacity:.5;border-style:dashed;}
+.pl-astep-k{font-size:10px;color:var(--memory);}
+.pl-astep-a{font-size:11px;color:var(--text);}
+.pl-astep-i{font-size:9px;color:var(--text-faint);}
+
+/* --- precedence + AST --- */
+.pl-precs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px;}
+.pl-prec{
+  background:var(--surface);border:1px solid var(--border);border-radius:999px;color:var(--text-faint);
+  font-family:var(--mono);font-size:11px;padding:3px 11px;cursor:pointer;
+}
+.pl-prec:hover{color:var(--text);}
+.pl-prec.on{border-color:var(--memory);color:var(--memory);}
+.pl-prec-why{font-size:11px;line-height:1.65;color:var(--text);margin-bottom:11px;}
+.pl-ast-wrap{border:1px solid var(--border);border-radius:7px;padding:10px 12px;background:var(--surface);}
+.pl-ast-h{font-size:9.5px;color:var(--text-faint);margin-bottom:8px;}
+.pl-ast{margin-left:13px;position:relative;}
+.pl-ast-n{
+  display:inline-block;font-size:10.5px;border:1px solid var(--border);border-radius:5px;
+  padding:2px 8px;background:var(--surface-2);color:var(--text);margin:2px 0;
+}
+.pl-ast-kids{border-left:1px dashed var(--border);margin-left:9px;padding-left:9px;}
+.pl-prec-run{
+  margin-top:11px;padding:8px 11px;border:1px solid var(--memory);border-radius:6px;
+  background:var(--memory-dim);font-size:11px;line-height:1.6;
+}
+
+/* --- explain --- */
+.pl-shut{display:flex;align-items:center;gap:11px;flex-wrap:wrap;}
+.pl-shut-n{font-size:10.5px;color:var(--text-faint);}
+.pl-explain{margin:11px 0 0;padding-left:20px;}
+.pl-explain li{font-size:11px;line-height:1.75;color:var(--text-faint);margin-bottom:5px;}
+.pl-explain b{color:var(--text);}
+
+/* --- states + literal comparison --- */
+.pl-state-src{max-height:none;padding:9px 11px;white-space:pre;}
+.pl-state-w{font-size:11px;line-height:1.6;color:var(--text-faint);margin:9px 0;}
+.pl-state-r{
+  border:1px solid var(--border);border-radius:6px;padding:9px 11px;font-size:10.5px;line-height:1.6;
+}
+.pl-state-r.ok{border-color:var(--heap);color:var(--text-faint);}
+.pl-state-r.bad{border-color:var(--error);background:var(--error-dim);color:var(--text);}
+.pl-state-r b{color:var(--error);}
+.pl-state-r.ok b{color:var(--heap);}
+.pl-split{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:11px;}
+.pl-half{border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--surface);}
+.pl-half-h{font-size:9.5px;letter-spacing:.11em;color:var(--text-faint);margin-bottom:8px;}
+.pl-lit-g{margin-bottom:9px;}
+
+@media (max-width:880px){
+  .pl-two{grid-template-columns:1fr;}
+  .pl-rung-w{margin-left:0;width:100%;}
+}
 </style>
 </head>
 <body>
@@ -4089,6 +4271,7 @@ const SIMPLIFICATIONS = [
   'Addresses are simulated. Region bases are fixed so runs are reproducible.',
   'Functions are given an entry-point address in .text, but the simulator does not compile to machine instructions, so the SIZE of a function\'s code is not modelled and .text is not drawn to scale.',
   'Section bases (.text/.rodata/.data/.bss) are illustrative. A real program\'s layout depends on the toolchain, the ABI, and whether the binary is position-independent — with ASLR the addresses differ on every run.',
+  'Dereferencing a void * is rejected by real C compilers because void is an incomplete type; this simulator currently allows it. Do not rely on that — cast to a concrete pointer type first.',
   '.rodata is not physical ROM. It is ordinary RAM the loader maps without write permission, which is why writing through a pointer to a string literal faults at run time rather than being rejected at compile time.',
 ];
 
@@ -4422,6 +4605,7 @@ const MEM_SAFETY_LABELS = {
   'double-free':        'Double free',
   'invalid-free':       'Invalid free()',
   'uninitialized-read': 'Read of uninitialized memory',
+  'readonly-write':     'Write to read-only memory',
 };
 
 /* =============================== MEMORY =================================== */
@@ -4631,6 +4815,19 @@ class Interp {
         (b.frameName || 'a function') + '(). That frame was destroyed when the function returned, so this storage is no longer valid.',
         { address: addrNum, size, access: access || null, line: this.curLine, block: b,
           validFrom: b.base, validTo: b.base + b.size - 1, blockLabel: b.label });
+    }
+    // A string literal lives in .rodata, which the loader maps without write
+    // permission. On a real system this traps; the simulator refuses it here
+    // so `char *p = "ABC"; *p = 'x';` is visibly a bug rather than silently
+    // rewriting the literal.
+    if (b.readonly && access === 'write') {
+      throw new MemSafetyError('readonly-write',
+        'Write to read-only memory at ' + hexAddr(addrNum) + ': that address is inside ' +
+        (b.label || 'a read-only object') + ', which lives in .rodata. String literals are not writable — ' +
+        'on a real system this usually crashes the program. Copy the literal into an array if you need to modify it.',
+        { address: addrNum, size, access: 'write', line: this.curLine, block: b,
+          blockLabel: b.label, section: b.section, readonly: true,
+          validFrom: b.base, validTo: b.base + b.size - 1 });
     }
     if (addrNum + size > b.base + b.size) {
       throw new MemSafetyError('out-of-bounds',
@@ -16785,6 +16982,7 @@ const LAB_TABS = [
   { id:'syscalls',  label:'Libraries & Syscalls' },
   { id:'c03',       label:'C03 Strings' },
   { id:'repr',      label:'Data Representation' },
+  { id:'ptr',       label:'Pointers & Dereferencing' },
 ];
 
 const lab = {
@@ -16819,6 +17017,10 @@ const lab = {
   reprType: 'uchar', reprValue: '255', reprRuns: null,
   reprA: 'schar', reprB: 'uchar', reprPattern: null,
   reprAdvanced: false, reprSizeof: null, reprArray: null,
+  // --- Phase 10: pointers and dereferencing ---
+  ptrEx: 'basic', ptrStep: null, ptrRuns: null, ptrMode: 'beginner',
+  ptrPrec: '(*p)++', ptrState: 'null', ptrStateRuns: null,
+  ptrExplain: false, ptrLit: null,
 };
 
 function labType() { return (LAB_TYPES.find(t => t.id === lab.typeId) || LAB_TYPES[0]).make(); }
@@ -17111,6 +17313,7 @@ function renderLab() {
     case 'syscalls':  body = labSyscallsHtml(); break;
     case 'c03':       body = labC03Html(); break;
     case 'repr':      body = labReprHtml(); break;
+    case 'ptr':       body = labPtrHtml(); break;
   }
   root.innerHTML =
     '<div class="vl"><div class="vl-inner">' +
@@ -17121,7 +17324,7 @@ function renderLab() {
           '" data-labtab="' + t.id + '" role="tab" aria-selected="' + (t.id === lab.tab) + '">' +
           esc(t.label) + '</button>').join('') +
       '</div>' +
-      (lab.tab === 'functions' || lab.tab === 'syscalls' || lab.tab === 'c03' || lab.tab === 'repr' ? '' : labValueStrip()) +
+      (lab.tab === 'functions' || lab.tab === 'syscalls' || lab.tab === 'c03' || lab.tab === 'repr' || lab.tab === 'ptr' ? '' : labValueStrip()) +
       '<div class="vl-body">' + body + '</div>' +
       '<div class="vl-foot">Widths, signedness and wrapping follow the simulated architecture (' +
         esc(CEngine.ARCH.short) + '). Arithmetic and comparisons are evaluated by the execution engine, ' +
@@ -17135,6 +17338,7 @@ function wireLab() {
   if (typeof wireLabFunctions === 'function') wireLabFunctions();
   if (typeof wireLabC03 === 'function') wireLabC03();
   if (typeof wireLabRepr === 'function') wireLabRepr();
+  if (typeof wireLabPtr === 'function') wireLabPtr();
   $$('#labRoot [data-labtab]').forEach(el => el.addEventListener('click', () => {
     lab.tab = el.dataset.labtab; renderLab();
   }));
@@ -19083,6 +19287,525 @@ function wireLabRepr() {
   }));
 }
 /* ==== REPRLAB END ==== */
+
+/* ==== PTRLAB START ====
+   PHASE 10 — Pointers & Dereferencing.
+
+   The audit found the engine already executes everything this lab teaches:
+   char **, three pointer levels, (*str)++ versus *p++ with correct precedence,
+   pointer arithmetic scaled by the pointee type, and the whole ft_putstr
+   example producing "ABC". So this file evaluates NOTHING. It runs the example
+   through CEngine.runToCompletion and reads back:
+
+     frames / variables   history.stateAt(i).frames
+     addresses and bytes  the same snapshot
+     pointer arrows       state.graph.edges  (the Phase 4 graph)
+     dereference chains   state.graph.chains
+     arithmetic steps     state.graph.arithmetic
+     precedence           CEngine.parseC — the real AST
+     output               the run's own output
+
+   If a number appears on this page and is not in the snapshot, that is a bug. */
+
+const PTR_EXAMPLES = [
+  { id:'basic', label:'1 · a pointer holds an address', focus:'p',
+    src:'int\tmain(void)\n{\n\tchar\tc;\n\tchar\t*p;\n\n\tc = 65;\n\tp = &c;\n\treturn (0);\n}\n',
+    teach:'p is a separate object with its own address. What it STORES is the address of c.' },
+  { id:'write', label:'2 · writing through a pointer', focus:'p',
+    src:'int\tmain(void)\n{\n\tint\tx;\n\tint\t*p;\n\n\tx = 42;\n\tp = &x;\n\t*p = 100;\n\treturn (0);\n}\n',
+    teach:'*p = 100 does not change p. It changes the object p points at.' },
+  { id:'ptr2', label:'3 · pointer to pointer', focus:'pp',
+    src:'int\tmain(void)\n{\n\tint\tx;\n\tint\t*p;\n\tint\t**pp;\n\n\tx = 42;\n\tp = &x;\n\tpp = &p;\n\treturn (0);\n}\n',
+    teach:'Every * removes one level. pp -> p -> x.' },
+  { id:'ptr3', label:'4 · three levels', focus:'ppp',
+    src:'int\tmain(void)\n{\n\tint\tx;\n\tint\t*p;\n\tint\t**pp;\n\tint\t***ppp;\n\n' +
+        '\tx = 42;\n\tp = &x;\n\tpp = &p;\n\tppp = &pp;\n\treturn (0);\n}\n',
+    teach:'The ladder is mechanical: each * follows one more address.' },
+  { id:'chars', label:'5 · a char pointer walking an array', focus:'p',
+    src:'int\tmain(void)\n{\n\tchar\ts[4] = "ABC";\n\tchar\t*p;\n\n\tp = s;\n\tp++;\n\tp++;\n\treturn (0);\n}\n',
+    teach:'p++ moves the POINTER. The array never moves.' },
+  { id:'literal', label:'6 · a pointer to a string literal', focus:'text',
+    src:'int\tmain(void)\n{\n\tchar\t*text;\n\tchar\t**p;\n\n\ttext = "ABC";\n\tp = &text;\n\treturn (0);\n}\n',
+    teach:'text points into .rodata. p points at text itself.' },
+  { id:'putstr', label:'7 · the complete ft_putstr', focus:'str',
+    src:'void\tft_putstr(char **str)\n{\n\twhile (**str != 0)\n\t{\n\t\twrite(1, *str, 1);\n\t\t(*str)++;\n\t}\n}\n\n' +
+        'int\tmain(void)\n{\n\tchar\t*text;\n\n\ttext = "ABC";\n\tft_putstr(&text);\n\treturn (0);\n}\n',
+    teach:'(*str)++ moves the pointer stored INSIDE text. str never changes.' },
+];
+const ptrEx = () => PTR_EXAMPLES.find(e => e.id === lab.ptrEx) || PTR_EXAMPLES[0];
+
+function ptrRun() {
+  const ex = ptrEx();
+  if (!lab.ptrRuns) lab.ptrRuns = {};
+  if (lab.ptrRuns[ex.id]) return lab.ptrRuns[ex.id];
+  let r;
+  try { r = CEngine.runToCompletion(ex.src); }
+  catch (e) { return (lab.ptrRuns[ex.id] = { ok:false, error:e.message }); }
+  if (!r.history) return (lab.ptrRuns[ex.id] = { ok:false, error: r.message || 'did not run' });
+  const steps = [];
+  for (let i = 0; i < r.history.length; i++)
+    steps.push({ i, step: r.history.steps[i], state: r.history.stateAt(i) });
+  return (lab.ptrRuns[ex.id] = { ok:true, src: ex.src, steps, output: r.output, error: r.ok ? null : r.message });
+}
+/* The step to open on: the LAST one where the focus variable is still alive.
+   At program end every frame is destroyed, so defaulting to the final step
+   would show an empty stack and none of the relationships. */
+function ptrDefaultStep(run, focus) {
+  for (let i = run.steps.length - 1; i >= 0; i--) {
+    const g = run.steps[i].state.graph;
+    const n = g.nodes.find(x => x.label === focus);
+    if (n && !n.uninitialized) return i;
+  }
+  for (let i = run.steps.length - 1; i >= 0; i--)
+    if (run.steps[i].state.frames.length) return i;
+  return run.steps.length - 1;
+}
+function ptrCur() {
+  const run = ptrRun();
+  if (!run.ok) return null;
+  const dflt = ptrDefaultStep(run, ptrEx().focus);
+  const i = Math.max(0, Math.min(lab.ptrStep == null ? dflt : lab.ptrStep, run.steps.length - 1));
+  return { run, i, cur: run.steps[i] };
+}
+const ptrMode = () => lab.ptrMode || 'beginner';
+const ptrShow = (level) => {   // beginner < intermediate < expert
+  const order = { beginner:0, intermediate:1, expert:2 };
+  return order[ptrMode()] >= order[level];
+};
+
+/* ---------------- the three words that get confused ---------------- */
+function ptrTripleHtml(node, edge, g) {
+  if (!node) return '';
+  const target = edge && edge.to ? g.nodes.find(n => n.id === edge.to) : null;
+  return '<div class="pl-triple">' +
+    '<div class="pl-tri"><span class="pl-tri-k">ADDRESS OF ' + esc(node.label) + '</span>' +
+      '<b class="mono">' + hexA(node.address) + '</b>' +
+      '<span class="pl-tri-n">where ' + esc(node.label) + ' itself lives — this is <span class="mono">&amp;' +
+      esc(node.label) + '</span></span></div>' +
+    '<div class="pl-tri"><span class="pl-tri-k">VALUE STORED IN ' + esc(node.label) + '</span>' +
+      '<b class="mono">' + esc(node.uninitialized ? '?' : node.valueText) + '</b>' +
+      '<span class="pl-tri-n">the bytes inside it — this is just <span class="mono">' + esc(node.label) + '</span></span></div>' +
+    '<div class="pl-tri' + (target ? ' ok' : ' na') + '"><span class="pl-tri-k">OBJECT IT POINTS AT</span>' +
+      '<b class="mono">' + esc(target ? target.label : '—') + '</b>' +
+      '<span class="pl-tri-n">' + (target
+        ? 'reached by <span class="mono">*' + esc(node.label) + '</span>, currently ' +
+          esc(edge.targetValueText != null ? edge.targetValueText : '—')
+        : 'this is not pointing at a live object') + '</span></div>' +
+    '</div>' +
+    '<div class="pl-note">These three are different things, and mixing them up is where pointer bugs come from. ' +
+    '<span class="mono">&amp;' + esc(node.label) + '</span> is where it lives, <span class="mono">' +
+    esc(node.label) + '</span> is what it holds, <span class="mono">*' + esc(node.label) + '</span> is what it reaches.</div>';
+}
+
+/* ---------------- the boxes and the arrow ---------------- */
+function ptrBoxesHtml(g, focusName) {
+  if (!g.nodes.length) return '<div class="pl-empty">no object is alive at this step</div>';
+  const shown = g.nodes.filter(n => n.section !== 'text');
+  const byId = {};
+  for (const n of shown) byId[n.id] = n;
+  return '<div class="pl-boxes">' + shown.map(n => {
+    const out = g.edges.find(e => e.from === n.id);
+    const target = out && out.to ? byId[out.to] : null;
+    const refs = (n.referencedBy || []).length;
+    return '<div class="pl-box' + (n.label === focusName ? ' focus' : '') +
+      (n.isPointer ? ' ptr' : '') + '" data-plnode="' + n.blockId + '" role="button" tabindex="0">' +
+      '<div class="pl-box-h"><b class="mono">' + esc(n.label) + '</b>' +
+        '<span class="pl-ty mono">' + esc(n.typeName || '') + '</span>' +
+        '<span class="pl-sec pl-sec-' + esc(n.section) + '">' + esc(n.sectionLabel) + '</span></div>' +
+      '<div class="pl-box-g">' +
+        '<span class="pl-k">address</span><span class="pl-v mono">' + hexA(n.address) + '</span>' +
+        '<span class="pl-k">' + (n.isPointer ? 'holds' : 'value') + '</span>' +
+        '<span class="pl-v mono' + (n.uninitialized ? ' un' : '') + '">' +
+          esc(n.uninitialized ? '?' : (n.valueText == null ? '—' : n.valueText)) + '</span>' +
+        (ptrShow('expert')
+          ? '<span class="pl-k">size</span><span class="pl-v">' + n.size + ' B · align ' + n.align + '</span>'
+          : '') +
+      '</div>' +
+      (out
+        ? '<div class="pl-arrow ' + (out.valid ? 'ok' : 'bad') + '">' +
+            '<span class="pl-arrow-l">' + esc(out.kind === 'points-to' ? 'points to' : out.kind) + '</span>' +
+            '<span class="pl-arrow-g">→</span>' +
+            '<span class="pl-arrow-t mono">' + esc(target ? target.label : (out.text || '—')) + '</span></div>'
+        : '') +
+      (refs ? '<div class="pl-refs">pointed at by ' + n.referencedBy.map(r =>
+        '<b class="mono">' + esc(r.name) + '</b>').join(', ') + '</div>' : '') +
+      '</div>';
+  }).join('') + '</div>';
+}
+
+/* ---------------- the dereference ladder ---------------- */
+function ptrLadderHtml(g, name) {
+  const start = g.nodes.find(n => n.label === name);
+  if (!start) return '';
+  const chain = g.chains[start.blockId];
+  if (!chain) return '';
+  const objs = chain.filter(h => h.kind === 'object');
+  const rows = [];
+  rows.push({ expr: '&' + name, val: hexA(start.address), what: 'the address of ' + name + ' itself' });
+  rows.push({ expr: name, val: start.uninitialized ? '?' : start.valueText,
+              what: 'what ' + name + ' stores' });
+  for (let k = 1; k < objs.length; k++) {
+    const o = objs[k];
+    rows.push({ expr: '*'.repeat(k) + name, val: o.label,
+                what: 'the object ' + (k === 1 ? name : '*'.repeat(k - 1) + name) + ' points at',
+                type: o.typeName });
+  }
+  const last = objs[objs.length - 1];
+  if (objs.length > 1 && last && !last.isPointer) {
+    rows[rows.length - 1].val = last.label + '  =  ' + (last.valueText != null ? last.valueText : '?');
+  }
+  const extra = '*'.repeat(objs.length) + name;
+  return '<div class="pl-ladder">' +
+    '<div class="pl-ladder-h">every <span class="mono">*</span> follows one more address</div>' +
+    rows.map((r, i) =>
+      '<div class="pl-rung' + (i === 0 ? ' addr' : '') + '">' +
+        '<span class="pl-rung-e mono">' + esc(r.expr) + '</span>' +
+        '<span class="pl-rung-a">→</span>' +
+        '<span class="pl-rung-v mono">' + esc(r.val) + '</span>' +
+        (r.type ? '<span class="pl-rung-t mono">' + esc(r.type) + '</span>' : '') +
+        '<span class="pl-rung-w">' + esc(r.what) + '</span>' +
+      '</div>').join('') +
+    '<div class="pl-rung invalid"><span class="pl-rung-e mono">' + esc(extra) + '</span>' +
+      '<span class="pl-rung-a">→</span>' +
+      '<span class="pl-rung-v">not valid here</span>' +
+      '<span class="pl-rung-w">there are no more pointer levels to follow</span></div>' +
+    '</div>';
+}
+
+/* ---------------- pointer arithmetic, from the graph ---------------- */
+function plArithHtml(g, name) {
+  const n = g.nodes.find(x => x.label === name);
+  if (!n) return '';
+  const a = g.arithmetic[n.blockId];
+  if (!a) return '';
+  return '<div class="pl-block"><div class="pl-block-h">' + esc(name) + ' + n</div>' +
+    '<div class="pl-arith-h">each step moves <b>sizeof(' + esc(a.pointeeTypeName) + ') = ' +
+      a.elemSize + ' byte' + (a.elemSize === 1 ? '' : 's') + '</b> — the TYPE supplies the stride, not the number 1</div>' +
+    '<div class="pl-arith">' + a.steps.map(s =>
+      '<div class="pl-astep' + (s.past ? ' past' : '') + '">' +
+        '<span class="pl-astep-k mono">' + esc(name) + ' + ' + s.k + '</span>' +
+        '<span class="pl-astep-a mono">' + esc(s.text) + '</span>' +
+        '<span class="pl-astep-i">' + (s.inside ? 'inside ' + esc(s.inside) : 'past the end') + '</span>' +
+      '</div>').join('') + '</div></div>';
+}
+
+/* ---------------- precedence, from the REAL AST ---------------- */
+const PTR_PRECEDENCE = [
+  { expr:'(*p)++', why:'The parentheses force the dereference first, so ++ applies to the OBJECT p points at.' },
+  { expr:'*p++',   why:'++ binds tighter than *, so this is *(p++): p moves, and the * reads where p WAS.' },
+  { expr:'++(*p)', why:'Dereference first, then pre-increment the object p points at.' },
+  { expr:'*++p',   why:'This is *(++p): p moves first, then the * reads the new location.' },
+];
+function ptrAstHtml(node, depth) {
+  if (!node || depth > 6) return '';
+  const kids = [];
+  if (node.arg) kids.push(node.arg);
+  if (node.left) kids.push(node.left);
+  if (node.right) kids.push(node.right);
+  const label = node.kind === 'Update' ? node.kind + ' ' + node.op + (node.prefix ? ' (prefix)' : ' (postfix)')
+    : node.kind === 'Ident' ? node.kind + ' ' + node.name : node.kind;
+  return '<div class="pl-ast"><span class="pl-ast-n mono">' + esc(label) + '</span>' +
+    (kids.length ? '<div class="pl-ast-kids">' + kids.map(k => ptrAstHtml(k, depth + 1)).join('') + '</div>' : '') +
+    '</div>';
+}
+function ptrPrecedenceHtml() {
+  const sel = lab.ptrPrec || '(*p)++';
+  const item = PTR_PRECEDENCE.find(p => p.expr === sel) || PTR_PRECEDENCE[0];
+  let ast = null, err = null;
+  try {
+    const prog = 'int\tmain(void)\n{\n\tchar\ts[4] = "ABC";\n\tchar\t*p;\n\n\tp = s;\n\t' + item.expr + ';\n\treturn (0);\n}\n';
+    const parsed = CEngine.parseC(prog);
+    const fn = parsed.find(d => d.kind === 'FuncDef');
+    const stmts = fn.body.body.filter(s => s.kind === 'ExprStmt');
+    ast = stmts[stmts.length - 1].expr;
+  } catch (e) { err = e.message; }
+  // and run it, so the outcome is the engine's
+  let after = null;
+  try {
+    const prog = 'int\tmain(void)\n{\n\tchar\ts[4] = "ABC";\n\tchar\t*p;\n\tchar\tr;\n\n\tp = s;\n\tr = 0;\n\t' +
+      (item.expr.indexOf('*') === 0 && item.expr.indexOf('(') !== 0 ? 'r = ' + item.expr : item.expr) + ';\n\treturn (0);\n}\n';
+    const r = CEngine.runToCompletion(prog);
+    if (r.history) {
+      for (let i = r.history.length - 1; i >= 0 && !after; i--) {
+        const st = r.history.stateAt(i);
+        const p = st.vars.find(v => v.name === 'p');
+        const rr = st.vars.find(v => v.name === 'r');
+        const s = st.vars.find(v => v.name === 's');
+        if (p && !p.uninitialized) after = { p: p.valueText, r: rr && !rr.uninitialized ? rr.valueText : null,
+                                             s: s ? s.valueText : null, ok: r.ok, msg: r.message };
+      }
+    }
+  } catch (e) { /* reported below */ }
+  return '<div class="pl-block"><div class="pl-block-h">Precedence: four expressions that look alike</div>' +
+    '<div class="pl-precs">' + PTR_PRECEDENCE.map(p =>
+      '<button class="pl-prec' + (p.expr === sel ? ' on' : '') + '" data-plprec="' + esc(p.expr) + '">' +
+      esc(p.expr) + '</button>').join('') + '</div>' +
+    '<div class="pl-prec-why">' + esc(item.why) + '</div>' +
+    (err ? '<div class="vl-err">' + esc(err) + '</div>' :
+      '<div class="pl-ast-wrap"><div class="pl-ast-h">the parser’s actual tree — the innermost node runs first</div>' +
+      ptrAstHtml(ast, 0) + '</div>') +
+    (after ? '<div class="pl-prec-run">after running it on <span class="mono">char s[4] = "ABC"; p = s;</span> — ' +
+      'p is <b class="mono">' + esc(after.p) + '</b>' +
+      (after.r !== null ? ', the expression produced <b class="mono">' + esc(after.r) + '</b>' : '') +
+      (after.s ? ', s is still <b class="mono">' + esc(after.s) + '</b>' : '') + '</div>' : '') +
+    '<div class="pl-note">The tree comes from the same parser that runs your programs, and the values come from ' +
+    'really executing the expression — this is not a description of what C ought to do.</div></div>';
+}
+
+/* ---------------- the guided walkthrough ---------------- */
+function ptrTimelineHtml() {
+  const c = ptrCur();
+  if (!c) return '<div class="pl-block"><div class="vl-err">' + esc(ptrRun().error) + '</div></div>';
+  const { run, i, cur } = c;
+  const ex = ptrEx();
+  const s = cur.step, g = cur.state.graph;
+  const lines = run.src.split('\n');
+  const focusName = ex.focus;
+
+  let h = '<div class="pl-block"><div class="pl-block-h">' + esc(ex.label) + '</div>';
+  h += '<div class="pl-exs">' + PTR_EXAMPLES.map(e =>
+    '<button class="pl-ex' + (e.id === ex.id ? ' on' : '') + '" data-plex="' + e.id + '">' +
+    esc(e.label.split('·')[0].trim()) + '</button>').join('') +
+    '<span class="pl-ex-t">' + esc(ex.label.split('·').slice(1).join('·').trim()) + '</span></div>';
+
+  h += '<div class="pl-two">' +
+    '<div class="pl-src-col"><pre class="pl-src mono">' + lines.map((l, k) =>
+      '<span class="pl-srcline' + (k + 1 === s.line ? ' on' : '') + '">' +
+      String(k + 1).padStart(2) + '  ' + esc(l || ' ') + '</span>').join('') + '</pre>' +
+      '<div class="pl-scrub">' +
+        '<button class="vl-btn" data-plstep="first">⏮</button>' +
+        '<button class="vl-btn" data-plstep="prev">◀</button>' +
+        '<input type="range" class="fn-range" min="0" max="' + (run.steps.length - 1) + '" value="' + i + '" ' +
+          'data-plrange="1" aria-label="Execution step">' +
+        '<button class="vl-btn" data-plstep="next">▶</button>' +
+        '<button class="vl-btn" data-plstep="last">⏭</button>' +
+        '<span class="fn-scrub-n mono">' + (i + 1) + ' / ' + run.steps.length + '</span></div>' +
+      '<div class="pl-desc">' + esc(s.description || '') + '</div>' +
+      (cur.state.output ? '<div class="pl-out">output so far: <b class="mono">' +
+        esc(cur.state.output) + '</b></div>' : '') +
+    '</div>' +
+    '<div class="pl-mem-col"><div class="pl-col-h">MEMORY &amp; POINTERS AT THIS STEP</div>' +
+      ptrBoxesHtml(g, focusName) + '</div>' +
+    '</div>';
+  h += '<div class="pl-teach">' + esc(ex.teach) + '</div>';
+  if (run.error) h += '<div class="pl-stopped">execution stopped: ' + esc(run.error) + '</div>';
+  return h + '</div>';
+}
+
+/* ---------------- symbol explainer ---------------- */
+function ptrSymbolHtml() {
+  const c = ptrCur();
+  if (!c) return '';
+  const g = c.cur.state.graph;
+  const name = ptrEx().focus;
+  const node = g.nodes.find(n => n.label === name);
+  if (!node) return '';
+  const edge = g.edges.find(e => e.from === node.id);
+  return '<div class="pl-block"><div class="pl-block-h">' +
+    esc(name) + ', &amp;' + esc(name) + ' and *' + esc(name) + ' are three different things</div>' +
+    ptrTripleHtml(node, edge, g) +
+    ptrLadderHtml(g, name) + '</div>';
+}
+
+/* ---------------- "explain this expression" ---------------- */
+function ptrExplainHtml() {
+  const c = ptrCur();
+  if (!c) return '';
+  const g = c.cur.state.graph;
+  const name = ptrEx().focus;
+  const node = g.nodes.find(n => n.label === name);
+  if (!node) return '';
+  const chain = g.chains[node.blockId];
+  if (!chain) return '';
+  const objs = chain.filter(h => h.kind === 'object');
+  const expr = '*'.repeat(Math.max(1, objs.length - 1)) + name;
+  if (!lab.ptrExplain) {
+    return '<div class="pl-block pl-shut"><button class="vl-btn" data-plexplain="1">Explain ' +
+      esc(expr) + '</button><span class="pl-shut-n">step by step, with this program’s real values</span></div>';
+  }
+  const steps = [];
+  steps.push('<b class="mono">' + esc(name) + '</b> has type <b class="mono">' + esc(node.typeName) +
+    '</b> and lives at ' + hexA(node.address) + '.');
+  for (let k = 1; k < objs.length; k++) {
+    const from = objs[k - 1], to = objs[k];
+    steps.push('It stores <b class="mono">' + esc(from.valueText != null ? from.valueText : '?') +
+      '</b>, which is the address of <b class="mono">' + esc(to.label) + '</b>. Following it once — ' +
+      '<span class="mono">' + '*'.repeat(k) + esc(name) + '</span> — gives a <b class="mono">' +
+      esc(to.typeName || '?') + '</b>.');
+  }
+  const last = objs[objs.length - 1];
+  if (last) steps.push('At the end of the chain is <b class="mono">' + esc(last.label) +
+    '</b>, currently <b class="mono">' + esc(last.valueText != null ? last.valueText : '?') +
+    '</b>. That is what <span class="mono">' + esc(expr) + '</span> evaluates to.');
+  return '<div class="pl-block"><div class="pl-block-h">Explaining ' + esc(expr) + '</div>' +
+    '<button class="vl-btn" data-plexplain="0">▾ hide</button>' +
+    '<ol class="pl-explain">' + steps.map(s => '<li>' + s + '</li>').join('') + '</ol>' +
+    '<div class="pl-note">Every address and value above was read from this program at step ' +
+    (c.i + 1) + '.</div></div>';
+}
+
+/* ---------------- pointer states ---------------- */
+const PTR_STATES = [
+  { id:'valid', label:'valid', src:'int\tmain(void)\n{\n\tint\tx;\n\tint\t*p;\n\n\tx = 42;\n\tp = &x;\n\treturn (*p);\n}\n',
+    what:'Points at a live object. Dereferencing is fine.' },
+  { id:'null', label:'NULL', src:'int\tmain(void)\n{\n\tint\t*p;\n\n\tp = NULL;\n\treturn (*p);\n}\n',
+    what:'A deliberate "points at nothing". Dereferencing it is a crash, so code must check first.' },
+  { id:'uninit', label:'uninitialized', src:'int\tmain(void)\n{\n\tint\t*p;\n\tint\tr;\n\n\tr = *p;\n\treturn (0);\n}\n',
+    what:'Never assigned. Its bytes are whatever was there. This is NOT the same as NULL.' },
+  { id:'dangling', label:'dangling', src:'int\tmain(void)\n{\n\tchar\t*p;\n\tchar\tc;\n\n\tp = malloc(4);\n\tfree(p);\n\tc = *p;\n\treturn (0);\n}\n',
+    what:'Held an address that WAS valid. The object is gone; the address is stale.' },
+  { id:'readonly', label:'read-only target', src:'int\tmain(void)\n{\n\tchar\t*p;\n\n\tp = "AB";\n\t*p = 88;\n\treturn (0);\n}\n',
+    what:'Points into .rodata. Reading is fine; writing is not.' },
+];
+function ptrStatesHtml() {
+  const sel = lab.ptrState || 'null';
+  const st = PTR_STATES.find(s => s.id === sel) || PTR_STATES[0];
+  if (!lab.ptrStateRuns) lab.ptrStateRuns = {};
+  if (!lab.ptrStateRuns[st.id]) {
+    let out;
+    try {
+      const r = CEngine.runToCompletion(st.src);
+      out = { ok: r.ok, kind: r.kind, msg: r.message, steps: r.history ? r.history.length : 0 };
+    } catch (e) { out = { ok:false, msg:e.message }; }
+    lab.ptrStateRuns[st.id] = out;
+  }
+  const r = lab.ptrStateRuns[st.id];
+  return '<div class="pl-block"><div class="pl-block-h">Pointer states</div>' +
+    '<div class="pl-precs">' + PTR_STATES.map(s =>
+      '<button class="pl-prec' + (s.id === sel ? ' on' : '') + '" data-plstate="' + s.id + '">' +
+      esc(s.label) + '</button>').join('') + '</div>' +
+    '<pre class="pl-src mono pl-state-src">' + esc(st.src.trim()) + '</pre>' +
+    '<div class="pl-state-w">' + esc(st.what) + '</div>' +
+    '<div class="pl-state-r' + (r.ok ? ' ok' : ' bad') + '">' +
+      (r.ok
+        ? 'ran to completion in ' + r.steps + ' steps'
+        : '<b>' + esc(r.kind ? (CEngine.MEM_SAFETY_LABELS[r.kind] || r.kind) : 'stopped') + '</b><br>' + esc(r.msg)) +
+    '</div>' +
+    '<div class="pl-note">These are real runs. Where C says the behaviour is undefined, the simulator stops and ' +
+    'says so rather than inventing a value — a real program might appear to work, crash, or corrupt something ' +
+    'else entirely, and none of those is more "correct" than the others.</div></div>';
+}
+
+/* ---------------- literal vs array ---------------- */
+function ptrLiteralHtml() {
+  if (!lab.ptrLit) {
+    const mk = (src, name) => {
+      try {
+        const r = CEngine.runToCompletion(src);
+        if (!r.history) return { ok:false, msg:r.message };
+        for (let i = r.history.length - 1; i >= 0; i--) {
+          const st = r.history.stateAt(i);
+          const n = st.graph.nodes.find(x => x.label === name);
+          if (n) return { ok:true, node:n, ranOk:r.ok, msg:r.message, kind:r.kind };
+        }
+        return { ok:false, msg:'not found' };
+      } catch (e) { return { ok:false, msg:e.message }; }
+    };
+    lab.ptrLit = {
+      lit: mk('int\tmain(void)\n{\n\tchar\t*p;\n\n\tp = "ABC";\n\treturn (0);\n}\n', '"ABC"'),
+      arr: mk('int\tmain(void)\n{\n\tchar\ts[4] = "ABC";\n\n\treturn (0);\n}\n', 's'),
+      litWrite: (() => { try { const r = CEngine.runToCompletion(
+        'int\tmain(void)\n{\n\tchar\t*p;\n\n\tp = "ABC";\n\t*p = 88;\n\treturn (0);\n}\n');
+        return { ok:r.ok, kind:r.kind, msg:r.message }; } catch (e) { return { ok:false, msg:e.message }; } })(),
+      arrWrite: (() => { try { const r = CEngine.runToCompletion(
+        'int\tmain(void)\n{\n\tchar\ts[4] = "ABC";\n\n\ts[0] = 88;\n\treturn (0);\n}\n');
+        return { ok:r.ok, msg:r.message }; } catch (e) { return { ok:false, msg:e.message }; } })(),
+    };
+  }
+  const L = lab.ptrLit;
+  const col = (title, code, node, write, note) =>
+    '<div class="pl-half"><div class="pl-half-h">' + esc(title) + '</div>' +
+    '<pre class="pl-src mono pl-state-src">' + esc(code) + '</pre>' +
+    (node && node.ok
+      ? '<div class="pl-box-g pl-lit-g">' +
+        '<span class="pl-k">section</span><span class="pl-v mono">' + esc(node.node.sectionLabel) + '</span>' +
+        '<span class="pl-k">address</span><span class="pl-v mono">' + hexA(node.node.address) + '</span>' +
+        '<span class="pl-k">writable</span><span class="pl-v">' + (node.node.readonly ? 'no' : 'yes') + '</span>' +
+        '</div>' : '') +
+    '<div class="pl-state-r ' + (write.ok ? 'ok' : 'bad') + '">' +
+      (write.ok ? 'writing to it succeeded'
+                : '<b>' + esc(write.kind ? (CEngine.MEM_SAFETY_LABELS[write.kind] || write.kind) : 'stopped') +
+                  '</b><br>' + esc(write.msg)) + '</div>' +
+    '<div class="pl-note">' + note + '</div></div>';
+  return '<div class="pl-block"><div class="pl-block-h">' +
+    'char *p = "ABC" is not the same as char s[] = "ABC"</div>' +
+    '<div class="pl-split">' +
+      col('a pointer to a literal', 'char *p = "ABC";\n*p = \'X\';', L.lit, L.litWrite,
+          'p points into <span class="mono">.rodata</span>. The literal is shared and not writable.') +
+      col('an array initialised from a literal', 'char s[4] = "ABC";\ns[0] = \'X\';', L.arr, L.arrWrite,
+          'The characters were COPIED into s, which is ordinary writable storage.') +
+    '</div>' +
+    '<div class="pl-note">Both lines contain the same four characters in the source, but they create different ' +
+    'things: one makes a pointer to a constant, the other makes a modifiable copy. Both runs above are real.</div></div>';
+}
+
+function labPtrHtml() {
+  const c = ptrCur();
+  const g = c ? c.cur.state.graph : null;
+  let h = '<div class="pl-modes" role="group" aria-label="Detail level">' +
+    ['beginner', 'intermediate', 'expert'].map(m =>
+      '<button class="pl-mode' + (ptrMode() === m ? ' on' : '') + '" data-plmode="' + m + '">' +
+      m + '</button>').join('') +
+    '<span class="pl-mode-n">the program and its values never change — only how much is explained</span></div>';
+  h += ptrTimelineHtml() + ptrSymbolHtml() + ptrExplainHtml();
+  if (g && ptrShow('intermediate')) {
+    const arith = plArithHtml(g, ptrEx().focus);
+    if (arith) h += arith;
+  }
+  h += ptrLiteralHtml();
+  if (ptrShow('intermediate')) h += ptrPrecedenceHtml();
+  h += ptrStatesHtml();
+  if (ptrShow('expert')) {
+    h += '<div class="pl-block"><div class="pl-block-h">Where to go next</div><div class="rp-links">' +
+      '<button class="rp-link" data-plgo="memory"><b>Memory</b><span>the whole address space</span></button>' +
+      '<button class="rp-link" data-plgo="pointers"><b>Pointer panel</b><span>the graph for the running program</span></button>' +
+      '<button class="rp-link" data-plgo="repr"><b>Data Representation</b><span>bytes and addresses</span></button>' +
+      '</div></div>';
+  }
+  return h;
+}
+
+function wireLabPtr() {
+  $$('#labRoot [data-plex]').forEach(el => el.addEventListener('click', () => {
+    lab.ptrEx = el.dataset.plex; lab.ptrStep = null; lab.ptrExplain = false; renderLab();
+  }));
+  $$('#labRoot [data-plmode]').forEach(el => el.addEventListener('click', () => {
+    lab.ptrMode = el.dataset.plmode; renderLab();
+  }));
+  $$('#labRoot [data-plprec]').forEach(el => el.addEventListener('click', () => {
+    lab.ptrPrec = el.dataset.plprec; renderLab();
+  }));
+  $$('#labRoot [data-plstate]').forEach(el => el.addEventListener('click', () => {
+    lab.ptrState = el.dataset.plstate; renderLab();
+  }));
+  $$('#labRoot [data-plexplain]').forEach(el => el.addEventListener('click', () => {
+    lab.ptrExplain = el.dataset.plexplain === '1'; renderLab();
+  }));
+  $$('#labRoot [data-plstep]').forEach(el => el.addEventListener('click', () => {
+    const run = ptrRun();
+    if (!run.ok) return;
+    const n = run.steps.length;
+    const cur = lab.ptrStep == null ? n - 1 : lab.ptrStep;
+    const a = el.dataset.plstep;
+    lab.ptrStep = a === 'first' ? 0 : a === 'last' ? n - 1
+      : a === 'next' ? Math.min(n - 1, cur + 1) : Math.max(0, cur - 1);
+    renderLab();
+  }));
+  const range = $('#labRoot [data-plrange]');
+  if (range) range.addEventListener('input', () => { lab.ptrStep = +range.value; renderLab(); });
+  $$('#labRoot [data-plnode]').forEach(el => {
+    const go = () => { ui.focusObject = +el.dataset.plnode; renderLab(); };
+    el.addEventListener('click', go);
+    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  });
+  $$('#labRoot [data-plgo]').forEach(el => el.addEventListener('click', () => {
+    const to = el.dataset.plgo;
+    if (to === 'repr') { lab.tab = 'repr'; renderLab(); return; }
+    if (typeof showWorkspace === 'function') showWorkspace();
+    if (typeof openPanel === 'function') openPanel(to === 'memory' ? 'panelMemory' : 'panelPointers');
+  }));
+}
+/* ==== PTRLAB END ==== */
 
 /* ==== TERM START ====
    PHASE 8 — the simulated C / 1337 terminal.
