@@ -3540,6 +3540,189 @@ html[data-theme=light] .viz-node.vz-frame::after{
   .av-slot-g{display:none;}
   .av-rung{grid-template-columns:1fr;gap:2px;}
 }
+
+/* ==== REPROCSS START ==== Phase 12 — Function Reproduction Lab.
+   Every selector is prefixed .rl- and scoped under #labRoot so it cannot reach
+   the shared table/row classes. Phase 8 taught that lesson: an unscoped
+   .vl-row{display:flex} broke every lab table on the site. */
+#labRoot .rl-block { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:16px 18px; margin-bottom:14px; }
+#labRoot .rl-block-h { font-size:12px; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--muted); margin-bottom:12px; font-weight:600; }
+#labRoot .rl-note { font-size:12.5px; color:var(--muted); line-height:1.65; margin-top:12px;
+  border-left:2px solid var(--line); padding-left:11px; }
+#labRoot .rl-empty { font-size:12px; color:var(--muted); font-style:italic; padding:6px 2px; }
+#labRoot .rl-col-h { font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); margin:14px 0 7px; font-weight:600; }
+#labRoot .rl-col-h:first-child { margin-top:0; }
+
+/* detail level */
+#labRoot .rl-modes { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-bottom:14px; }
+#labRoot .rl-mode { background:var(--panel); border:1px solid var(--line); color:var(--muted);
+  border-radius:999px; padding:6px 15px; font-size:12px; cursor:pointer; text-transform:capitalize; }
+#labRoot .rl-mode:hover { color:var(--fg); border-color:var(--accent); }
+#labRoot .rl-mode.on { background:var(--accent); border-color:var(--accent); color:#0b0e14; font-weight:600; }
+#labRoot .rl-mode-n { font-size:11.5px; color:var(--muted); margin-left:6px; }
+
+/* function picker */
+#labRoot .rl-cats { display:grid; grid-template-columns:repeat(auto-fill,minmax(215px,1fr)); gap:10px; }
+#labRoot .rl-cat { border:1px solid var(--line); border-radius:10px; padding:11px 12px; background:var(--bg); }
+#labRoot .rl-cat.empty { opacity:.55; }
+#labRoot .rl-cat-h { font-size:12.5px; font-weight:600; display:flex; align-items:center;
+  justify-content:space-between; gap:6px; margin-bottom:5px; }
+#labRoot .rl-cat-soon { font-size:9.5px; text-transform:uppercase; letter-spacing:.06em;
+  color:var(--muted); font-weight:400; border:1px solid var(--line); border-radius:4px; padding:1px 5px; }
+#labRoot .rl-cat-b { font-size:11.5px; color:var(--muted); line-height:1.5; }
+#labRoot .rl-cat-fns { display:flex; flex-wrap:wrap; gap:6px; margin-top:9px; }
+#labRoot .rl-fn { background:var(--panel); border:1px solid var(--line); color:var(--fg);
+  border-radius:6px; padding:5px 10px; font-size:12px; cursor:pointer;
+  font-family:var(--mono); }
+#labRoot .rl-fn:hover { border-color:var(--accent); }
+#labRoot .rl-fn.on { background:var(--accent); border-color:var(--accent); color:#0b0e14; font-weight:600; }
+
+/* GIOPVC-LAC */
+#labRoot .rl-giop { display:grid; gap:1px; background:var(--line); border:1px solid var(--line);
+  border-radius:8px; overflow:hidden; }
+#labRoot .rl-g { display:grid; grid-template-columns:120px 1fr; gap:14px; background:var(--bg);
+  padding:9px 13px; align-items:baseline; }
+#labRoot .rl-g-k { font-size:10.5px; text-transform:uppercase; letter-spacing:.08em;
+  color:var(--muted); font-weight:600; }
+#labRoot .rl-g-v { font-size:13px; line-height:1.6; }
+#labRoot .rl-concepts { display:flex; flex-wrap:wrap; gap:6px; margin-top:11px; }
+#labRoot .rl-concept { font-size:11px; border:1px solid var(--line); border-radius:999px;
+  padding:3px 10px; color:var(--muted); }
+
+/* two-column execution view */
+#labRoot .rl-two { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:16px; }
+#labRoot .rl-left, #labRoot .rl-right { min-width:0; }
+#labRoot .rl-src { background:var(--bg); border:1px solid var(--line); border-radius:8px;
+  padding:11px 0; font-size:12.5px; line-height:1.6; overflow-x:auto; margin:0;
+  tab-size:var(--tab-size); -moz-tab-size:var(--tab-size); }
+#labRoot .rl-srcline { display:block; padding:1px 13px; white-space:pre; }
+#labRoot .rl-srcline.on { background:color-mix(in srgb, var(--accent) 20%, transparent);
+  box-shadow:inset 2px 0 0 var(--accent); }
+#labRoot .rl-full { max-height:none; }
+#labRoot .rl-scrub { display:flex; align-items:center; gap:6px; margin-top:10px; flex-wrap:wrap; }
+#labRoot .rl-scrub .fn-range { flex:1; min-width:110px; }
+#labRoot .rl-desc { margin-top:10px; font-size:13px; line-height:1.6; }
+#labRoot .rl-why { margin-top:6px; font-size:12.5px; color:var(--muted); line-height:1.6;
+  border-left:2px solid var(--accent); padding-left:10px; }
+#labRoot .rl-out { margin-top:9px; font-size:12.5px; }
+
+/* call stack + frames */
+#labRoot .rl-cs { display:flex; flex-direction:column; gap:3px; }
+#labRoot .rl-cs-r { font-size:12px; padding:4px 10px; border:1px solid var(--line);
+  border-radius:6px; background:var(--bg); color:var(--muted); }
+#labRoot .rl-cs-r.top { color:var(--fg); border-color:var(--accent); }
+#labRoot .rl-frames { display:flex; flex-direction:column; gap:8px; }
+#labRoot .rl-frame { border:1px solid var(--line); border-radius:8px; background:var(--bg); padding:9px 11px; }
+#labRoot .rl-frame.top { border-color:var(--accent); }
+#labRoot .rl-frame-h { display:flex; align-items:center; gap:8px; font-size:12.5px; margin-bottom:7px; }
+#labRoot .rl-tag { font-size:9.5px; text-transform:uppercase; letter-spacing:.06em;
+  background:var(--accent); color:#0b0e14; border-radius:4px; padding:1px 6px; font-weight:600; }
+#labRoot .rl-tag.w { background:transparent; border:1px solid var(--line); color:var(--muted); font-weight:400; }
+#labRoot .rl-vars { display:flex; flex-direction:column; gap:3px; }
+#labRoot .rl-var { display:grid; grid-template-columns:minmax(46px,auto) minmax(52px,auto) 1fr auto;
+  gap:9px; align-items:baseline; font-size:12px; padding:2px 0; }
+#labRoot .rl-var.un { opacity:.6; }
+#labRoot .rl-var-t { color:var(--muted); font-size:11px; }
+#labRoot .rl-var-v { color:var(--accent); overflow-wrap:anywhere; }
+#labRoot .rl-var-a { color:var(--muted); font-size:10.5px; }
+
+/* watched objects, byte by byte */
+#labRoot .rl-watch { display:flex; flex-direction:column; gap:9px; }
+#labRoot .rl-obj { border:1px solid var(--line); border-radius:8px; background:var(--bg); padding:9px 11px; }
+#labRoot .rl-obj.scalar { display:flex; align-items:baseline; gap:9px; flex-wrap:wrap; font-size:12px; }
+#labRoot .rl-obj-h { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;
+  font-size:12.5px; margin-bottom:8px; }
+#labRoot .rl-obj-t, #labRoot .rl-obj-o { font-size:11px; color:var(--muted); }
+#labRoot .rl-obj-a { font-size:10.5px; color:var(--muted); margin-left:auto; }
+#labRoot .rl-obj-v { color:var(--accent); }
+#labRoot .rl-cells { display:flex; flex-wrap:wrap; gap:4px; }
+#labRoot .rl-cell2 { display:flex; flex-direction:column; align-items:center; gap:1px;
+  min-width:34px; border:1px solid var(--line); border-radius:5px; padding:4px 3px; background:var(--panel); }
+#labRoot .rl-cell2 .rl-c-i { font-size:9px; color:var(--muted); }
+#labRoot .rl-cell2 .rl-c-v { font-size:12.5px; }
+#labRoot .rl-cell2.un { opacity:.45; }
+#labRoot .rl-cell2.nul { border-color:var(--warn, #d98b3a); }
+#labRoot .rl-cell2.hit { border-color:var(--accent); background:color-mix(in srgb, var(--accent) 22%, transparent); }
+
+/* pointers, from the Phase 4 graph */
+#labRoot .rl-ptrs { display:flex; flex-direction:column; gap:4px; }
+#labRoot .rl-ptr { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; font-size:12px;
+  border:1px solid var(--line); border-radius:6px; padding:5px 10px; background:var(--bg); }
+#labRoot .rl-ptr.bad { border-color:var(--bad, #d05c5c); }
+#labRoot .rl-ptr-k { font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+#labRoot .rl-ptr-v { color:var(--accent); margin-left:auto; }
+
+/* the story of one step */
+#labRoot .rl-story { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:10px; margin-top:14px; }
+#labRoot .rl-story > div { border:1px solid var(--line); border-radius:9px;
+  background:var(--bg); padding:11px 13px; }
+#labRoot .rl-flow-h, #labRoot .rl-cond-h { font-size:10px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted); font-weight:600; margin-bottom:8px; }
+#labRoot .rl-cond.t { border-color:var(--ok, #56a869); }
+#labRoot .rl-cond.f { border-color:var(--muted); }
+#labRoot .rl-cond-e { font-size:14px; margin-bottom:6px; overflow-wrap:anywhere; }
+#labRoot .rl-cond-r { font-size:12px; color:var(--muted); }
+#labRoot .rl-cond.t .rl-cond-r { color:var(--ok, #56a869); }
+#labRoot .rl-flow-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+#labRoot .rl-cell { display:flex; flex-direction:column; gap:1px; border:1px solid var(--line);
+  border-radius:6px; padding:5px 9px; background:var(--panel); }
+#labRoot .rl-cell.dest { border-color:var(--accent); }
+#labRoot .rl-cell-t { font-size:10.5px; color:var(--muted); }
+#labRoot .rl-cell-a { font-size:9.5px; color:var(--muted); }
+#labRoot .rl-op { font-size:13px; color:var(--muted); }
+#labRoot .rl-arrow { color:var(--accent); font-size:15px; }
+#labRoot .rl-diff-row { display:flex; align-items:baseline; gap:9px; flex-wrap:wrap; font-size:12.5px; }
+#labRoot .rl-diff-a { font-size:11px; color:var(--muted); }
+#labRoot .rl-diff-b { text-decoration:line-through; opacity:.65; }
+#labRoot .rl-diff-n { color:var(--accent); font-weight:600; }
+#labRoot .rl-diff-t { font-size:10.5px; color:var(--muted); margin-left:auto; }
+#labRoot .rl-ret-v { font-size:15px; color:var(--accent); overflow-wrap:anywhere; }
+#labRoot .rl-ret-n, #labRoot .rl-ret-o { font-size:12px; color:var(--muted); margin-top:5px; line-height:1.6; }
+#labRoot .rl-pop { font-size:12.5px; color:var(--muted); line-height:1.6; }
+#labRoot .rl-stopped { margin-top:12px; border:1px solid var(--bad, #d05c5c); border-radius:8px;
+  padding:10px 13px; font-size:12.5px; line-height:1.6; }
+
+/* experiments */
+#labRoot .rl-exps { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; }
+#labRoot .rl-exp { border:1px solid var(--line); border-radius:9px; background:var(--bg); padding:11px 12px; }
+#labRoot .rl-exp.base { border-color:var(--accent); }
+#labRoot .rl-exp-h { font-size:12.5px; font-weight:600; margin-bottom:6px; }
+#labRoot .rl-exp-p { font-size:11px; color:var(--muted); margin-bottom:7px; overflow-wrap:anywhere; }
+#labRoot .rl-exp-s { font-size:11.5px; color:var(--muted); }
+#labRoot .rl-exp-r { font-size:13px; color:var(--accent); margin-top:3px;
+  font-family:var(--mono); overflow-wrap:anywhere; }
+
+/* mistakes */
+#labRoot .rl-mist { border:1px solid var(--line); border-radius:9px; background:var(--bg);
+  padding:11px 13px; margin-bottom:8px; }
+#labRoot .rl-mist:last-child { margin-bottom:0; }
+#labRoot .rl-mist-w, #labRoot .rl-mist-r { display:flex; gap:9px; font-size:12.5px; line-height:1.65; }
+#labRoot .rl-mist-w { color:var(--muted); margin-bottom:6px; }
+#labRoot .rl-mist-w span { color:var(--bad, #d05c5c); font-weight:700; }
+#labRoot .rl-mist-r span { color:var(--ok, #56a869); font-weight:700; }
+
+/* expert facts + unsupported */
+#labRoot .rl-facts { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:9px; margin-top:12px; }
+#labRoot .rl-fact { border:1px solid var(--line); border-radius:8px; background:var(--bg);
+  padding:9px 12px; display:flex; flex-direction:column; gap:3px; }
+#labRoot .rl-fact span { font-size:10.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); }
+#labRoot .rl-fact b { font-size:15px; }
+#labRoot .rl-links { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+#labRoot .rl-unsupported { border:1px solid var(--bad, #d05c5c); border-radius:9px;
+  padding:12px 14px; margin-bottom:12px; }
+#labRoot .rl-uns-m { font-family:var(--mono); font-size:12.5px; margin-top:7px; line-height:1.6; }
+
+@media (max-width: 900px) {
+  #labRoot .rl-two { grid-template-columns:1fr; }
+  #labRoot .rl-g { grid-template-columns:1fr; gap:3px; }
+  #labRoot .rl-var { grid-template-columns:1fr auto; }
+}
+/* ==== REPROCSS END ==== */
 </style>
 </head>
 <body>
@@ -17224,6 +17407,7 @@ const LAB_TABS = [
   { id:'repr',      label:'Data Representation' },
   { id:'ptr',       label:'Pointers & Dereferencing' },
   { id:'argv',      label:'argc / argv' },
+  { id:'repro',     label:'Function Reproduction' },
 ];
 
 const lab = {
@@ -17262,6 +17446,11 @@ const lab = {
   ptrEx: 'basic', ptrStep: null, ptrRuns: null, ptrMode: 'beginner',
   ptrPrec: '(*p)++', ptrState: 'null', ptrStateRuns: null,
   ptrExplain: false, ptrLit: null,
+  // --- Phase 12: function reproduction ---
+  rpFn: 'strcpy',      // which entry of REPRO_FUNCTIONS
+  rpStep: null,        // null = open where the function is actually running
+  rpMode: 'beginner',  // beginner | intermediate | expert
+  rpRuns: null,        // memoised engine runs, keyed by function + patch
   // --- Phase 11: argc / argv ---
   avEx: 'count', avArgs: null, avStep: null, avRuns: null,
   avMode: 'beginner', avIndex: null, avCounts: null, avQuiz: null,
@@ -17559,6 +17748,7 @@ function renderLab() {
     case 'repr':      body = labReprHtml(); break;
     case 'ptr':       body = labPtrHtml(); break;
     case 'argv':      body = labArgvHtml(); break;
+    case 'repro':     body = labReproHtml(); break;
   }
   root.innerHTML =
     '<div class="vl"><div class="vl-inner">' +
@@ -17569,7 +17759,7 @@ function renderLab() {
           '" data-labtab="' + t.id + '" role="tab" aria-selected="' + (t.id === lab.tab) + '">' +
           esc(t.label) + '</button>').join('') +
       '</div>' +
-      (lab.tab === 'functions' || lab.tab === 'syscalls' || lab.tab === 'c03' || lab.tab === 'repr' || lab.tab === 'ptr' || lab.tab === 'argv' ? '' : labValueStrip()) +
+      (lab.tab === 'functions' || lab.tab === 'syscalls' || lab.tab === 'c03' || lab.tab === 'repr' || lab.tab === 'ptr' || lab.tab === 'argv' || lab.tab === 'repro' ? '' : labValueStrip()) +
       '<div class="vl-body">' + body + '</div>' +
       '<div class="vl-foot">Widths, signedness and wrapping follow the simulated architecture (' +
         esc(CEngine.ARCH.short) + '). Arithmetic and comparisons are evaluated by the execution engine, ' +
@@ -17585,6 +17775,7 @@ function wireLab() {
   if (typeof wireLabRepr === 'function') wireLabRepr();
   if (typeof wireLabPtr === 'function') wireLabPtr();
   if (typeof wireLabArgv === 'function') wireLabArgv();
+  if (typeof wireLabRepro === 'function') wireLabRepro();
   $$('#labRoot [data-labtab]').forEach(el => el.addEventListener('click', () => {
     lab.tab = el.dataset.labtab; renderLab();
   }));
@@ -20492,6 +20683,699 @@ function wireLabArgv() {
   }));
 }
 /* ==== ARGVLAB END ==== */
+
+/* ==== REPROLAB START ====
+   PHASE 12 — the Function Reproduction Lab.
+
+   The audit found that no engine change was needed. Everything this lab shows
+   already exists in the step record and was simply never surfaced:
+
+     step.condition          {expr, result, value, iteration}  -> the loop view
+     step.detail.dataflow    {dest, op, opExpr, sources[]}     -> the explanation
+     step.memDiff            {address, before/after + repr}    -> what changed
+     step.returnValue        the value the engine produced
+     state.frames            parameters and locals
+     state.graph             the Phase 4 pointer graph, unchanged
+     CEngine.asciiInfo       the one ASCII table
+
+   So this file executes nothing and computes nothing. It compiles the program
+   with runToCompletion and reads the snapshot back.
+
+   ON THE FUNCTION LIST: the real 1337/42 functions have not been supplied, so
+   none are invented here. REPRO_FUNCTIONS below holds a small set of genuinely
+   executable seeds, each marked `seed: true`; the categories that will be
+   filled in later are declared empty rather than guessed at. Adding a function
+   means adding ONE entry — source, harness, lesson and tests all read from it. */
+
+const REPRO_CATEGORIES = [
+  { id:'char',   label:'Character',   blurb:'Classifying and converting single characters.' },
+  { id:'string', label:'String',      blurb:'Walking and copying NUL-terminated arrays.' },
+  { id:'mem',    label:'Memory',      blurb:'Working with raw bytes, terminator or not.' },
+  { id:'ptr',    label:'Pointer',     blurb:'Functions whose whole point is what they modify through a pointer.' },
+  { id:'array',  label:'Array',       blurb:'Reordering and searching contiguous storage.' },
+  { id:'number', label:'Number',      blurb:'Arithmetic, digits and conversion.' },
+  { id:'rec',    label:'Recursive',   blurb:'Functions that call themselves.' },
+  { id:'sort',   label:'Sorting',     blurb:'Comparison and exchange.' },
+  { id:'list',   label:'Linked list', blurb:'Awaiting the struct support this simulator does not yet have.' },
+  { id:'custom', label:'Your own',    blurb:'Functions you supply. Add one entry to REPRO_FUNCTIONS.' },
+];
+
+/* GIOPVC-LAC: Goal, Input, Output, Prototype, Variables, Conditions, Loop,
+   Algorithm, Code. Every entry carries the whole shape so a lesson never has to
+   be written twice. */
+const REPRO_FUNCTIONS = [
+  {
+    id:'strcpy', name:'ft_strcpy', category:'string', seed:true,
+    prototype:'char *ft_strcpy(char *dest, char *src);',
+    goal:'Copy a string into a buffer the caller owns, terminator included.',
+    input:'dest — a buffer with room. src — a NUL-terminated string.',
+    output:'dest, so the call can be chained.',
+    variables:'i — one index used for BOTH strings, because they move together.',
+    conditions:'src[i] != 0 — stop at the terminator, not at a length.',
+    loop:'while: copy one byte, advance, repeat.',
+    algorithm:'Walk src. Copy each byte to the same offset in dest. Terminate dest.',
+    watch:['dest', 'src', 'i'],
+    concepts:['char *', 'array indexing', 'the \\0 terminator', 'caller-owned buffers'],
+    mistakes:[
+      ['“strcpy allocates the destination.”',
+       'It does not. dest must already have room — including one byte for the terminator. Getting that wrong is the classic buffer overflow.'],
+      ['“The loop copies the \\0 too.”',
+       'It stops AT the terminator, which is why the final dest[i] = 0 line exists. Remove it and dest is not a string.'],
+    ],
+    source:
+'char\t*ft_strcpy(char *dest, char *src)\n' +
+'{\n' +
+'\tint\ti;\n' +
+'\n' +
+'\ti = 0;\n' +
+'\twhile (src[i] != 0)\n' +
+'\t{\n' +
+'\t\tdest[i] = src[i];\n' +
+'\t\ti++;\n' +
+'\t}\n' +
+'\tdest[i] = 0;\n' +
+'\treturn (dest);\n' +
+'}\n',
+    harness:
+'int\tmain(void)\n' +
+'{\n' +
+'\tchar\tdest[8];\n' +
+'\tchar\tsrc[6] = "Hello";\n' +
+'\tchar\t*r;\n' +
+'\n' +
+'\tr = ft_strcpy(dest, src);\n' +
+'\treturn (0);\n' +
+'}\n',
+    experiments:[
+      { label:'a shorter source', patch:['char\tsrc[6] = "Hello";', 'char\tsrc[6] = "Hi";'] },
+      { label:'a longer source',  patch:['char\tsrc[6] = "Hello";', 'char\tsrc[8] = "Hello!!";'] },
+    ],
+  },
+  {
+    id:'strlen', name:'ft_strlen', category:'string', seed:true,
+    prototype:'int ft_strlen(char *s);',
+    goal:'Count the characters before the terminator.',
+    input:'s — a NUL-terminated string.',
+    output:'The count, not including the \\0.',
+    variables:'i — doubles as the cursor and, at the end, as the answer.',
+    conditions:'s[i] — a non-zero byte is true, so the terminator ends the loop on its own.',
+    loop:'while: advance until the terminator.',
+    algorithm:'Start at 0, step forward while the byte is non-zero, return where you stopped.',
+    watch:['s', 'i'],
+    concepts:['\\0 terminator', 'truthiness of a byte', 'reading without writing'],
+    mistakes:[
+      ['“It returns the buffer size.”',
+       'It returns the string length. A 100-byte buffer holding "hi" has length 2.'],
+      ['“It counts the \\0.”',
+       'It stops at it. That is why a buffer needs length + 1 bytes to hold the string.'],
+    ],
+    source:
+'int\tft_strlen(char *s)\n' +
+'{\n' +
+'\tint\ti;\n' +
+'\n' +
+'\ti = 0;\n' +
+'\twhile (s[i])\n' +
+'\t\ti++;\n' +
+'\treturn (i);\n' +
+'}\n',
+    harness:
+'int\tmain(void)\n' +
+'{\n' +
+'\tint\tn;\n' +
+'\n' +
+'\tn = ft_strlen("Hello");\n' +
+'\treturn (0);\n' +
+'}\n',
+    experiments:[
+      { label:'the empty string', patch:['ft_strlen("Hello")', 'ft_strlen("")'] },
+      { label:'one character',    patch:['ft_strlen("Hello")', 'ft_strlen("A")'] },
+    ],
+  },
+  {
+    id:'swap', name:'ft_swap', category:'ptr', seed:true,
+    prototype:'void ft_swap(int *a, int *b);',
+    goal:'Exchange two values that belong to the CALLER.',
+    input:'a and b — addresses of two ints.',
+    output:'Nothing is returned. The effect is the mutation itself.',
+    variables:'t — a temporary, because the first write would otherwise destroy what the second needs.',
+    conditions:'None. It is straight-line code.',
+    loop:'None.',
+    algorithm:'Save *a, copy *b over it, put the saved value into *b.',
+    watch:['x', 'y'],
+    concepts:['int *', 'dereferencing to write', 'why C needs addresses to modify a caller'],
+    mistakes:[
+      ['“Passing a and b by value would work.”',
+       'It would swap the copies and leave the caller untouched. The addresses are the whole point.'],
+      ['“The temporary is optional.”',
+       'Without it the first assignment overwrites the value the second one still needs.'],
+    ],
+    source:
+'void\tft_swap(int *a, int *b)\n' +
+'{\n' +
+'\tint\tt;\n' +
+'\n' +
+'\tt = *a;\n' +
+'\t*a = *b;\n' +
+'\t*b = t;\n' +
+'}\n',
+    harness:
+'int\tmain(void)\n' +
+'{\n' +
+'\tint\tx;\n' +
+'\tint\ty;\n' +
+'\n' +
+'\tx = 1;\n' +
+'\ty = 2;\n' +
+'\tft_swap(&x, &y);\n' +
+'\treturn (0);\n' +
+'}\n',
+    experiments:[{ label:'different values', patch:['x = 1;', 'x = 42;'] }],
+  },
+  {
+    id:'isalpha', name:'ft_isalpha', category:'char', seed:true,
+    prototype:'int ft_isalpha(int c);',
+    goal:'Report whether a character code is a letter.',
+    input:'c — a character code as an int.',
+    output:'1 for a letter, 0 otherwise.',
+    variables:'None — the parameter is enough.',
+    conditions:'Two range checks joined by &&, one per case of letter.',
+    loop:'None.',
+    algorithm:'Test the uppercase range, then the lowercase range, else 0.',
+    watch:['c', 'r'],
+    concepts:['characters are numbers', 'ASCII ranges', '&& short-circuit'],
+    mistakes:[
+      ['“A single range covers both cases.”',
+       'Uppercase and lowercase are not adjacent in ASCII: there are six punctuation codes between Z (90) and a (97).'],
+      ['“It takes a char.”',
+       'The standard versions take an int so they can also represent EOF. Passing a plain char is usually fine but is not the declared interface.'],
+    ],
+    source:
+'int\tft_isalpha(int c)\n' +
+'{\n' +
+'\tif (c >= 65 && c <= 90)\n' +
+'\t\treturn (1);\n' +
+'\tif (c >= 97 && c <= 122)\n' +
+'\t\treturn (1);\n' +
+'\treturn (0);\n' +
+'}\n',
+    harness:
+'int\tmain(void)\n' +
+'{\n' +
+'\tint\tr;\n' +
+'\n' +
+'\tr = ft_isalpha(66);\n' +
+'\treturn (0);\n' +
+'}\n',
+    experiments:[
+      { label:'a lowercase letter', patch:['ft_isalpha(66)', 'ft_isalpha(122)'] },
+      { label:'a digit',            patch:['ft_isalpha(66)', 'ft_isalpha(53)'] },
+      { label:'between Z and a',    patch:['ft_isalpha(66)', 'ft_isalpha(94)'] },
+    ],
+  },
+  {
+    id:'fact', name:'ft_fact', category:'rec', seed:true,
+    prototype:'int ft_fact(int n);',
+    goal:'Compute n! by calling itself.',
+    input:'n — a small non-negative integer.',
+    output:'n factorial.',
+    variables:'None. Each call keeps its own n in its own frame.',
+    conditions:'n <= 1 — the base case, which is what stops the recursion.',
+    loop:'No loop. The call stack is doing the repeating.',
+    algorithm:'If n is small, return 1. Otherwise return n times the answer for n - 1.',
+    watch:['n', 'r'],
+    concepts:['stack frames', 'base case', 'one frame per call'],
+    mistakes:[
+      ['“Recursion repeats without cost.”',
+       'Every call is a real frame holding its own n. Deep recursion exhausts the stack; this simulator stops at 200 frames and says so.'],
+      ['“The base case is optional.”',
+       'Without it the recursion never ends. It is not a formality — it is the terminating condition.'],
+    ],
+    source:
+'int\tft_fact(int n)\n' +
+'{\n' +
+'\tif (n <= 1)\n' +
+'\t\treturn (1);\n' +
+'\treturn (n * ft_fact(n - 1));\n' +
+'}\n',
+    harness:
+'int\tmain(void)\n' +
+'{\n' +
+'\tint\tr;\n' +
+'\n' +
+'\tr = ft_fact(4);\n' +
+'\treturn (0);\n' +
+'}\n',
+    experiments:[
+      { label:'the base case itself', patch:['ft_fact(4)', 'ft_fact(1)'] },
+      { label:'one level deeper',     patch:['ft_fact(4)', 'ft_fact(6)'] },
+    ],
+  },
+  {
+    id:'sort', name:'ft_sort_pass', category:'sort', seed:true,
+    prototype:'void ft_sort_pass(int *a, int n);',
+    goal:'One bubble-sort pass: push the largest element to the end.',
+    input:'a — an array of ints. n — how many.',
+    output:'Nothing returned; the array itself is reordered.',
+    variables:'i — the position being compared. t — the temporary for the exchange.',
+    conditions:'i < n - 1 bounds the walk; a[i] > a[i + 1] decides each swap.',
+    loop:'while: compare each neighbouring pair once.',
+    algorithm:'Walk the array comparing neighbours, exchanging any pair in the wrong order.',
+    watch:['a'],
+    concepts:['arrays are contiguous', 'in-place mutation', 'comparison and exchange'],
+    mistakes:[
+      ['“One pass sorts the array.”',
+       'One pass only guarantees the largest element reaches the end. A full sort repeats the pass.'],
+      ['“i < n is the right bound.”',
+       'It reads a[i + 1], so the last valid i is n - 2. Using n reads one element past the array.'],
+    ],
+    source:
+'void\tft_sort_pass(int *a, int n)\n' +
+'{\n' +
+'\tint\ti;\n' +
+'\tint\tt;\n' +
+'\n' +
+'\ti = 0;\n' +
+'\twhile (i < n - 1)\n' +
+'\t{\n' +
+'\t\tif (a[i] > a[i + 1])\n' +
+'\t\t{\n' +
+'\t\t\tt = a[i];\n' +
+'\t\t\ta[i] = a[i + 1];\n' +
+'\t\t\ta[i + 1] = t;\n' +
+'\t\t}\n' +
+'\t\ti++;\n' +
+'\t}\n' +
+'}\n',
+    harness:
+'int\tmain(void)\n' +
+'{\n' +
+'\tint\ta[4] = {4, 2, 3, 1};\n' +
+'\n' +
+'\tft_sort_pass(a, 4);\n' +
+'\treturn (0);\n' +
+'}\n',
+    experiments:[
+      { label:'already sorted', patch:['{4, 2, 3, 1}', '{1, 2, 3, 4}'] },
+      { label:'reversed',       patch:['{4, 2, 3, 1}', '{4, 3, 2, 1}'] },
+    ],
+  },
+];
+const reproFn = () => REPRO_FUNCTIONS.find(f => f.id === lab.rpFn) || REPRO_FUNCTIONS[0];
+/* ONE program: the function plus its harness. This is both what is shown and
+   what is executed — a test asserts they are the same string. */
+function reproProgram(fn, patch) {
+  let src = fn.source + '\n' + fn.harness;
+  if (patch) src = src.split(patch[0]).join(patch[1]);
+  return src;
+}
+const rpMode = () => lab.rpMode || 'beginner';
+const rpShow = (l) => ({ beginner:0, intermediate:1, expert:2 })[rpMode()] >=
+                      ({ beginner:0, intermediate:1, expert:2 })[l];
+
+function reproRun(patch) {
+  const fn = reproFn();
+  const key = fn.id + '|' + (patch ? patch.join('->') : '');
+  if (!lab.rpRuns) lab.rpRuns = {};
+  if (lab.rpRuns[key]) return lab.rpRuns[key];
+  const src = reproProgram(fn, patch);
+  let r;
+  try { r = CEngine.runToCompletion(src); }
+  catch (e) { return (lab.rpRuns[key] = { ok:false, src, error:e.message, unsupported:true }); }
+  if (!r.history) return (lab.rpRuns[key] = { ok:false, src, error: r.message || 'did not run', unsupported:true });
+  const steps = [];
+  for (let i = 0; i < r.history.length; i++)
+    steps.push({ i, step: r.history.steps[i], state: r.history.stateAt(i) });
+  return (lab.rpRuns[key] = { ok:true, src, steps, output:r.output,
+                              error: r.ok ? null : r.message, kind: r.kind });
+}
+/* Open where the function is actually running, not on the empty end. */
+function reproDefaultStep(run, name) {
+  for (let i = run.steps.length - 1; i >= 0; i--)
+    if (run.steps[i].state.frames.some(f => f.name === name)) return i;
+  for (let i = run.steps.length - 1; i >= 0; i--)
+    if ((run.steps[i].step.callStack || []).indexOf(name) >= 0) return i;
+  for (let i = run.steps.length - 1; i >= 0; i--)
+    if (run.steps[i].state.frames.length) return i;
+  return 0;
+}
+function reproCur() {
+  const run = reproRun();
+  if (!run.ok) return null;
+  const d = reproDefaultStep(run, reproFn().name);
+  const i = Math.max(0, Math.min(lab.rpStep == null ? d : lab.rpStep, run.steps.length - 1));
+  return { run, i, cur: run.steps[i] };
+}
+
+/* ---------------- selector ---------------- */
+function reproPickerHtml() {
+  const fn = reproFn();
+  const byCat = {};
+  for (const f of REPRO_FUNCTIONS) (byCat[f.category] = byCat[f.category] || []).push(f);
+  return '<div class="rl-block"><div class="rl-block-h">Function</div>' +
+    '<div class="rl-cats">' + REPRO_CATEGORIES.map(c => {
+      const fns = byCat[c.id] || [];
+      return '<div class="rl-cat' + (fns.length ? '' : ' empty') + '">' +
+        '<div class="rl-cat-h">' + esc(c.label) +
+          (fns.length ? '' : '<span class="rl-cat-soon">awaiting your functions</span>') + '</div>' +
+        '<div class="rl-cat-b">' + esc(c.blurb) + '</div>' +
+        (fns.length ? '<div class="rl-cat-fns">' + fns.map(f =>
+          '<button class="rl-fn' + (f.id === fn.id ? ' on' : '') + '" data-rpfn="' + f.id + '">' +
+          esc(f.name) + '</button>').join('') + '</div>' : '') +
+        '</div>';
+    }).join('') + '</div>' +
+    '<div class="rl-note">The official 1337/42 function list has <b>not</b> been supplied, so none is invented ' +
+    'here. These are executable seeds. Adding a function means adding one entry to ' +
+    '<span class="mono">REPRO_FUNCTIONS</span> — its source, lesson, experiments and tests all read from it.</div>' +
+    '</div>';
+}
+
+/* ---------------- the lesson, GIOPVC-LAC ---------------- */
+function reproLessonHtml() {
+  const f = reproFn();
+  const rows = [['Goal', f.goal], ['Input', f.input], ['Output', f.output],
+                ['Prototype', f.prototype], ['Variables', f.variables],
+                ['Conditions', f.conditions], ['Loop', f.loop], ['Algorithm', f.algorithm]];
+  return '<div class="rl-block"><div class="rl-block-h">' + esc(f.name) + ' — the plan before the code</div>' +
+    '<div class="rl-giop">' + rows.map(([k, v]) =>
+      '<div class="rl-g"><span class="rl-g-k">' + esc(k) + '</span>' +
+      '<span class="rl-g-v' + (k === 'Prototype' ? ' mono' : '') + '">' + esc(v) + '</span></div>').join('') +
+    '</div>' +
+    (rpShow('intermediate')
+      ? '<div class="rl-concepts">' + f.concepts.map(c =>
+          '<span class="rl-concept">' + esc(c) + '</span>').join('') + '</div>' : '') +
+    '</div>';
+}
+
+/* ---------------- what this step did ---------------- */
+function reproStepStoryHtml(step, state) {
+  const bits = [];
+  const d = step.detail || {};
+  // a loop or if condition, with the engine's own operands
+  if (step.condition) {
+    const c = step.condition;
+    bits.push('<div class="rl-cond' + (c.result ? ' t' : ' f') + '">' +
+      '<div class="rl-cond-h">CONDITION' + (c.iteration ? ' · iteration ' + c.iteration : '') + '</div>' +
+      '<div class="rl-cond-e mono">' + esc(c.expr) + '</div>' +
+      '<div class="rl-cond-r">' + (c.result ? 'TRUE — the body runs' : 'FALSE — the loop or branch ends') + '</div>' +
+      '</div>');
+  }
+  // an assignment, with source -> destination
+  if (d.dataflow) {
+    const f = d.dataflow;
+    const srcs = (f.sources || []).filter(s => s.valueText != null);
+    bits.push('<div class="rl-flow"><div class="rl-flow-h">WHAT MOVED</div>' +
+      '<div class="rl-flow-row">' +
+        srcs.map(s => '<span class="rl-cell"><span class="rl-cell-t mono">' + esc(s.text) + '</span>' +
+          '<b class="mono">' + esc(s.valueText) + '</b>' +
+          (s.address != null ? '<span class="rl-cell-a mono">' + hexA(s.address) + '</span>' : '') +
+          '</span>').join(f.op ? '<span class="rl-op mono">' + esc(f.op) + '</span>' : '<span class="rl-op">,</span>') +
+        '<span class="rl-arrow">→</span>' +
+        '<span class="rl-cell dest"><span class="rl-cell-t mono">' + esc(f.dest.text) + '</span>' +
+          '<b class="mono">' + esc(f.dest.valueText) + '</b>' +
+          (f.dest.address != null ? '<span class="rl-cell-a mono">' + hexA(f.dest.address) + '</span>' : '') +
+          '</span>' +
+      '</div></div>');
+  }
+  // the byte that changed
+  if (step.memDiff) {
+    const m = step.memDiff;
+    bits.push('<div class="rl-diff"><div class="rl-flow-h">MEMORY CHANGED</div>' +
+      '<div class="rl-diff-row"><span class="rl-diff-a mono">' + hexA(m.address) + '</span>' +
+      '<span class="rl-diff-b mono">' + esc(m.beforeText == null ? 'uninitialized' : m.beforeText) + '</span>' +
+      '<span class="rl-arrow">→</span>' +
+      '<span class="rl-diff-n mono">' + esc(m.afterText) + '</span>' +
+      '<span class="rl-diff-t">' + esc(m.typeName || '') + ' · ' + m.size + ' B</span></div></div>');
+  }
+  if (step.returnValue !== undefined && step.returnValue !== null) {
+    /* "Show what the returned value actually represents": if the value is the
+       address of something the graph knows about, name that object. The lookup
+       reads the graph — it does not resolve the pointer itself. */
+    const rv = step.returnValue;
+    const n = (state.graph ? state.graph.nodes : []).find(x => String(x.address) === String(rv));
+    bits.push('<div class="rl-ret"><div class="rl-flow-h">RETURN</div>' +
+      '<div class="rl-ret-v mono">' + esc(String(rv)) +
+        (n ? '  ·  ' + hexA(n.address) : '') + '</div>' +
+      (n ? '<div class="rl-ret-o">that address is <b class="mono">' + esc(n.label) + '</b>' +
+           ' — <span class="mono">' + esc(n.typeName || '') + '</span> in ' +
+           esc(n.frameName ? n.frameName + '()' : n.sectionLabel) +
+           '. The caller receives the address, not a copy of the bytes.</div>'
+         : '<div class="rl-ret-n">the caller receives this once the frame is destroyed</div>') +
+      '</div>');
+  }
+  if (d.poppedFrame) {
+    bits.push('<div class="rl-pop">frame <b class="mono">' + esc(d.poppedFrame) +
+      '()</b> destroyed — its parameters and locals are gone</div>');
+  }
+  return bits.length ? '<div class="rl-story">' + bits.join('') + '</div>' : '';
+}
+
+/* ---------------- frames, params, locals ---------------- */
+function reproFramesHtml(state) {
+  if (!state.frames.length) return '<div class="rl-empty">no frame is alive at this step</div>';
+  return '<div class="rl-frames">' + state.frames.slice().reverse().map((f, k) =>
+    '<div class="rl-frame' + (k === 0 ? ' top' : '') + '">' +
+      '<div class="rl-frame-h"><b class="mono">' + esc(f.name) + '()</b>' +
+        (k === 0 ? '<span class="rl-tag">running</span>' : '<span class="rl-tag w">waiting</span>') + '</div>' +
+      (f.vars.length
+        ? '<div class="rl-vars">' + f.vars.map(v =>
+            '<div class="rl-var' + (v.uninitialized ? ' un' : '') + '">' +
+              '<span class="rl-var-n mono">' + esc(v.name) + '</span>' +
+              '<span class="rl-var-t mono">' + esc(v.typeName) + '</span>' +
+              '<span class="rl-var-v mono">' + esc(v.uninitialized ? '?' : v.valueText) + '</span>' +
+              (rpShow('intermediate')
+                ? '<span class="rl-var-a mono">' + hexA(v.address) + '</span>' : '') +
+            '</div>').join('') + '</div>'
+        : '<div class="rl-empty">no locals yet</div>') +
+    '</div>').join('') + '</div>';
+}
+
+/* ---------------- watched objects, byte by byte ---------------- */
+function reproWatchHtml(state, changed) {
+  const f = reproFn();
+  const found = [];
+  for (const fr of state.frames)
+    for (const v of fr.vars)
+      if (f.watch.indexOf(v.name) >= 0) found.push({ v, owner: fr.name });
+  if (!found.length) return '';
+  return '<div class="rl-watch">' + found.map(({ v, owner }) => {
+    if (v.elements) {
+      return '<div class="rl-obj"><div class="rl-obj-h"><b class="mono">' + esc(v.name) + '</b>' +
+        '<span class="rl-obj-t mono">' + esc(v.typeName) + '</span>' +
+        '<span class="rl-obj-o">in ' + esc(owner) + '()</span>' +
+        '<span class="rl-obj-a mono">' + hexA(v.address) + '</span></div>' +
+        '<div class="rl-cells">' + v.elements.map(el => {
+          /* el.repr is the engine's own decode, ASCII included. Nothing is
+             re-derived here — that is the rule this lab exists to obey. */
+          const isChar = /\bchar\b/.test(v.elemTypeName || '');
+          const a = isChar && el.initialized && el.repr ? el.repr.ascii : null;
+          const nul = !!a && a.code === 0;
+          const hit = changed.indexOf(el.address) >= 0;
+          return '<span class="rl-cell2' + (hit ? ' hit' : '') + (nul ? ' nul' : '') +
+            (el.initialized ? '' : ' un') + '" title="' + hexA(el.address) +
+            (el.initialized ? ' · ' + esc(el.repr.hex) : '') + '">' +
+            '<span class="rl-c-i">' + el.index + '</span>' +
+            '<span class="rl-c-v mono">' + esc(!el.initialized ? '?'
+              : a ? (nul ? '\\0' : (a.printable ? a.display : a.escape || a.name))
+                  : el.repr ? el.repr.decimal : el.valueText) +
+            '</span></span>';
+        }).join('') + '</div></div>';
+    }
+    return '<div class="rl-obj scalar' + (v.uninitialized ? ' un' : '') + '">' +
+      '<b class="mono">' + esc(v.name) + '</b>' +
+      '<span class="rl-obj-t mono">' + esc(v.typeName) + '</span>' +
+      '<span class="rl-obj-o">in ' + esc(owner) + '()</span>' +
+      '<span class="rl-obj-v mono">' + esc(v.uninitialized ? 'not set yet' : v.valueText) + '</span>' +
+      '<span class="rl-obj-a mono">' + hexA(v.address) + '</span></div>';
+  }).join('') + '</div>';
+}
+
+/* ---------------- pointers, from the Phase 4 graph ---------------- */
+function reproPointersHtml(state) {
+  const g = state.graph;
+  if (!g || !g.edges.length) return '<div class="rl-empty">no pointer is alive at this step</div>';
+  return '<div class="rl-ptrs">' + g.edges.map(e => {
+    const to = e.to ? g.nodes.find(n => n.id === e.to) : null;
+    return '<div class="rl-ptr' + (e.valid ? '' : ' bad') + '">' +
+      '<span class="rl-ptr-n mono">' + esc(e.name) + '</span>' +
+      '<span class="rl-ptr-k">' + esc(e.kind === 'points-to' ? 'points to' : e.kind) + '</span>' +
+      '<span class="rl-ptr-t mono">' + esc(to ? to.label : (e.text || '—')) + '</span>' +
+      (e.targetValueText ? '<span class="rl-ptr-v mono">' + esc(e.targetValueText) + '</span>' : '') +
+      '</div>';
+  }).join('') + '</div>';
+}
+
+/* ---------------- the timeline ---------------- */
+function reproTimelineHtml() {
+  const c = reproCur();
+  const run = reproRun();
+  const f = reproFn();
+  if (!c) {
+    return '<div class="rl-block"><div class="rl-block-h">' + esc(f.name) + '</div>' +
+      '<div class="rl-unsupported"><b>UNSUPPORTED BY SIMULATOR</b>' +
+      '<div class="rl-uns-m">' + esc(run.error || 'this program did not compile') + '</div>' +
+      '<div class="rl-note">Nothing is faked when the engine cannot run something. The message above is the ' +
+      'engine’s own diagnostic; the C shown is unchanged.</div></div>' +
+      '<pre class="rl-src mono">' + esc(run.src) + '</pre></div>';
+  }
+  const { i, cur } = c;
+  const s = cur.step;
+  const lines = run.src.split('\n');
+  const changed = (s.changed || []).concat(s.memDiff ? [s.memDiff.address] : []);
+  let h = '<div class="rl-block"><div class="rl-block-h">Execute · step through · inspect</div>';
+  h += '<div class="rl-two">' +
+    '<div class="rl-left">' +
+      '<pre class="rl-src mono">' + lines.map((l, k) =>
+        '<span class="rl-srcline' + (k + 1 === s.line ? ' on' : '') + '">' +
+        String(k + 1).padStart(2) + '  ' + esc(l || ' ') + '</span>').join('') + '</pre>' +
+      '<div class="rl-scrub">' +
+        '<button class="vl-btn" data-rpstep="first">⏮</button>' +
+        '<button class="vl-btn" data-rpstep="prev">◀</button>' +
+        '<input type="range" class="fn-range" min="0" max="' + (run.steps.length - 1) + '" value="' + i + '" ' +
+          'data-rprange="1" aria-label="Execution step">' +
+        '<button class="vl-btn" data-rpstep="next">▶</button>' +
+        '<button class="vl-btn" data-rpstep="last">⏭</button>' +
+        '<button class="vl-btn" data-rpstep="reset">reset</button>' +
+        '<span class="fn-scrub-n mono">' + (i + 1) + ' / ' + run.steps.length + '</span></div>' +
+      '<div class="rl-desc">' + esc(s.description || '') + '</div>' +
+      (s.why && rpShow('intermediate') ? '<div class="rl-why">' + esc(s.why) + '</div>' : '') +
+      (cur.state.output ? '<div class="rl-out">output: <b class="mono">' + esc(cur.state.output) + '</b></div>' : '') +
+    '</div>' +
+    '<div class="rl-right">' +
+      '<div class="rl-col-h">CALL STACK</div>' +
+      '<div class="rl-cs">' + ((s.callStack || []).slice().reverse().map((n, k) =>
+        '<div class="rl-cs-r' + (k === 0 ? ' top' : '') + '"><span class="mono">' + esc(n) + '()</span></div>'
+        ).join('') || '<div class="rl-empty">—</div>') + '</div>' +
+      '<div class="rl-col-h">FRAMES</div>' + reproFramesHtml(cur.state) +
+      '<div class="rl-col-h">WATCHING</div>' + reproWatchHtml(cur.state, changed) +
+      (rpShow('intermediate')
+        ? '<div class="rl-col-h">POINTERS</div>' + reproPointersHtml(cur.state) : '') +
+    '</div></div>';
+  h += reproStepStoryHtml(s, cur.state);
+  if (run.error) h += '<div class="rl-stopped"><b>' +
+    esc(run.kind ? (CEngine.MEM_SAFETY_LABELS[run.kind] || run.kind) : 'stopped') + '</b><br>' +
+    esc(run.error) + '</div>';
+  return h + '</div>';
+}
+
+/* ---------------- experiments ---------------- */
+function reproExperimentsHtml() {
+  const f = reproFn();
+  if (!f.experiments || !f.experiments.length) return '';
+  const base = reproRun();
+  const rows = f.experiments.map(x => {
+    const r = reproRun(x.patch);
+    let result = null;
+    if (r.ok) {
+      for (let i = r.steps.length - 1; i >= 0 && result === null; i--) {
+        const st = r.steps[i].state;
+        for (const fr of st.frames) for (const v of fr.vars)
+          if (f.watch.indexOf(v.name) >= 0 && !v.uninitialized) result = v.name + ' = ' + v.valueText;
+      }
+    }
+    return { x, r, result, steps: r.ok ? r.steps.length : 0 };
+  });
+  return '<div class="rl-block"><div class="rl-block-h">Change one thing, run it again</div>' +
+    '<div class="rl-exps">' +
+      '<div class="rl-exp base"><div class="rl-exp-h">as written</div>' +
+        '<div class="rl-exp-s">' + (base.ok ? base.steps.length + ' steps' : 'did not run') + '</div>' +
+        '<div class="rl-exp-r">' + esc(reproFinalWatch(base, f) || '—') + '</div></div>' +
+      rows.map(({ x, r, result, steps }) =>
+        '<div class="rl-exp"><div class="rl-exp-h">' + esc(x.label) + '</div>' +
+        '<div class="rl-exp-p mono">' + esc(x.patch[0]) + ' → ' + esc(x.patch[1]) + '</div>' +
+        (r.ok
+          ? '<div class="rl-exp-s">' + steps + ' steps</div><div class="rl-exp-r">' + esc(result || '—') + '</div>'
+          : '<div class="vl-err">' + esc(r.error) + '</div>') +
+        '</div>').join('') +
+    '</div>' +
+    '<div class="rl-note">Each variant is a whole program compiled and run by the engine. The step counts and ' +
+    'results above are what those runs produced — change the input and the work really changes.</div></div>';
+}
+function reproFinalWatch(run, f) {
+  if (!run.ok) return null;
+  for (let i = run.steps.length - 1; i >= 0; i--) {
+    const st = run.steps[i].state;
+    for (const fr of st.frames) for (const v of fr.vars)
+      if (f.watch.indexOf(v.name) >= 0 && !v.uninitialized) return v.name + ' = ' + v.valueText;
+  }
+  return null;
+}
+
+/* ---------------- mistakes + why ---------------- */
+function reproMistakesHtml() {
+  const f = reproFn();
+  return '<div class="rl-block"><div class="rl-block-h">Common mistakes</div>' +
+    f.mistakes.map(([w, r]) =>
+      '<div class="rl-mist"><div class="rl-mist-w"><span>✕</span>' + esc(w) + '</div>' +
+      '<div class="rl-mist-r"><span>✓</span>' + esc(r) + '</div></div>').join('') + '</div>';
+}
+
+/* ---------------- expert: the AST and the whole program ---------------- */
+function reproExpertHtml() {
+  const run = reproRun();
+  const f = reproFn();
+  let nodes = 0, fnCount = 0, err = null;
+  try {
+    const ast = CEngine.parseC(run.src);
+    fnCount = ast.filter(d => d.kind === 'FuncDef').length;
+    const walk = (n) => { if (!n || typeof n !== 'object') return; nodes++;
+      for (const k of Object.keys(n)) { const v = n[k];
+        if (Array.isArray(v)) v.forEach(walk); else if (v && typeof v === 'object') walk(v); } };
+    ast.forEach(walk);
+  } catch (e) { err = e.message; }
+  return '<div class="rl-block"><div class="rl-block-h">The program that actually ran</div>' +
+    '<pre class="rl-src mono rl-full">' + esc(run.src) + '</pre>' +
+    '<div class="rl-facts">' +
+      '<div class="rl-fact"><span>functions parsed</span><b>' + fnCount + '</b></div>' +
+      '<div class="rl-fact"><span>AST nodes</span><b>' + nodes + '</b></div>' +
+      '<div class="rl-fact"><span>execution steps</span><b>' + (run.ok ? run.steps.length : 0) + '</b></div>' +
+      '<div class="rl-fact"><span>architecture</span><b class="mono">' + esc(CEngine.ARCH.short) + '</b></div>' +
+    '</div>' +
+    (err ? '<div class="vl-err">' + esc(err) + '</div>' : '') +
+    '<div class="rl-note">This is the exact text handed to the tokenizer — the function plus a harness that calls ' +
+    'it. What you read above is what executed; a test asserts the two are the same string.</div>' +
+    '<div class="rl-links"><button class="vl-btn" data-rpgo="memory">open Memory →</button>' +
+    '<button class="vl-btn" data-rpgo="pointers">open Pointers →</button>' +
+    '<button class="vl-btn" data-rpgo="ptr">the pointer lab →</button></div></div>';
+}
+
+function labReproHtml() {
+  let h = '<div class="rl-modes" role="group" aria-label="Detail level">' +
+    ['beginner', 'intermediate', 'expert'].map(m =>
+      '<button class="rl-mode' + (rpMode() === m ? ' on' : '') + '" data-rpmode="' + m + '">' + m + '</button>').join('') +
+    '<span class="rl-mode-n">the same execution throughout — only the amount shown changes</span></div>';
+  h += reproPickerHtml() + reproLessonHtml() + reproTimelineHtml() + reproExperimentsHtml() + reproMistakesHtml();
+  if (rpShow('expert')) h += reproExpertHtml();
+  return h;
+}
+
+function wireLabRepro() {
+  $$('#labRoot [data-rpfn]').forEach(el => el.addEventListener('click', () => {
+    lab.rpFn = el.dataset.rpfn; lab.rpStep = null; renderLab();
+  }));
+  $$('#labRoot [data-rpmode]').forEach(el => el.addEventListener('click', () => {
+    lab.rpMode = el.dataset.rpmode; renderLab();
+  }));
+  $$('#labRoot [data-rpstep]').forEach(el => el.addEventListener('click', () => {
+    const run = reproRun();
+    if (!run.ok) return;
+    const n = run.steps.length;
+    const cur = lab.rpStep == null ? reproDefaultStep(run, reproFn().name) : lab.rpStep;
+    const a = el.dataset.rpstep;
+    lab.rpStep = a === 'first' ? 0 : a === 'reset' ? null : a === 'last' ? n - 1
+      : a === 'next' ? Math.min(n - 1, cur + 1) : Math.max(0, cur - 1);
+    renderLab();
+  }));
+  const range = $('#labRoot [data-rprange]');
+  if (range) range.addEventListener('input', () => { lab.rpStep = +range.value; renderLab(); });
+  $$('#labRoot [data-rpgo]').forEach(el => el.addEventListener('click', () => {
+    const to = el.dataset.rpgo;
+    if (to === 'ptr') { lab.tab = 'ptr'; renderLab(); return; }
+    if (typeof showWorkspace === 'function') showWorkspace();
+    if (typeof openPanel === 'function') openPanel(to === 'memory' ? 'panelMemory' : 'panelPointers');
+  }));
+}
+/* ==== REPROLAB END ==== */
 
 /* ==== TERM START ====
    PHASE 8 — the simulated C / 1337 terminal.
