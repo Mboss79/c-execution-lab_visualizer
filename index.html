@@ -4209,6 +4209,214 @@ html[data-theme=light] .viz-node.vz-frame::after{
   #learnRoot .c4-rule-s { grid-column:1/-1; }
 }
 /* ==== C04CSS END ==== */
+
+/* ==== C04DEEPCSS START ==== C 04 learning upgrade.
+   Additions only, all scoped under #learnRoot with the c4- prefix, reusing the
+   same tokens as the rest of the module. */
+
+#learnRoot .c4-dim { color:var(--text-faint); }
+#learnRoot .c4-yes { color:var(--ok, #56a869); font-weight:600; }
+#learnRoot .c4-no  { color:var(--text-faint); }
+#learnRoot .c4-pre { background:var(--bg); border:1px solid var(--border); border-radius:7px;
+  padding:11px 14px; font-size:12.5px; line-height:1.7; margin:0; overflow-x:auto;
+  white-space:pre; tab-size:4; }
+#learnRoot .c4-quote { font-style:italic; border-left:2px solid var(--execution);
+  padding-left:12px; margin:0 0 10px; }
+#learnRoot .c4-boxnote, #learnRoot .c4-wsnote, #learnRoot .c4-mantips, #learnRoot .c4-bridge-note,
+#learnRoot .c4-algo-n { margin-top:12px; font-size:12.5px; color:var(--text-muted); line-height:1.7; }
+
+/* whitespace */
+#learnRoot .c4-invis { color:var(--text-faint); font-size:11.5px; }
+#learnRoot .c4-ghost { display:inline-block; width:16px; text-align:center; opacity:.45;
+  border:1px dashed var(--border); border-radius:3px; margin-right:5px; }
+#learnRoot .c4-ram tbody tr.c4-skipped { opacity:.5; }
+#learnRoot .c4-ram tbody tr.c4-here { background:color-mix(in srgb, var(--execution) 16%, transparent); }
+#learnRoot .c4-ram tbody tr.c4-here td { border-color:var(--execution); }
+#learnRoot .c4-hand { border:1px solid var(--border); border-radius:9px; padding:13px 15px;
+  margin:12px 0; background:var(--bg); }
+#learnRoot .c4-hand-h { font-size:11.5px; font-weight:700; margin-bottom:9px; }
+#learnRoot .c4-hand p { margin:10px 0 0; font-size:12.5px; color:var(--text-muted); line-height:1.7; }
+#learnRoot .c4-hand-w { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+#learnRoot .c4-hw { font-size:11px; border:1px solid var(--border); border-radius:5px;
+  padding:3px 9px; color:var(--text-muted); }
+#learnRoot .c4-hw b { color:var(--execution); margin-right:4px; }
+
+/* string vs integer */
+#learnRoot .c4-svi { display:grid; grid-template-columns:1fr auto 1fr; gap:14px; align-items:center; }
+#learnRoot .c4-svi-side { border:1px solid var(--border); border-radius:9px; padding:13px 15px; background:var(--bg); }
+#learnRoot .c4-svi-h { font-size:11.5px; font-weight:700; margin-bottom:10px; letter-spacing:.04em; }
+#learnRoot .c4-svi-cells { display:flex; gap:4px; margin-bottom:10px; }
+#learnRoot .c4-svi-int { font-size:30px; font-weight:800; color:var(--execution);
+  border:1px solid var(--execution); border-radius:7px; padding:9px 0; text-align:center; margin-bottom:10px; }
+#learnRoot .c4-svi-n { font-size:11.5px; color:var(--text-faint); line-height:1.6; }
+#learnRoot .c4-svi-mid { display:flex; flex-direction:column; align-items:center; gap:3px; }
+#learnRoot .c4-svi-arrow { color:var(--execution); font-size:19px; }
+#learnRoot .c4-svi-op { font-size:10.5px; color:var(--text-faint); }
+
+/* ladder + pipes */
+#learnRoot .c4-pipe.wide .c4-pstep { max-width:460px; }
+#learnRoot .c4-pstep.warn { border-color:var(--warn, #d98b3a); color:var(--warn, #d98b3a); }
+#learnRoot .c4-ladder { display:flex; flex-direction:column; align-items:flex-start; gap:3px; }
+#learnRoot .c4-lrung { display:flex; align-items:baseline; gap:12px; border:1px solid var(--border);
+  border-radius:7px; padding:8px 13px; background:var(--bg); min-width:300px; }
+#learnRoot .c4-lrung.good { border-color:var(--ok, #56a869); }
+#learnRoot .c4-lrung.bad { border-color:var(--bad, #d05c5c); }
+#learnRoot .c4-lk { font-size:11px; color:var(--text-faint); min-width:150px; }
+#learnRoot .c4-lrung b { font-size:16px; }
+#learnRoot .c4-lok { font-size:11px; color:var(--ok, #56a869); }
+#learnRoot .c4-lno { font-size:11px; color:var(--bad, #d05c5c); }
+#learnRoot .c4-larr { color:var(--text-faint); font-size:11px; padding-left:18px; }
+
+/* positional notation */
+#learnRoot .c4-posn, #learnRoot .c4-posn-why { border:1px solid var(--border); border-radius:9px;
+  padding:13px 15px; background:var(--bg); margin-bottom:11px; }
+#learnRoot .c4-posn-h { font-size:11px; text-transform:uppercase; letter-spacing:.08em;
+  color:var(--text-faint); font-weight:700; margin-bottom:11px; }
+#learnRoot .c4-posn-row { display:flex; align-items:flex-end; gap:8px; flex-wrap:wrap; }
+#learnRoot .c4-posn-t { display:flex; flex-direction:column; align-items:center; gap:1px;
+  border:1px solid var(--border); border-radius:6px; padding:6px 11px; background:var(--surface); }
+#learnRoot .c4-posn-t b { font-size:16px; }
+#learnRoot .c4-posn-x { font-size:10px; color:var(--text-faint); }
+#learnRoot .c4-posn-v { font-size:11.5px; color:var(--execution); }
+#learnRoot .c4-posn-plus, #learnRoot .c4-posn-eq { color:var(--text-faint); padding-bottom:12px; }
+#learnRoot .c4-posn-sum { font-size:22px; font-weight:800; color:var(--execution); padding-bottom:6px; }
+#learnRoot .c4-posn-why p { margin:0 0 11px; font-size:12.5px; line-height:1.75; color:var(--text-muted); }
+#learnRoot .c4-shift-r { display:grid; grid-template-columns:110px 90px 1fr; gap:12px;
+  align-items:baseline; font-size:12px; padding:3px 0; }
+#learnRoot .c4-shift-k { color:var(--text-faint); font-size:11px; }
+#learnRoot .c4-shift-v { color:var(--execution); font-size:14px; }
+#learnRoot .c4-shift-n { color:var(--text-muted); font-size:11.5px; }
+
+/* the base bridge */
+#learnRoot .c4-bridge { text-align:center; }
+#learnRoot .c4-bridge-top { display:inline-block; font-size:10.5px; letter-spacing:.1em;
+  border:1px solid var(--execution); color:var(--execution); border-radius:999px;
+  padding:4px 14px; font-weight:700; margin-bottom:12px; }
+#learnRoot .c4-bridge-split { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; }
+#learnRoot .c4-bridge-arm { border:1px solid var(--border); border-radius:9px; padding:13px 15px;
+  background:var(--bg); text-align:left; }
+#learnRoot .c4-bridge-arm.alt { border-color:var(--execution); }
+#learnRoot .c4-bridge-h { font-size:11.5px; font-weight:700; margin-bottom:9px; }
+#learnRoot .c4-bridge-f { font-size:13px; color:var(--execution); background:var(--surface);
+  border-radius:6px; padding:8px 11px; margin-bottom:9px; overflow-x:auto; }
+#learnRoot .c4-bridge-n { font-size:11.5px; color:var(--text-faint); line-height:1.6; margin-bottom:9px; }
+#learnRoot .c4-bridge-x { font-size:11px; color:var(--text-muted); }
+
+/* parser boxes */
+#learnRoot .c4-boxes { display:flex; flex-direction:column; align-items:center; gap:3px; }
+#learnRoot .c4-box { border:1px solid var(--border); border-radius:7px; padding:8px 16px;
+  font-size:12.5px; background:var(--bg); min-width:270px; text-align:center; }
+#learnRoot .c4-box.in, #learnRoot .c4-box.out { border-style:dashed; color:var(--text-faint);
+  letter-spacing:.06em; font-size:11px; }
+#learnRoot .c4-box.out { border-color:var(--execution); color:var(--execution); }
+#learnRoot .c4-box.p1 { border-left:3px solid #5b8bd0; }
+#learnRoot .c4-box.p2 { border-left:3px solid #c07fd0; }
+#learnRoot .c4-box.p3 { border-left:3px solid var(--ok,#56a869); }
+
+/* int range */
+#learnRoot .c4-range { margin-bottom:14px; }
+#learnRoot .c4-range-bar { display:flex; align-items:center; gap:10px; }
+#learnRoot .c4-range-e { display:flex; flex-direction:column; gap:1px; }
+#learnRoot .c4-range-e.right { text-align:right; }
+#learnRoot .c4-range-e b { font-size:14px; }
+#learnRoot .c4-range-e span { font-size:9.5px; letter-spacing:.08em; color:var(--text-faint); }
+#learnRoot .c4-range-line { flex:1; height:2px; background:linear-gradient(90deg,
+  var(--bad,#d05c5c), var(--border) 20%, var(--border) 80%, var(--bad,#d05c5c));
+  position:relative; }
+#learnRoot .c4-range-zero { position:absolute; left:50%; top:-9px; transform:translateX(-50%);
+  font-size:10px; color:var(--text-faint); background:var(--surface); padding:0 5px; }
+#learnRoot .c4-range-n { margin-top:11px; font-size:11.5px; color:var(--text-faint); }
+
+/* undefined behaviour */
+#learnRoot .c4-ud { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:11px; margin:13px 0; }
+#learnRoot .c4-ud-r { border:1px solid var(--border); border-radius:9px; padding:12px 14px; background:var(--bg); }
+#learnRoot .c4-ud-r.no { border-color:var(--bad, #d05c5c); }
+#learnRoot .c4-ud-r.ok { border-color:var(--ok, #56a869); }
+#learnRoot .c4-ud-r span { font-size:11px; font-weight:700; }
+#learnRoot .c4-ud-r.no span { color:var(--bad, #d05c5c); }
+#learnRoot .c4-ud-r.ok span { color:var(--ok, #56a869); }
+#learnRoot .c4-ud-r p { margin:7px 0 0; font-size:12.5px; line-height:1.7; color:var(--text-muted); }
+#learnRoot .c4-where { font-size:10px; color:var(--text-faint); font-weight:400; margin-left:auto; }
+#learnRoot .c4-half-h { display:flex; align-items:baseline; gap:8px; }
+#learnRoot .c4-mini { background:var(--surface); border:1px solid var(--border); border-radius:6px;
+  padding:8px 12px; font-size:13px; color:var(--execution); margin:9px 0; overflow-x:auto; }
+
+/* man */
+#learnRoot .c4-mansec { display:flex; flex-direction:column; gap:5px; margin-bottom:13px; }
+#learnRoot .c4-mansec-r { display:grid; grid-template-columns:80px 190px 1fr; gap:12px;
+  align-items:baseline; border:1px solid var(--border); border-radius:7px;
+  padding:7px 12px; background:var(--bg); font-size:12px; }
+#learnRoot .c4-mansec-r.hi { border-color:var(--execution); }
+#learnRoot .c4-mansec-n { color:var(--execution); font-weight:700; }
+#learnRoot .c4-mansec-e { font-size:11px; color:var(--text-faint); }
+#learnRoot .c4-manpage { border:1px solid var(--border); border-radius:9px; overflow:hidden; margin-top:13px; }
+#learnRoot .c4-manpage-h { background:#0b0e14; color:#3ddc84; padding:8px 14px; font-size:12.5px; }
+#learnRoot .c4-manrow { display:grid; grid-template-columns:150px 1fr; gap:14px;
+  padding:9px 14px; border-top:1px solid var(--border); font-size:12.5px; }
+#learnRoot .c4-manrow.dim { opacity:.65; }
+#learnRoot .c4-mank { font-family:var(--mono); font-size:11px; color:var(--execution); letter-spacing:.05em; }
+#learnRoot .c4-manv { color:var(--text-muted); line-height:1.65; }
+
+/* function anatomy */
+#learnRoot .c4-anat { border:1px solid var(--border); border-radius:9px; padding:13px 15px;
+  background:var(--bg); margin-bottom:12px; }
+#learnRoot .c4-anat-h { display:flex; align-items:baseline; gap:11px; flex-wrap:wrap; margin-bottom:10px; }
+#learnRoot .c4-anat-h b { font-size:15px; }
+#learnRoot .c4-anat-hdr, #learnRoot .c4-anat-man { font-size:11px; color:var(--text-faint); }
+#learnRoot .c4-anat-rows { display:flex; flex-direction:column; gap:8px; margin-top:11px; }
+#learnRoot .c4-anat-r { display:grid; grid-template-columns:110px 1fr; gap:12px; align-items:baseline; }
+#learnRoot .c4-anat-r span { font-size:9.5px; text-transform:uppercase; letter-spacing:.08em;
+  color:var(--text-faint); font-weight:700; }
+#learnRoot .c4-anat-r p { margin:0; font-size:12.5px; line-height:1.7; color:var(--text-muted); }
+#learnRoot .c4-anat-r p b { color:var(--execution); }
+#learnRoot .c4-why { margin-top:12px; border-left:2px solid var(--execution); padding-left:12px; }
+#learnRoot .c4-why-h { font-size:9.5px; letter-spacing:.1em; color:var(--execution); font-weight:700; }
+#learnRoot .c4-why p { margin:5px 0 0; font-size:12.5px; line-height:1.75; }
+#learnRoot .c4-anats { padding:0 13px 12px; }
+
+/* functions & libraries */
+#learnRoot .c4-fl th { text-align:left; width:210px; vertical-align:top; }
+#learnRoot .c4-fl-src { font-size:9px; background:var(--execution); color:#0b0e14;
+  border-radius:3px; padding:1px 5px; margin-left:6px; font-weight:700; }
+#learnRoot .c4-fl-list { display:flex; flex-direction:column; gap:6px; margin-top:11px; }
+#learnRoot .c4-flr { border:1px solid var(--border); border-radius:7px; padding:9px 12px; background:var(--bg); }
+#learnRoot .c4-flr.yes { border-left:3px solid var(--ok, #56a869); }
+#learnRoot .c4-flr.no { border-left:3px solid var(--bad, #d05c5c); }
+#learnRoot .c4-flr-h { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; font-size:12.5px; }
+#learnRoot .c4-flr-tag { margin-left:auto; font-size:9px; letter-spacing:.06em; font-weight:700;
+  border-radius:3px; padding:2px 7px; }
+#learnRoot .c4-flr.yes .c4-flr-tag { background:var(--ok, #56a869); color:#0b0e14; }
+#learnRoot .c4-flr.no .c4-flr-tag { background:var(--bad, #d05c5c); color:#fff; }
+#learnRoot .c4-flr-w { margin-top:6px; font-size:11.5px; color:var(--text-faint); line-height:1.6; }
+
+/* algorithm, three sizes */
+#learnRoot .c4-algo { border:1px solid var(--border); border-radius:9px; padding:12px 15px;
+  background:var(--bg); margin-bottom:10px; }
+#learnRoot .c4-algo-h { font-size:10.5px; text-transform:uppercase; letter-spacing:.08em;
+  color:var(--execution); font-weight:700; margin-bottom:9px; }
+#learnRoot .c4-algo-l { margin:0; padding-left:20px; font-size:13px; line-height:1.9; }
+#learnRoot .c4-algo-l li::marker { color:var(--execution); }
+
+@media (max-width: 820px) {
+  #learnRoot .c4-svi { grid-template-columns:1fr; }
+  #learnRoot .c4-svi-mid { flex-direction:row; gap:10px; }
+  #learnRoot .c4-mansec-r { grid-template-columns:70px 1fr; }
+  #learnRoot .c4-mansec-e { grid-column:1/-1; }
+  #learnRoot .c4-manrow { grid-template-columns:1fr; gap:3px; }
+  #learnRoot .c4-anat-r { grid-template-columns:1fr; gap:2px; }
+  #learnRoot .c4-shift-r { grid-template-columns:1fr auto; }
+  #learnRoot .c4-shift-n { grid-column:1/-1; }
+  #learnRoot .c4-fl th { width:auto; }
+}
+
+/* A wide table scrolls inside itself rather than pushing the page sideways.
+   display:block lets a table honour overflow-x; the content stays reachable. */
+@media (max-width: 820px) {
+  #learnRoot .c4-t { display:block; overflow-x:auto; max-width:100%; }
+  #learnRoot .c4-t thead, #learnRoot .c4-t tbody { display:table; width:100%; min-width:max-content; }
+}
+/* ==== C04DEEPCSS END ==== */
 </style>
 </head>
 <body>
@@ -19487,6 +19695,167 @@ const C04_DEPS = {
     ['Base validation', ['ex04', 'ex05']],
   ],
 };
+
+/* ================================================================== *
+ * LEARNING UPGRADE — four more foundations, and the reference data    *
+ * the exercise pages draw on. Same two-source discipline: anything     *
+ * quoted from the subject says so; everything else is teaching.        *
+ * ================================================================== */
+
+/* The whitespace set ft_atoi must recognise. Codes are the authority —
+   the escape spellings are how you write them in C. */
+const C04_WS = [
+  { code: 32, esc: "' '",    name: 'space',           what: 'the ordinary gap between words', vis: '␠' },
+  { code:  9, esc: "'\\t'",  name: 'tab',             what: 'jumps to the next tab stop',     vis: '→' },
+  { code: 10, esc: "'\\n'",  name: 'newline',         what: 'ends the line',                  vis: '↵' },
+  { code: 11, esc: "'\\v'",  name: 'vertical tab',    what: 'moves down without returning',   vis: '↧' },
+  { code: 12, esc: "'\\f'",  name: 'form feed',       what: 'starts a new page on a printer', vis: '⤓' },
+  { code: 13, esc: "'\\r'",  name: 'carriage return', what: 'returns to the start of the line', vis: '⏎' },
+];
+
+/* Function anatomy, used both on its own and inside each exercise's
+   Functions & Libraries block. the allowed flag is per exercise and lives in
+   C04_EXFUNCS; this table holds only what is true of the function itself. */
+const C04_FUNCREF = {
+  write: {
+    name: 'write', header: '<unistd.h>', man: 'man 2 write', section: 2,
+    proto: 'ssize_t write(int fd, const void *buf, size_t count);',
+    library: 'POSIX system interface — it is a system call, not part of the C standard library',
+    params: [
+      ['fd', 'which file descriptor to write to. 1 is standard output.'],
+      ['buf', 'the ADDRESS of the first byte to send. Not a character — an address.'],
+      ['count', 'how many bytes to send. write never looks for \\0.'],
+    ],
+    returns: 'the number of bytes actually written, or -1 on error. C 04 ignores it.',
+    effects: 'bytes appear on the terminal. Nothing in your program changes.',
+    usage: 'write(1, &c, 1);',
+    why: 'C does not print a character just because you have one. A char is a number in memory; ' +
+         'making it appear on screen means asking the operating system to send that byte somewhere. ' +
+         'write is that request.',
+  },
+  isspace: {
+    name: 'isspace', header: '<ctype.h>', man: 'man 3 isspace', section: 3,
+    proto: 'int isspace(int c);',
+    library: 'C standard library — character classification',
+    params: [['c', 'a character, passed as an int so it can also carry EOF.']],
+    returns: 'non-zero if c is a whitespace character, 0 otherwise.',
+    effects: 'none. It only answers a question.',
+    usage: 'while (isspace(str[i]))\n\t\ti++;',
+    why: 'Whitespace is not one byte, it is six, and five of them are invisible. A single named ' +
+         'test is clearer than repeating the same six comparisons everywhere.',
+  },
+  atoi: {
+    name: 'atoi', header: '<stdlib.h>', man: 'man 3 atoi', section: 3,
+    proto: 'int atoi(const char *nptr);',
+    library: 'C standard library — general utilities',
+    params: [['nptr', 'the string to read a number out of.']],
+    returns: 'the integer value of the leading numeric portion. 0 if there is none.',
+    effects: 'none. The string is not modified.',
+    usage: 'int n = atoi("42");',
+    why: 'Text arriving from a terminal, a file or argv is characters. Arithmetic needs a number. ' +
+         'Something has to turn one into the other, and that something is what ex03 asks you to write.',
+  },
+};
+
+/* Which functions each exercise involves, and whether the SUBJECT allows it. */
+const C04_EXFUNCS = {
+  ex00: [{ fn: null, name: 'ft_strlen', allowed: null }],
+  ex01: [{ fn: 'write', allowed: true }],
+  ex02: [{ fn: 'write', allowed: true }],
+  ex03: [{ fn: 'isspace', allowed: false,
+           reason: 'the subject says Allowed functions: None, so the whitespace test must be written by hand' },
+         { fn: 'atoi', allowed: false,
+           reason: 'this exercise IS ft_atoi — calling the library version would be the whole answer' }],
+  ex04: [{ fn: 'write', allowed: true }],
+  ex05: [{ fn: 'isspace', allowed: false,
+           reason: 'the subject says Allowed functions: None, for the base check and the string check alike' }],
+};
+
+/* The skeleton first, the detail after. Progressive disclosure in data form. */
+const C04_ALGO = {
+  ex00: {
+    human: ['Start a counter at 0.', 'Look at the character there.',
+            'If it is not \\0, add one and move on.', 'When you reach \\0, the counter is the answer.'],
+    skeleton: 'i = 0\nwhile str[i] is not \\0\n    i++\nreturn i',
+  },
+  ex01: {
+    human: ['Start at the first character.', 'While it is not \\0, send that one byte to the terminal.',
+            'Move to the next character.'],
+    skeleton: 'i = 0\nwhile str[i] is not \\0\n    write(1, &str[i], 1)\n    i++',
+  },
+  ex02: {
+    human: ['If the number is negative, print ‘-’ and work with its magnitude.',
+            'If the number is 10 or more, deal with everything except the last digit FIRST.',
+            'Then print the last digit.'],
+    skeleton: 'if nb < 0\n    write "-"\n    nb = magnitude of nb\nif nb > 9\n    putnbr(nb / 10)\nwrite digit for nb % 10',
+  },
+  ex03: {
+    human: ['Skip whitespace.', 'Read ‘+’ / ‘-’ signs.', 'Remember the final sign.',
+            'Read digits.', 'Build the number.', 'Stop at the first non-digit.', 'Return result × sign.'],
+    skeleton: 'skip spaces\n\nread signs\n\nwhile digit\n    result = result * 10 + digit\n\nreturn result * sign',
+  },
+  ex04: {
+    human: ['Measure the base.', 'Reject it if it is malformed — and print nothing at all.',
+            'If the number is negative, print ‘-’ and work with its magnitude.',
+            'Deal with everything except the last digit first.', 'Then print the symbol for the last digit.'],
+    skeleton: 'len = length of base\nif base is invalid\n    return\n\nif nbr < 0\n    write "-"\n    nbr = magnitude\n\n' +
+              'if nbr >= len\n    put_in_base(nbr / len)\nwrite base[nbr % len]',
+  },
+  ex05: {
+    human: ['Reject a malformed base — and return 0.', 'Skip whitespace.', 'Read signs, remember the parity.',
+            'For each character, find its position in the base.', 'Stop at the first character not in the base.',
+            'Build the number.', 'Return result × sign.'],
+    skeleton: 'if base is invalid\n    return 0\n\nskip spaces\n\nread signs\n\n' +
+              'while char is in base\n    result = result * base_len + index\n\nreturn result * sign',
+  },
+};
+
+/* Four more foundations. They sit after 1.6 and are reached the same way. */
+const C04_FOUND2 = [
+  {
+    id: 'whitespace', n: '1.7', title: 'Whitespace, and why you cannot see it',
+    what: 'Whitespace is the set of characters that arrange text rather than show a symbol. A space is one. So are tab, newline, vertical tab, form feed and carriage return.',
+    why: 'ft_atoi must skip whitespace before it reads anything else. If you only test for the space character you will miss the other five — and they are exactly the ones you cannot see in an editor.',
+    keys: [
+      ['there are six of them', 'space (32), and the run from 9 to 13'],
+      ['five are invisible', 'they occupy a byte and change the layout, but draw nothing'],
+      ['a byte is still a byte', 'a newline in memory is the number 10, no less real than ‘A’ being 65'],
+    ],
+  },
+  {
+    id: 'convert', n: '1.8', title: 'From "42" to 42 — the central C 04 idea',
+    what: '"42" is two characters in memory. 42 is a number in an int. They are not the same thing, and nothing converts one to the other automatically.',
+    why: 'Everything arriving from a terminal, a file or argv is characters. Arithmetic needs numbers. ex03 and ex05 exist to bridge that gap; ex02 and ex04 bridge it in the other direction.',
+    keys: [
+      ["'4' is a character", 'the byte 52'],
+      ['4 is a value', 'the number four'],
+      ['"42" is a string', 'three bytes: 52, 50, 0'],
+      ['42 is an integer', 'one four-byte object holding the value'],
+    ],
+  },
+  {
+    id: 'overflow', n: '1.9', title: 'Overflow, underflow, and what "undefined" means',
+    what: 'An int holds a limited range of values. Asking for a result outside that range is not a wrap-around — the C standard simply does not say what happens.',
+    why: 'The ex03 subject says overflow and underflow do not need to be handled. That is permission to ignore it, not a promise that it is safe. Knowing the difference is what stops you writing confident nonsense in a peer evaluation.',
+    keys: [
+      ['overflow', 'a result above the maximum'],
+      ['underflow', 'a result below the minimum'],
+      ['undefined behaviour', 'the standard imposes no requirement — not "wraps around"'],
+      ['two different problems', 'a huge string in ft_atoi, and negating INT_MIN in ft_putnbr'],
+    ],
+  },
+  {
+    id: 'man', n: '1.10', title: 'Reading the manual',
+    what: 'man is how you look up a C function without leaving the terminal — and without asking anyone.',
+    why: 'In an exam there is no internet. Being able to open man 3 atoi and read the prototype and return value is a skill worth more than remembering any single function.',
+    keys: [
+      ['man 1', 'shell commands — ls, cc, git'],
+      ['man 2', 'system calls — write, read, open'],
+      ['man 3', 'C library functions — atoi, isspace, strlen'],
+      ['man 3 atoi', 'the section number disambiguates when a name exists in several'],
+    ],
+  },
+];
 /* ==== C04DATA END ==== */
 
 /* ==== FNLAB START ====
@@ -22680,6 +23049,9 @@ const c4 = {
   sgn: '---+--+',     // sign-parity demo
   atoi: '   ---@--+1234ab567'.replace('@', '+'),
   caseIx: {},         // selected test case per exercise
+  ws: ' \t\n42',      // whitespace RAM demo
+  s2i: '1234',        // string -> integer demo
+  adig: '7',          // ASCII -> digit demo
 };
 
 /* One entry point to the engine, memoised so re-rendering never re-executes. */
@@ -22992,7 +23364,7 @@ function c4Search() {
      this is exact — and it avoids emitting a quoted character literal, which is
      how this went wrong: JSON.stringify produced "1", a char *, where the
      parameter is a char. */
-'int\tmain(void)\n{\n\tint\tfound;\n\n\tfound = idx_in_base(' + target.charCodeAt(0) + ', ' + JSON.stringify(base) + ');\n\treturn (0);\n}\n';
+'int\tmain(void)\n{\n\tint\tfound;\n\n\tfound = idx_in_base(' + target.charCodeAt(0) + ', ' + c4CLit(base) + ');\n\treturn (0);\n}\n';
   const run = c4Run(src);
   const probes = [];
   let answer = null;
@@ -23033,27 +23405,26 @@ function c4Accum() {
   const src =
 'int\tidx_in_base(char c, char *base)\n{\n\tint\ti;\n\n\ti = 0;\n\twhile (base[i])\n\t{\n\t\tif (base[i] == c)\n\t\t\treturn (i);\n\t\ti++;\n\t}\n\treturn (-1);\n}\n\n' +
 'int\tmain(void)\n{\n\tchar\t*str;\n\tchar\t*base;\n\tint\tresult;\n\tint\ti;\n\tint\td;\n\n' +
-'\tstr = ' + JSON.stringify(str) + ';\n\tbase = ' + JSON.stringify(base) + ';\n\tresult = 0;\n\ti = 0;\n' +
+'\tstr = ' + c4CLit(str) + ';\n\tbase = ' + c4CLit(base) + ';\n\tresult = 0;\n\ti = 0;\n' +
 '\td = idx_in_base(str[i], base);\n\twhile (d != -1)\n\t{\n\t\tresult = result * ' + len + ' + d;\n\t\ti++;\n' +
 '\t\td = idx_in_base(str[i], base);\n\t}\n\treturn (0);\n}\n';
   const run = c4Run(src);
+  const accLine = src.split(String.fromCharCode(10)).findIndex(l => l.indexOf('result * ') >= 0) + 1;
   const rows = [];
   let final = '0';
   if (run.ok) {
-    let prev = '0', seen = -1;
     for (const st of run.steps) {
-      if (st.state.frames.length !== 1) continue;      // main only, not inside the search
-      const r = c4Find(st.state, 'result'), i = c4Find(st.state, 'i'), d = c4Find(st.state, 'd');
-      if (!r || r.uninitialized || !i || i.uninitialized || !d || d.uninitialized) continue;
-      const ix = +i.valueText;
-      if (r.valueText !== prev && ix > seen) {
-        rows.push({ ch: str[ix - 1] !== undefined ? str[ix - 1] : '?', d: d.valueText, before: prev, after: r.valueText });
-        prev = r.valueText; seen = ix;
+      const df = st.step.detail && st.step.detail.dataflow;
+      if (st.step.line === accLine && df && df.dest.text === 'result') {
+        const dv = c4Find(st.state, 'd');
+        const k = rows.length;
+        rows.push({ ch: str[k] === undefined ? '?' : str[k],
+                    d: dv && !dv.uninitialized ? dv.valueText : '?',
+                    before: df.dest.before === null || df.dest.before === undefined ? '0' : String(df.dest.before),
+                    after: df.dest.valueText });
+        final = df.dest.valueText;
       }
-      final = r.valueText;
     }
-    /* d is re-read after each accumulate, so pair each row with the index that produced it. */
-    rows.forEach((row, k) => { row.ch = str[k] === undefined ? '?' : str[k]; });
   }
   return c4Block('result = result × base_len + digit — one step per character',
     '<div class="c4-row"><label class="c4-lab" for="c4Dstr">input</label>' +
@@ -23179,7 +23550,7 @@ function c4Dup() {
 function c4SignParity() {
   const s = c4.sgn;
   const src =
-'int\tmain(void)\n{\n\tchar\t*str;\n\tint\ti;\n\tint\tsign;\n\n\tstr = ' + JSON.stringify(s) + ';\n' +
+'int\tmain(void)\n{\n\tchar\t*str;\n\tint\ti;\n\tint\tsign;\n\n\tstr = ' + c4CLit(s) + ';\n' +
 '\tsign = 1;\n\ti = 0;\n\twhile (str[i] == 43 || str[i] == 45)\n\t{\n\t\tif (str[i] == 45)\n\t\t\tsign = -sign;\n' +
 '\t\ti++;\n\t}\n\treturn (0);\n}\n';
   const run = c4Run(src);
@@ -23223,7 +23594,7 @@ function c4SignParity() {
 function c4Parser() {
   const input = c4.atoi;
   const src =
-'int\tmain(void)\n{\n\tchar\t*str;\n\tint\ti;\n\tint\tsign;\n\tint\tresult;\n\n\tstr = ' + JSON.stringify(input) + ';\n' +
+'int\tmain(void)\n{\n\tchar\t*str;\n\tint\ti;\n\tint\tsign;\n\tint\tresult;\n\n\tstr = ' + c4CLit(input) + ';\n' +
 '\ti = 0;\n\tsign = 1;\n\tresult = 0;\n' +
 '\twhile (str[i] == 32 || (str[i] >= 9 && str[i] <= 13))\n\t\ti++;\n' +
 '\twhile (str[i] == 43 || str[i] == 45)\n\t{\n\t\tif (str[i] == 45)\n\t\t\tsign = -sign;\n\t\ti++;\n\t}\n' +
@@ -23386,8 +23757,11 @@ function c4Overview() {
       '</div>');
 }
 
+/* The original six plus the four added by the learning upgrade, in order. */
+function c4Founds() { return C04_FOUND.concat(typeof C04_FOUND2 !== 'undefined' ? C04_FOUND2 : []); }
+
 function c4Foundation(id) {
-  const f = C04_FOUND.find(x => x.id === id) || C04_FOUND[0];
+  const f = c4Founds().find(x => x.id === id) || C04_FOUND[0];
   let h = '<header class="c4-page-h"><span class="c4-kicker">Foundations · ' + c4Esc(f.n) + '</span>' +
     '<h1>' + c4Esc(f.title) + '</h1></header>';
   h += c4Block('What is it, and why does it exist?',
@@ -23399,6 +23773,11 @@ function c4Foundation(id) {
   if (f.id === 'ascii') h += c4AsciiViz();
   if (f.id === 'recursion') h += c4DivMod();
   if (f.id === 'validate') h += c4Validator() + c4Dup();
+  if (f.id === 'whitespace') h += c4WsTable() + c4WsRam() + c4IsSpace();
+  if (f.id === 'convert') h += c4StrVsInt() + c4WhyAtoi() + c4AsciiDigit() + c4StrToInt() +
+                                c4WhyAccum() + c4BaseBridge();
+  if (f.id === 'overflow') h += c4Range() + c4Undefined() + c4TwoOverflows();
+  if (f.id === 'man') h += c4ManPage() + c4AnatomyCard('atoi') + c4AnatomyCard('isspace');
   if (f.demo) {
     const run = c4Run(f.demo.src);
     h += c4Block(f.demo.label, c4Stepper(run, { watch: f.demo.watch }),
@@ -23440,6 +23819,8 @@ function c4Exercise(id) {
   }
   if (c4.tab === 'understand') {
     const g = t.giopvc;
+    h += c4AlgoBlock(ex);          // skeleton first
+    h += c4FuncsBlock(ex);         // what you may and may not call
     h += c4Block('GIOPVC-LAC — the plan before the code',
       '<div class="c4-giop">' + [['G', 'Goal', g.G], ['I', 'Input', g.I], ['O', 'Output', g.O],
         ['P', 'Prototype', g.P], ['V', 'Variables', g.V], ['C', 'Conditions', g.C],
@@ -23458,11 +23839,16 @@ function c4Exercise(id) {
     h += c4Block('Key takeaway', '<p class="c4-take">' + c4Esc(t.takeaway) + '</p>');
   }
   if (c4.tab === 'visualize') {
-    if (ex.id === 'ex02') h += c4DivMod() + c4IntMin();
-    else if (ex.id === 'ex03') h += c4Parser() + c4SignParity();
-    else if (ex.id === 'ex04') h += c4BaseViz() + c4DivMod() + c4Validator() + c4Dup() + c4IntMin();
-    else if (ex.id === 'ex05') h += c4Validator() + c4Search() + c4Accum() + c4EncDec();
-    else h += c4Block('The string in memory, byte by byte',
+    if (ex.id === 'ex02') h += c4DivMod() + c4IntMin() + c4TwoOverflows();
+    else if (ex.id === 'ex03') h += c4ParserBoxes() + c4Parser() + c4SignParity() +
+                                      c4WsRam() + c4StrToInt() + c4WhyAccum();
+    else if (ex.id === 'ex04') h += c4BaseViz() + c4DivMod() + c4Validator() + c4Dup() +
+                                      c4IntMin() + c4TwoOverflows();
+    else if (ex.id === 'ex05') h += c4BaseBridge() + c4Validator() + c4Search() + c4Accum() + c4EncDec();
+    else if (ex.id === 'ex01') h += c4AnatomyCard('write') + c4Block('The string in memory, byte by byte',
+      c4Stepper(c4Run(ex.program.src), { watch: ex.program.watch, fn: ex.name }),
+      'Every address and byte value is the engine’s own.');
+    else h += c4StrVsInt() + c4Block('The string in memory, byte by byte',
       c4Stepper(c4Run(ex.program.src), { watch: ex.program.watch, fn: ex.name }),
       'Every address and byte value is the engine’s own. Step through and watch the cursor ' +
       'walk the array until it meets the terminator.');
@@ -23537,7 +23923,7 @@ function c4Bugs() {
  * ------------------------------------------------------------------ */
 function c4Pages() {
   const out = [{ key: 'overview', label: 'Overview', kind: 'top' }];
-  for (const f of C04_FOUND) out.push({ key: 'f:' + f.id, label: f.n + '  ' + f.title, kind: 'found' });
+  for (const f of c4Founds()) out.push({ key: 'f:' + f.id, label: f.n + '  ' + f.title, kind: 'found' });
   for (const e of C04_EX) out.push({ key: 'ex:' + e.id, label: e.id + '  ' + e.name, kind: 'ex', deep: e.deep });
   out.push({ key: 'practice', label: 'Exam practice', kind: 'top' });
   out.push({ key: 'bugs', label: 'Common mistakes', kind: 'top' });
@@ -23637,14 +24023,527 @@ function wireLearn() {
   bind('#c4Vbase', 'vbase');
   bind('#c4Sgn', 'sgn');
   bind('#c4Atoi', 'atoi');
+  bind('#c4Ws', 'ws');
+  bind('#c4S2i', 's2i');
   const chip = (attr, key) => $$('#learnRoot [data-' + attr + ']').forEach(el =>
     el.addEventListener('click', () => { c4[key] = el.getAttribute('data-' + attr); renderLearn(); }));
   chip('c4base', 'base'); chip('c4vbase', 'vbase'); chip('c4sgn', 'sgn'); chip('c4atoi', 'atoi');
+  chip('c4ws', 'ws'); chip('c4s2i', 's2i'); chip('c4adig', 'adig');
   $$('#learnRoot [data-c4vex]').forEach(el => el.addEventListener('click', () => {
     c4.vex = el.dataset.c4vex; renderLearn(); }));
   $$('#learnRoot [data-c4work]').forEach(el => el.addEventListener('click', () => showWorkspace()));
 }
 /* ==== C04UI END ==== */
+
+/* ==== C04DEEP START ====
+   C 04 learning upgrade — the visualizers for the four new foundations, plus
+   the Functions & Libraries and algorithm blocks the exercise pages use.
+
+   These are function declarations, so they are hoisted across the whole bundle
+   and callable from p26_c04ui.js regardless of file order. Every one that shows
+   a value gets it from CEngine executing C; the diagrams that carry no computed
+   value (the parser boxes, the string-vs-integer picture) are pure layout and
+   say nothing a run could contradict. */
+
+
+/* A genuine C string literal. JSON.stringify is NOT this: it emits \u000b for a
+   vertical tab, which C does not understand. These are the escapes the engine's
+   tokenizer implements; anything else goes out as an octal escape. */
+const C4_ESC = { 0:'\\0', 7:'\\a', 8:'\\b', 9:'\\t', 10:'\\n', 11:'\\v', 12:'\\f', 13:'\\r',
+                 34:'\\"', 92:'\\\\' };
+function c4CLit(str) {
+  let out = '"';
+  for (const ch of String(str)) {
+    const c = ch.charCodeAt(0);
+    if (C4_ESC[c]) out += C4_ESC[c];
+    else if (c >= 32 && c < 127) out += ch;
+    else out += '\\' + c.toString(8);
+  }
+  return out + '"';
+}
+
+/* ---------------------------------------------------------------- *
+ * 1.7 — whitespace                                                   *
+ * ---------------------------------------------------------------- */
+function c4WsTable() {
+  return c4Block('The six whitespace characters',
+    '<table class="c4-t"><thead><tr><th>written in C</th><th>ASCII</th><th>name</th>' +
+    '<th>on screen</th><th>what it does</th></tr></thead><tbody>' +
+    C04_WS.map(w => {
+      const a = CEngine.asciiInfo(w.code);
+      return '<tr><td class="mono c4-sym-out">' + c4Esc(w.esc) + '</td>' +
+        '<td class="mono">' + w.code + '</td>' +
+        '<td>' + c4Esc(a.name) + '</td>' +
+        '<td class="c4-invis">' + (w.code === 32 ? 'a blank gap' :
+          '<span class="c4-ghost">' + w.vis + '</span> nothing visible') + '</td>' +
+        '<td class="c4-dim">' + c4Esc(w.what) + '</td></tr>';
+    }).join('') + '</tbody></table>' +
+    '<div class="c4-wsnote"><b>Five of the six draw nothing.</b> They still occupy a byte, they still ' +
+    'have a value, and <span class="mono">str[i]</span> still returns them. "Invisible" is about the ' +
+    'screen, not about memory.</div>',
+    'The names come from <span class="mono">CEngine.asciiInfo</span> — the same table the ASCII lab uses.');
+}
+
+/* The parser cursor walking real bytes, from a real run. */
+function c4WsRam() {
+  const input = c4.ws;
+  const src =
+'int\tmain(void)\n{\n\tchar\t*str;\n\tint\ti;\n\n\tstr = ' + c4CLit(input) + ';\n\ti = 0;\n' +
+'\twhile (str[i] == 32 || (str[i] >= 9 && str[i] <= 13))\n\t\ti++;\n\treturn (0);\n}\n';
+  const run = c4Run(src);
+  let stopped = 0, addr = null, bytes = [];
+  if (run.ok) {
+    for (const st of run.steps) {
+      const i = c4Find(st.state, 'i');
+      if (i && !i.uninitialized) stopped = Math.max(stopped, +i.valueText);
+      const s = c4Find(st.state, 'str');
+      if (s && !s.uninitialized && s.pointerTarget && s.pointerTarget.bytes)
+        { bytes = s.pointerTarget.bytes; addr = s.pointerTarget.address; }
+    }
+  }
+  const codes = input.split('').map(c => c.charCodeAt(0)).concat([0]);
+  const isWs = (c) => c === 32 || (c >= 9 && c <= 13);
+  return c4Block('The same string, as bytes, with the cursor walking it',
+    '<div class="c4-row"><label class="c4-lab" for="c4Ws">string</label>' +
+      '<input id="c4Ws" class="c4-in vwide mono" value="' + c4Esc(input) + '" maxlength="24" spellcheck="false">' +
+      '<span class="c4-presets">' + [' \t\n42', '   42', '42', '\t\t-7', ' \r\n '].map(p =>
+        '<button class="c4-chip" data-c4ws="' + c4Esc(p) + '">' +
+        c4Esc(p.replace(/ /g, '␠').replace(/\t/g, '\\t').replace(/\n/g, '\\n').replace(/\r/g, '\\r') || '(empty)') +
+        '</button>').join('') + '</span></div>' +
+    '<table class="c4-t c4-ram"><thead><tr><th>address</th><th>byte</th><th>as C writes it</th>' +
+      '<th>whitespace?</th><th>cursor</th></tr></thead><tbody>' +
+    codes.map((code, k) => {
+      const w = C04_WS.find(x => x.code === code);
+      const ws = isWs(code);
+      const here = k === stopped;
+      const skipped = k < stopped;
+      return '<tr class="' + (here ? 'c4-here' : skipped ? 'c4-skipped' : '') + '">' +
+        '<td class="mono c4-dim">' + (addr !== null ? hexA(addr + k) : '+' + k) + '</td>' +
+        '<td class="mono">' + code + '</td>' +
+        '<td class="mono c4-sym-out">' + c4Esc(code === 0 ? "'\\0'" : w ? w.esc : "'" + input[k] + "'") + '</td>' +
+        '<td>' + (ws ? '<span class="c4-yes">yes</span>' : '<span class="c4-no">no</span>') + '</td>' +
+        '<td>' + (here ? '<b>i = ' + k + ' — STOP, this is not whitespace</b>'
+                : skipped ? '<span class="c4-dim">skipped</span>' : '') + '</td></tr>';
+    }).join('') + '</tbody></table>' +
+    '<div class="c4-wsnote">The loop advanced <b>' + stopped + '</b> time' + (stopped === 1 ? '' : 's') +
+      '. Phase 2 of ft_atoi will begin at index <b>' + stopped + '</b> — wherever this one stopped.</div>',
+    'The addresses and the stopping index come from executing that loop, not from counting characters here.');
+}
+
+function c4IsSpace() {
+  const f = C04_FUNCREF.isspace;
+  const probes = [' ', '\t', '\n', 'A', '4', '\v'];
+  return c4Block('isspace() — the standard library’s answer, and why ex03 cannot use it',
+    c4AnatomyCard('isspace') +
+    '<table class="c4-t"><thead><tr><th>call</th><th>answer</th><th>because</th></tr></thead><tbody>' +
+    probes.map(ch => {
+      const code = ch.charCodeAt(0);
+      const w = C04_WS.find(x => x.code === code);
+      const yes = !!w;
+      return '<tr><td class="mono">isspace(' + c4Esc(w ? w.esc : "'" + ch + "'") + ')</td>' +
+        '<td class="' + (yes ? 'c4-yes' : 'c4-no') + '">' + (yes ? 'true' : 'false') + '</td>' +
+        '<td class="c4-dim">' + (yes ? c4Esc(w.name) + ', code ' + code
+          : 'code ' + code + ' — a printable ' + (code >= 48 && code <= 57 ? 'digit' : 'symbol')) + '</td></tr>';
+    }).join('') + '</tbody></table>' +
+    '<div class="c4-hand"><div class="c4-hand-h">What ex03 must write instead</div>' +
+    '<pre class="c4-pre mono">while (str[i] == \' \' || (str[i] >= 9 &amp;&amp; str[i] <= 13))\n\ti++;</pre>' +
+    '<div class="c4-hand-w">' + C04_WS.filter(w => w.code !== 32).map(w =>
+      '<span class="c4-hw"><b class="mono">' + w.code + '</b> ' + c4Esc(w.esc) + '</span>').join('') +
+    '</div><p>9 to 13 is a contiguous run, so one range test covers five of the six. The space at 32 sits ' +
+    'apart and needs its own comparison.</p></div>' +
+    '<div class="c4-warn"><span class="c4-badge alt">SUBJECT REQUIREMENT</span>' +
+    '<p>ex03 and ex05 both say <b>Allowed functions: None</b>. <span class="mono">isspace</span> is a ' +
+    'library function, so calling it is using a forbidden function — which the instructions grade at -42. ' +
+    'The point is not that isspace is bad. It is the right tool, and it is what the subject itself names ' +
+    'when it says “as determined by isspace(3)”. You simply have to reproduce its answer by hand here.</p></div>',
+    'The subject’s own wording for ex03 is “an arbitrary amount of whitespace (as determined by isspace(3))” — ' +
+    'note the <b>(3)</b>. That is the manual section, and it is telling you exactly where to look it up.');
+}
+
+/* ---------------------------------------------------------------- *
+ * 1.8 — from "42" to 42                                              *
+ * ---------------------------------------------------------------- */
+function c4StrVsInt() {
+  return c4Block('A string and an integer are different things',
+    '<div class="c4-svi">' +
+      '<div class="c4-svi-side"><div class="c4-svi-h">STRING <span class="mono">"42"</span></div>' +
+        '<div class="c4-svi-cells">' +
+          ['4', '2', '\\0'].map((c, i) => '<span class="c4-cell"><span class="c4-cell-i">' + i + '</span>' +
+            '<span class="c4-cell-v mono">' + c4Esc(c) + '</span></span>').join('') + '</div>' +
+        '<div class="c4-svi-n">three bytes: 52, 50, 0. You can index it, walk it, and ask for its length. ' +
+          'You cannot add one to it.</div></div>' +
+      '<div class="c4-svi-mid"><div class="c4-svi-arrow">→</div>' +
+        '<div class="c4-svi-op mono">ft_atoi</div>' +
+        '<div class="c4-svi-arrow up">←</div>' +
+        '<div class="c4-svi-op mono">ft_putnbr</div></div>' +
+      '<div class="c4-svi-side"><div class="c4-svi-h">INTEGER <span class="mono">42</span></div>' +
+        '<div class="c4-svi-int mono">42</div>' +
+        '<div class="c4-svi-n">one four-byte object holding a value. You can add, divide and compare it. ' +
+          'You cannot index it, and printing it takes work.</div></div>' +
+    '</div>',
+    '<span class="mono">\'4\'</span> is a character, <span class="mono">4</span> is a value, ' +
+    '<span class="mono">"42"</span> is a string and <span class="mono">42</span> is an integer. ' +
+    'Four different things. Keeping them apart is most of C 04.');
+}
+
+function c4WhyAtoi() {
+  return c4Block('Why a function like atoi has to exist',
+    '<div class="c4-pipe wide">' +
+      '<div class="c4-pstep">you type <span class="mono">./a.out 42</span></div><div class="c4-parr">↓</div>' +
+      '<div class="c4-pstep">the shell hands your program <span class="mono">argv[1]</span></div><div class="c4-parr">↓</div>' +
+      '<div class="c4-pstep">which is characters in memory: <span class="mono">\'4\' \'2\' \'\\0\'</span></div>' +
+      '<div class="c4-parr">↓</div>' +
+      '<div class="c4-pstep warn">arithmetic cannot be done on characters</div><div class="c4-parr">↓</div>' +
+      '<div class="c4-pstep mono">ft_atoi(argv[1])</div><div class="c4-parr">↓</div>' +
+      '<div class="c4-pstep fin">the integer <span class="mono">42</span>, ready to compute with</div>' +
+    '</div>' + c4AnatomyCard('atoi'),
+    'Nothing in C converts text to a number on your behalf. Every program that reads a number from a ' +
+    'terminal, a file or argv has this function somewhere in it.');
+}
+
+/* ASCII → digit, engine-driven. */
+function c4AsciiDigit() {
+  const ch = (c4.adig || '7')[0];
+  const code = ch.charCodeAt(0);
+  const src = 'int\tmain(void)\n{\n\tchar\tc;\n\tint\td;\n\n\tc = ' + code + ';\n\td = c - 48;\n\treturn (0);\n}\n';
+  const run = c4Run(src);
+  let d = null;
+  if (run.ok) for (const st of run.steps) {
+    const v = c4Find(st.state, 'd');
+    if (v && !v.uninitialized) d = v.valueText;
+  }
+  const isDigit = code >= 48 && code <= 57;
+  return c4Block('One character to one digit — where ‘0’ comes in',
+    '<div class="c4-row"><span class="c4-lab">character</span>' +
+      '<span class="c4-presets">' + '0123456789Az'.split('').map(x =>
+        '<button class="c4-chip' + (x === ch ? ' on' : '') + '" data-c4adig="' + x + '">' + x + '</button>').join('') +
+      '</span></div>' +
+    '<div class="c4-ladder">' +
+      '<div class="c4-lrung"><span class="c4-lk">the character</span><b class="mono c4-sym-out">\'' + c4Esc(ch) + '\'</b></div>' +
+      '<div class="c4-larr">↓ its ASCII code</div>' +
+      '<div class="c4-lrung"><span class="c4-lk">the byte in memory</span><b class="mono">' + code + '</b></div>' +
+      '<div class="c4-larr">↓ subtract ASCII \'0\' (48)</div>' +
+      '<div class="c4-lrung ' + (isDigit ? 'good' : 'bad') + '"><span class="c4-lk">' + code + ' − 48</span>' +
+        '<b class="mono">' + c4Esc(d) + '</b>' +
+        (isDigit ? '<span class="c4-lok">a digit value, 0 to 9</span>'
+                 : '<span class="c4-lno">meaningless — ‘' + c4Esc(ch) + '’ is not a digit character</span>') +
+      '</div></div>',
+    'The digits are consecutive in ASCII — 48 to 57 — which is the only reason subtraction works. ' +
+    '‘A’ minus ‘0’ is 17, not 10. For any other alphabet you must index or search the base instead, ' +
+    'which is exactly what ex04 and ex05 do.');
+}
+
+/* The accumulator for base 10, from a real run, with each character's ASCII. */
+function c4StrToInt() {
+  const str = c4.s2i;
+  const src =
+'int\tmain(void)\n{\n\tchar\t*str;\n\tint\ti;\n\tint\tresult;\n\tint\tdigit;\n\n\tstr = ' + c4CLit(str) + ';\n' +
+'\ti = 0;\n\tresult = 0;\n\tdigit = 0;\n' +
+'\twhile (str[i] >= 48 && str[i] <= 57)\n\t{\n\t\tdigit = str[i] - 48;\n\t\tresult = result * 10 + digit;\n\t\ti++;\n\t}\n' +
+'\treturn (0);\n}\n';
+  const run = c4Run(src);
+  const accLine = src.split(String.fromCharCode(10)).findIndex(l => l.indexOf('result * 10') >= 0) + 1;
+  const rows = [];
+  if (run.ok) {
+    for (const st of run.steps) {
+      if (st.step.line !== accLine) continue;
+      const d = st.step.detail && st.step.detail.dataflow;
+      if (!d || d.dest.text !== 'result') continue;
+      const dg = c4Find(st.state, 'digit');
+      const k = rows.length;
+      rows.push({ ch: str[k], code: str.charCodeAt(k),
+                  d: dg && !dg.uninitialized ? dg.valueText : '?',
+                  before: d.dest.before === null || d.dest.before === undefined ? '0' : String(d.dest.before),
+                  after: d.dest.valueText });
+    }
+  }
+  const final = rows.length ? rows[rows.length - 1].after : '0';
+  return c4Block('"' + c4Esc(str) + '" becoming a number, one character at a time',
+    '<div class="c4-row"><label class="c4-lab" for="c4S2i">string</label>' +
+      '<input id="c4S2i" class="c4-in mono" value="' + c4Esc(str) + '" maxlength="10" spellcheck="false">' +
+      '<span class="c4-presets">' + ['1234', '42', '7', '0', '907'].map(p =>
+        '<button class="c4-chip' + (p === str ? ' on' : '') + '" data-c4s2i="' + p + '">' + p + '</button>').join('') +
+      '</span></div>' +
+    (rows.length
+      ? '<table class="c4-t"><thead><tr><th>char</th><th>ASCII</th><th>− 48</th><th>result before</th>' +
+        '<th>× 10 + digit</th><th>result after</th></tr></thead><tbody>' +
+        rows.map(x => '<tr><td class="mono c4-sym-out">' + c4Esc(x.ch) + '</td>' +
+          '<td class="mono c4-dim">' + x.code + '</td><td class="mono">' + c4Esc(x.d) + '</td>' +
+          '<td class="mono">' + c4Esc(x.before) + '</td>' +
+          '<td class="mono c4-eq">' + c4Esc(x.before) + ' × 10 + ' + c4Esc(x.d) + '</td>' +
+          '<td class="mono c4-hl">' + c4Esc(x.after) + '</td></tr>').join('') + '</tbody></table>' +
+        '<div class="c4-final">the string <span class="mono">"' + c4Esc(str) + '"</span> has become the integer ' +
+        '<b class="mono">' + c4Esc(final) + '</b></div>'
+      : '<div class="c4-empty">no leading digits, so the loop never runs and the result stays 0 — which is ' +
+        'exactly what ft_atoi("") and ft_atoi("abc") return</div>'),
+    'Each row is one iteration of the real loop. The ASCII column is where the character came from; ' +
+    'the last column is where the number is going.');
+}
+
+/* Why result * 10 + digit is positional notation. */
+function c4WhyAccum() {
+  const str = /^[0-9]+$/.test(c4.s2i) ? c4.s2i : '1234';
+  const digits = str.split('').map(Number);
+  const n = digits.length;
+  return c4Block('Why result × 10 + digit is not a trick',
+    '<div class="c4-posn"><div class="c4-posn-h">What the number MEANS, written out</div>' +
+    '<div class="c4-posn-row">' + digits.map((d, i) => {
+      const p = Math.pow(10, n - 1 - i);
+      return '<span class="c4-posn-t"><b class="mono">' + d + '</b>' +
+        '<span class="c4-posn-x">× ' + p + '</span>' +
+        '<span class="c4-posn-v mono">' + (d * p) + '</span></span>';
+    }).join('<span class="c4-posn-plus">+</span>') +
+    '<span class="c4-posn-eq">=</span><span class="c4-posn-sum mono">' + Number(str) + '</span></div></div>' +
+    '<div class="c4-posn-why"><div class="c4-posn-h">Why multiplying by 10 does the same job</div>' +
+    '<p>Every time you multiply the running total by 10, every digit already in it moves one place left — ' +
+    'its power of ten goes up by one. The new digit then lands in the units place. After ' + n + ' steps ' +
+    'the first digit has been multiplied by 10 exactly ' + (n - 1) + ' times, which is ' +
+    '<span class="mono">10<sup>' + (n - 1) + '</sup></span> — the very weight it has in the sum above.</p>' +
+    '<div class="c4-shift">' + digits.map((d, i) =>
+      '<div class="c4-shift-r"><span class="c4-shift-k">after step ' + (i + 1) + '</span>' +
+      '<span class="mono c4-shift-v">' + str.slice(0, i + 1) + '</span>' +
+      '<span class="c4-shift-n">' + (i === 0 ? 'the first digit' :
+        'everything shifted left, ' + d + ' dropped into the units') + '</span></div>').join('') +
+    '</div></div>',
+    'The two calculations are the same arithmetic in a different order. The loop is not a shortcut to be ' +
+    'memorised — it is positional notation, evaluated as you read.');
+}
+
+/* The bridge from base 10 to any base. */
+function c4BaseBridge() {
+  return c4Block('The same idea, in any base',
+    '<div class="c4-bridge">' +
+      '<div class="c4-bridge-top">ONE IDEA</div>' +
+      '<div class="c4-bridge-split">' +
+        '<div class="c4-bridge-arm"><div class="c4-bridge-h">base 10</div>' +
+          '<div class="c4-bridge-f mono">result = result * 10 + digit</div>' +
+          '<div class="c4-bridge-n">the digit comes from <span class="mono">c - \'0\'</span>, ' +
+            'because ‘0’…‘9’ are consecutive in ASCII</div>' +
+          '<div class="c4-bridge-x mono">ft_atoi</div></div>' +
+        '<div class="c4-bridge-arm alt"><div class="c4-bridge-h">base N</div>' +
+          '<div class="c4-bridge-f mono">result = result * base_len + index</div>' +
+          '<div class="c4-bridge-n">the index comes from <b>searching the base</b>, ' +
+            'because the symbols can be anything in any order</div>' +
+          '<div class="c4-bridge-x mono">ft_atoi_base</div></div>' +
+      '</div></div>' +
+      '<div class="c4-bridge-note">Base 10 is the special case where the search can be replaced by ' +
+      'subtraction. Everything else is identical — same three phases, same accumulator, same stopping rule.</div>',
+    'If ex03 makes sense, ex05 is ex03 with two lines changed. That is the whole relationship.');
+}
+
+/* The parser, as boxes. */
+function c4ParserBoxes() {
+  return c4Block('ft_atoi is a parser, not a formula',
+    '<div class="c4-boxes">' +
+      '<div class="c4-box in">INPUT STRING</div><div class="c4-parr">↓</div>' +
+      '<div class="c4-box p1">phase 1 — skip whitespace</div><div class="c4-parr">↓</div>' +
+      '<div class="c4-box p2">phase 2 — consume signs, track parity</div><div class="c4-parr">↓</div>' +
+      '<div class="c4-box p3">phase 3 — consume digits, accumulate</div><div class="c4-parr">↓</div>' +
+      '<div class="c4-box out">INTEGER</div>' +
+    '</div>' +
+    '<div class="c4-boxnote">A parser reads a stream of characters and decides, at each position, ' +
+    'which part of the grammar it is in. ft_atoi has three parts and reads left to right, once. ' +
+    'That shape — skip a class, consume a class, accumulate a class, stop — is the template for almost ' +
+    'every hand-rolled parsing question you will be asked.</div>',
+    'The tape below shows the same three phases moving over a real string, coloured by which phase ' +
+    'actually consumed each character.');
+}
+
+/* ---------------------------------------------------------------- *
+ * 1.9 — overflow                                                     *
+ * ---------------------------------------------------------------- */
+function c4Range() {
+  const lim = CEngine.limitsOf(CEngine.scalarT('int'));
+  const src =
+'int\tmain(void)\n{\n\tint\tmax;\n\tint\tmin;\n\tint\tover;\n\tint\tunder;\n\n' +
+'\tmax = 2147483647;\n\tmin = -2147483647 - 1;\n\tover = max + 1;\n\tunder = min - 1;\n\treturn (0);\n}\n';
+  const run = c4Run(src);
+  const v = {};
+  if (run.ok) for (const st of run.steps)
+    for (const name of ['max', 'min', 'over', 'under']) {
+      const x = c4Find(st.state, name);
+      if (x && !x.uninitialized) v[name] = x.valueText;
+    }
+  return c4Block('An int has ends, and asking for more does not wrap politely',
+    '<div class="c4-range"><div class="c4-range-bar">' +
+      '<span class="c4-range-e left"><b class="mono">' + c4Esc(lim.min) + '</b><span>INT_MIN</span></span>' +
+      '<span class="c4-range-line"><span class="c4-range-zero">0</span></span>' +
+      '<span class="c4-range-e right"><b class="mono">' + c4Esc(lim.max) + '</b><span>INT_MAX</span></span>' +
+    '</div><div class="c4-range-n">' + c4Esc(lim.bits) + ' bits · ' + c4Esc(lim.patterns) +
+      ' distinct patterns · every one of them is already spoken for</div></div>' +
+    '<div class="c4-imrow">' +
+      '<div class="c4-imcard bad"><div class="c4-imcard-h">OVERFLOW — INT_MAX + 1</div>' +
+        '<div class="c4-imcard-v mono">' + c4Esc(v.max) + ' + 1 → ' + c4Esc(v.over) + '</div>' +
+        '<div class="c4-imcard-n">The mathematical answer is 2147483648. There is no int that holds it. ' +
+        'This simulator produced the value above; the C standard does not require that, or any other value.</div></div>' +
+      '<div class="c4-imcard bad"><div class="c4-imcard-h">UNDERFLOW — INT_MIN − 1</div>' +
+        '<div class="c4-imcard-v mono">' + c4Esc(v.min) + ' − 1 → ' + c4Esc(v.under) + '</div>' +
+        '<div class="c4-imcard-n">The mathematical answer is −2147483649, and again there is no int for it.</div></div>' +
+    '</div>',
+    'The two ends are not symmetric: there is one more negative value than positive, because zero uses up ' +
+    'one of the patterns that would otherwise have been a positive number.');
+}
+
+function c4Undefined() {
+  return c4Block('What "undefined" actually means',
+    '<div class="c4-pipe wide">' +
+      '<div class="c4-pstep">the mathematical result</div><div class="c4-parr">↓</div>' +
+      '<div class="c4-pstep">falls outside the representable range</div><div class="c4-parr">↓</div>' +
+      '<div class="c4-pstep">there is no valid int for it</div><div class="c4-parr">↓</div>' +
+      '<div class="c4-pstep warn">the C standard imposes <b>no requirement</b> on what happens</div>' +
+    '</div>' +
+    '<div class="c4-ud"><div class="c4-ud-r no"><span>✕ do not believe</span>' +
+      '<p>“Signed overflow wraps around, so INT_MAX + 1 is INT_MIN.” Unsigned arithmetic is defined to ' +
+      'wrap. <b>Signed arithmetic is not.</b> A compiler is entitled to assume overflow never happens and ' +
+      'optimise on that basis, which can delete a check you wrote.</p></div>' +
+      '<div class="c4-ud-r ok"><span>✓ say instead</span>' +
+      '<p>“Signed integer overflow is undefined behaviour. The result is not specified, and it may differ ' +
+      'between compilers, optimisation levels, or even between two places in the same program.”</p></div></div>' +
+    '<div class="c4-warn"><span class="c4-badge alt">WHAT THE SUBJECT SAYS</span>' +
+      '<p class="c4-quote">“Overflow and underflow do not need to be handled; the function’s return value ' +
+      'is undefined in such cases.”</p>' +
+      '<p>That is permission to leave overflow detection out of ex03, so you can concentrate on the parsing. ' +
+      'It is <b>not</b> a statement that overflow is harmless, and it is not a promise about which number ' +
+      'you will get. Those are two different claims, and only the first one is in the subject.</p></div>',
+    'The value this simulator shows for an overflowing expression is what THIS simulator does. Nothing ' +
+    'guarantees another compiler agrees — that is precisely the point of the word “undefined”.');
+}
+
+function c4TwoOverflows() {
+  const big = c4Run(
+'int\tmain(void)\n{\n\tchar\t*s;\n\tint\ti;\n\tint\tr;\n\n\ts = "9999999999";\n\tr = 0;\n\ti = 0;\n' +
+'\twhile (s[i] >= 48 && s[i] <= 57)\n\t{\n\t\tr = r * 10 + (s[i] - 48);\n\t\ti++;\n\t}\n\treturn (0);\n}\n');
+  let bigVal = null;
+  if (big.ok) for (const st of big.steps) {
+    const r = c4Find(st.state, 'r');
+    if (r && !r.uninitialized) bigVal = r.valueText;
+  }
+  return c4Block('Two different overflow problems that are easy to confuse',
+    '<div class="c4-two">' +
+      '<div class="c4-half"><div class="c4-half-h">A — the parsed value is too big <span class="c4-where">ex03, ex05</span></div>' +
+        '<p class="c4-p">The string holds more digits than an int can represent. The accumulator overflows ' +
+        'part-way through.</p>' +
+        '<div class="c4-mini mono">"9999999999" → ' + c4Esc(bigVal) + '</div>' +
+        '<div class="c4-half-n"><b>The subject excuses this one.</b> “Overflow and underflow do not need ' +
+        'to be handled.” Write the parser; do not build a guard the exercise did not ask for.</div></div>' +
+      '<div class="c4-half"><div class="c4-half-h">B — negating INT_MIN <span class="c4-where">ex02, ex04</span></div>' +
+        '<p class="c4-p">The input is a perfectly ordinary int. The overflow is created by <b>your own code</b>, ' +
+        'in the line that flips the sign.</p>' +
+        '<div class="c4-mini mono">nb = -nb;  when nb is INT_MIN</div>' +
+        '<div class="c4-half-n"><b>The subject does not excuse this one.</b> ex02 says the function “must be ' +
+        'able to handle all possible values of the int type”, and INT_MIN is one of them.</div></div>' +
+    '</div>' +
+    '<div class="c4-boxnote">The difference is who caused it. In A the input was outside the range before ' +
+    'you touched it, and the subject waives it. In B the input was fine and your negation pushed it out — ' +
+    'which is why ex02 and ex04 have to deal with it and ex03 does not.</div>',
+    'See the INT_MIN panel on ex02 for what the engine does with that negation, and the ex02 trace’s ' +
+    'INT_MIN case for what the naive implementation really prints.');
+}
+
+/* ---------------------------------------------------------------- *
+ * 1.10 — the manual                                                  *
+ * ---------------------------------------------------------------- */
+function c4ManPage() {
+  const sections = [
+    ['1', 'shell commands', 'ls, cc, git, man itself'],
+    ['2', 'system calls', 'write, read, open — requests to the kernel'],
+    ['3', 'C library functions', 'atoi, isspace, strlen, malloc'],
+  ];
+  return c4Block('man — looking a function up without asking anyone',
+    '<div class="c4-mansec">' + sections.map(([n, t, ex]) =>
+      '<div class="c4-mansec-r' + (n === '3' ? ' hi' : '') + '"><span class="c4-mansec-n mono">man ' + n + '</span>' +
+      '<span class="c4-mansec-t">' + c4Esc(t) + '</span>' +
+      '<span class="c4-mansec-e mono">' + c4Esc(ex) + '</span></div>').join('') + '</div>' +
+    '<div class="c4-boxnote">A name can live in more than one section — so <span class="mono">man 3 atoi</span> ' +
+    'says “the library function”, not “the shell command”. When the ex03 subject writes ' +
+    '<b>isspace(3)</b>, that 3 is the section number.</div>' +
+    '<div class="c4-manpage"><div class="c4-manpage-h mono">man 3 atoi</div>' +
+      '<div class="c4-manrow"><span class="c4-mank">NAME</span>' +
+        '<span class="c4-manv">what the function is called, and a one-line summary</span></div>' +
+      '<div class="c4-manrow"><span class="c4-mank">SYNOPSIS</span>' +
+        '<span class="c4-manv">which header to include, and the exact prototype — the two things you ' +
+        'need before you can call it</span></div>' +
+      '<div class="c4-manrow"><span class="c4-mank">DESCRIPTION</span>' +
+        '<span class="c4-manv">what it really does, including the edge cases. This is where you learn ' +
+        'that atoi skips whitespace and stops at the first non-digit</span></div>' +
+      '<div class="c4-manrow"><span class="c4-mank">RETURN VALUE</span>' +
+        '<span class="c4-manv">what comes back, and what comes back when it fails</span></div>' +
+      '<div class="c4-manrow dim"><span class="c4-mank">ERRORS / SEE ALSO</span>' +
+        '<span class="c4-manv">failure modes, and the related functions worth knowing</span></div>' +
+    '</div>' +
+    '<div class="c4-mantips"><b>Reading it quickly:</b> SYNOPSIS and RETURN VALUE answer most questions. ' +
+    'DESCRIPTION is where the behaviour you did not expect is written down. Press <span class="mono">q</span> ' +
+    'to quit, <span class="mono">/word</span> to search.</div>',
+    'This is the habit the exam rewards: when you do not know a function, you look it up rather than guess.');
+}
+
+/* ---------------------------------------------------------------- *
+ * Shared blocks used by the exercise pages                           *
+ * ---------------------------------------------------------------- */
+function c4AnatomyCard(key) {
+  const f = C04_FUNCREF[key];
+  if (!f) return '';
+  return '<div class="c4-anat"><div class="c4-anat-h"><b class="mono">' + c4Esc(f.name) + '</b>' +
+    '<span class="c4-anat-hdr mono">' + c4Esc(f.header) + '</span>' +
+    '<span class="c4-anat-man mono">' + c4Esc(f.man) + '</span></div>' +
+    '<div class="c4-proto mono">' + c4Esc(f.proto) + '</div>' +
+    '<div class="c4-anat-rows">' +
+      '<div class="c4-anat-r"><span>library</span><p>' + c4Esc(f.library) + '</p></div>' +
+      '<div class="c4-anat-r"><span>parameters</span><p>' + f.params.map(([p, d]) =>
+        '<b class="mono">' + c4Esc(p) + '</b> — ' + c4Esc(d)).join('<br>') + '</p></div>' +
+      '<div class="c4-anat-r"><span>returns</span><p>' + c4Esc(f.returns) + '</p></div>' +
+      '<div class="c4-anat-r"><span>side effects</span><p>' + c4Esc(f.effects) + '</p></div>' +
+    '</div>' +
+    '<div class="c4-why"><span class="c4-why-h">WHY DO WE NEED IT?</span><p>' + c4Esc(f.why) + '</p></div>' +
+    '</div>';
+}
+
+/* The standardised Functions & Libraries block on every exercise. */
+function c4FuncsBlock(ex) {
+  const list = C04_EXFUNCS[ex.id] || [];
+  return c4Block('Functions & libraries',
+    '<table class="c4-t c4-fl"><tbody>' +
+      '<tr><th>the function you are writing</th><td class="mono c4-sym-out">' + c4Esc(ex.name) + '</td></tr>' +
+      '<tr><th>prototype</th><td class="mono">' + c4Esc(ex.official.proto) + '</td></tr>' +
+      '<tr><th>header it would live in</th><td class="c4-dim">none — the subject asks for ' +
+        '<span class="mono">' + c4Esc(ex.official.files) + '</span> alone, with no header of your own</td></tr>' +
+      '<tr><th>allowed functions <span class="c4-fl-src">subject</span></th>' +
+        '<td class="mono' + (ex.official.allowed === 'None' ? ' c4-none' : '') + '">' +
+        c4Esc(ex.official.allowed) + '</td></tr>' +
+    '</tbody></table>' +
+    (list.filter(x => x.fn).length
+      ? '<div class="c4-fl-list">' + list.filter(x => x.fn).map(x => {
+          const f = C04_FUNCREF[x.fn];
+          return '<div class="c4-flr ' + (x.allowed ? 'yes' : 'no') + '">' +
+            '<div class="c4-flr-h"><b class="mono">' + c4Esc(f.name) + '</b>' +
+              '<span class="mono c4-dim">' + c4Esc(f.header) + '</span>' +
+              '<span class="mono c4-dim">' + c4Esc(f.man) + '</span>' +
+              '<span class="c4-flr-tag">' + (x.allowed ? 'ALLOWED HERE' : 'NOT ALLOWED HERE') + '</span></div>' +
+            (x.reason ? '<div class="c4-flr-w">' + c4Esc(x.reason) + '</div>' : '') +
+            '</div>';
+        }).join('') + '</div>'
+      : '') +
+    (list.some(x => x.fn) ? '<details class="c4-q"><summary>Function anatomy</summary><div class="c4-anats">' +
+      list.filter(x => x.fn).map(x => c4AnatomyCard(x.fn)).join('') + '</div></details>' : ''),
+    'The <b>allowed functions</b> row is quoted from the subject. Everything under it is reference — ' +
+    'knowing what a function does is useful even when you may not call it.');
+}
+
+/* Human algorithm → skeleton → (the detailed GIOPVC follows on the page). */
+function c4AlgoBlock(ex) {
+  const a = C04_ALGO[ex.id];
+  if (!a) return '';
+  return c4Block('The algorithm, in three sizes',
+    '<div class="c4-algo"><div class="c4-algo-h">1 — in plain words</div>' +
+      '<ol class="c4-algo-l">' + a.human.map(x => '<li>' + c4Esc(x) + '</li>').join('') + '</ol></div>' +
+    '<div class="c4-algo"><div class="c4-algo-h">2 — as a skeleton</div>' +
+      '<pre class="c4-pre mono">' + c4Esc(a.skeleton) + '</pre></div>' +
+    '<div class="c4-algo-n">3 — the detail is below. If steps 1 and 2 make sense you can already write ' +
+      'this function; the rest is naming the variables and getting the conditions exactly right.</div>',
+    'Understand the shape before the specifics. In an exam you reconstruct the shape from memory and ' +
+    'derive the rest — which is why the skeleton matters more than the finished code.');
+}
+/* ==== C04DEEP END ==== */
 
 /* ==== TERM START ====
    PHASE 8 — the simulated C / 1337 terminal.
