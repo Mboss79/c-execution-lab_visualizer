@@ -751,6 +751,18 @@ html[data-theme=light] .term-out{color:#1f7a3f;}
 }
 .statusbar .sb-i{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
 .statusbar .sb-i b{color:var(--text-muted);font-weight:600;font-family:var(--mono);}
+/* The four live fields are given fixed widths so their positions do not move as
+   their contents change. Measured before the change: sbLine sat at x=149 with no
+   execution and x=201 mid-run, so the eye had to re-find it after every step.
+   Content longer than the box is clipped with an ellipsis rather than pushing
+   the row along. */
+.statusbar #sbStatus{display:inline-block;width:56px;}
+.statusbar #sbFn{display:inline-block;width:92px;}
+.statusbar #sbLine{display:inline-block;width:30px;}
+.statusbar #sbStep{display:inline-block;width:56px;}
+.statusbar #sbStatus,.statusbar #sbFn,.statusbar #sbLine,.statusbar #sbStep{
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom;
+}
 .sb-gap{flex:1;}
 .sb-dot{width:6px;height:6px;border-radius:50%;background:var(--text-faint);}
 .sb-dot.ok{background:var(--success);} .sb-dot.run{background:var(--execution);} .sb-dot.err{background:var(--error);}
@@ -4417,6 +4429,135 @@ html[data-theme=light] .viz-node.vz-frame::after{
   #learnRoot .c4-t thead, #learnRoot .c4-t tbody { display:table; width:100%; min-width:max-content; }
 }
 /* ==== C04DEEPCSS END ==== */
+
+/* ==== C05CSS START ==== C 05 visualizers, plus the module switch and the two
+   new subject labels. Everything scoped under #learnRoot, prefixed c4- or c5-,
+   reusing the same tokens as the rest of the Learn view. */
+
+/* module switch in the contents rail */
+#learnRoot .c4-modsw { display:flex; gap:4px; margin:0 8px 10px; }
+#learnRoot .c4-modb { flex:1; background:var(--bg); border:1px solid var(--border);
+  border-radius:6px; color:var(--text-muted); padding:5px 0; font-size:11.5px;
+  cursor:pointer; font-family:var(--mono); }
+#learnRoot .c4-modb:hover { color:var(--text); border-color:var(--execution); }
+#learnRoot .c4-modb.on { background:var(--execution); border-color:var(--execution);
+  color:#0b0e14; font-weight:700; }
+#learnRoot .c4-modb:focus-visible { outline:2px solid var(--execution); outline-offset:1px; }
+
+/* the two additional subject labels */
+#learnRoot .c4-subj-tip { border:1px solid var(--warn, #d98b3a); border-radius:7px;
+  padding:9px 12px; margin-bottom:11px; font-size:12.5px; }
+#learnRoot .c4-subj-tip span { display:block; font-size:9px; letter-spacing:.1em;
+  color:var(--warn, #d98b3a); font-weight:700; margin-bottom:4px; }
+#learnRoot .c4-subj-note { margin:10px 0 0; font-size:12.5px; line-height:1.7; }
+#learnRoot .c4-unspec { border-color:var(--text-faint); }
+#learnRoot .c4-unspec .c4-badge { border-color:var(--text-faint); }
+#learnRoot .c4-limit { border-color:var(--memory, #6f9fd8); }
+#learnRoot .c4-limit p { margin:8px 0 0; font-size:12.5px; line-height:1.7; color:var(--text-muted); }
+#learnRoot .c4-algo.one { border-color:var(--execution); }
+#learnRoot .c4-algo-one { margin:0; font-size:14.5px; line-height:1.6; }
+
+/* small stat rows */
+#learnRoot .c5-stat { display:flex; align-items:baseline; justify-content:space-between;
+  gap:12px; font-size:12px; padding:3px 0; }
+#learnRoot .c5-stat span { color:var(--text-faint); }
+#learnRoot .c5-stat b { color:var(--execution); }
+#learnRoot .c5-statrow { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:9px; margin-bottom:12px; }
+#learnRoot .c5-stat.big { flex-direction:column; align-items:flex-start; gap:2px;
+  border:1px solid var(--border); border-radius:8px; padding:9px 12px; background:var(--bg); }
+#learnRoot .c5-stat.big span { font-size:10px; text-transform:uppercase; letter-spacing:.07em; }
+#learnRoot .c5-stat.big b { font-size:18px; }
+
+/* the call ladder */
+#learnRoot .c5-ladder { display:flex; flex-direction:column; gap:3px; }
+#learnRoot .c5-rung { display:flex; align-items:baseline; gap:9px; border:1px solid var(--border);
+  border-radius:7px; padding:6px 12px; background:var(--bg); font-size:12.5px; }
+#learnRoot .c5-rung.down { border-left:3px solid var(--execution); }
+#learnRoot .c5-rung.up { border-left:3px solid var(--ok, #56a869); opacity:.9; }
+#learnRoot .c5-rung-a { color:var(--text-faint); }
+#learnRoot .c5-rung-n { font-size:11px; color:var(--text-faint); margin-left:auto; }
+#learnRoot .c5-base { font-size:10px; background:var(--execution); color:#0b0e14;
+  border-radius:3px; padding:1px 6px; font-weight:700; margin-left:auto; }
+
+/* factorial / power expansion */
+#learnRoot .c5-expand { background:var(--bg); border:1px solid var(--border); border-radius:7px;
+  padding:10px 13px; font-size:14px; margin-bottom:12px; overflow-x:auto; color:var(--execution); }
+#learnRoot .c5-over td { color:var(--bad, #d05c5c); }
+
+/* fibonacci */
+#learnRoot .c5-seq { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:12px; }
+#learnRoot .c5-seqc { display:flex; flex-direction:column; align-items:center; gap:1px;
+  min-width:46px; border:1px solid var(--border); border-radius:6px; padding:6px 4px;
+  background:var(--bg); }
+#learnRoot .c5-seqc.base { border-color:var(--execution); }
+#learnRoot .c5-seqi { font-size:9px; color:var(--text-faint); }
+#learnRoot .c5-seqv { font-size:15px; color:var(--execution); font-weight:700; }
+#learnRoot .c5-seqb { font-size:8px; color:var(--execution); letter-spacing:.05em; }
+#learnRoot .c5-sums { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:10px; }
+#learnRoot .c5-sum { font-size:11.5px; color:var(--text-muted); border:1px solid var(--border);
+  border-radius:5px; padding:2px 8px; }
+#learnRoot .c5-hits { border:1px solid var(--border); border-radius:8px; padding:11px 13px;
+  background:var(--bg); margin-bottom:12px; }
+#learnRoot .c5-hit { display:grid; grid-template-columns:80px 1fr 44px; gap:9px;
+  align-items:center; margin-bottom:3px; }
+#learnRoot .c5-hit-k { font-size:11px; color:var(--text-muted); }
+#learnRoot .c5-hit-bar { height:9px; background:var(--execution); border-radius:3px; min-width:2px; }
+#learnRoot .c5-hit-n { font-size:11px; color:var(--execution); text-align:right; }
+
+/* search candidates — sqrt, primes, next prime */
+#learnRoot .c5-tries { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:12px; }
+#learnRoot .c5-try { display:flex; flex-direction:column; align-items:center; gap:1px;
+  min-width:52px; border:1px solid var(--border); border-radius:6px; padding:5px 7px;
+  background:var(--bg); }
+#learnRoot .c5-try.hit { border-color:var(--ok, #56a869);
+  background:color-mix(in srgb, var(--ok, #56a869) 16%, transparent); }
+#learnRoot .c5-try.bad { border-color:var(--bad, #d05c5c);
+  background:color-mix(in srgb, var(--bad, #d05c5c) 16%, transparent); }
+#learnRoot .c5-try-i { font-size:12.5px; color:var(--text); }
+#learnRoot .c5-try-v { font-size:11px; color:var(--text-muted); }
+#learnRoot .c5-try-r { font-size:9px; color:var(--text-faint); }
+#learnRoot .c5-try.hit .c5-try-r { color:var(--ok, #56a869); font-weight:700; }
+#learnRoot .c5-try.bad .c5-try-r { color:var(--bad, #d05c5c); font-weight:700; }
+
+/* the chessboard */
+#learnRoot .c5-boardwrap { display:flex; flex-wrap:wrap; gap:18px; align-items:flex-start;
+  margin-bottom:12px; }
+#learnRoot .c5-board { border-collapse:collapse; border:1px solid var(--border-strong, var(--border)); }
+#learnRoot .c5-board td { width:34px; height:34px; text-align:center; vertical-align:middle;
+  font-size:17px; background:var(--surface); color:var(--text); }
+#learnRoot .c5-board td.dark { background:var(--bg); }
+#learnRoot .c5-board td.queen { background:var(--execution); color:#0b0e14; }
+#learnRoot .c5-board td.att { background:color-mix(in srgb, var(--bad, #d05c5c) 26%, var(--surface)); }
+#learnRoot .c5-board td.att.diagonal { background:color-mix(in srgb, var(--warn, #d98b3a) 26%, var(--surface)); }
+#learnRoot .c5-board td.cand { outline:2px solid var(--memory, #6f9fd8); outline-offset:-2px;
+  font-size:13px; color:var(--text-muted); }
+#learnRoot .c5-boardkey { display:flex; flex-direction:column; gap:6px; font-size:11.5px;
+  color:var(--text-muted); }
+#learnRoot .c5-boardkey span { display:flex; align-items:center; gap:8px; }
+#learnRoot .c5-boardkey i { width:17px; height:17px; border-radius:3px; display:inline-flex;
+  align-items:center; justify-content:center; font-style:normal; font-size:11px;
+  border:1px solid var(--border); flex-shrink:0; }
+#learnRoot .c5-boardkey i.k-queen { background:var(--execution); color:#0b0e14; }
+#learnRoot .c5-boardkey i.k-att { background:color-mix(in srgb, var(--bad, #d05c5c) 26%, var(--surface)); }
+
+/* solution encoding */
+#learnRoot .c5-solpick { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:11px; }
+#learnRoot .c5-encode { flex:1; min-width:220px; }
+#learnRoot .c5-enc-row { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:9px; }
+#learnRoot .c5-enc { display:flex; flex-direction:column; align-items:center; gap:1px;
+  border:1px solid var(--border); border-radius:5px; padding:4px 8px; background:var(--bg); }
+#learnRoot .c5-enc-c { font-size:9px; color:var(--text-faint); }
+#learnRoot .c5-enc-r { font-size:14px; color:var(--execution); font-weight:700; }
+#learnRoot .c5-enc-out { font-size:20px; letter-spacing:.14em; color:var(--execution);
+  font-weight:700; margin-bottom:7px; }
+
+@media (max-width: 820px) {
+  #learnRoot .c5-hit { grid-template-columns:70px 1fr 38px; }
+  #learnRoot .c5-board td { width:28px; height:28px; font-size:14px; }
+  #learnRoot .c5-statrow { grid-template-columns:repeat(auto-fit,minmax(118px,1fr)); }
+}
+/* ==== C05CSS END ==== */
 </style>
 </head>
 <body>
@@ -14068,7 +14209,10 @@ function updateStatusTrace() {
   const last = trc.index >= n - 1;
   $('#sbFn').textContent   = s && s.fn ? s.fn + '()' : '—';
   $('#sbLine').textContent = s && s.line ? String(s.line) : '—';
-  $('#sbStep').textContent = (trc.index + 1) + ' / ' + n;
+  /* The execution writer guards this; the trace writer did not, so a trace
+     with no position rendered "NaN / n". Same em dash, same rule, both paths. */
+  $('#sbStep').textContent = (trc && typeof trc.index === 'number' && n)
+    ? (trc.index + 1) + ' / ' + n : '—';
   $('#sbStatus').textContent = 'trace';
   $('#sbDot').className = 'sb-dot' + (last ? ' ok' : ' run');
   $('#stepReadout').innerHTML = '<b>' + (trc.index + 1) + '</b> / ' + n;
@@ -15651,13 +15795,25 @@ const MENUS = {
   ],
   mLearn: () => [
     { n:'C 04 — strings, bases, recursion, parsing', ico:'◳', k:'Ctrl+3',
-      a:() => showLearn('overview') },
-    { n:'   ex00 ft_strlen', ico:'·', a:() => showLearn('ex:ex00') },
-    { n:'   ex01 ft_putstr', ico:'·', a:() => showLearn('ex:ex01') },
-    { n:'   ex02 ft_putnbr', ico:'·', a:() => showLearn('ex:ex02') },
-    { n:'   ex03 ft_atoi', ico:'·', a:() => showLearn('ex:ex03') },
-    { n:'   ex04 ft_putnbr_base', ico:'·', a:() => showLearn('ex:ex04') },
-    { n:'   ex05 ft_atoi_base', ico:'·', a:() => showLearn('ex:ex05') },
+      a:() => showLearn('overview', 'C04') },
+    { n:'   ex00 ft_strlen', ico:'·', a:() => showLearn('ex:ex00', 'C04') },
+    { n:'   ex01 ft_putstr', ico:'·', a:() => showLearn('ex:ex01', 'C04') },
+    { n:'   ex02 ft_putnbr', ico:'·', a:() => showLearn('ex:ex02', 'C04') },
+    { n:'   ex03 ft_atoi', ico:'·', a:() => showLearn('ex:ex03', 'C04') },
+    { n:'   ex04 ft_putnbr_base', ico:'·', a:() => showLearn('ex:ex04', 'C04') },
+    { n:'   ex05 ft_atoi_base', ico:'·', a:() => showLearn('ex:ex05', 'C04') },
+    '-',
+    { n:'C 05 — recursion, sequences, search, backtracking', ico:'◳',
+      a:() => showLearn('overview', 'C05') },
+    { n:'   ex00 ft_iterative_factorial', ico:'·', a:() => showLearn('ex:ex00', 'C05') },
+    { n:'   ex01 ft_recursive_factorial', ico:'·', a:() => showLearn('ex:ex01', 'C05') },
+    { n:'   ex02 ft_iterative_power', ico:'·', a:() => showLearn('ex:ex02', 'C05') },
+    { n:'   ex03 ft_recursive_power', ico:'·', a:() => showLearn('ex:ex03', 'C05') },
+    { n:'   ex04 ft_fibonacci', ico:'·', a:() => showLearn('ex:ex04', 'C05') },
+    { n:'   ex05 ft_sqrt', ico:'·', a:() => showLearn('ex:ex05', 'C05') },
+    { n:'   ex06 ft_is_prime', ico:'·', a:() => showLearn('ex:ex06', 'C05') },
+    { n:'   ex07 ft_find_next_prime', ico:'·', a:() => showLearn('ex:ex07', 'C05') },
+    { n:'   ex08 The Ten Queens', ico:'·', a:() => showLearn('ex:ex08', 'C05') },
     '-',
     { n:'C 00 — subject not provided yet', ico:'○', disabled:true },
     { n:'C 01 — subject not provided yet', ico:'○', disabled:true },
@@ -19145,7 +19301,7 @@ const C04_FOUND = [
     },
   },
   {
-    id: 'bases', n: '1.3', title: 'Number bases — the foundation of ex04 and ex05',
+    id: 'bases', n: '1.3', viz: ['c4BaseViz', 'c4EncDec'], title: 'Number bases — the foundation of ex04 and ex05',
     what: 'A base is a set of symbols. A digit’s value depends on its position — its power of the base.',
     why: 'The subject gives the base as a STRING. Its length is the numeric base. A character’s INDEX inside that string is its digit value. That one sentence is the whole of ex04 and ex05.',
     keys: [
@@ -19156,7 +19312,7 @@ const C04_FOUND = [
     ],
   },
   {
-    id: 'ascii', n: '1.4', title: 'ASCII, digits and character math',
+    id: 'ascii', n: '1.4', viz: ['c4AsciiViz'], title: 'ASCII, digits and character math',
     what: 'Characters are small integers. ‘0’ is 48, ‘A’ is 65, ‘a’ is 97.',
     why: 'For base 10 you can convert with arithmetic: c - ‘0’ gives the digit, ‘0’ + d gives the character. For an arbitrary base you cannot — the symbols may be any characters in any order, so you index into the base string instead.',
     keys: [
@@ -19166,7 +19322,7 @@ const C04_FOUND = [
     ],
   },
   {
-    id: 'recursion', n: '1.5', title: 'Recursion vs loops for digit extraction',
+    id: 'recursion', n: '1.5', viz: ['c4DivMod'], title: 'Recursion vs loops for digit extraction',
     what: 'Dividing a number by its base produces digits least-significant first — the reverse of the order you must print them in.',
     why: 'Recursing on nbr / base BEFORE printing lets the call stack reverse the order for you. The writes all happen while the stack unwinds.',
     keys: [
@@ -19183,7 +19339,7 @@ const C04_FOUND = [
     },
   },
   {
-    id: 'validate', n: '1.6', title: 'The input-validation mindset',
+    id: 'validate', n: '1.6', viz: ['c4Validator', 'c4Dup'], title: 'The input-validation mindset',
     what: 'ex04 and ex05 must reject a malformed base BEFORE doing anything else.',
     why: 'ex04 says "if an invalid argument is provided, nothing should be displayed" — not "stop part-way". ex05 says return 0. Both mean: check first, act second.',
     keys: [
@@ -19203,6 +19359,7 @@ const C04_EX = [
   /* ---------------------------- ex00 ---------------------------- */
   {
     id: 'ex00', name: 'ft_strlen', chapter: 'IV',
+    viz: ['c4StrVsInt'], mem: true,
     official: {
       dir: 'ex00/', files: 'ft_strlen.c', allowed: 'None',
       proto: 'int\tft_strlen(char *str);',
@@ -19247,6 +19404,7 @@ const C04_EX = [
   /* ---------------------------- ex01 ---------------------------- */
   {
     id: 'ex01', name: 'ft_putstr', chapter: 'V',
+    viz: ['c4WriteAnatomy'], mem: true,
     official: {
       dir: 'ex01/', files: 'ft_putstr.c', allowed: 'write',
       proto: 'void\tft_putstr(char *str);',
@@ -19290,6 +19448,7 @@ const C04_EX = [
   /* ---------------------------- ex02 ---------------------------- */
   {
     id: 'ex02', name: 'ft_putnbr', chapter: 'VI',
+    viz: ['c4DivMod', 'c4IntMin', 'c4TwoOverflows'],
     official: {
       dir: 'ex02/', files: 'ft_putnbr.c', allowed: 'write',
       proto: 'void\tft_putnbr(int nb);',
@@ -19350,6 +19509,7 @@ const C04_EX = [
   /* ---------------------------- ex03 ---------------------------- */
   {
     id: 'ex03', name: 'ft_atoi', chapter: 'VII', deep: true,
+    viz: ['c4ParserBoxes', 'c4Parser', 'c4SignParity', 'c4WsRam', 'c4StrToInt', 'c4WhyAccum'],
     official: {
       dir: 'ex03/', files: 'ft_atoi.c', allowed: 'None',
       proto: 'int\tft_atoi(char *str);',
@@ -19423,6 +19583,7 @@ const C04_EX = [
   /* ---------------------------- ex04 ---------------------------- */
   {
     id: 'ex04', name: 'ft_putnbr_base', chapter: 'VIII', deep: true,
+    viz: ['c4BaseViz', 'c4DivMod', 'c4Validator', 'c4Dup', 'c4IntMin', 'c4TwoOverflows'],
     official: {
       dir: 'ex04/', files: 'ft_putnbr_base.c', allowed: 'write',
       proto: 'void\tft_putnbr_base(int nbr, char *base);',
@@ -19497,6 +19658,7 @@ const C04_EX = [
   /* ---------------------------- ex05 ---------------------------- */
   {
     id: 'ex05', name: 'ft_atoi_base', chapter: 'IX', deep: true,
+    viz: ['c4BaseBridge', 'c4Validator', 'c4Search', 'c4Accum', 'c4EncDec'],
     official: {
       dir: 'ex05/', files: 'ft_atoi_base.c', allowed: 'None',
       proto: 'int\tft_atoi_base(char *str, char *base);',
@@ -19813,7 +19975,7 @@ const C04_ALGO = {
 /* Four more foundations. They sit after 1.6 and are reached the same way. */
 const C04_FOUND2 = [
   {
-    id: 'whitespace', n: '1.7', title: 'Whitespace, and why you cannot see it',
+    id: 'whitespace', n: '1.7', viz: ['c4WsTable', 'c4WsRam', 'c4IsSpace'], title: 'Whitespace, and why you cannot see it',
     what: 'Whitespace is the set of characters that arrange text rather than show a symbol. A space is one. So are tab, newline, vertical tab, form feed and carriage return.',
     why: 'ft_atoi must skip whitespace before it reads anything else. If you only test for the space character you will miss the other five — and they are exactly the ones you cannot see in an editor.',
     keys: [
@@ -19823,7 +19985,7 @@ const C04_FOUND2 = [
     ],
   },
   {
-    id: 'convert', n: '1.8', title: 'From "42" to 42 — the central C 04 idea',
+    id: 'convert', n: '1.8', viz: ['c4StrVsInt', 'c4WhyAtoi', 'c4AsciiDigit', 'c4StrToInt', 'c4WhyAccum', 'c4BaseBridge'], title: 'From "42" to 42 — the central C 04 idea',
     what: '"42" is two characters in memory. 42 is a number in an int. They are not the same thing, and nothing converts one to the other automatically.',
     why: 'Everything arriving from a terminal, a file or argv is characters. Arithmetic needs numbers. ex03 and ex05 exist to bridge that gap; ex02 and ex04 bridge it in the other direction.',
     keys: [
@@ -19834,7 +19996,7 @@ const C04_FOUND2 = [
     ],
   },
   {
-    id: 'overflow', n: '1.9', title: 'Overflow, underflow, and what "undefined" means',
+    id: 'overflow', n: '1.9', viz: ['c4Range', 'c4Undefined', 'c4TwoOverflows'], title: 'Overflow, underflow, and what "undefined" means',
     what: 'An int holds a limited range of values. Asking for a result outside that range is not a wrap-around — the C standard simply does not say what happens.',
     why: 'The ex03 subject says overflow and underflow do not need to be handled. That is permission to ignore it, not a promise that it is safe. Knowing the difference is what stops you writing confident nonsense in a peer evaluation.',
     keys: [
@@ -19845,7 +20007,7 @@ const C04_FOUND2 = [
     ],
   },
   {
-    id: 'man', n: '1.10', title: 'Reading the manual',
+    id: 'man', n: '1.10', viz: ['c4ManPage', 'c4AtoiAnatomy', 'c4IsSpaceAnatomy'], title: 'Reading the manual',
     what: 'man is how you look up a C function without leaving the terminal — and without asking anyone.',
     why: 'In an exam there is no internet. Being able to open man 3 atoi and read the prototype and return value is a skill worth more than remembering any single function.',
     keys: [
@@ -19857,6 +20019,966 @@ const C04_FOUND2 = [
   },
 ];
 /* ==== C04DATA END ==== */
+
+/* ==== C05DATA START ====
+   C 05 — the content layer.
+
+   Same two-source discipline as C 04. Every `official` object is transcribed
+   from the C Piscine C 05 subject PDF (version 7) and nothing else; `teaching`
+   is explanation. Where the subject is SILENT on something a learner will ask
+   about, it is recorded in `notSpecified` and shown as such — the subject says
+   "if the argument is not valid" without ever defining valid, and that gap is
+   the learner's to notice, not mine to paper over.
+
+   Three textual details worth preserving, all real differences in the PDF:
+     - ex02 says only "Overflows do not need to be handled." ex03 adds "; the
+       function's return value will be undefined in such cases."
+     - ex08 is the only exercise whose allowed functions are not None.
+     - the "0 and 1 are not prime numbers" line in ex06 is a tip box, not a
+       bullet, and is reproduced as such. */
+
+const C05_META = {
+  module: 'C 05',
+  version: '7',
+  summary: 'This document is the subject of the C 05 module of the C Piscine at 42.',
+};
+
+/* ------------------------------------------------------------------ *
+ * FOUNDATIONS                                                          *
+ * ------------------------------------------------------------------ */
+const C05_FOUND = [
+  {
+    id: 'iter-rec', n: '1.1', title: 'Iteration and recursion — two shapes, one problem',
+    what: 'Repetition can be written as a loop that goes round, or as a function that calls a smaller version of itself. C 05 asks for both, on the same two problems, on purpose.',
+    why: 'ex00 and ex01 are the same factorial. ex02 and ex03 are the same power. The subject is not testing whether you can compute a factorial — it is testing whether you can see one idea in two forms.',
+    keys: [
+      ['a loop', 'one stack frame, a variable that changes'],
+      ['recursion', 'many stack frames, each holding its own copy of the parameter'],
+      ['both need a stopping rule', 'a loop condition, or a base case — the same thing wearing different clothes'],
+      ['recursion costs memory', 'every pending call is a real frame; a loop is not'],
+    ],
+    viz: ['c5IterRec'],
+  },
+  {
+    id: 'recursion', n: '1.2', title: 'How a recursive call actually works',
+    what: 'A recursive function does not "call itself". It calls a NEW copy of itself, with its own parameters and its own locals, and waits for that copy to finish.',
+    why: 'ex01, ex03 and ex04 are recursive, and ex08 cannot be solved without recursion. Getting the mental model right once pays for all four.',
+    keys: [
+      ['1 — make it smaller', 'the call must move toward the base case, or it never ends'],
+      ['2 — the base case returns without recursing', 'this is what stops it'],
+      ['3 — each call is a frame', 'holding its own arguments, waiting'],
+      ['4 — results travel back up', 'the deepest call returns first, and the answer is assembled on the way out'],
+    ],
+    viz: ['c5CallLadder'],
+  },
+  {
+    id: 'factorial', n: '1.3', title: 'Factorial',
+    what: 'n! is every whole number from 1 to n multiplied together. 5! = 5 × 4 × 3 × 2 × 1 = 120.',
+    why: 'ex00 and ex01. It is the smallest problem where "the answer for n is built from the answer for n − 1" is obvious.',
+    keys: [
+      ['0! = 1', 'the empty product — multiplying nothing together leaves the multiplicative identity'],
+      ['n! = n × (n − 1)!', 'the recursive definition, and the whole of ex01'],
+      ['it grows terrifyingly fast', '12! fits in an int. 13! does not.'],
+    ],
+    viz: ['c5Factorial', 'c5Growth'],
+  },
+  {
+    id: 'power', n: '1.4', title: 'Powers',
+    what: 'nb raised to power is nb multiplied by itself `power` times. 2⁵ = 2 × 2 × 2 × 2 × 2 = 32.',
+    why: 'ex02 and ex03 — and the subject states one rule you would not guess: 0⁰ is 1.',
+    keys: [
+      ['nb⁰ = 1', 'always — multiplying nothing together gives 1'],
+      ['nb^p = nb × nb^(p−1)', 'the recursive definition, and the whole of ex03'],
+      ['0⁰ = 1', 'the subject says so explicitly. Mathematicians argue about it; the subject does not.'],
+    ],
+    viz: ['c5Power'],
+  },
+  {
+    id: 'fib', n: '1.5', title: 'Fibonacci, and the cost of the obvious recursion',
+    what: 'Each number is the sum of the two before it. The subject fixes the start: 0, 1, 1, 2.',
+    why: 'ex04 — and it is the first place where a correct recursive solution is also an expensive one. Seeing why is worth more than the exercise.',
+    keys: [
+      ['F(n) = F(n−1) + F(n−2)', 'two recursive calls, not one'],
+      ['F(0) = 0 and F(1) = 1', 'two base cases, because the rule needs two previous values'],
+      ['the same value is recomputed', 'F(n−2) is computed inside F(n−1) as well, and again alongside it'],
+    ],
+    viz: ['c5FibSeq', 'c5FibCost'],
+  },
+  {
+    id: 'sqrt', n: '1.6', title: 'Square roots that are whole numbers',
+    what: 'A perfect square is a number that some whole number multiplied by itself produces. 144 is 12 × 12. 2 is not any whole number times itself.',
+    why: 'ex05 asks for the square root "if it exists", and 0 "if the square root is an irrational number". So the exercise is really: is this a perfect square, and if so which one?',
+    keys: [
+      ['perfect square', '1, 4, 9, 16, 25, 36 … i × i for whole i'],
+      ['irrational', 'the square root cannot be written as a fraction, so certainly not as an int'],
+      ['the search', 'try i = 1, 2, 3 … until i × i reaches or passes nb'],
+      ['stop early', 'once i × i > nb there is no point continuing'],
+    ],
+    viz: ['c5Sqrt'],
+  },
+  {
+    id: 'prime', n: '1.7', title: 'Prime numbers and divisibility',
+    what: 'A prime has exactly two whole divisors: 1 and itself. 7 is prime. 9 is not, because 3 divides it.',
+    why: 'ex06 and ex07. And the subject spends a tip box telling you that 0 and 1 are not prime — which is exactly the case people get wrong.',
+    keys: [
+      ['nb % i == 0', 'means i divides nb exactly — the only test you need'],
+      ['0 and 1 are not prime', 'the subject states this outright'],
+      ['2 is prime', 'the only even one'],
+      ['stop at the square root', 'if nb = a × b then one of them is at most √nb, so no divisor above √nb can be new'],
+    ],
+    viz: ['c5Prime'],
+  },
+  {
+    id: 'board', n: '1.8', title: 'The board, the queen, and what "attacking" means',
+    what: 'A queen attacks along its row, its column and both diagonals. Two queens conflict if they share any of those.',
+    why: 'ex08. Before you can search for placements you must be able to say, of two squares, whether they fight.',
+    keys: [
+      ['one queen per column', 'chosen, not given — it makes column conflicts impossible by construction'],
+      ['same row', 'board[i] == row'],
+      ['same diagonal', 'the column distance equals the row distance'],
+      ['so the whole test is', 'compare the candidate against every queen already placed'],
+    ],
+    viz: ['c5Board'],
+  },
+  {
+    id: 'backtrack', n: '1.9', title: 'Backtracking — search that knows how to give up',
+    what: 'Try a candidate. If it leads nowhere, undo it and try the next. If they all fail, give up and let the caller try something else.',
+    why: 'ex08 says recursion is required, and this is why: the undo happens for free when a call returns.',
+    keys: [
+      ['try', 'place a queen in the first row that is safe'],
+      ['recurse', 'move to the next column and repeat'],
+      ['fail', 'no safe row in this column — return without a solution'],
+      ['undo', 'the frame is destroyed, so the placement disappears by itself'],
+      ['count', 'reaching the last column means one complete solution'],
+    ],
+    viz: ['c5Backtrack'],
+  },
+  {
+    id: 'growth', n: '1.10', title: 'Growth, overflow, and what the subject is and is not saying',
+    what: 'Five of the nine exercises say overflows do not need to be handled. That is permission, not a safety guarantee.',
+    why: 'Factorials and powers leave the range of an int almost immediately. Knowing where, and knowing what C does and does not promise, is what stops you saying something wrong in a peer evaluation.',
+    keys: [
+      ['12! fits, 13! does not', 'verified by running both'],
+      ['signed overflow is undefined behaviour', 'the standard imposes no result — not "it wraps"'],
+      ['"not required to handle"', 'is a statement about the exercise, not about C'],
+      ['ex02 and ex03 word it differently', 'ex03 adds "the return value will be undefined"; ex02 does not'],
+    ],
+    viz: ['c5Growth'],
+  },
+];
+
+/* ------------------------------------------------------------------ *
+ * THE NINE OFFICIAL EXERCISES                                          *
+ * ------------------------------------------------------------------ */
+const C05_EX = [
+  {
+    id: 'ex00', name: 'ft_iterative_factorial', chapter: 'IV',
+    official: {
+      dir: 'ex00/', files: 'ft_iterative_factorial.c', allowed: 'None',
+      proto: 'int\tft_iterative_factorial(int nb);',
+      bullets: [
+        'Create an iterative function that returns a number. This number should be the result of a factorial operation based on the given parameter.',
+        'If the argument is not valid, the function should return 0.',
+        'Overflows do not need to be handled; the function’s return value will be undefined in such cases.',
+      ],
+    },
+    teaching: {
+      testing: 'Whether you can turn "multiply everything from 1 to n" into a loop with the right starting value and the right bound.',
+      giopvc: {
+        G: 'Return nb! computed with a loop.',
+        I: 'int nb.',
+        O: 'int. The factorial, or 0 for an invalid argument.',
+        P: 'One int in, one int out. No pointers, no output.',
+        V: 'result, starting at 1 — NOT 0, or every multiplication gives 0. i, the multiplier.',
+        C: 'Reject an invalid argument first. 0! is 1, which the loop produces on its own by never running.',
+        L: 'while: multiply by i, increase i, until i passes nb.',
+        A: 'Check the argument. Set result to 1. Multiply it by every number from 1 up to nb. Return it.',
+      },
+      notSpecified: [
+        'The subject says "if the argument is not valid" and never defines valid. A negative nb is the reading almost everyone takes, since a factorial is not defined for negatives — but the subject does not say it, so do not tell a peer evaluator that it does.',
+      ],
+      mistakes: [
+        ['result starts at 0', 'Every multiplication then produces 0. The identity for multiplication is 1.'],
+        ['the loop bound excludes nb', 'while (i < nb) computes (nb − 1)!. The bound is i <= nb.'],
+        ['0 is treated as invalid', '0! is 1, and 0 is a perfectly valid argument. Only the undefined cases return 0.'],
+      ],
+      traps: ['0 and 1 both return 1, by different routes — 0 never enters the loop, 1 enters it once.',
+              'An examiner may ask for the iterative and recursive versions side by side and expect you to explain the trade.'],
+      reading: [
+        ['What does the loop do when nb is 0?', 'i starts at 1, the condition 1 <= 0 is false, the body never runs, and result stays 1. Which is correct: 0! is 1.'],
+        ['Why must result start at 1?', 'It is the multiplicative identity. Starting at 0 makes every product 0.'],
+      ],
+      pattern: '"Combine every number from 1 to n" — a running total, an identity starting value, and a loop with an inclusive bound.',
+      takeaway: 'The starting value of an accumulator is part of the algorithm, not a detail. For a sum it is 0; for a product it is 1.',
+    },
+    program: {
+      watch: ['result', 'i', 'f'],
+      src:
+'int\tft_iterative_factorial(int nb)\n{\n\tint\tresult;\n\tint\ti;\n\n\tif (nb < 0)\n\t\treturn (0);\n' +
+'\tresult = 1;\n\ti = 1;\n\twhile (i <= nb)\n\t{\n\t\tresult = result * i;\n\t\ti++;\n\t}\n\treturn (result);\n}\n\n' +
+'int\tmain(void)\n{\n\tint\tf;\n\n\tf = ft_iterative_factorial(5);\n\treturn (0);\n}\n',
+    },
+    cases: [
+      { label: '0', patch: ['factorial(5)', 'factorial(0)'], expect: '1' },
+      { label: '1', patch: ['factorial(5)', 'factorial(1)'], expect: '1' },
+      { label: '5', patch: null, expect: '120' },
+      { label: '12 — the largest that fits', patch: ['factorial(5)', 'factorial(12)'], expect: '479001600' },
+      { label: '13 — overflows', patch: ['factorial(5)', 'factorial(13)'], expect: 'not 6227020800' },
+      { label: '-3', patch: ['factorial(5)', 'factorial(-3)'], expect: '0' },
+    ],
+    algo: {
+      one: 'Multiply every whole number from 1 up to nb together.',
+      human: ['Reject an argument you cannot compute a factorial for.',
+              'Start a running product at 1.',
+              'Multiply it by 1, then 2, then 3 … up to and including nb.',
+              'Return the product.'],
+      skeleton: 'if nb is invalid\n    return 0\n\nresult = 1\ni = 1\nwhile i <= nb\n    result = result * i\n    i++\n\nreturn result',
+    },
+    viz: ['c5Factorial'],
+  },
+
+  {
+    id: 'ex01', name: 'ft_recursive_factorial', chapter: 'V',
+    official: {
+      dir: 'ex01/', files: 'ft_recursive_factorial.c', allowed: 'None',
+      proto: 'int\tft_recursive_factorial(int nb);',
+      bullets: [
+        'Create a recursive function that returns the factorial of the given parameter.',
+        'If the argument is not valid, the function should return 0.',
+        'Overflows do not need to be handled; the function’s return value will be undefined in such cases.',
+      ],
+    },
+    teaching: {
+      testing: 'The same arithmetic as ex00, expressed as a base case plus a smaller problem. This is the shape every later recursive exercise reuses.',
+      giopvc: {
+        G: 'Return nb! computed by calling itself on nb − 1.',
+        I: 'int nb.',
+        O: 'int.',
+        P: 'Identical to ex00 apart from the name — the difference is entirely inside.',
+        V: 'None. Each call already has its own nb, which is the only state the algorithm needs.',
+        C: 'Invalid argument returns 0. nb of 0 or 1 returns 1 without recursing — that is the base case.',
+        L: 'No loop. The recursion descends nb, nb−1, nb−2 … down to the base case.',
+        A: 'If nb is invalid return 0. If nb is 0 or 1 return 1. Otherwise return nb times the factorial of nb − 1.',
+      },
+      notSpecified: [
+        'Same gap as ex00: "not valid" is never defined by the subject.',
+      ],
+      mistakes: [
+        ['no base case', 'The calls descend for ever — nb goes negative and keeps going. In a real program the stack runs out; this simulator stops at 200 frames and says so.'],
+        ['the base case does not return a value', 'Falling off the end of a non-void function leaves the caller multiplying by whatever was in the register.'],
+        ['forgetting to return the recursive result', 'Calling ft_recursive_factorial(nb - 1) and discarding it computes nothing.'],
+        ['recursing on nb rather than nb − 1', 'The argument never shrinks, so the base case is never reached.'],
+      ],
+      traps: ['An examiner may ask which version uses more memory, and why. Each pending call is a frame.',
+              'An examiner may ask you to convert one form to the other on the spot.'],
+      reading: [
+        ['For nb = 4, how many frames exist at the deepest point?', 'Five: the calls for 4, 3, 2, 1 and main. The call for 1 is the base case and does not recurse.'],
+        ['Which call returns first?', 'The deepest — the base case. The answer is then assembled on the way back out.'],
+        ['What would happen with no base case and nb = 4?', 'It would call 3, 2, 1, 0, −1, −2 … for ever. Nothing stops it, because nothing tests for the bottom.'],
+      ],
+      pattern: '"The answer for n is built from the answer for n − 1" — a base case and one recursive call.',
+      takeaway: 'A recursive function needs two things and only two: a case that stops, and a case that gets smaller.',
+    },
+    program: {
+      watch: ['f'],
+      src:
+'int\tft_recursive_factorial(int nb)\n{\n\tif (nb < 0)\n\t\treturn (0);\n\tif (nb <= 1)\n\t\treturn (1);\n' +
+'\treturn (nb * ft_recursive_factorial(nb - 1));\n}\n\n' +
+'int\tmain(void)\n{\n\tint\tf;\n\n\tf = ft_recursive_factorial(5);\n\treturn (0);\n}\n',
+    },
+    cases: [
+      { label: '0', patch: ['factorial(5)', 'factorial(0)'], expect: '1' },
+      { label: '1', patch: ['factorial(5)', 'factorial(1)'], expect: '1' },
+      { label: '5', patch: null, expect: '120' },
+      { label: '-3', patch: ['factorial(5)', 'factorial(-3)'], expect: '0' },
+    ],
+    algo: {
+      one: 'The factorial of nb is nb times the factorial of nb − 1, until you reach 1.',
+      human: ['If the argument is invalid, return 0.',
+              'If nb is 0 or 1, return 1 — and do NOT recurse. This is what stops the process.',
+              'Otherwise return nb multiplied by the factorial of nb − 1.'],
+      skeleton: 'if nb is invalid\n    return 0\nif nb <= 1\n    return 1\nreturn nb * factorial(nb - 1)',
+    },
+    viz: ['c5CallLadder', 'c5Factorial'],
+  },
+
+  {
+    id: 'ex02', name: 'ft_iterative_power', chapter: 'VI',
+    official: {
+      dir: 'ex02/', files: 'ft_iterative_power.c', allowed: 'None',
+      proto: 'int\tft_iterative_power(int nb, int power);',
+      bullets: [
+        'Create an iterative function that returns the result of raising a number to a given power.',
+        'If the power is less than 0, the function should return 0.',
+        'Overflows do not need to be handled.',
+        'By definition, 0 raised to the power of 0 should return 1.',
+      ],
+    },
+    teaching: {
+      testing: 'A second accumulator loop — and whether you noticed that the subject legislates 0⁰.',
+      giopvc: {
+        G: 'Return nb raised to power, computed with a loop.',
+        I: 'int nb, int power.',
+        O: 'int. 0 when power is negative.',
+        P: 'Two ints in, one out. Note this exercise names its invalid case precisely: power < 0.',
+        V: 'result, starting at 1.',
+        C: 'power < 0 returns 0. power == 0 returns 1 — including when nb is 0, which the subject states.',
+        L: 'while: multiply result by nb, count power down.',
+        A: 'Reject a negative power. Set result to 1. Multiply by nb, power times. Return it.',
+      },
+      notInSubject: [
+        'ex02 says only "Overflows do not need to be handled." ex03 adds "; the function’s return value will be undefined in such cases." The wording genuinely differs between the two exercises.',
+      ],
+      mistakes: [
+        ['result starts at 0', 'Same trap as ex00 — the product collapses to 0.'],
+        ['0⁰ returns 0', 'The subject says it must return 1. A loop starting at 1 that never runs gives that for free.'],
+        ['a negative power multiplies anyway', 'The subject says return 0. Check before the loop.'],
+        ['counting the loop wrong', 'power times, not power − 1 or power + 1. Trace nb=2, power=3 and count the multiplications: exactly three.'],
+      ],
+      traps: ['0⁰ is the case examiners test, because most people never think about it.',
+              'A negative nb with an even power is positive — nothing special is needed, but people add a special case that breaks it.'],
+      reading: [
+        ['How many multiplications happen for power = 3?', 'Three. result starts at 1 and is multiplied by nb three times.'],
+        ['What does the function return for power = 0?', '1. The loop condition is false immediately and result is still its starting value.'],
+        ['Why does 0⁰ come out right without a special case?', 'Because power is 0, the loop never runs, and result was initialised to 1.'],
+      ],
+      pattern: '"Repeat an operation n times" — accumulator at the identity, count down to zero.',
+      takeaway: 'When the subject legislates a mathematical edge case, that is the case you will be tested on.',
+    },
+    program: {
+      watch: ['result', 'power', 'p'],
+      src:
+'int\tft_iterative_power(int nb, int power)\n{\n\tint\tresult;\n\n\tif (power < 0)\n\t\treturn (0);\n' +
+'\tresult = 1;\n\twhile (power > 0)\n\t{\n\t\tresult = result * nb;\n\t\tpower--;\n\t}\n\treturn (result);\n}\n\n' +
+'int\tmain(void)\n{\n\tint\tp;\n\n\tp = ft_iterative_power(2, 10);\n\treturn (0);\n}\n',
+    },
+    cases: [
+      { label: '2^10', patch: null, expect: '1024' },
+      { label: '0^0 — the subject says 1', patch: ['power(2, 10)', 'power(0, 0)'], expect: '1' },
+      { label: '5^0', patch: ['power(2, 10)', 'power(5, 0)'], expect: '1' },
+      { label: '0^5', patch: ['power(2, 10)', 'power(0, 5)'], expect: '0' },
+      { label: '(-2)^3', patch: ['power(2, 10)', 'power(-2, 3)'], expect: '-8' },
+      { label: '2^-3 — negative power', patch: ['power(2, 10)', 'power(2, -3)'], expect: '0' },
+      { label: '2^31 — overflows', patch: ['power(2, 10)', 'power(2, 31)'], expect: 'not 2147483648' },
+    ],
+    algo: {
+      one: 'Multiply 1 by nb, power times.',
+      human: ['If power is negative, return 0.',
+              'Start a running product at 1.',
+              'Multiply it by nb, and count power down, until power reaches 0.',
+              'Return the product.'],
+      skeleton: 'if power < 0\n    return 0\n\nresult = 1\nwhile power > 0\n    result = result * nb\n    power--\n\nreturn result',
+    },
+    viz: ['c5Power'],
+  },
+
+  {
+    id: 'ex03', name: 'ft_recursive_power', chapter: 'VII',
+    official: {
+      dir: 'ex03/', files: 'ft_recursive_power.c', allowed: 'None',
+      proto: 'int\tft_recursive_power(int nb, int power);',
+      bullets: [
+        'Create a recursive function that returns the result of raising a number to a given power.',
+        'If the power is less than 0, the function should return 0.',
+        'Overflows do not need to be handled; the function’s return value will be undefined in such cases.',
+        'By definition, 0 raised to the power of 0 should return 1.',
+      ],
+    },
+    teaching: {
+      testing: 'The second iterative/recursive pair. If you can convert ex00 into ex01, you can convert ex02 into this one — and an examiner will ask you to do exactly that.',
+      giopvc: {
+        G: 'Return nb^power by calling itself with power − 1.',
+        I: 'int nb, int power.',
+        O: 'int.',
+        P: 'Identical to ex02.',
+        V: 'None. power shrinking IS the state.',
+        C: 'power < 0 returns 0. power == 0 returns 1 — the base case, and also the 0⁰ rule.',
+        L: 'Recursion down power, one multiplication per level.',
+        A: 'If power is negative return 0. If power is 0 return 1. Otherwise return nb times nb^(power − 1).',
+      },
+      mistakes: [
+        ['base case at power == 1', 'It works for positive powers but breaks 0⁰, which the subject legislates. Base at 0 and return 1.'],
+        ['recursing on power without decreasing it', 'The classic infinite recursion.'],
+        ['handling the negative power inside the recursion', 'It only needs checking once. Checking at every level is harmless but muddles the base case.'],
+        ['forgetting to multiply by nb', 'Returning the recursive call alone gives 1 for everything.'],
+      ],
+      traps: ['0⁰ again — and here it is the base case, so getting the base wrong breaks it silently.',
+              'An examiner may ask for the fast version, squaring at each step. That is not what this subject asks for.'],
+      reading: [
+        ['For power = 3, how deep does the recursion go?', 'Four levels: power 3, 2, 1 and the base case at 0.'],
+        ['Which call performs the last multiplication?', 'The outermost one. The base returns 1 and each level multiplies on the way out.'],
+        ['Why is the base case at 0 rather than 1?', 'Because power can legitimately be 0, and the subject requires that to give 1.'],
+      ],
+      pattern: '"Repeat an operation n times, recursively" — base at zero repetitions returning the identity.',
+      takeaway: 'Put the base case at the smallest legal input, not at the smallest convenient one.',
+    },
+    program: {
+      watch: ['p'],
+      src:
+'int\tft_recursive_power(int nb, int power)\n{\n\tif (power < 0)\n\t\treturn (0);\n\tif (power == 0)\n\t\treturn (1);\n' +
+'\treturn (nb * ft_recursive_power(nb, power - 1));\n}\n\n' +
+'int\tmain(void)\n{\n\tint\tp;\n\n\tp = ft_recursive_power(2, 10);\n\treturn (0);\n}\n',
+    },
+    cases: [
+      { label: '2^10', patch: null, expect: '1024' },
+      { label: '0^0 — the subject says 1', patch: ['power(2, 10)', 'power(0, 0)'], expect: '1' },
+      { label: '3^4', patch: ['power(2, 10)', 'power(3, 4)'], expect: '81' },
+      { label: '2^-3', patch: ['power(2, 10)', 'power(2, -3)'], expect: '0' },
+    ],
+    algo: {
+      one: 'nb to the power p is nb times nb to the power p − 1, until p is 0.',
+      human: ['If power is negative, return 0.',
+              'If power is 0, return 1 — this stops the recursion, and it is also the 0⁰ rule.',
+              'Otherwise return nb multiplied by the same function with power − 1.'],
+      skeleton: 'if power < 0\n    return 0\nif power == 0\n    return 1\nreturn nb * power(nb, power - 1)',
+    },
+    viz: ['c5CallLadder', 'c5Power'],
+  },
+
+  {
+    id: 'ex04', name: 'ft_fibonacci', chapter: 'VIII',
+    official: {
+      dir: 'ex04/', files: 'ft_fibonacci.c', allowed: 'None',
+      proto: 'int\tft_fibonacci(int index);',
+      bullets: [
+        'Create a function ft_fibonacci, that returns the n-th element of the Fibonacci sequence, with the first element at index 0. The Fibonacci sequence will be considered to start as follows: 0, 1, 1, 2.',
+        'Overflows do not need to be handled; the function’s return value will be undefined in such cases.',
+        'ft_fibonacci must be implemented recursively.',
+        'If index is less than 0, the function should return -1.',
+      ],
+    },
+    teaching: {
+      testing: 'A recursion with TWO recursive calls and TWO base cases — and, quietly, whether you notice how much work that costs.',
+      giopvc: {
+        G: 'Return the element of the sequence at the given index.',
+        I: 'int index.',
+        O: 'int. −1 for a negative index.',
+        P: 'One int in, one out. The subject requires the implementation to be recursive, which is unusual — normally how you do it is your business.',
+        V: 'None.',
+        C: 'index < 0 returns −1. index 0 returns 0. index 1 returns 1. The subject pins the sequence to 0, 1, 1, 2, which fixes both base cases.',
+        L: 'Recursion, twice per level.',
+        A: 'Reject a negative index. Return 0 for index 0 and 1 for index 1. Otherwise return the sum of the two previous elements.',
+      },
+      notInSubject: [
+        'A loop, or remembering values already computed, would be far faster. The subject requires recursion, so neither is an option here — but knowing why the naive version is slow is worth having.',
+      ],
+      mistakes: [
+        ['returning 0 for a negative index', 'The subject says −1. It is the only exercise in C 05 with that return value, which is exactly why it is easy to forget.'],
+        ['one base case instead of two', 'The rule adds the two previous elements, so it needs two known values to start from.'],
+        ['the sequence starting 1, 1, 2', 'The subject states 0, 1, 1, 2 — index 0 is 0. Getting this wrong shifts every answer by one place.'],
+        ['index − 1 and index − 1', 'A typo that gives you 2ⁿ instead of Fibonacci, and looks right at a glance.'],
+      ],
+      traps: ['−1 for a negative index, where every other C 05 exercise returns 0.',
+              'An examiner may ask how many calls fib(20) makes. The answer is "far too many", and being able to say why is the point.'],
+      reading: [
+        ['What are the first five elements?', '0, 1, 1, 2, 3 — at indexes 0, 1, 2, 3, 4.'],
+        ['How many calls does fib(5) make?', 'Fifteen, as the call counter on this page shows. Each level branches into two.'],
+        ['Why is fib(index − 2) computed twice?', 'Once directly, and again inside fib(index − 1). Nothing remembers the first answer.'],
+      ],
+      pattern: '"Each term depends on the previous two" — two base cases and two recursive calls.',
+      takeaway: 'A correct recursion is not automatically a good one. This one recomputes the same values exponentially often, and the subject asks for it anyway.',
+    },
+    program: {
+      watch: ['f'],
+      src:
+'int\tft_fibonacci(int index)\n{\n\tif (index < 0)\n\t\treturn (-1);\n\tif (index == 0)\n\t\treturn (0);\n' +
+'\tif (index == 1)\n\t\treturn (1);\n\treturn (ft_fibonacci(index - 1) + ft_fibonacci(index - 2));\n}\n\n' +
+'int\tmain(void)\n{\n\tint\tf;\n\n\tf = ft_fibonacci(7);\n\treturn (0);\n}\n',
+    },
+    cases: [
+      { label: 'index 0', patch: ['fibonacci(7)', 'fibonacci(0)'], expect: '0' },
+      { label: 'index 1', patch: ['fibonacci(7)', 'fibonacci(1)'], expect: '1' },
+      { label: 'index 2', patch: ['fibonacci(7)', 'fibonacci(2)'], expect: '1' },
+      { label: 'index 7', patch: null, expect: '13' },
+      { label: 'index 10', patch: ['fibonacci(7)', 'fibonacci(10)'], expect: '55' },
+      { label: 'index -1', patch: ['fibonacci(7)', 'fibonacci(-1)'], expect: '-1' },
+    ],
+    algo: {
+      one: 'Each element is the sum of the two before it, and the first two are given.',
+      human: ['If index is negative, return −1.',
+              'If index is 0, return 0. If index is 1, return 1. These two are the base cases.',
+              'Otherwise return fibonacci(index − 1) + fibonacci(index − 2).'],
+      skeleton: 'if index < 0\n    return -1\nif index == 0\n    return 0\nif index == 1\n    return 1\nreturn fib(index - 1) + fib(index - 2)',
+    },
+    viz: ['c5FibSeq', 'c5FibCost'],
+  },
+
+  {
+    id: 'ex05', name: 'ft_sqrt', chapter: 'IX',
+    official: {
+      dir: 'ex05/', files: 'ft_sqrt.c', allowed: 'None',
+      proto: 'int\tft_sqrt(int nb);',
+      bullets: [
+        'Create a function that returns the square root of a given number (if it exists), or 0 if the square root is an irrational number.',
+      ],
+    },
+    teaching: {
+      testing: 'Turning a mathematical question — is this a perfect square? — into a bounded search.',
+      giopvc: {
+        G: 'Return i when i × i equals nb, and 0 when no such whole i exists.',
+        I: 'int nb.',
+        O: 'int.',
+        P: 'One int in, one out. Note this exercise says nothing about overflow at all.',
+        V: 'i, the candidate root.',
+        C: 'Return i on an exact match. Return 0 once the candidates have passed nb.',
+        L: 'while: try i = 1, 2, 3 … stopping as soon as i × i would exceed nb.',
+        A: 'Try each whole number in turn. If its square is nb, that is the answer. Once the squares overshoot, there is no answer, so return 0.',
+      },
+      notSpecified: [
+        'The subject does not say what to do for a negative nb. A negative number has no real square root, and 0 is the natural answer given the rest of the wording — but the subject does not state it.',
+        'The subject does not say what ft_sqrt(0) or ft_sqrt(1) should return. 0 and 1 are their own square roots; a loop starting at i = 1 returns 1 for 1, and returns 0 for 0 — which happens to coincide with the "no root" answer.',
+      ],
+      mistakes: [
+        ['looping all the way to nb', 'For a large nb that is millions of pointless iterations. Stop when i × i passes nb.'],
+        ['i * i overflowing', 'For a large nb, i × i can leave the int range before the loop ends. Comparing i <= nb / i avoids forming the product at all.'],
+        ['starting at i = 0', 'Harmless for the answer, but 0 × 0 is only nb when nb is 0 — and it makes the i <= nb / i form divide by zero.'],
+        ['returning i when i × i merely exceeds nb', 'That is the floor of the square root, not an exact root. The subject asks for the root if it exists, else 0.'],
+      ],
+      traps: ['nb = 0 and nb = 1 are the cases to think through before you claim your version is right.',
+              'An examiner may ask for the integer part of the square root instead — a different question with a different stopping rule.'],
+      reading: [
+        ['How many iterations for nb = 144?', 'Twelve — i reaches 12 and 12 × 12 is 144.'],
+        ['What does the loop do for nb = 2?', 'i = 1 gives 1, which is not 2. i = 2 already has 2 × 2 = 4 > 2, so the loop ends and the function returns 0.'],
+        ['Why compare i <= nb / i rather than i * i <= nb?', 'The division cannot overflow. The multiplication can.'],
+      ],
+      pattern: '"Does a whole number with this property exist?" — a bounded search that returns the answer or a sentinel.',
+      takeaway: 'Knowing when to stop searching is as much a part of the algorithm as knowing what to test.',
+    },
+    program: {
+      watch: ['i', 's'],
+      src:
+'int\tft_sqrt(int nb)\n{\n\tint\ti;\n\n\tif (nb < 1)\n\t\treturn (0);\n\ti = 1;\n\twhile (i <= nb / i)\n\t{\n' +
+'\t\tif (i * i == nb)\n\t\t\treturn (i);\n\t\ti++;\n\t}\n\treturn (0);\n}\n\n' +
+'int\tmain(void)\n{\n\tint\ts;\n\n\ts = ft_sqrt(144);\n\treturn (0);\n}\n',
+    },
+    cases: [
+      { label: '144', patch: null, expect: '12' },
+      { label: '1', patch: ['ft_sqrt(144)', 'ft_sqrt(1)'], expect: '1' },
+      { label: '2 — irrational', patch: ['ft_sqrt(144)', 'ft_sqrt(2)'], expect: '0' },
+      { label: '15 — not a square', patch: ['ft_sqrt(144)', 'ft_sqrt(15)'], expect: '0' },
+      { label: '16', patch: ['ft_sqrt(144)', 'ft_sqrt(16)'], expect: '4' },
+      { label: '0', patch: ['ft_sqrt(144)', 'ft_sqrt(0)'], expect: '0' },
+      { label: '-4', patch: ['ft_sqrt(144)', 'ft_sqrt(-4)'], expect: '0' },
+    ],
+    algo: {
+      one: 'Try whole numbers until one of them squared equals nb, or until they overshoot.',
+      human: ['Start with i = 1.',
+              'While i × i has not passed nb: if i × i is exactly nb, return i.',
+              'Otherwise move to the next i.',
+              'If the loop ends without a match, nb is not a perfect square — return 0.'],
+      skeleton: 'i = 1\nwhile i <= nb / i\n    if i * i == nb\n        return i\n    i++\n\nreturn 0',
+    },
+    viz: ['c5Sqrt'],
+  },
+
+  {
+    id: 'ex06', name: 'ft_is_prime', chapter: 'X',
+    official: {
+      dir: 'ex06/', files: 'ft_is_prime.c', allowed: 'None',
+      proto: 'int\tft_is_prime(int nb);',
+      bullets: [
+        'Create a function that returns 1 if the given number is a prime number and 0 if it is not.',
+      ],
+      tip: '0 and 1 are not prime numbers.',
+    },
+    teaching: {
+      testing: 'Divisibility, a bounded search, and whether you read the tip box.',
+      giopvc: {
+        G: 'Return 1 if nb is prime, 0 otherwise.',
+        I: 'int nb.',
+        O: 'int — 1 or 0.',
+        P: 'One int in, one out.',
+        V: 'i, the candidate divisor.',
+        C: 'Anything below 2 is not prime, which the subject states for 0 and 1. Any exact divisor means not prime.',
+        L: 'while: test divisors from 2 upward, stopping at the square root.',
+        A: 'Rule out everything below 2. Try dividing by 2, 3, 4 … If any divides exactly, it is not prime. If none does by the time the candidates reach √nb, it is prime.',
+      },
+      notSpecified: [
+        'The subject does not say what to do for a negative nb. Primes are defined for whole numbers greater than 1, so 0 is the natural answer — but the subject only names 0 and 1.',
+      ],
+      mistakes: [
+        ['1 reported as prime', 'The subject has a tip box saying it is not. A loop from 2 that never runs returns 1 unless you guard first.'],
+        ['looping to nb', 'Correct but needlessly slow. Every divisor above √nb pairs with one below it, so there is nothing new up there.'],
+        ['looping to nb / 2', 'Better, still far more than needed.'],
+        ['i <= nb / i written as i * i <= nb', 'Fine for small nb; for a large one the product can leave the int range before the comparison happens.'],
+        ['starting the divisor at 1', '1 divides everything, so every number is reported composite.'],
+      ],
+      traps: ['0, 1 and 2 are the three cases to check before claiming it works. 2 is prime; the other two are not.',
+              'An examiner may ask why stopping at the square root is enough. Have the answer ready.'],
+      reading: [
+        ['How many divisors are tested for nb = 97?', 'i runs 2 to 9, because 10 × 10 already exceeds 97. Eight tests, none of which divide.'],
+        ['What does the function return for nb = 2?', '1. The guard passes it, and the loop condition 2 <= 2/2 is 2 <= 1, which is false — so no divisor is tried.'],
+        ['Why is testing above √nb pointless?', 'If nb = a × b with a > √nb, then b < √nb, so b was already tested.'],
+      ],
+      pattern: '"Does anything divide this?" — trial division bounded by the square root.',
+      takeaway: 'The square-root bound is not an optimisation trick; it follows from the fact that divisors come in pairs.',
+    },
+    program: {
+      watch: ['i', 'p'],
+      src:
+'int\tft_is_prime(int nb)\n{\n\tint\ti;\n\n\tif (nb < 2)\n\t\treturn (0);\n\ti = 2;\n\twhile (i <= nb / i)\n\t{\n' +
+'\t\tif (nb % i == 0)\n\t\t\treturn (0);\n\t\ti++;\n\t}\n\treturn (1);\n}\n\n' +
+'int\tmain(void)\n{\n\tint\tp;\n\n\tp = ft_is_prime(97);\n\treturn (0);\n}\n',
+    },
+    cases: [
+      { label: '0 — the subject says not prime', patch: ['is_prime(97)', 'is_prime(0)'], expect: '0' },
+      { label: '1 — the subject says not prime', patch: ['is_prime(97)', 'is_prime(1)'], expect: '0' },
+      { label: '2', patch: ['is_prime(97)', 'is_prime(2)'], expect: '1' },
+      { label: '9', patch: ['is_prime(97)', 'is_prime(9)'], expect: '0' },
+      { label: '97', patch: null, expect: '1' },
+      { label: '-7', patch: ['is_prime(97)', 'is_prime(-7)'], expect: '0' },
+    ],
+    algo: {
+      one: 'Try to divide nb by every number from 2 up to its square root.',
+      human: ['If nb is less than 2, it is not prime — return 0.',
+              'Try each divisor i from 2 upward.',
+              'If i divides nb exactly, nb is not prime — return 0.',
+              'Stop once i passes the square root of nb. Nothing divided it, so return 1.'],
+      skeleton: 'if nb < 2\n    return 0\n\ni = 2\nwhile i <= nb / i\n    if nb % i == 0\n        return 0\n    i++\n\nreturn 1',
+    },
+    viz: ['c5Prime'],
+  },
+
+  {
+    id: 'ex07', name: 'ft_find_next_prime', chapter: 'XI',
+    official: {
+      dir: 'ex07/', files: 'ft_find_next_prime.c', allowed: 'None',
+      proto: 'int\tft_find_next_prime(int nb);',
+      bullets: [
+        'Create a function that returns the next prime number greater than or equal to the given number.',
+      ],
+    },
+    teaching: {
+      testing: 'Reusing a function you already wrote, and reading "greater than or equal to" carefully.',
+      giopvc: {
+        G: 'Return the smallest prime that is at least nb.',
+        I: 'int nb.',
+        O: 'int.',
+        P: 'One int in, one out. ft_is_prime is not given to you — you write it again in this file.',
+        V: 'The parameter itself can be the candidate.',
+        C: 'If nb is already prime, return nb — that is what "or equal to" means.',
+        L: 'while: step the candidate up until one is prime.',
+        A: 'Test nb. If it is prime, return it. Otherwise add one and test again.',
+      },
+      notSpecified: [
+        'The subject does not say what to do for nb below 2. Searching upward from any such value reaches 2, which is the smallest prime — but the subject does not state a rule.',
+        'The subject does not mention overflow here. Searching upward from a very large nb could run past INT_MAX.',
+        'The file must contain everything it needs, so ft_is_prime is written again inside ft_find_next_prime.c. The subject lists one file and no allowed functions.',
+      ],
+      mistakes: [
+        ['starting at nb + 1', '"Greater than or equal to" means a prime nb is its own answer. Starting above it gets every prime input wrong.'],
+        ['stepping by 2', 'An optimisation that breaks immediately if nb is even and small — and the first prime, 2, is even.'],
+        ['calling a ft_is_prime from another exercise', 'Each exercise is one file with no allowed functions. The helper has to be in this file.'],
+      ],
+      traps: ['A prime input. If ft_find_next_prime(7) returns 11, you read the wording wrong.',
+              'An examiner may change it to "strictly greater than", which is a one-character difference and a completely different function.'],
+      reading: [
+        ['What does ft_find_next_prime(7) return?', '7. It is already prime, and the subject says greater than OR EQUAL to.'],
+        ['How many candidates are tested for nb = 20?', 'Four — 20, 21, 22 and 23. Only 23 is prime.'],
+        ['What does it return for nb = 0?', 'Searching upward, the first prime found is 2. The subject does not legislate this case.'],
+      ],
+      pattern: '"Find the next thing with a property" — test the current candidate, step, repeat.',
+      takeaway: 'Read the boundary word. "At least", "greater than" and "greater than or equal to" are three different specifications.',
+    },
+    program: {
+      watch: ['nb', 'n'],
+      src:
+'int\tft_is_prime(int nb)\n{\n\tint\ti;\n\n\tif (nb < 2)\n\t\treturn (0);\n\ti = 2;\n\twhile (i <= nb / i)\n\t{\n' +
+'\t\tif (nb % i == 0)\n\t\t\treturn (0);\n\t\ti++;\n\t}\n\treturn (1);\n}\n\n' +
+'int\tft_find_next_prime(int nb)\n{\n\twhile (ft_is_prime(nb) == 0)\n\t\tnb++;\n\treturn (nb);\n}\n\n' +
+'int\tmain(void)\n{\n\tint\tn;\n\n\tn = ft_find_next_prime(20);\n\treturn (0);\n}\n',
+    },
+    cases: [
+      { label: '20 → 23', patch: null, expect: '23' },
+      { label: '7 — already prime', patch: ['next_prime(20)', 'next_prime(7)'], expect: '7' },
+      { label: '0', patch: ['next_prime(20)', 'next_prime(0)'], expect: '2' },
+      { label: '1', patch: ['next_prime(20)', 'next_prime(1)'], expect: '2' },
+      { label: '90 → 97', patch: ['next_prime(20)', 'next_prime(90)'], expect: '97' },
+    ],
+    algo: {
+      one: 'Test nb; if it is not prime, try nb + 1, and keep going.',
+      human: ['Test the candidate, starting with nb itself.',
+              'If it is prime, return it.',
+              'Otherwise add one and test again.'],
+      skeleton: 'while is_prime(nb) is false\n    nb++\n\nreturn nb',
+    },
+    viz: ['c5NextPrime'],
+  },
+
+  {
+    id: 'ex08', name: 'The Ten Queens', chapter: 'XII', deep: true,
+    official: {
+      dir: 'ex08/', files: 'ft_ten_queens_puzzle.c', allowed: 'write',
+      proto: 'int\tft_ten_queens_puzzle(void);',
+      bullets: [
+        'Create a function that displays all possible placements of ten queens on a 10×10 chessboard, ensuring that no two queens can attack each other in a single move. The function should return the total number of valid solutions.',
+        'Recursion is required to solve this problem.',
+      ],
+      sub: [
+        'The first digit represents the row position of the queen in the first column (index starting at 0).',
+        'The Nth digit represents the row position of the queen in the Nth column.',
+      ],
+      examples: ['$>./a.out | cat -e', '0257948136$', '0258693147$', '...', '4605713829$',
+                 '4609582731$', '...', '9742051863$', '$>'],
+      note: 'The function should return the total number of valid solutions found.',
+    },
+    teaching: {
+      testing: 'Everything at once: recursion, state you must undo, a conflict rule you have to derive, and output you have to build yourself with write.',
+      giopvc: {
+        G: 'Print every arrangement of ten non-attacking queens, one per line, and return how many there were.',
+        I: 'None — the function takes void.',
+        O: 'Lines on standard output, and an int count returned.',
+        P: 'int ft_ten_queens_puzzle(void); — no parameters at all, so the board has to live somewhere you create.',
+        V: 'An array of ten rows, one per column. A column index. A running count.',
+        C: 'A candidate row is safe if no queen already placed shares its row or a diagonal. A full board is one solution.',
+        L: 'Recursion over columns; a loop over the ten candidate rows within each column.',
+        A: 'For the current column, try each row. If it is safe, record it and solve the next column. When the column index passes the last column, print the board and count one. Return the total found below this point.',
+      },
+      notInSubject: [
+        'One queen per column is a representation YOU choose. The subject says nothing about it — it simply makes column conflicts impossible, so only rows and diagonals need testing.',
+        'The subject does not prescribe an algorithm beyond requiring recursion. Backtracking is the standard approach, not a stated requirement.',
+      ],
+      limitation: 'This simulator cannot run a 10×10 search — it exceeds its step budget. The visualizations below run 4×4 and 5×5 boards to completion instead, using the identical algorithm. Those are executed, not illustrated.',
+      mistakes: [
+        ['checking only rows', 'Two queens on the same diagonal attack each other. Row equality is half the test.'],
+        ['getting the diagonal test wrong', 'Two squares are on a diagonal when the column distance equals the row distance. Both diagonals need checking, or one comparison on absolute differences.'],
+        ['checking columns', 'With one queen per column by construction, a column conflict cannot happen. Testing for it is harmless but shows you have not understood the representation.'],
+        ['not undoing the placement', 'With an array indexed by column, the next candidate simply overwrites the slot — but if you also keep a separate "used" marker, you must clear it.'],
+        ['printing partial boards', 'Only print when the column index has passed the last column. Printing earlier floods the output with incomplete rows.'],
+        ['forgetting to count', 'The subject asks for the total returned, not just printed. Each complete board adds one, and each call returns the sum of what its children found.'],
+        ['printing digits with the wrong offset', 'The rows are indexed from 0, so row 0 prints as the character \'0\'.'],
+      ],
+      traps: ['The output format is shown through cat -e, so each $ is a newline that cat -e is displaying — not a character you print.',
+              'An examiner may change the board size, which should require changing one constant and nothing else.'],
+      reading: [
+        ['On a 4×4 board, how many solutions are there?', 'Two — as the search below finds by running.'],
+        ['When does the search decide to backtrack?', 'When no row in the current column is safe. The loop ends without recursing, the call returns, and the caller moves to its next candidate.'],
+        ['What makes the placement undo itself?', 'Nothing explicit. The next safe row overwrites the same array slot, and a returning call leaves nothing behind.'],
+        ['Why must recursion be used rather than ten nested loops?', 'Ten nested loops would work for exactly ten columns and nothing else. The recursion expresses "solve the rest of the board" once.'],
+      ],
+      pattern: '"Find all arrangements satisfying a constraint" — try, recurse, and let returning undo the try.',
+      takeaway: 'Backtracking is ordinary recursion where the interesting event is a call returning without success.',
+    },
+    program: {
+      watch: ['board', 'total'],
+      /* 4x4 — the engine runs this to completion. The subject's board is 10x10;
+         the algorithm here is identical and the size is a single constant. */
+      src:
+'int\tsafe(int *b, int col, int row)\n{\n\tint\ti;\n\n\ti = 0;\n\twhile (i < col)\n\t{\n' +
+'\t\tif (b[i] == row)\n\t\t\treturn (0);\n\t\tif (col - i == row - b[i])\n\t\t\treturn (0);\n' +
+'\t\tif (col - i == b[i] - row)\n\t\t\treturn (0);\n\t\ti++;\n\t}\n\treturn (1);\n}\n\n' +
+'int\tsolve(int *b, int col, int n)\n{\n\tint\trow;\n\tint\tcount;\n\n\tif (col == n)\n\t\treturn (1);\n' +
+'\tcount = 0;\n\trow = 0;\n\twhile (row < n)\n\t{\n\t\tif (safe(b, col, row))\n\t\t{\n\t\t\tb[col] = row;\n' +
+'\t\t\tcount = count + solve(b, col + 1, n);\n\t\t}\n\t\trow++;\n\t}\n\treturn (count);\n}\n\n' +
+'int\tmain(void)\n{\n\tint\tboard[4];\n\tint\ttotal;\n\n\ttotal = solve(board, 0, 4);\n\treturn (0);\n}\n',
+    },
+    cases: [
+      { label: '4 × 4', patch: null, expect: '2 solutions' },
+      { label: '5 × 5', patch: ['board[4]', 'board[5]'], expect: '10 solutions', patch2: ['solve(board, 0, 4)', 'solve(board, 0, 5)'] },
+    ],
+    algo: {
+      one: 'Place one queen per column, always in a row that no earlier queen attacks, and count the arrangements that reach the end.',
+      human: ['If the column index has passed the last column, the board is full — print it and count one.',
+              'Otherwise, for each row in this column:',
+              '   check whether any queen already placed shares that row or a diagonal;',
+              '   if it is safe, record it and solve the next column;',
+              '   add whatever that found to the running count.',
+              'Return the count. If no row was safe, the count is 0 and the caller tries something else.'],
+      skeleton: 'solve(board, col):\n    if col == N\n        print board\n        return 1\n\n    count = 0\n    for row in 0..N-1\n        if safe(board, col, row)\n            board[col] = row\n            count += solve(board, col + 1)\n    return count',
+    },
+    viz: ['c5Board', 'c5Backtrack'],
+  },
+];
+
+/* Functions & libraries, per exercise. Only ex08 has an allowed function. */
+const C05_EXFUNCS = {
+  ex00: [], ex01: [], ex02: [], ex03: [], ex04: [], ex05: [], ex06: [], ex07: [],
+  ex08: [{ fn: 'write', allowed: true,
+           reason: 'the only exercise in C 05 whose allowed functions are not None — you need it to print each solution' }],
+};
+
+/* ------------------------------------------------------------------ *
+ * PRACTICE — reasoning-first, built only on what C 05 teaches.         *
+ * ------------------------------------------------------------------ */
+const C05_PRACTICE = [
+  { id: 'p01', name: 'ft_sum_to_n', difficulty: 'warm-up',
+    subject: 'Write int ft_sum_to_n(int nb) that returns 1 + 2 + … + nb, iteratively. Return 0 for a negative argument.',
+    concepts: ['accumulator', 'identity value', 'inclusive bound'],
+    hints: ['This is ex00 with one operator changed — and one other thing must change with it.',
+            'The starting value of an accumulator depends on the operation.'],
+    checklist: ['Does the accumulator start at the right identity for addition?',
+                'Is the loop bound inclusive of nb?',
+                'What does it return for nb = 0?'],
+    edges: ['0', '1', 'a negative argument'],
+  },
+  { id: 'p02', name: 'ft_recursive_sum', difficulty: 'warm-up',
+    subject: 'Write int ft_recursive_sum(int nb) that returns the same sum as above, recursively.',
+    concepts: ['base case', 'smaller problem', 'returning the recursive result'],
+    hints: ['What is the smallest nb for which you know the answer without recursing?',
+            'The answer for nb is nb plus the answer for nb − 1.'],
+    checklist: ['Is there a base case that returns without recursing?',
+                'Does every path return a value?',
+                'Does the argument definitely get smaller each call?'],
+    edges: ['0', '1', 'a negative argument — decide what it means before you code it'],
+  },
+  { id: 'p03', name: 'ft_count_digits', difficulty: 'core',
+    subject: 'Write int ft_count_digits(int nb) that returns how many decimal digits nb has. Decide and state what you do about a negative nb and about 0.',
+    concepts: ['repeated division', 'loop termination', 'the zero case'],
+    hints: ['Dividing by 10 removes a digit. When does that stop?',
+            '0 has one digit but dividing it by 10 immediately gives 0 — the loop needs help.'],
+    checklist: ['Does 0 return 1 rather than 0?',
+                'Is the sign counted as a digit? State your choice.',
+                'Does the loop terminate for every input?'],
+    edges: ['0', '9', '10', 'a negative number', 'INT_MIN — think about what negating it would do'],
+  },
+  { id: 'p04', name: 'ft_is_perfect_square', difficulty: 'core',
+    subject: 'Write int ft_is_perfect_square(int nb) that returns 1 if nb is a perfect square and 0 otherwise. Do not form i * i if it could leave the int range.',
+    concepts: ['bounded search', 'overflow-safe comparison', 'returning a flag rather than a value'],
+    hints: ['ex05 answers a related but different question — it returns the root, not a yes or no.',
+            'i <= nb / i compares without ever computing the product.'],
+    checklist: ['Does it stop searching at the right point?',
+                'Does it handle 0 and 1 the way you intend?',
+                'Could any intermediate value overflow?'],
+    edges: ['0', '1', '2', 'a large perfect square', 'a large number that is not one'],
+  },
+  { id: 'p05', name: 'ft_nth_prime', difficulty: 'hard',
+    subject: 'Write int ft_nth_prime(int n) that returns the n-th prime, counting the first prime (2) as n = 1. Return 0 for n < 1.',
+    concepts: ['reusing a primality test', 'counting occurrences', 'two nested searches'],
+    hints: ['You already have the two pieces: a primality test and a way to step through candidates.',
+            'The outer loop counts primes found; the inner one decides whether a candidate is prime.'],
+    checklist: ['Does n = 1 give 2?',
+                'Is the counter incremented only on a prime?',
+                'Where does the candidate start, and why?'],
+    edges: ['n = 0 and negative n', 'n = 1', 'a moderately large n — how slow does it get?'],
+  },
+  { id: 'p06', name: 'ft_count_placements', difficulty: 'hard',
+    subject: 'Write int ft_count_placements(int n) that returns the number of ways to place n non-attacking queens on an n×n board, without printing anything. Recursion is required.',
+    concepts: ['backtracking', 'conflict testing', 'counting rather than printing', 'the board as an array'],
+    hints: ['This is ex08 with the printing removed — which makes the counting logic easier to see.',
+            'Check your answer against small boards you can reason about: n = 1 has one solution, n = 2 and n = 3 have none.'],
+    checklist: ['Does the safety test cover both diagonals?',
+                'Does each call return the sum of what its children found?',
+                'Does n = 2 correctly return 0 rather than looping for ever?'],
+    edges: ['n = 1', 'n = 2 and n = 3, which have no solutions', 'n = 4, which has two', 'n = 0 — decide what it means'],
+  },
+];
+
+/* ------------------------------------------------------------------ *
+ * BUG DATABASE                                                         *
+ * ------------------------------------------------------------------ */
+const C05_BUGS = [
+  ['No base case at all', 'A recursive function that always recurses.',
+   'Nothing tests for the bottom, so the argument runs past it and keeps going.',
+   'The simulator stops at 200 frames and says so; a real program crashes with a stack overflow.',
+   'Every recursive function needs a case that returns WITHOUT recursing. Write that case first.'],
+  ['A base case that cannot be reached', 'if (nb == 0) with an argument that skips past 0.',
+   'The argument decreases by 2, or starts negative, so it steps over the only exit.',
+   'Same symptom as no base case at all.',
+   'Test the base with <= rather than ==, or guard the input so the base is always reachable.'],
+  ['Recursion moving the wrong way', 'return nb * fact(nb + 1);',
+   'The argument grows, so it moves away from the base case.',
+   'Immediate stack exhaustion.',
+   'Ask of every recursive call: is this argument strictly closer to the base?'],
+  ['Recursing without shrinking', 'return nb * fact(nb);',
+   'The argument is unchanged, so the same call repeats for ever.',
+   'Immediate stack exhaustion.',
+   'The recursive call must transform the problem, not repeat it.'],
+  ['Forgetting to return the recursive result', 'fact(nb - 1); on its own line, then return nb;',
+   'The recursive call runs and its answer is thrown away.',
+   'The result is wrong but the program does not crash, which makes it harder to spot.',
+   'In a function that returns a value, the recursive call must be part of a return expression.'],
+  ['An accumulator starting at 0 for a product', 'result = 0; then result = result * i;',
+   '0 times anything is 0, so every multiplication is wasted.',
+   'The answer is always 0.',
+   'The identity for multiplication is 1, for addition 0. Pick the one that matches the operation.'],
+  ['An off-by-one loop bound', 'while (i < nb) in a factorial.',
+   'The last factor is never applied.',
+   'The answer is the factorial of nb − 1 — plausible-looking and wrong.',
+   'Decide whether the bound is inclusive before you write it, then trace nb = 3 by hand.'],
+  ['0 to the power 0 returning 0', 'A special case added for nb == 0.',
+   'The subject explicitly states 0⁰ is 1, and the natural loop already gives that.',
+   'A single failing case among many that pass.',
+   'Let the accumulator start at 1 and the loop not run. No special case is needed.'],
+  ['Fibonacci returning 0 for a negative index', 'Copying the return value from the other exercises.',
+   'ex04 is the only C 05 exercise that returns −1, and it says so.',
+   'One failing case, easy to miss.',
+   'Re-read each exercise’s return values. They are not consistent across the module, on purpose.'],
+  ['Fibonacci with one base case', 'Only if (index == 0) return 0;',
+   'The rule adds the two previous values, so it needs two known starting points.',
+   'Infinite recursion, or a wrong answer for index 1.',
+   'The number of base cases matches the number of previous terms the rule uses.'],
+  ['The Fibonacci sequence starting at the wrong place', 'Treating index 0 as 1.',
+   'The subject states the sequence as 0, 1, 1, 2.',
+   'Every answer is shifted by one index.',
+   'Write out the first five indexes and values before coding.'],
+  ['Searching for a square root all the way to nb', 'while (i <= nb).',
+   'Correct but does far more work than necessary.',
+   'Slow for large inputs; a peer will ask why.',
+   'Once i × i passes nb there can be no match. Stop there.'],
+  ['i * i overflowing during the search', 'while (i * i <= nb) with a large nb.',
+   'The product leaves the int range before the comparison happens.',
+   'The loop ends early or behaves unpredictably.',
+   'Compare i <= nb / i. The division cannot overflow.'],
+  ['1 reported as prime', 'A loop from 2 that never runs, with no guard.',
+   'The subject has a tip box stating that 0 and 1 are not prime.',
+   'Two failing cases, both of them the ones an examiner tests first.',
+   'Guard nb < 2 before the loop.'],
+  ['A prime divisor search starting at 1', 'i = 1 in the trial division.',
+   '1 divides everything.',
+   'Every number is reported composite.',
+   'Divisor candidates start at 2.'],
+  ['find_next_prime starting above nb', 'nb + 1 as the first candidate.',
+   'The subject says greater than OR EQUAL to.',
+   'Every prime input returns the wrong answer.',
+   'Test the input itself before stepping.'],
+  ['Queens checking only rows', 'Comparing b[i] == row and nothing else.',
+   'Two queens on a diagonal still attack each other.',
+   'Far too many "solutions" are found.',
+   'A diagonal conflict is a column distance equal to a row distance. Check both directions.'],
+  ['Queens printing partial boards', 'Printing inside the row loop rather than at the base case.',
+   'The board is only complete when the column index has passed the last column.',
+   'Output full of short, wrong lines.',
+   'Print in the base case, and only there.'],
+  ['Queens not counting', 'Printing solutions but returning 0 or nothing meaningful.',
+   'The subject asks for the total to be returned as well as displayed.',
+   'The count is wrong even though the output looks right.',
+   'The base case returns 1; every other call returns the sum of what its children returned.'],
+  ['Assuming signed overflow wraps', 'Reasoning about what 13! "becomes".',
+   'Signed integer overflow is undefined behaviour; the standard requires no particular result.',
+   'A confident, wrong explanation in a peer evaluation.',
+   'Say "the result is not defined by the standard". The subject excusing you from handling it is not a claim that it is safe.'],
+];
+
+/* The dependency map for this module. */
+const C05_DEPS = {
+  before: [
+    ['C00', 'write, characters'],
+    ['C01', 'loops, functions, pointers'],
+    ['C02', 'strings and arrays'],
+    ['C03', 'pointer manipulation'],
+    ['C04', 'recursion for digit order, INT_MIN, bases'],
+  ],
+  adds: ['recursive decomposition', 'base cases', 'mathematical sequences', 'bounded search',
+         'divisibility', 'backtracking', 'counting solutions'],
+  chain: [
+    { id: 'ex00', needs: [] },
+    { id: 'ex01', needs: ['ex00'] },
+    { id: 'ex02', needs: ['ex00'] },
+    { id: 'ex03', needs: ['ex01', 'ex02'] },
+    { id: 'ex04', needs: ['ex01'] },
+    { id: 'ex05', needs: [] },
+    { id: 'ex06', needs: [] },
+    { id: 'ex07', needs: ['ex06'] },
+    { id: 'ex08', needs: ['ex01'] },
+  ],
+  concepts: [
+    ['Iteration vs recursion', ['ex00', 'ex01', 'ex02', 'ex03']],
+    ['Base cases', ['ex01', 'ex03', 'ex04', 'ex08']],
+    ['Bounded search', ['ex05', 'ex06', 'ex07']],
+    ['Backtracking', ['ex08']],
+  ],
+};
+/* ==== C05DATA END ==== */
 
 /* ==== FNLAB START ====
    PHASE 7 — Functions, Libraries & System Calls.
@@ -19960,11 +21082,11 @@ const CURRICULUM = ['C00','C01','C02','C03','C04','C05','C06','C07'].map(id => (
   /* C04's subject has been provided, so its exercises are real and its lesson
      pages exist. The rest stay empty until their subjects arrive — the original
      principle holds: inventing exercise content is worse than showing none. */
-  exercises: id === 'C04' && typeof C04_EX !== 'undefined'
-    ? C04_EX.map(e => ({ id: e.id, name: e.name, proto: e.official.proto,
-                         allowed: e.official.allowed, files: e.official.files }))
-    : [],
-  loaded: id === 'C04',
+  exercises: (id === 'C04' && typeof C04_EX !== 'undefined' ? C04_EX
+            : id === 'C05' && typeof C05_EX !== 'undefined' ? C05_EX : [])
+    .map(e => ({ id: e.id, name: e.name, proto: e.official.proto,
+                 allowed: e.official.allowed, files: e.official.files })),
+  loaded: id === 'C04' || id === 'C05',
 }));
 
 /* ----------------------- the runnable examples ----------------------- */
@@ -23035,7 +24157,34 @@ function wireLabRepro() {
    The view is a fourth peer of dashboard / workspace / lab, using the same
    overlay-root pattern; it adds no router and no second editor. */
 
+/* The Learn view hosts one module at a time. Adding C06 means adding one entry
+   here and one data file — no renderer changes. Evaluated lazily on purpose:
+   reading the C04 and C05 data at load time would put it in a temporal dead zone. */
+function learnModules() {
+  const has = (x) => typeof x !== 'undefined';
+  const out = [];
+  if (has(C04_EX)) out.push({
+    id: 'C04', label: 'C 04', meta: C04_META,
+    blurb: 'Strings, write, numbers, number bases, recursion and parsing.',
+    founds: C04_FOUND.concat(has(C04_FOUND2) ? C04_FOUND2 : []),
+    ex: C04_EX, practice: C04_PRACTICE, bugs: C04_BUGS, deps: C04_DEPS,
+    exfuncs: has(C04_EXFUNCS) ? C04_EXFUNCS : {}, algo: has(C04_ALGO) ? C04_ALGO : {},
+  });
+  if (has(C05_EX)) out.push({
+    id: 'C05', label: 'C 05', meta: C05_META,
+    blurb: 'Iteration and recursion, factorials, powers, Fibonacci, roots, primes and backtracking.',
+    founds: C05_FOUND, ex: C05_EX, practice: C05_PRACTICE, bugs: C05_BUGS, deps: C05_DEPS,
+    exfuncs: has(C05_EXFUNCS) ? C05_EXFUNCS : {}, algo: {},
+  });
+  return out;
+}
+function learnMod() {
+  const all = learnModules();
+  return all.find(m => m.id === c4.mod) || all[0];
+}
+
 const c4 = {
+  mod: 'C04',         // which module the Learn view is showing
   page: 'overview',   // overview | f:<id> | ex:<id> | practice | bugs
   tab: 'subject',     // per-exercise: subject | understand | visualize | trace | practice
   step: null,         // stepper position, null = a sensible default
@@ -23091,6 +24240,41 @@ const c4Esc = (s) => esc(s === null || s === undefined ? '' : s);
 /* ------------------------------------------------------------------ *
  * Shared pieces                                                        *
  * ------------------------------------------------------------------ */
+/* Resolve a list of visualizer NAMES to their output. A name that does not
+   resolve is reported rather than silently skipped — a typo in the data should
+   be visible, not invisible. */
+function c4VizList(names) {
+  if (!names || !names.length) return '';
+  let h = '';
+  for (const nm of names) {
+    const fn = c4VizRegistry()[nm];
+    if (typeof fn === 'function') h += fn();
+    else h += '<div class="c4-unsup"><b>MISSING VISUALIZER</b><div class="mono">' + c4Esc(nm) + '</div></div>';
+  }
+  return h;
+}
+/* Every visualizer is a function DECLARATION, so all of them are hoisted across
+   the whole bundle and can be named here directly regardless of file order.
+   Built on call rather than as a const, for the same reason learnModules() is. */
+function c4VizRegistry() {
+  return {
+    c4BaseViz, c4EncDec, c4AsciiViz, c4DivMod, c4Validator, c4Dup,
+    c4WsTable, c4WsRam, c4IsSpace, c4StrVsInt, c4WhyAtoi, c4AsciiDigit,
+    c4StrToInt, c4WhyAccum, c4BaseBridge, c4Range, c4Undefined,
+    c4TwoOverflows, c4IntMin, c4ManPage, c4ParserBoxes, c4Parser, c4SignParity,
+    c4Search, c4Accum, c4WriteAnatomy, c4AtoiAnatomy, c4IsSpaceAnatomy,
+    c5IterRec, c5CallLadder, c5Factorial, c5Power, c5FibSeq, c5FibCost,
+    c5Sqrt, c5Prime, c5NextPrime, c5Board, c5Backtrack, c5Growth,
+  };
+}
+function c4WriteAnatomy() { return c4AnatomyCard('write'); }
+function c4AtoiAnatomy() { return c4AnatomyCard('atoi'); }
+function c4IsSpaceAnatomy() { return c4AnatomyCard('isspace'); }
+function c4Limitation(txt) {
+  return '<div class="c4-warn c4-limit"><span class="c4-badge alt">SIMULATOR LIMITATION</span>' +
+    '<p>' + c4Esc(txt) + '</p></div>';
+}
+
 function c4Block(title, body, note) {
   return '<section class="c4-block"><h3 class="c4-block-h">' + c4Esc(title) + '</h3>' + body +
     (note ? '<p class="c4-note">' + note + '</p>' : '') + '</section>';
@@ -23101,8 +24285,8 @@ function c4Subject(ex) {
   const o = ex.official;
   return '<section class="c4-subject"><div class="c4-subj-h">' +
     '<span class="c4-badge">OFFICIAL SUBJECT</span>' +
-    '<span class="c4-subj-src">C Piscine ' + c4Esc(C04_META.module) + ', version ' +
-      c4Esc(C04_META.version) + ' · Chapter ' + c4Esc(ex.chapter) + '</span></div>' +
+    '<span class="c4-subj-src">C Piscine ' + c4Esc(learnMod().meta.module) + ', version ' +
+      c4Esc(learnMod().meta.version) + ' · Chapter ' + c4Esc(ex.chapter) + '</span></div>' +
     '<table class="c4-subj-t"><tbody>' +
       '<tr><th>Exercise</th><td>' + c4Esc(ex.id.replace('ex', 'Exercise ')) + '</td></tr>' +
       '<tr><th>Name</th><td class="mono">' + c4Esc(ex.name) + '</td></tr>' +
@@ -23112,14 +24296,30 @@ function c4Subject(ex) {
         c4Esc(o.allowed) + '</td></tr>' +
     '</tbody></table>' +
     '<ul class="c4-subj-b">' + o.bullets.map(b => '<li>' + c4Esc(b) + '</li>').join('') + '</ul>' +
-    (o.sub ? '<ul class="c4-subj-sub">' + o.sub.map(b => '<li class="mono">' + c4Esc(b) + '</li>').join('') + '</ul>' : '') +
+    (o.sub && !o.examples ? '<ul class="c4-subj-sub">' + o.sub.map(b =>
+       '<li class="mono">' + c4Esc(b) + '</li>').join('') + '</ul>' : '') +
     (o.invalid ? '<div class="c4-subj-inv"><b>Examples of invalid arguments:</b><ul>' +
        o.invalid.map(b => '<li>' + c4Esc(b) + '</li>').join('') + '</ul></div>' : '') +
+    (o.tip ? '<div class="c4-subj-tip"><span>TIP BOX IN THE SUBJECT</span>' + c4Esc(o.tip) + '</div>' : '') +
     '<div class="c4-proto mono">' + c4Esc(o.proto) + '</div>' +
     (o.examples ? '<div class="c4-subj-ex">' + o.examples.map(e =>
        '<div class="mono">' + c4Esc(e) + '</div>').join('') + '</div>' : '') +
+    (o.sub && o.examples ? '<ul class="c4-subj-b">' + o.sub.map(b =>
+       '<li>' + c4Esc(b) + '</li>').join('') + '</ul>' : '') +
+    (o.note ? '<p class="c4-subj-note">' + c4Esc(o.note) + '</p>' : '') +
     '</section>';
 }
+/* Where the subject is SILENT. Different from NOT IN THE SUBJECT: that is
+   material the subject does not mention because it is technique; this is a
+   question the subject raises and then never answers. */
+function c4NotSpecified(list) {
+  if (!list || !list.length) return '';
+  return '<div class="c4-warn c4-unspec"><span class="c4-badge alt">NOT SPECIFIED BY THE SUBJECT</span>' +
+    '<ul>' + list.map(x => '<li>' + c4Esc(x) + '</li>').join('') + '</ul>' +
+    '<p>The subject leaves these open. Decide, be consistent, and be ready to say in a peer ' +
+    'evaluation that it was your decision — not that the subject required it.</p></div>';
+}
+
 /* Anything the handbook adds that the subject does not say. */
 function c4NotInSubject(list) {
   if (!list || !list.length) return '';
@@ -23709,59 +24909,65 @@ function c4IntMin() {
  * Pages                                                                *
  * ------------------------------------------------------------------ */
 function c4Overview() {
+  const m = learnMod();
   const byId = {};
-  for (const e of C04_EX) byId[e.id] = e;
+  for (const e of m.ex) byId[e.id] = e;
+  /* Two starting points per module, named in data rather than hardcoded. */
+  const starts = {
+    C04: [['f:bases', 'Number bases', 'The one idea ex04 and ex05 are built on.'],
+          ['f:recursion', 'Recursion for digit order', 'Why the writes happen on the way back up.'],
+          ['ex:ex03', 'ex03 — the parser', 'One cursor, three phases.'],
+          ['ex:ex04', 'ex04 — encode', 'Number to symbols, with validation first.'],
+          ['ex:ex05', 'ex05 — decode', 'Symbols back to a number.']],
+    C05: [['f:iter-rec', 'Iteration and recursion', 'The same problem in two shapes — four of the nine exercises.'],
+          ['f:recursion', 'How a recursive call works', 'Frames, base cases, and results travelling back.'],
+          ['f:fib', 'Fibonacci and its cost', 'A correct recursion that is also an expensive one.'],
+          ['f:backtrack', 'Backtracking', 'Search that knows how to give up.'],
+          ['ex:ex08', 'ex08 — the Ten Queens', 'Everything in the module, at once.']],
+  }[m.id] || [];
   return '<header class="c4-hero"><div class="c4-hero-tag">C PISCINE</div>' +
-    '<h1>C 04</h1><p>Strings, <span class="mono">write</span>, numbers, number bases, recursion and ' +
-    'parsing. Six exercises that look separate and are not: ex05 is ex03’s parser with ex04’s alphabet.</p>' +
-    '<div class="c4-hero-meta"><span>subject version ' + c4Esc(C04_META.version) + '</span>' +
-    '<span>' + C04_EX.length + ' exercises</span><span>' + C04_FOUND.length + ' foundations</span>' +
-    '<span>' + C04_PRACTICE.length + ' practice problems</span></div></header>' +
-    c4Block('What C 04 assumes, and what it adds',
+    '<h1>' + c4Esc(m.label) + '</h1><p>' + c4Esc(m.blurb) + '</p>' +
+    '<div class="c4-hero-meta"><span>subject version ' + c4Esc(m.meta.version) + '</span>' +
+    '<span>' + m.ex.length + ' exercises</span><span>' + m.founds.length + ' foundations</span>' +
+    '<span>' + m.practice.length + ' practice problems</span>' +
+    '<span>' + m.bugs.length + ' catalogued bugs</span></div></header>' +
+    c4Block('What ' + c4Esc(m.label) + ' assumes, and what it adds',
       '<div class="c4-dep"><div class="c4-dep-col"><div class="c4-dep-h">you already have</div>' +
-        C04_DEPS.before.map(([m, w]) => '<div class="c4-dep-r"><b>' + m + '</b><span>' + c4Esc(w) + '</span></div>').join('') +
+        m.deps.before.map(([mo, w]) => '<div class="c4-dep-r"><b>' + c4Esc(mo) + '</b><span>' +
+          c4Esc(w) + '</span></div>').join('') +
         '</div><div class="c4-dep-arrow">→</div>' +
-        '<div class="c4-dep-col add"><div class="c4-dep-h">C 04 adds</div>' +
-        '<div class="c4-dep-tags">' + C04_DEPS.adds.map(a => '<span class="c4-tagx">' + c4Esc(a) + '</span>').join('') +
-        '</div></div></div>') +
-    c4Block('How the six exercises depend on each other',
-      '<div class="c4-chain">' + C04_DEPS.chain.map(c => {
+        '<div class="c4-dep-col add"><div class="c4-dep-h">' + c4Esc(m.label) + ' adds</div>' +
+        '<div class="c4-dep-tags">' + m.deps.adds.map(a => '<span class="c4-tagx">' + c4Esc(a) +
+          '</span>').join('') + '</div></div></div>') +
+    c4Block('How the ' + m.ex.length + ' exercises depend on each other',
+      '<div class="c4-chain">' + m.deps.chain.map(c => {
         const e = byId[c.id];
+        if (!e) return '';
         return '<button class="c4-chain-n" data-c4go="ex:' + c.id + '">' +
           '<span class="c4-chain-id">' + c.id + '</span>' +
           '<span class="c4-chain-nm mono">' + c4Esc(e.name) + '</span>' +
-          (c.needs.length ? '<span class="c4-chain-nd">needs ' + c.needs.join(' + ') + '</span>'
+          (c.needs.length ? '<span class="c4-chain-nd">needs ' + c4Esc(c.needs.join(' + ')) + '</span>'
                           : '<span class="c4-chain-nd">start here</span>') +
           (e.deep ? '<span class="c4-deep">deep dive</span>' : '') + '</button>';
       }).join('<span class="c4-chain-arr">→</span>') + '</div>' +
-      '<div class="c4-conc">' + C04_DEPS.concepts.map(([c, exs]) =>
+      '<div class="c4-conc">' + m.deps.concepts.map(([c, exs]) =>
         '<div class="c4-conc-r"><span class="c4-conc-k">' + c4Esc(c) + '</span>' +
-        exs.map(x => '<button class="c4-chip" data-c4go="ex:' + x + '">' + x + '</button>').join('') +
-        '</div>').join('') + '</div>',
-      'ex04 and ex05 are inverses of one another, and both stand on the same idea: a base is an alphabet, ' +
-      'and a symbol’s index is its value.') +
+        exs.map(x => '<button class="c4-chip" data-c4go="ex:' + c4Esc(x) + '">' + c4Esc(x) +
+          '</button>').join('') + '</div>').join('') + '</div>') +
     c4Block('Start anywhere',
-      '<div class="c4-grid">' +
-        '<button class="c4-card" data-c4go="f:bases"><b>Number bases</b>' +
-          '<span>The one idea ex04 and ex05 are built on.</span></button>' +
-        '<button class="c4-card" data-c4go="f:recursion"><b>Recursion for digit order</b>' +
-          '<span>Why the writes happen on the way back up.</span></button>' +
-        '<button class="c4-card" data-c4go="ex:ex03"><b>ex03 — the parser</b>' +
-          '<span>One cursor, three phases.</span></button>' +
-        '<button class="c4-card" data-c4go="ex:ex04"><b>ex04 — encode</b>' +
-          '<span>Number to symbols, with validation first.</span></button>' +
-        '<button class="c4-card" data-c4go="ex:ex05"><b>ex05 — decode</b>' +
-          '<span>Symbols back to a number.</span></button>' +
+      '<div class="c4-grid">' + starts.map(([k, t, d]) =>
+        '<button class="c4-card" data-c4go="' + c4Esc(k) + '"><b>' + c4Esc(t) + '</b>' +
+        '<span>' + c4Esc(d) + '</span></button>').join('') +
         '<button class="c4-card" data-c4go="bugs"><b>Common mistakes</b>' +
-          '<span>' + C04_BUGS.length + ' bugs, and how to recognise each.</span></button>' +
+        '<span>' + m.bugs.length + ' bugs, and how to recognise each.</span></button>' +
       '</div>');
 }
 
 /* The original six plus the four added by the learning upgrade, in order. */
-function c4Founds() { return C04_FOUND.concat(typeof C04_FOUND2 !== 'undefined' ? C04_FOUND2 : []); }
+function c4Founds() { return learnMod().founds; }
 
 function c4Foundation(id) {
-  const f = c4Founds().find(x => x.id === id) || C04_FOUND[0];
+  const f = c4Founds().find(x => x.id === id) || c4Founds()[0];
   let h = '<header class="c4-page-h"><span class="c4-kicker">Foundations · ' + c4Esc(f.n) + '</span>' +
     '<h1>' + c4Esc(f.title) + '</h1></header>';
   h += c4Block('What is it, and why does it exist?',
@@ -23769,15 +24975,7 @@ function c4Foundation(id) {
     '<div class="c4-keys">' + f.keys.map(([k, v]) =>
       '<div class="c4-key"><span class="c4-key-k mono">' + c4Esc(k) + '</span>' +
       '<span class="c4-key-v">' + c4Esc(v) + '</span></div>').join('') + '</div>');
-  if (f.id === 'bases') h += c4BaseViz() + c4EncDec();
-  if (f.id === 'ascii') h += c4AsciiViz();
-  if (f.id === 'recursion') h += c4DivMod();
-  if (f.id === 'validate') h += c4Validator() + c4Dup();
-  if (f.id === 'whitespace') h += c4WsTable() + c4WsRam() + c4IsSpace();
-  if (f.id === 'convert') h += c4StrVsInt() + c4WhyAtoi() + c4AsciiDigit() + c4StrToInt() +
-                                c4WhyAccum() + c4BaseBridge();
-  if (f.id === 'overflow') h += c4Range() + c4Undefined() + c4TwoOverflows();
-  if (f.id === 'man') h += c4ManPage() + c4AnatomyCard('atoi') + c4AnatomyCard('isspace');
+  h += c4VizList(f.viz);
   if (f.demo) {
     const run = c4Run(f.demo.src);
     h += c4Block(f.demo.label, c4Stepper(run, { watch: f.demo.watch }),
@@ -23801,7 +24999,7 @@ function c4AsciiViz() {
 }
 
 function c4Exercise(id) {
-  const ex = C04_EX.find(x => x.id === id) || C04_EX[0];
+  const ex = learnMod().ex.find(x => x.id === id) || learnMod().ex[0];
   const tabs = [['subject', 'Subject'], ['understand', 'Understand'], ['visualize', 'Visualize'],
                 ['trace', 'Trace'], ['practice', 'Practice']];
   let h = '<header class="c4-page-h"><span class="c4-kicker">Exercise ' + c4Esc(ex.id.slice(2)) +
@@ -23816,6 +25014,7 @@ function c4Exercise(id) {
     h += c4Block('What is this exercise really testing?', '<p class="c4-p">' + c4Esc(t.testing) + '</p>' +
       '<span class="c4-badge alt">HANDBOOK</span>');
     h += c4NotInSubject(t.notInSubject);
+    h += c4NotSpecified(t.notSpecified);
   }
   if (c4.tab === 'understand') {
     const g = t.giopvc;
@@ -23831,27 +25030,26 @@ function c4Exercise(id) {
       'The letters are the plan; the code is the last of them. Working out G through A before writing ' +
       'anything is what makes an unfamiliar exam variant solvable.');
     h += c4NotInSubject(t.notInSubject);
+    h += c4NotSpecified(t.notSpecified);
     h += c4Block('Common mistakes',
       t.mistakes.map(([w, r]) => '<div class="c4-mist"><div class="c4-mist-w">' + c4Esc(w) + '</div>' +
         '<div class="c4-mist-r">' + c4Esc(r) + '</div></div>').join(''));
     h += c4Block('Exam traps', '<ul class="c4-list">' +
       t.traps.map(x => '<li>' + c4Esc(x) + '</li>').join('') + '</ul>');
+    if (t.pattern) h += c4Block('Pattern recognition',
+      '<p class="c4-p">' + c4Esc(t.pattern) + '</p>',
+      'What should make you reach for this shape when the wording is unfamiliar.');
     h += c4Block('Key takeaway', '<p class="c4-take">' + c4Esc(t.takeaway) + '</p>');
   }
   if (c4.tab === 'visualize') {
-    if (ex.id === 'ex02') h += c4DivMod() + c4IntMin() + c4TwoOverflows();
-    else if (ex.id === 'ex03') h += c4ParserBoxes() + c4Parser() + c4SignParity() +
-                                      c4WsRam() + c4StrToInt() + c4WhyAccum();
-    else if (ex.id === 'ex04') h += c4BaseViz() + c4DivMod() + c4Validator() + c4Dup() +
-                                      c4IntMin() + c4TwoOverflows();
-    else if (ex.id === 'ex05') h += c4BaseBridge() + c4Validator() + c4Search() + c4Accum() + c4EncDec();
-    else if (ex.id === 'ex01') h += c4AnatomyCard('write') + c4Block('The string in memory, byte by byte',
-      c4Stepper(c4Run(ex.program.src), { watch: ex.program.watch, fn: ex.name }),
-      'Every address and byte value is the engine’s own.');
-    else h += c4StrVsInt() + c4Block('The string in memory, byte by byte',
-      c4Stepper(c4Run(ex.program.src), { watch: ex.program.watch, fn: ex.name }),
-      'Every address and byte value is the engine’s own. Step through and watch the cursor ' +
-      'walk the array until it meets the terminator.');
+    /* Which visualizers an exercise shows is data, not a chain of id tests, so a
+       new module supplies its own without touching this function. */
+    h += c4VizList(ex.viz);
+    if (ex.mem !== false && (!ex.viz || !ex.viz.length || ex.mem))
+      h += c4Block('In memory, step by step',
+        c4Stepper(c4Run(ex.program.src), { watch: ex.program.watch, fn: ex.name }),
+        'Every address and value is the engine’s own.');
+    if (t.limitation) h += c4Limitation(t.limitation);
   }
   if (c4.tab === 'trace') {
     const sel = c4.caseIx[ex.id] || 0;
@@ -23887,7 +25085,7 @@ function c4Practice() {
   let h = '<header class="c4-page-h"><span class="c4-kicker">Part 3</span><h1>Exam practice</h1>' +
     '<p class="c4-p muted">These six are from the handbook, not from the C 04 subject. They are variations ' +
     'of the kind an examiner builds — reasoning first, no solutions.</p></header>';
-  h += C04_PRACTICE.map(p =>
+  h += learnMod().practice.map(p =>
     '<section class="c4-prac"><div class="c4-prac-h"><span class="mono">' + c4Esc(p.name) + '</span>' +
     '<span class="c4-diff ' + p.difficulty.replace(/[^a-z]/g, '') + '">' + c4Esc(p.difficulty) + '</span></div>' +
     '<p class="c4-prac-s">' + c4Esc(p.subject) + '</p>' +
@@ -23906,9 +25104,9 @@ function c4Practice() {
 
 function c4Bugs() {
   return '<header class="c4-page-h"><span class="c4-kicker">Reference</span><h1>Common mistakes</h1>' +
-    '<p class="c4-p muted">' + C04_BUGS.length + ' bugs that cost C 04 exercises, each with what happened, ' +
+    '<p class="c4-p muted">' + learnMod().bugs.length + ' bugs that cost ' + c4Esc(learnMod().label) + ' exercises, each with what happened, ' +
     'why, how to spot it and how to fix the reasoning.</p></header>' +
-    '<div class="c4-bugs">' + C04_BUGS.map(([title, what, why, spot, fix], i) =>
+    '<div class="c4-bugs">' + learnMod().bugs.map(([title, what, why, spot, fix], i) =>
       '<details class="c4-bug"><summary><span class="c4-bug-n">' + String(i + 1).padStart(2, '0') + '</span>' +
       c4Esc(title) + '</summary><div class="c4-bug-b">' +
       '<div class="c4-bug-r"><span>what happens</span><p>' + c4Esc(what) + '</p></div>' +
@@ -23924,7 +25122,7 @@ function c4Bugs() {
 function c4Pages() {
   const out = [{ key: 'overview', label: 'Overview', kind: 'top' }];
   for (const f of c4Founds()) out.push({ key: 'f:' + f.id, label: f.n + '  ' + f.title, kind: 'found' });
-  for (const e of C04_EX) out.push({ key: 'ex:' + e.id, label: e.id + '  ' + e.name, kind: 'ex', deep: e.deep });
+  for (const e of learnMod().ex) out.push({ key: 'ex:' + e.id, label: e.id + '  ' + e.name, kind: 'ex', deep: e.deep });
   out.push({ key: 'practice', label: 'Exam practice', kind: 'top' });
   out.push({ key: 'bugs', label: 'Common mistakes', kind: 'top' });
   return out;
@@ -23940,9 +25138,12 @@ function renderLearn() {
   else if (c4.page === 'practice') body = c4Practice();
   else body = c4Bugs();
 
-  const nav = '<nav class="c4-nav" aria-label="C 04 contents">' +
-    '<div class="c4-nav-h">C 04</div>' +
-    ['top:Overview', 'found:Part 1 — Foundations', 'ex:Part 2 — Exercises'].map(() => '').join('') +
+  const mods = learnModules();
+  const nav = '<nav class="c4-nav" aria-label="Course contents">' +
+    '<div class="c4-nav-h">' + c4Esc(learnMod().label) + '</div>' +
+    (mods.length > 1 ? '<div class="c4-modsw" role="group" aria-label="Course">' + mods.map(m =>
+      '<button class="c4-modb' + (m.id === c4.mod ? ' on' : '') + '" data-c4mod="' + c4Esc(m.id) + '">' +
+      c4Esc(m.label) + '</button>').join('') + '</div>' : '') +
     '<div class="c4-nav-g">Overview</div>' +
     pages.filter(p => p.key === 'overview').map(p => c4NavBtn(p)).join('') +
     '<div class="c4-nav-g">Part 1 — Foundations</div>' +
@@ -23968,8 +25169,9 @@ function c4NavBtn(p) {
     c4Esc(p.label) + (p.deep ? '<span class="c4-deep sm">deep</span>' : '') + '</button>';
 }
 
-function showLearn(page) {
+function showLearn(page, mod) {
   ui.view = 'learn';
+  if (mod && learnModules().some(m => m.id === mod)) { c4.mod = mod; c4.page = 'overview'; }
   if (page) { c4.page = page; c4.step = null; }
   $('#dashRoot').style.display = 'none';
   if (typeof hideLab === 'function') hideLab();
@@ -23991,6 +25193,10 @@ function wireLearn() {
   const go = (k) => { c4.page = k; c4.step = null; c4.tab = 'subject'; renderLearn();
     const m = $('.c4-main'); if (m) m.scrollTop = 0; };
   $$('#learnRoot [data-c4go]').forEach(el => el.addEventListener('click', () => go(el.dataset.c4go)));
+  $$('#learnRoot [data-c4mod]').forEach(el => el.addEventListener('click', () => {
+    c4.mod = el.dataset.c4mod; c4.page = 'overview'; c4.tab = 'subject'; c4.step = null;
+    renderLearn();
+  }));
   $$('#learnRoot [data-c4tab]').forEach(el => el.addEventListener('click', () => {
     c4.tab = el.dataset.c4tab; c4.step = null; renderLearn(); }));
   $$('#learnRoot [data-c4case]').forEach(el => el.addEventListener('click', () => {
@@ -24029,6 +25235,7 @@ function wireLearn() {
     el.addEventListener('click', () => { c4[key] = el.getAttribute('data-' + attr); renderLearn(); }));
   chip('c4base', 'base'); chip('c4vbase', 'vbase'); chip('c4sgn', 'sgn'); chip('c4atoi', 'atoi');
   chip('c4ws', 'ws'); chip('c4s2i', 's2i'); chip('c4adig', 'adig');
+  if (typeof wireC5 === 'function') wireC5();
   $$('#learnRoot [data-c4vex]').forEach(el => el.addEventListener('click', () => {
     c4.vex = el.dataset.c4vex; renderLearn(); }));
   $$('#learnRoot [data-c4work]').forEach(el => el.addEventListener('click', () => showWorkspace()));
@@ -24500,7 +25707,7 @@ function c4AnatomyCard(key) {
 
 /* The standardised Functions & Libraries block on every exercise. */
 function c4FuncsBlock(ex) {
-  const list = C04_EXFUNCS[ex.id] || [];
+  const list = (learnMod().exfuncs || {})[ex.id] || [];
   return c4Block('Functions & libraries',
     '<table class="c4-t c4-fl"><tbody>' +
       '<tr><th>the function you are writing</th><td class="mono c4-sym-out">' + c4Esc(ex.name) + '</td></tr>' +
@@ -24531,19 +25738,754 @@ function c4FuncsBlock(ex) {
 
 /* Human algorithm → skeleton → (the detailed GIOPVC follows on the page). */
 function c4AlgoBlock(ex) {
-  const a = C04_ALGO[ex.id];
+  const a = ex.algo || (learnMod().algo || {})[ex.id];
   if (!a) return '';
   return c4Block('The algorithm, in three sizes',
-    '<div class="c4-algo"><div class="c4-algo-h">1 — in plain words</div>' +
+    (a.one ? '<div class="c4-algo one"><div class="c4-algo-h">1 — in one sentence</div>' +
+      '<p class="c4-algo-one">' + c4Esc(a.one) + '</p></div>' : '') +
+    '<div class="c4-algo"><div class="c4-algo-h">' + (a.one ? '2' : '1') + ' — in plain words</div>' +
       '<ol class="c4-algo-l">' + a.human.map(x => '<li>' + c4Esc(x) + '</li>').join('') + '</ol></div>' +
-    '<div class="c4-algo"><div class="c4-algo-h">2 — as a skeleton</div>' +
+    '<div class="c4-algo"><div class="c4-algo-h">' + (a.one ? '3' : '2') + ' — as a skeleton</div>' +
       '<pre class="c4-pre mono">' + c4Esc(a.skeleton) + '</pre></div>' +
-    '<div class="c4-algo-n">3 — the detail is below. If steps 1 and 2 make sense you can already write ' +
+    '<div class="c4-algo-n">The detail is below. If steps 1 and 2 make sense you can already write ' +
       'this function; the rest is naming the variables and getting the conditions exactly right.</div>',
     'Understand the shape before the specifics. In an exam you reconstruct the shape from memory and ' +
     'derive the rest — which is why the skeleton matters more than the finished code.');
 }
 /* ==== C04DEEP END ==== */
+
+/* ==== C05UI START ====
+   C 05 — the visualizers.
+
+   Same rule as C 04: nothing here computes an answer. Every number, count,
+   frame and board state is read back out of CEngine executing a real C program,
+   through the shared c4Run / c4Find / c4Stepper helpers. Where the learner picks
+   a value the program is rebuilt with it and re-run.
+
+   Two hard limits, measured rather than assumed, shape what these can show:
+     - the engine stops at 200,000 steps, and snapshots every one of them, so a
+       naive fib beyond index ~15 exhausts memory;
+     - an n-queens search is runnable to completion at 4x4 (1082 steps) and 5x5
+       (4299), and not at 6x6.
+   The queens pages therefore run small boards and say so. The subject's board
+   is 10x10 and the algorithm is identical; the size is one constant. */
+
+/* Default state for the C05 widgets. Added lazily so the c4 object declared in
+   p26 stays the single source of lesson UI state. */
+function c5State() {
+  if (c4.c5n === undefined) {
+    c4.c5n = 5;        // factorial / recursion depth
+    c4.c5b = 2;        // power base
+    c4.c5p = 10;       // power exponent
+    c4.c5fib = 7;      // fibonacci index
+    c4.c5sq = 144;     // sqrt input
+    c4.c5pr = 97;      // primality input
+    c4.c5np = 20;      // next-prime input
+    c4.c5qn = 4;       // queens board size
+    c4.c5qsol = 0;     // which solution is being shown
+  }
+  return c4;
+}
+const c5Num = (v, lo, hi, dflt) => {
+  const n = parseInt(v, 10);
+  return isNaN(n) ? dflt : Math.max(lo, Math.min(hi, n));
+};
+/* Last value a named variable held anywhere in the run. */
+function c5Final(run, name) {
+  if (!run.ok) return null;
+  for (let i = run.steps.length - 1; i >= 0; i--) {
+    const v = c4Find(run.steps[i].state, name);
+    if (v && !v.uninitialized) return v.valueText;
+  }
+  return null;
+}
+/* The value the outermost call returned. */
+function c5Returned(run) {
+  if (!run.ok) return null;
+  for (let i = run.steps.length - 1; i >= 0; i--) {
+    const s = run.steps[i].step;
+    if (s.phase === 'call-return' && (s.callStack || []).length <= 1 &&
+        s.returnValue !== undefined && s.returnValue !== null) return String(s.returnValue);
+  }
+  return null;
+}
+function c5Calls(run, fname) {
+  if (!run.ok) return { calls: 0, depth: 0 };
+  let calls = 0, depth = 0;
+  for (const st of run.steps) {
+    const cs = st.step.callStack || [];
+    if (st.step.phase === 'call-enter' && (!fname || cs[cs.length - 1] === fname)) calls++;
+    depth = Math.max(depth, cs.length);
+  }
+  return { calls, depth };
+}
+function c5Num0(v) { return v === null || v === undefined ? '—' : v; }
+
+/* ------------------------------------------------------------------ *
+ * 1.1 — iteration and recursion, side by side, both executed           *
+ * ------------------------------------------------------------------ */
+const C5_ITER_FACT = (n) =>
+'int\tfact_loop(int nb)\n{\n\tint\tresult;\n\tint\ti;\n\n\tresult = 1;\n\ti = 1;\n\twhile (i <= nb)\n\t{\n' +
+'\t\tresult = result * i;\n\t\ti++;\n\t}\n\treturn (result);\n}\n\n' +
+'int\tmain(void)\n{\n\tint\tv;\n\n\tv = fact_loop(' + n + ');\n\treturn (0);\n}\n';
+const C5_REC_FACT = (n) =>
+'int\tfact_rec(int nb)\n{\n\tif (nb <= 1)\n\t\treturn (1);\n\treturn (nb * fact_rec(nb - 1));\n}\n\n' +
+'int\tmain(void)\n{\n\tint\tv;\n\n\tv = fact_rec(' + n + ');\n\treturn (0);\n}\n';
+
+function c5IterRec() {
+  const s = c5State();
+  const n = s.c5n;
+  const a = c4Run(C5_ITER_FACT(n)), b = c4Run(C5_REC_FACT(n));
+  const av = c5Final(a, 'v'), bv = c5Final(b, 'v');
+  const ac = c5Calls(a), bc = c5Calls(b);
+  return c4Block('The same answer, two shapes — both really run',
+    '<div class="c4-row"><label class="c4-lab" for="c5N">nb</label>' +
+      '<input id="c5N" class="c4-in" type="number" min="0" max="12" value="' + n + '">' +
+      '<span class="c4-presets">' + [0, 1, 5, 8, 12].map(x =>
+        '<button class="c4-chip' + (x === n ? ' on' : '') + '" data-c5n="' + x + '">' + x + '</button>').join('') +
+      '</span></div>' +
+    '<div class="c4-two">' +
+      '<div class="c4-half"><div class="c4-half-h">ITERATIVE <span class="mono">ex00</span></div>' +
+        '<pre class="c4-pre mono">result = 1\ni = 1\nwhile i &lt;= nb\n    result = result * i\n    i++</pre>' +
+        '<div class="c5-stat"><span>answer</span><b class="mono">' + c4Esc(c5Num0(av)) + '</b></div>' +
+        '<div class="c5-stat"><span>engine steps</span><b class="mono">' + (a.ok ? a.steps.length : '—') + '</b></div>' +
+        '<div class="c5-stat"><span>deepest call stack</span><b class="mono">' + ac.depth + '</b></div>' +
+        '<div class="c4-half-n">One frame of its own, for as long as it runs — the count above includes main. The state lives in two variables that change.</div></div>' +
+      '<div class="c4-half alt"><div class="c4-half-h">RECURSIVE <span class="mono">ex01</span></div>' +
+        '<pre class="c4-pre mono">if nb &lt;= 1\n    return 1\nreturn nb * fact(nb - 1)</pre>' +
+        '<div class="c5-stat"><span>answer</span><b class="mono">' + c4Esc(c5Num0(bv)) + '</b></div>' +
+        '<div class="c5-stat"><span>engine steps</span><b class="mono">' + (b.ok ? b.steps.length : '—') + '</b></div>' +
+        '<div class="c5-stat"><span>deepest call stack</span><b class="mono">' + bc.depth + '</b></div>' +
+        '<div class="c4-half-n">' + bc.calls + ' call' + (bc.calls === 1 ? '' : 's') +
+          ', each with its own copy of nb. The state lives in the stack.</div></div>' +
+    '</div>' +
+    (av !== null && av === bv
+      ? '<div class="c4-verdict ok">Both produce <b class="mono">' + c4Esc(av) + '</b>. ' +
+        'The recursive one used a stack ' + bc.depth + ' frames deep to do it.</div>'
+      : '<div class="c4-verdict no">The two runs did not agree — ' + c4Esc(c5Num0(av)) + ' and ' +
+        c4Esc(c5Num0(bv)) + '.</div>'),
+    'Same arithmetic, same answer, different cost. A loop keeps its state in variables; recursion ' +
+    'keeps it in frames — which is memory you did not have to ask for and cannot see.');
+}
+
+/* ------------------------------------------------------------------ *
+ * 1.2 — the call ladder: down to the base case, then back up           *
+ * ------------------------------------------------------------------ */
+function c5CallLadder() {
+  const s = c5State();
+  const n = Math.min(s.c5n, 8);
+  const run = c4Run(C5_REC_FACT(n));
+  /* Every call's argument on the way down, and every return on the way up —
+     read from the engine's own frames and return steps. */
+  const down = [], up = [];
+  if (run.ok) {
+    let seen = -1;
+    for (const st of run.steps) {
+      const fr = st.state.frames.filter(f => f.name === 'fact_rec');
+      if (fr.length > seen) {
+        const deepest = fr[fr.length - 1];
+        const nb = deepest && deepest.vars.find(v => v.name === 'nb');
+        if (nb && !nb.uninitialized) { down.push({ depth: fr.length, nb: nb.valueText }); seen = fr.length; }
+      }
+      if (st.step.phase === 'call-return' && st.step.returnValue !== undefined &&
+          st.step.returnValue !== null && (st.step.callStack || []).length >= 1)
+        up.push({ depth: (st.step.callStack || []).length, v: String(st.step.returnValue) });
+    }
+  }
+  return c4Block('Calling down, then returning up',
+    '<div class="c4-row"><label class="c4-lab" for="c5N2">nb</label>' +
+      '<input id="c5N2" class="c4-in" type="number" min="1" max="8" value="' + n + '">' +
+      '<span class="c4-lab">' + down.length + ' calls deep</span></div>' +
+    '<div class="c5-ladder">' +
+      down.map((d, i) => '<div class="c5-rung down" style="margin-left:' + (i * 20) + 'px">' +
+        '<span class="c5-rung-a">↓</span><span class="mono">fact_rec(' + c4Esc(d.nb) + ')</span>' +
+        (i === down.length - 1 ? '<span class="c5-base">BASE CASE — returns without recursing</span>'
+          : '<span class="c5-rung-n">waits for the answer below</span>') + '</div>').join('') +
+      up.slice().reverse().map((u, i) => '<div class="c5-rung up" style="margin-left:' +
+        ((down.length - 1 - i) * 20) + 'px">' +
+        '<span class="c5-rung-a">↑</span><span class="mono">returns ' + c4Esc(u.v) + '</span></div>').join('') +
+    '</div>' +
+    '<div class="c4-boxnote"><b>Nothing is multiplied on the way down.</b> Each call only makes a ' +
+    'smaller call and waits. The base case is the first thing that produces a value; every ' +
+    'multiplication then happens as the frames unwind.</div>',
+    'The arguments and the returned values above are the engine’s, read from the frames that ' +
+    'actually existed at each step.');
+}
+
+/* ------------------------------------------------------------------ *
+ * 1.3 / ex00 / ex01 — factorial                                        *
+ * ------------------------------------------------------------------ */
+function c5Factorial() {
+  const s = c5State();
+  const n = s.c5n;
+  const run = c4Run(C5_ITER_FACT(n));
+  const rows = [];
+  if (run.ok) {
+    const line = C5_ITER_FACT(n).split('\n').findIndex(l => l.indexOf('result * i') >= 0) + 1;
+    for (const st of run.steps) {
+      if (st.step.line !== line) continue;
+      const d = st.step.detail && st.step.detail.dataflow;
+      if (!d || d.dest.text !== 'result') continue;
+      rows.push({ i: rows.length + 1,
+                  before: d.dest.before === null || d.dest.before === undefined ? '1' : String(d.dest.before),
+                  after: d.dest.valueText });
+    }
+  }
+  const answer = c5Final(run, 'v');
+  return c4Block('n! — every factor, one at a time',
+    '<div class="c4-row"><label class="c4-lab" for="c5N3">nb</label>' +
+      '<input id="c5N3" class="c4-in" type="number" min="0" max="13" value="' + n + '">' +
+      '<span class="c4-presets">' + [0, 1, 5, 12, 13].map(x =>
+        '<button class="c4-chip' + (x === n ? ' on' : '') + '" data-c5n="' + x + '">' + x + '</button>').join('') +
+      '</span></div>' +
+    '<div class="c5-expand mono">' + (n <= 0 ? 'the empty product' :
+      Array.from({ length: n }, (_, k) => n - k).join(' × ') + ' = ' + c4Esc(c5Num0(answer))) + '</div>' +
+    (rows.length
+      ? '<table class="c4-t"><thead><tr><th>step</th><th>factor</th><th>result before</th>' +
+        '<th>× factor</th><th>result after</th></tr></thead><tbody>' +
+        rows.map(r => '<tr><td>' + r.i + '</td><td class="mono c4-sym-out">' + r.i + '</td>' +
+          '<td class="mono">' + c4Esc(r.before) + '</td>' +
+          '<td class="mono c4-eq">' + c4Esc(r.before) + ' × ' + r.i + '</td>' +
+          '<td class="mono c4-hl">' + c4Esc(r.after) + '</td></tr>').join('') + '</tbody></table>'
+      : '<div class="c4-empty">the loop never runs, so result keeps its starting value of 1 — ' +
+        'which is exactly why 0! is 1</div>'),
+    'The starting value 1 is not decoration: it is the identity for multiplication. Start at 0 and ' +
+    'every row above collapses to zero.');
+}
+
+function c5Growth() {
+  const lim = CEngine.limitsOf(CEngine.scalarT('int'));
+  const rows = [];
+  for (const n of [10, 11, 12, 13, 14]) {
+    const r = c4Run(C5_ITER_FACT(n));
+    let exact = 1n;
+    for (let k = 2n; k <= BigInt(n); k++) exact *= k;
+    const got = c5Final(r, 'v');
+    rows.push({ n, got, exact: exact.toString(), fits: got !== null && BigInt(got) === exact });
+  }
+  const pw = [];
+  for (const p of [28, 29, 30, 31]) {
+    const src = 'int\tpw(int nb, int p)\n{\n\tint\tr;\n\n\tr = 1;\n\twhile (p > 0)\n\t{\n\t\tr = r * nb;\n\t\tp--;\n\t}\n\treturn (r);\n}\n' +
+      'int\tmain(void)\n{\n\tint\tv;\n\n\tv = pw(2, ' + p + ');\n\treturn (0);\n}\n';
+    const got = c5Final(c4Run(src), 'v');
+    const exact = 2n ** BigInt(p);
+    pw.push({ p, got, exact: exact.toString(), fits: got !== null && BigInt(got) === exact });
+  }
+  return c4Block('Where these functions leave the range of an int',
+    '<div class="c4-range-n">INT_MAX is <b class="mono">' + c4Esc(lim.max) + '</b>. ' +
+      'Everything below was executed; the exact column is the mathematics.</div>' +
+    '<table class="c4-t"><thead><tr><th>n</th><th>n! the engine produced</th>' +
+      '<th>n! mathematically</th><th></th></tr></thead><tbody>' +
+    rows.map(r => '<tr class="' + (r.fits ? '' : 'c5-over') + '"><td class="mono">' + r.n + '</td>' +
+      '<td class="mono">' + c4Esc(c5Num0(r.got)) + '</td><td class="mono">' + c4Esc(r.exact) + '</td>' +
+      '<td>' + (r.fits ? '<span class="c4-yes">fits</span>'
+        : '<span class="c4-bad">outside the range</span>') + '</td></tr>').join('') + '</tbody></table>' +
+    '<table class="c4-t"><thead><tr><th>2^p</th><th>engine</th><th>mathematically</th><th></th></tr></thead><tbody>' +
+    pw.map(r => '<tr class="' + (r.fits ? '' : 'c5-over') + '"><td class="mono">2^' + r.p + '</td>' +
+      '<td class="mono">' + c4Esc(c5Num0(r.got)) + '</td><td class="mono">' + c4Esc(r.exact) + '</td>' +
+      '<td>' + (r.fits ? '<span class="c4-yes">fits</span>'
+        : '<span class="c4-bad">outside the range</span>') + '</td></tr>').join('') + '</tbody></table>' +
+    '<div class="c4-ud"><div class="c4-ud-r no"><span>✕ do not say</span>' +
+      '<p>“13! wraps around to 1932053504.” That is what this simulator produced. Signed integer ' +
+      'overflow is <b>undefined behaviour</b> — the standard requires no particular result, and ' +
+      'another compiler may produce something else or optimise on the assumption that it never happens.</p></div>' +
+      '<div class="c4-ud-r ok"><span>✓ say instead</span>' +
+      '<p>“13! is outside the range of an int, so the result is not defined by the standard. The ' +
+      'subject tells us we do not need to handle it.”</p></div></div>' +
+    '<div class="c4-warn"><span class="c4-badge alt">WHAT THE SUBJECT SAYS</span>' +
+      '<p class="c4-quote">“Overflows do not need to be handled; the function’s return value will be ' +
+      'undefined in such cases.”</p>' +
+      '<p>That is permission to leave overflow detection out, so you can concentrate on the algorithm. ' +
+      'It is not a claim that overflow is harmless. Note also that ex02 words it more briefly — ' +
+      '“Overflows do not need to be handled.” — without the second clause.</p></div>',
+    'The boundary is real and was measured: 12! is the largest factorial an int can hold.');
+}
+
+/* ------------------------------------------------------------------ *
+ * 1.4 / ex02 / ex03 — powers                                           *
+ * ------------------------------------------------------------------ */
+const C5_POWER = (nb, p) =>
+'int\tpower_loop(int nb, int power)\n{\n\tint\tresult;\n\n\tif (power < 0)\n\t\treturn (0);\n\tresult = 1;\n' +
+'\twhile (power > 0)\n\t{\n\t\tresult = result * nb;\n\t\tpower--;\n\t}\n\treturn (result);\n}\n\n' +
+'int\tmain(void)\n{\n\tint\tv;\n\n\tv = power_loop(' + nb + ', ' + p + ');\n\treturn (0);\n}\n';
+
+function c5Power() {
+  const s = c5State();
+  const nb = s.c5b, p = s.c5p;
+  const run = c4Run(C5_POWER(nb, p));
+  const rows = [];
+  if (run.ok) {
+    const line = C5_POWER(nb, p).split('\n').findIndex(l => l.indexOf('result * nb') >= 0) + 1;
+    for (const st of run.steps) {
+      if (st.step.line !== line) continue;
+      const d = st.step.detail && st.step.detail.dataflow;
+      if (!d || d.dest.text !== 'result') continue;
+      rows.push({ k: rows.length + 1,
+                  before: d.dest.before === null || d.dest.before === undefined ? '1' : String(d.dest.before),
+                  after: d.dest.valueText });
+    }
+  }
+  const answer = c5Final(run, 'v');
+  const zeroZero = nb === 0 && p === 0;
+  return c4Block('nb to the power p — one multiplication per unit of p',
+    '<div class="c4-row"><label class="c4-lab" for="c5B">nb</label>' +
+      '<input id="c5B" class="c4-in" type="number" min="-10" max="10" value="' + nb + '">' +
+      '<label class="c4-lab" for="c5P">power</label>' +
+      '<input id="c5P" class="c4-in" type="number" min="-4" max="16" value="' + p + '">' +
+      '<span class="c4-presets">' + [[2, 10], [0, 0], [5, 0], [0, 5], [-2, 3], [2, -3]].map(([x, y]) =>
+        '<button class="c4-chip' + (x === nb && y === p ? ' on' : '') + '" data-c5bp="' + x + ',' + y + '">' +
+        x + '^' + y + '</button>').join('') + '</span></div>' +
+    (p < 0
+      ? '<div class="c4-verdict no">power is negative, so the subject says return <b>0</b> — the loop ' +
+        'never starts. Engine returned <b class="mono">' + c4Esc(c5Num0(answer)) + '</b>.</div>'
+      : rows.length
+        ? '<table class="c4-t"><thead><tr><th>step</th><th>result before</th><th>× nb</th>' +
+          '<th>result after</th></tr></thead><tbody>' +
+          rows.map(r => '<tr><td>' + r.k + '</td><td class="mono">' + c4Esc(r.before) + '</td>' +
+            '<td class="mono c4-eq">' + c4Esc(r.before) + ' × ' + nb + '</td>' +
+            '<td class="mono c4-hl">' + c4Esc(r.after) + '</td></tr>').join('') + '</tbody></table>' +
+          '<div class="c4-final">' + nb + '<sup>' + p + '</sup> = <b class="mono">' +
+            c4Esc(c5Num0(answer)) + '</b> after ' + rows.length + ' multiplication' +
+            (rows.length === 1 ? '' : 's') + '</div>'
+        : '<div class="c4-verdict ok">power is 0, so the loop never runs and result keeps its starting ' +
+          'value. The engine returned <b class="mono">' + c4Esc(c5Num0(answer)) + '</b>.' +
+          (zeroZero ? ' <b>This is the 0⁰ case the subject legislates</b> — and it comes out right ' +
+            'with no special case at all.' : '') + '</div>'),
+    'The number of multiplications is exactly p. Trace 2 and 3 by hand and count them before you ' +
+    'trust a loop bound.');
+}
+
+/* ------------------------------------------------------------------ *
+ * 1.5 / ex04 — Fibonacci                                               *
+ * ------------------------------------------------------------------ */
+const C5_FIB = (n) =>
+'int\tfib(int index)\n{\n\tif (index < 0)\n\t\treturn (-1);\n\tif (index == 0)\n\t\treturn (0);\n' +
+'\tif (index == 1)\n\t\treturn (1);\n\treturn (fib(index - 1) + fib(index - 2));\n}\n\n' +
+'int\tmain(void)\n{\n\tint\tv;\n\n\tv = fib(' + n + ');\n\treturn (0);\n}\n';
+
+function c5FibSeq() {
+  const s = c5State();
+  const upto = Math.min(Math.max(s.c5fib, 2), 12);
+  /* One run per index, so every value on the strip is the engine's. */
+  const vals = [];
+  for (let i = 0; i <= upto; i++) vals.push(c5Final(c4Run(C5_FIB(i)), 'v'));
+  return c4Block('The sequence the subject fixes: 0, 1, 1, 2',
+    '<div class="c4-row"><label class="c4-lab" for="c5Fib">show up to index</label>' +
+      '<input id="c5Fib" class="c4-in" type="number" min="2" max="12" value="' + upto + '"></div>' +
+    '<div class="c5-seq">' + vals.map((v, i) =>
+      '<span class="c5-seqc' + (i <= 1 ? ' base' : '') + '">' +
+      '<span class="c5-seqi">' + i + '</span>' +
+      '<span class="c5-seqv mono">' + c4Esc(c5Num0(v)) + '</span>' +
+      (i <= 1 ? '<span class="c5-seqb">base</span>' : '') + '</span>').join('') + '</div>' +
+    (vals.length > 3
+      ? '<div class="c5-sums">' + vals.slice(2).map((v, k) =>
+          '<span class="c5-sum mono">' + c4Esc(c5Num0(vals[k])) + ' + ' + c4Esc(c5Num0(vals[k + 1])) +
+          ' = ' + c4Esc(c5Num0(v)) + '</span>').join('') + '</div>' : '') +
+    '<div class="c4-boxnote"><b>Index 0 holds 0.</b> The subject states the sequence as 0, 1, 1, 2, ' +
+    'so the first element is 0 and it sits at index 0. Starting at 1, 1 shifts every answer by one place ' +
+    'and is the commonest way to fail this exercise.</div>',
+    'Each value above came from its own run of the recursive function — ' + (upto + 1) +
+    ' separate executions, not a formula evaluated here.');
+}
+
+function c5FibCost() {
+  const s = c5State();
+  const n = Math.min(Math.max(s.c5fib, 0), 14);
+  const run = c4Run(C5_FIB(n));
+  const { calls, depth } = c5Calls(run, 'fib');
+  /* How often each argument value was called with — the repeated work, counted
+     from the engine's own call-enter steps. */
+  const hits = {};
+  if (run.ok) for (const st of run.steps) {
+    if (st.step.phase !== 'call-enter') continue;
+    const fr = st.state.frames.filter(f => f.name === 'fib');
+    const deepest = fr[fr.length - 1];
+    const idx = deepest && deepest.vars.find(v => v.name === 'index');
+    if (idx && !idx.uninitialized) hits[idx.valueText] = (hits[idx.valueText] || 0) + 1;
+  }
+  const keys = Object.keys(hits).map(Number).sort((a, b) => b - a);
+  const max = Math.max(1, ...keys.map(k => hits[k]));
+  /* A comparison row: the same indexes, run separately, to show the growth. */
+  const growth = [];
+  for (const k of [5, 8, 10, 12].filter(x => x <= 14)) {
+    const r = c4Run(C5_FIB(k));
+    growth.push({ k, calls: c5Calls(r, 'fib').calls, steps: r.ok ? r.steps.length : 0 });
+  }
+  return c4Block('Correct, and expensive — the same work done again and again',
+    '<div class="c4-row"><label class="c4-lab" for="c5Fib2">index</label>' +
+      '<input id="c5Fib2" class="c4-in" type="number" min="0" max="14" value="' + n + '">' +
+      '<span class="c4-presets">' + [5, 7, 10, 12, 14].map(x =>
+        '<button class="c4-chip' + (x === n ? ' on' : '') + '" data-c5fib="' + x + '">' + x + '</button>').join('') +
+      '</span></div>' +
+    '<div class="c5-statrow">' +
+      '<div class="c5-stat big"><span>calls to fib</span><b class="mono">' + calls + '</b></div>' +
+      '<div class="c5-stat big"><span>deepest stack</span><b class="mono">' + depth + '</b></div>' +
+      '<div class="c5-stat big"><span>engine steps</span><b class="mono">' +
+        (run.ok ? run.steps.length : '—') + '</b></div>' +
+      '<div class="c5-stat big"><span>answer</span><b class="mono">' +
+        c4Esc(c5Num0(c5Final(run, 'v'))) + '</b></div></div>' +
+    (keys.length
+      ? '<div class="c5-hits"><div class="c4-algo-h">how many times each index was computed</div>' +
+        keys.map(k => '<div class="c5-hit"><span class="c5-hit-k mono">fib(' + k + ')</span>' +
+          '<span class="c5-hit-bar" style="width:' + Math.round(hits[k] / max * 100) + '%"></span>' +
+          '<span class="c5-hit-n mono">' + hits[k] + '×</span></div>').join('') + '</div>'
+      : '') +
+    '<table class="c4-t"><thead><tr><th>index</th><th>calls</th><th>engine steps</th></tr></thead><tbody>' +
+    growth.map(g => '<tr><td class="mono">' + g.k + '</td><td class="mono c4-hl">' + g.calls + '</td>' +
+      '<td class="mono">' + g.steps + '</td></tr>').join('') + '</tbody></table>' +
+    '<div class="c4-boxnote"><b>fib(index − 2) is computed twice</b> — once directly, and again inside ' +
+    'fib(index − 1). Nothing remembers the first answer, so the whole subtree is rebuilt. That is why ' +
+    'the call count roughly doubles for every step up the index.</div>' +
+    c4Limitation('This simulator snapshots every execution step, so a naive fib beyond about index 15 ' +
+      'exhausts its memory. The counts above stop there. The subject requires the recursive form, and ' +
+      'the growth is exactly the point.'),
+    'The bars and the call counts are tallied from the engine’s call-enter steps for this very run.');
+}
+
+/* ------------------------------------------------------------------ *
+ * 1.6 / ex05 — integer square roots                                    *
+ * ------------------------------------------------------------------ */
+const C5_SQRT = (nb) =>
+'int\tft_sqrt(int nb)\n{\n\tint\ti;\n\n\tif (nb < 1)\n\t\treturn (0);\n\ti = 1;\n\twhile (i <= nb / i)\n\t{\n' +
+'\t\tif (i * i == nb)\n\t\t\treturn (i);\n\t\ti++;\n\t}\n\treturn (0);\n}\n\n' +
+'int\tmain(void)\n{\n\tint\tv;\n\n\tv = ft_sqrt(' + nb + ');\n\treturn (0);\n}\n';
+
+function c5Sqrt() {
+  const s = c5State();
+  const nb = s.c5sq;
+  const run = c4Run(C5_SQRT(nb));
+  const tries = [];
+  if (run.ok) {
+    let last = null;
+    for (const st of run.steps) {
+      const c = st.step.condition;
+      if (!c || c.expr.indexOf('i * i == nb') < 0) continue;
+      const iv = c4Find(st.state, 'i');
+      if (!iv || iv.uninitialized) continue;
+      if (iv.valueText === last) continue;
+      last = iv.valueText;
+      tries.push({ i: +iv.valueText, hit: c.result });
+    }
+  }
+  const answer = c5Returned(run) !== null ? c5Returned(run) : c5Final(run, 'v');
+  const found = answer !== null && answer !== '0';
+  /* 0 and 1 need saying carefully: 0 is its own square root, so returning 0 for
+     it is not the same statement as returning 0 for an irrational root — and
+     the subject never distinguishes the two. */
+  const verdict = nb < 0
+    ? '<div class="c4-verdict no">A negative number has no real square root. This implementation ' +
+      'returns <b class="mono">' + c4Esc(c5Num0(answer)) + '</b>, but <b>the subject does not say ' +
+      'what ft_sqrt should do for a negative nb</b> — that is a decision you are making.</div>'
+    : nb === 0
+      ? '<div class="c4-verdict no">0 <b>is</b> a perfect square — 0 × 0 is 0 — so its root is not ' +
+        'irrational. This implementation returns <b class="mono">' + c4Esc(c5Num0(answer)) + '</b> ' +
+        'because its guard rejects anything below 1, and 0 is also the value the subject asks for ' +
+        'when there is no root. <b>The subject does not say which of those two 0 means here.</b></div>'
+      : found
+        ? '<div class="c4-verdict ok">nb is a perfect square. The function returns <b class="mono">' +
+          c4Esc(answer) + '</b>, because ' + answer + ' × ' + answer + ' is exactly ' + nb + '.</div>'
+        : '<div class="c4-verdict no">No whole number squared gives ' + nb + '. Its square root is ' +
+          'irrational, so the subject says return <b>0</b> — and the engine returned <b class="mono">' +
+          c4Esc(c5Num0(answer)) + '</b>.</div>';
+  return c4Block('Searching for a whole number whose square is nb',
+    '<div class="c4-row"><label class="c4-lab" for="c5Sq">nb</label>' +
+      '<input id="c5Sq" class="c4-in" type="number" min="-10" max="10000" value="' + nb + '">' +
+      '<span class="c4-presets">' + [0, 1, 2, 15, 16, 144, 169].map(x =>
+        '<button class="c4-chip' + (x === nb ? ' on' : '') + '" data-c5sq="' + x + '">' + x + '</button>').join('') +
+      '</span></div>' +
+    (tries.length
+      ? '<div class="c5-tries">' + tries.map(t =>
+          '<span class="c5-try' + (t.hit ? ' hit' : '') + '"><span class="c5-try-i mono">' + t.i + '</span>' +
+          '<span class="c5-try-v mono">' + (t.i * t.i) + '</span>' +
+          '<span class="c5-try-r">' + (t.hit ? '= nb' : '≠ nb') + '</span></span>').join('') + '</div>'
+      : '<div class="c4-empty">the loop never ran — for nb below 1 the guard returns straight away</div>') +
+    verdict +
+    '<div class="c4-boxnote">The loop stops at <span class="mono">i &lt;= nb / i</span> rather than ' +
+    '<span class="mono">i * i &lt;= nb</span>. Both express “stop at the square root”, but the division ' +
+    'cannot leave the range of an int and the multiplication can.</div>',
+    'Every candidate above is one real iteration of the loop, and the verdict is the value the ' +
+    'function actually returned.');
+}
+
+/* ------------------------------------------------------------------ *
+ * 1.7 / ex06 / ex07 — primes                                           *
+ * ------------------------------------------------------------------ */
+const C5_PRIME = (nb) =>
+'int\tft_is_prime(int nb)\n{\n\tint\ti;\n\n\tif (nb < 2)\n\t\treturn (0);\n\ti = 2;\n\twhile (i <= nb / i)\n\t{\n' +
+'\t\tif (nb % i == 0)\n\t\t\treturn (0);\n\t\ti++;\n\t}\n\treturn (1);\n}\n\n' +
+'int\tmain(void)\n{\n\tint\tv;\n\n\tv = ft_is_prime(' + nb + ');\n\treturn (0);\n}\n';
+
+function c5Prime() {
+  const s = c5State();
+  const nb = s.c5pr;
+  const run = c4Run(C5_PRIME(nb));
+  const tests = [];
+  if (run.ok) {
+    let last = null;
+    for (const st of run.steps) {
+      const c = st.step.condition;
+      if (!c || c.expr.indexOf('nb % i == 0') < 0) continue;
+      const iv = c4Find(st.state, 'i');
+      if (!iv || iv.uninitialized || iv.valueText === last) continue;
+      last = iv.valueText;
+      tests.push({ i: +iv.valueText, divides: c.result });
+    }
+  }
+  const answer = c5Returned(run) !== null ? c5Returned(run) : c5Final(run, 'v');
+  const prime = answer === '1';
+  return c4Block('Trial division — does anything divide it?',
+    '<div class="c4-row"><label class="c4-lab" for="c5Pr">nb</label>' +
+      '<input id="c5Pr" class="c4-in" type="number" min="-5" max="10000" value="' + nb + '">' +
+      '<span class="c4-presets">' + [0, 1, 2, 9, 20, 97, 121].map(x =>
+        '<button class="c4-chip' + (x === nb ? ' on' : '') + '" data-c5pr="' + x + '">' + x + '</button>').join('') +
+      '</span></div>' +
+    (nb < 2
+      ? '<div class="c4-verdict no">' + nb + ' is below 2, so the guard returns 0 before any division. ' +
+        'The subject states outright that <b>0 and 1 are not prime numbers</b>.</div>'
+      : (tests.length
+          ? '<div class="c5-tries">' + tests.map(t =>
+              '<span class="c5-try' + (t.divides ? ' bad' : '') + '">' +
+              '<span class="c5-try-i mono">÷ ' + t.i + '</span>' +
+              '<span class="c5-try-r">' + (t.divides ? 'divides!' : 'no') + '</span></span>').join('') + '</div>'
+          : '<div class="c4-empty">no divisor was tried — for 2 and 3 the bound i &lt;= nb / i is ' +
+            'already false at i = 2</div>') +
+        '<div class="c4-verdict ' + (prime ? 'ok' : 'no') + '">' + nb + ' is ' +
+          (prime ? '<b>prime</b>' : '<b>not prime</b>') + '. The function returned <b class="mono">' +
+          c4Esc(c5Num0(answer)) + '</b> after ' + tests.length + ' division test' +
+          (tests.length === 1 ? '' : 's') + '.</div>') +
+    '<div class="c4-boxnote"><b>Why stop at the square root?</b> If nb = a × b and a is bigger than ' +
+    '√nb, then b must be smaller than √nb — so b was already tested. Nothing above the square root ' +
+    'can be a divisor you have not already seen.</div>',
+    'Each test above is one real evaluation of nb % i == 0, taken from the engine’s condition records.');
+}
+
+function c5NextPrime() {
+  const s = c5State();
+  const nb = s.c5np;
+  const src =
+'int\tft_is_prime(int nb)\n{\n\tint\ti;\n\n\tif (nb < 2)\n\t\treturn (0);\n\ti = 2;\n\twhile (i <= nb / i)\n\t{\n' +
+'\t\tif (nb % i == 0)\n\t\t\treturn (0);\n\t\ti++;\n\t}\n\treturn (1);\n}\n\n' +
+'int\tft_find_next_prime(int nb)\n{\n\twhile (ft_is_prime(nb) == 0)\n\t\tnb++;\n\treturn (nb);\n}\n\n' +
+'int\tmain(void)\n{\n\tint\tv;\n\n\tv = ft_find_next_prime(' + nb + ');\n\treturn (0);\n}\n';
+  const run = c4Run(src);
+  /* Each candidate is one entry to ft_is_prime from ft_find_next_prime. */
+  const cands = [];
+  if (run.ok) for (const st of run.steps) {
+    if (st.step.phase !== 'call-enter') continue;
+    const fr = st.state.frames.filter(f => f.name === 'ft_is_prime');
+    const d = fr[fr.length - 1];
+    const v = d && d.vars.find(x => x.name === 'nb');
+    if (v && !v.uninitialized && (!cands.length || cands[cands.length - 1].n !== +v.valueText))
+      cands.push({ n: +v.valueText });
+  }
+  const answer = c5Final(run, 'v');
+  cands.forEach(c => { c.prime = String(c.n) === String(answer); });
+  return c4Block('Stepping up until a candidate is prime',
+    '<div class="c4-row"><label class="c4-lab" for="c5Np">nb</label>' +
+      '<input id="c5Np" class="c4-in" type="number" min="-5" max="1000" value="' + nb + '">' +
+      '<span class="c4-presets">' + [0, 1, 7, 20, 90].map(x =>
+        '<button class="c4-chip' + (x === nb ? ' on' : '') + '" data-c5np="' + x + '">' + x + '</button>').join('') +
+      '</span></div>' +
+    '<div class="c5-tries">' + cands.map(c =>
+      '<span class="c5-try' + (c.prime ? ' hit' : '') + '"><span class="c5-try-i mono">' + c.n + '</span>' +
+      '<span class="c5-try-r">' + (c.prime ? 'prime' : 'not prime') + '</span></span>').join('') + '</div>' +
+    '<div class="c4-verdict ok">Returns <b class="mono">' + c4Esc(c5Num0(answer)) + '</b> after testing ' +
+      cands.length + ' candidate' + (cands.length === 1 ? '' : 's') +
+      (String(nb) === String(answer)
+        ? '. The input was already prime — the subject says <b>greater than or equal to</b>, so it is ' +
+          'its own answer.' : '.') + '</div>',
+    'Each candidate above is one real call to ft_is_prime, counted from the engine’s call-enter steps.');
+}
+
+/* ------------------------------------------------------------------ *
+ * 1.8 / ex08 — the board and the conflict test                         *
+ * ------------------------------------------------------------------ */
+/* A partial board plus one candidate, with the safety verdict produced by
+   running the real safe() function rather than deciding it here. */
+function c5Board() {
+  const s = c5State();
+  const n = 6;
+  const placed = [1, 3, 5];               // queens in columns 0, 1, 2
+  const cand = { col: 3, row: 0 };
+  const src =
+'int\tsafe(int *b, int col, int row)\n{\n\tint\ti;\n\n\ti = 0;\n\twhile (i < col)\n\t{\n' +
+'\t\tif (b[i] == row)\n\t\t\treturn (0);\n\t\tif (col - i == row - b[i])\n\t\t\treturn (0);\n' +
+'\t\tif (col - i == b[i] - row)\n\t\t\treturn (0);\n\t\ti++;\n\t}\n\treturn (1);\n}\n\n' +
+'int\tmain(void)\n{\n\tint\tb[' + n + '];\n\tint\tok;\n\tint\trow;\n\n' +
+  placed.map((r, i) => '\tb[' + i + '] = ' + r + ';\n').join('') +
+'\trow = 0;\n\twhile (row < ' + n + ')\n\t{\n\t\tok = safe(b, ' + placed.length + ', row);\n\t\trow++;\n\t}\n\treturn (0);\n}\n';
+  const run = c4Run(src);
+  /* Which rows the real safe() accepted, in order. */
+  const verdicts = [];
+  if (run.ok) {
+    let row = 0;
+    for (const st of run.steps) {
+      if (st.step.phase !== 'call-return') continue;
+      if (st.step.returnValue === undefined || st.step.returnValue === null) continue;
+      const cs = st.step.callStack || [];
+      if (cs[cs.length - 1] !== 'safe') continue;
+      verdicts.push({ row: row++, ok: String(st.step.returnValue) === '1' });
+    }
+  }
+  const attacked = (r, c) => {
+    for (let i = 0; i < placed.length; i++) {
+      if (placed[i] === r) return 'row';
+      if (Math.abs(c - i) === Math.abs(r - placed[i])) return 'diagonal';
+    }
+    return null;
+  };
+  return c4Block('When do two queens fight?',
+    '<div class="c5-boardwrap"><table class="c5-board"><tbody>' +
+      Array.from({ length: n }, (_, r) => '<tr>' + Array.from({ length: n }, (_, c) => {
+        const q = placed[c] === r;
+        const isCand = c === placed.length;
+        const att = attacked(r, c);
+        return '<td class="' + ((r + c) % 2 ? 'dark' : '') + (q ? ' queen' : '') +
+          (!q && att ? ' att ' + att : '') + (isCand ? ' cand' : '') + '">' +
+          (q ? '♛' : (isCand && verdicts[r] ? (verdicts[r].ok ? '·' : '✕') : '')) + '</td>';
+      }).join('') + '</tr>').join('') + '</tbody></table>' +
+    '<div class="c5-boardkey">' +
+      '<span><i class="k-queen">♛</i> a queen already placed, one per column</span>' +
+      '<span><i class="k-att"></i> attacked by one of them</span>' +
+      '<span><i class="k-ok">·</i> safe for the next queen</span>' +
+      '<span><i class="k-no">✕</i> rejected by safe()</span></div></div>' +
+    '<table class="c4-t"><thead><tr><th>candidate row in column ' + placed.length + '</th>' +
+      '<th>safe() returned</th><th>why</th></tr></thead><tbody>' +
+    verdicts.map(v => {
+      const why = attacked(v.row, placed.length);
+      return '<tr><td class="mono">' + v.row + '</td>' +
+        '<td class="' + (v.ok ? 'c4-yes' : 'c4-bad') + '">' + (v.ok ? '1 — safe' : '0 — conflict') + '</td>' +
+        '<td class="c4-dim">' + (why ? 'shares a ' + why + ' with a queen already placed'
+          : 'no queen shares its row or a diagonal') + '</td></tr>';
+    }).join('') + '</tbody></table>' +
+    '<div class="c4-boxnote"><b>Columns are never checked.</b> With one queen per column by ' +
+    'construction, two queens cannot share a column — so the test only needs rows and the two ' +
+    'diagonals. A diagonal conflict is a column distance equal to a row distance.</div>',
+    'The verdict column is what the real safe() returned for each row, run in the engine. ' +
+    'The shading is the same rule drawn out.');
+}
+
+/* ------------------------------------------------------------------ *
+ * 1.9 / ex08 — backtracking                                            *
+ * ------------------------------------------------------------------ */
+const C5_QUEENS = (n) =>
+'int\tsafe(int *b, int col, int row)\n{\n\tint\ti;\n\n\ti = 0;\n\twhile (i < col)\n\t{\n' +
+'\t\tif (b[i] == row)\n\t\t\treturn (0);\n\t\tif (col - i == row - b[i])\n\t\t\treturn (0);\n' +
+'\t\tif (col - i == b[i] - row)\n\t\t\treturn (0);\n\t\ti++;\n\t}\n\treturn (1);\n}\n\n' +
+'int\tsolve(int *b, int col, int n)\n{\n\tint\trow;\n\tint\tcount;\n\n\tif (col == n)\n\t\treturn (1);\n' +
+'\tcount = 0;\n\trow = 0;\n\twhile (row < n)\n\t{\n\t\tif (safe(b, col, row))\n\t\t{\n\t\t\tb[col] = row;\n' +
+'\t\t\tcount = count + solve(b, col + 1, n);\n\t\t}\n\t\trow++;\n\t}\n\treturn (count);\n}\n\n' +
+'int\tmain(void)\n{\n\tint\tboard[' + n + '];\n\tint\ttotal;\n\n\ttotal = solve(board, 0, ' + n + ');\n\treturn (0);\n}\n';
+
+/* Solutions are read off the board at the moment the search reaches the last
+   column — i.e. from the engine's own array contents, not recomputed. */
+function c5QueensRun(n) {
+  const run = c4Run(C5_QUEENS(n));
+  const out = { run, sols: [], placements: 0, conflicts: 0, total: null };
+  if (!run.ok) return out;
+  const seen = {};
+  for (const st of run.steps) {
+    const s = st.step;
+    if (s.phase === 'call-return' && (s.callStack || []).slice(-1)[0] === 'safe' &&
+        s.returnValue !== undefined && s.returnValue !== null) {
+      if (String(s.returnValue) === '1') out.placements++; else out.conflicts++;
+    }
+    const solve = st.state.frames.filter(f => f.name === 'solve');
+    const deepest = solve[solve.length - 1];
+    if (!deepest) continue;
+    const col = deepest.vars.find(v => v.name === 'col');
+    if (!col || col.uninitialized || +col.valueText !== n) continue;
+    let board = null;
+    for (const f of st.state.frames) for (const v of f.vars)
+      if (v.name === 'board' && v.elements) board = v.elements;
+    if (!board) continue;
+    const rows = board.map(e => e.initialized ? e.repr.decimal : '?');
+    const key = rows.join('');
+    if (!seen[key] && rows.indexOf('?') < 0) { seen[key] = 1; out.sols.push(rows); }
+  }
+  out.total = c5Final(run, 'total');
+  return out;
+}
+
+function c5Backtrack() {
+  const s = c5State();
+  const n = s.c5qn === 5 ? 5 : 4;
+  const q = c5QueensRun(n);
+  const sol = q.sols.length ? q.sols[Math.min(s.c5qsol, q.sols.length - 1)] : null;
+  return c4Block('The search, run to completion on a small board',
+    '<div class="c4-row"><span class="c4-lab">board</span>' +
+      '<span class="c4-presets">' + [4, 5].map(x =>
+        '<button class="c4-chip' + (x === n ? ' on' : '') + '" data-c5qn="' + x + '">' +
+        x + ' × ' + x + '</button>').join('') + '</span>' +
+      '<span class="c4-lab">' + (q.run.ok ? q.run.steps.length + ' engine steps' : 'did not run') +
+      '</span></div>' +
+    '<div class="c5-statrow">' +
+      '<div class="c5-stat big"><span>solutions found</span><b class="mono">' + q.sols.length + '</b></div>' +
+      '<div class="c5-stat big"><span>returned by solve()</span><b class="mono">' +
+        c4Esc(c5Num0(q.total)) + '</b></div>' +
+      '<div class="c5-stat big"><span>candidates accepted</span><b class="mono">' + q.placements + '</b></div>' +
+      '<div class="c5-stat big"><span>candidates rejected</span><b class="mono">' + q.conflicts + '</b></div>' +
+    '</div>' +
+    (sol
+      ? '<div class="c5-solpick">' + q.sols.map((x, i) =>
+          '<button class="c4-chip' + (i === Math.min(s.c5qsol, q.sols.length - 1) ? ' on' : '') +
+          '" data-c5qsol="' + i + '">' + x.join('') + '</button>').join('') + '</div>' +
+        '<div class="c5-boardwrap"><table class="c5-board"><tbody>' +
+        Array.from({ length: n }, (_, r) => '<tr>' + Array.from({ length: n }, (_, c) =>
+          '<td class="' + ((r + c) % 2 ? 'dark' : '') + (+sol[c] === r ? ' queen' : '') + '">' +
+          (+sol[c] === r ? '♛' : '') + '</td>').join('') + '</tr>').join('') + '</tbody></table>' +
+        '<div class="c5-encode"><div class="c4-algo-h">how the subject encodes this board</div>' +
+        '<div class="c5-enc-row">' + sol.map((r, c) =>
+          '<span class="c5-enc"><span class="c5-enc-c">col ' + c + '</span>' +
+          '<span class="c5-enc-r mono">' + c4Esc(r) + '</span></span>').join('') + '</div>' +
+        '<div class="c5-enc-out mono">' + c4Esc(sol.join('')) + '</div>' +
+        '<div class="c4-dim">The Nth digit is the row of the queen in the Nth column, indexed from 0 — ' +
+        'exactly as the subject describes it.</div></div></div>'
+      : '<div class="c4-empty">no complete board was reached</div>') +
+    '<div class="c4-boxnote"><b>Where the backtracking is.</b> ' + q.conflicts + ' candidate' +
+      (q.conflicts === 1 ? ' was' : 's were') + ' rejected outright. Beyond those, whenever a column ' +
+      'offered no safe row at all, the call simply returned — and the caller carried on with its next ' +
+      'row. Nothing undoes the placement explicitly; the array slot is overwritten by the next ' +
+      'candidate, and the returning frame takes its own state with it.</div>' +
+    c4Limitation('The subject’s board is 10 × 10. This simulator snapshots every execution step and ' +
+      'cannot finish a search that large — 6 × 6 already exhausts its memory. The board above was run ' +
+      'to completion with the identical algorithm; in the real exercise the size is a single constant.'),
+    'The solutions, the counts and the totals above were all read out of one real execution — the ' +
+    'boards are the contents of the engine’s array at the moment the search reached the last column.');
+}
+
+/* ------------------------------------------------------------------ *
+ * wiring for the C05 inputs                                            *
+ * ------------------------------------------------------------------ */
+function wireC5() {
+  const bindNum = (sel, key, lo, hi) => {
+    const el = $(sel);
+    if (!el) return;
+    el.addEventListener('input', () => {
+      c4[key] = c5Num(el.value, lo, hi, c4[key]);
+      const pos = el.selectionStart;
+      renderLearn();
+      const again = $(sel);
+      if (again) { again.focus(); try { again.setSelectionRange(pos, pos); } catch (e) {} }
+    });
+  };
+  bindNum('#c5N', 'c5n', 0, 12); bindNum('#c5N2', 'c5n', 1, 8); bindNum('#c5N3', 'c5n', 0, 13);
+  bindNum('#c5B', 'c5b', -10, 10); bindNum('#c5P', 'c5p', -4, 16);
+  bindNum('#c5Fib', 'c5fib', 2, 12); bindNum('#c5Fib2', 'c5fib', 0, 14);
+  bindNum('#c5Sq', 'c5sq', -10, 10000); bindNum('#c5Pr', 'c5pr', -5, 10000);
+  bindNum('#c5Np', 'c5np', -5, 1000);
+  const chip = (attr, fn) => $$('#learnRoot [data-' + attr + ']').forEach(el =>
+    el.addEventListener('click', () => { fn(el.getAttribute('data-' + attr)); renderLearn(); }));
+  chip('c5n', v => { c4.c5n = c5Num(v, 0, 13, c4.c5n); });
+  chip('c5fib', v => { c4.c5fib = c5Num(v, 0, 14, c4.c5fib); });
+  chip('c5sq', v => { c4.c5sq = c5Num(v, -10, 10000, c4.c5sq); });
+  chip('c5pr', v => { c4.c5pr = c5Num(v, -5, 10000, c4.c5pr); });
+  chip('c5np', v => { c4.c5np = c5Num(v, -5, 1000, c4.c5np); });
+  chip('c5qn', v => { c4.c5qn = c5Num(v, 4, 5, 4); c4.c5qsol = 0; });
+  chip('c5qsol', v => { c4.c5qsol = c5Num(v, 0, 999, 0); });
+  chip('c5bp', v => { const p = v.split(','); c4.c5b = +p[0]; c4.c5p = +p[1]; });
+}
+/* ==== C05UI END ==== */
 
 /* ==== TERM START ====
    PHASE 8 — the simulated C / 1337 terminal.
