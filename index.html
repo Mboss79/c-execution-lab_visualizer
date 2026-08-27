@@ -24351,6 +24351,33 @@ function c4NotInSubject(list) {
     'examiner grades you against the subject, so keep the distinction.</p></div>';
 }
 
+/* What the exercise's own function handed back, taken from the engine's return
+   step. This is not the same thing as what the program printed: most of C 05
+   returns a number and prints nothing, most of C 04 prints and returns nothing
+   worth reading. Showing one field for both made every C 05 case look like a
+   failure — "expected: 120, engine output: (nothing)". */
+function c4ReturnOf(run, proto) {
+  if (!run || !run.ok) return null;
+  const m = /([A-Za-z_]\w*)\s*\(/.exec(String(proto || ''));
+  const fname = m ? m[1] : null;
+  let byName = null, outermost = null, outerName = null;
+  for (const st of run.steps) {
+    if (st.step.phase !== 'call-return') continue;
+    if (st.step.returnValue === undefined || st.step.returnValue === null) continue;
+    const cs = st.step.callStack || [];
+    const top = cs[cs.length - 1];
+    if (fname && top === fname) byName = String(st.step.returnValue);
+    /* Depth 2 is a function main called directly. Some traces stand in for the
+       real exercise — ex08 runs solve() on a small board, as its own limitation
+       notice says — so the row is labelled with whatever actually returned
+       rather than with a prototype the program does not contain. */
+    if (cs.length === 2) { outermost = String(st.step.returnValue); outerName = top; }
+  }
+  if (byName !== null) return { name: fname, value: byName };
+  if (outermost !== null) return { name: outerName, value: outermost };
+  return null;
+}
+
 /* ------------------------------------------------------------------ *
  * The execution stepper — used by every trace on the site              *
  * ------------------------------------------------------------------ */
@@ -24834,29 +24861,36 @@ function c4Parser() {
      that moved the cursor past it, not by a phase merely testing it. */
   const owner = {};
   const trail = [];
+  let cursorAt = 0, finalSign = '1', finalRes = '0';
   if (run.ok) {
-    let prev = null;
     for (const st of run.steps) {
       const ph = phaseOf(st.step.line);
       /* i++ is an `update` step: it carries no dataflow, but its memDiff holds
          the value i had before the increment — which is precisely the index
-         that phase just consumed. */
-      if (ph && st.step.phase === 'update' && st.step.memDiff && st.step.memDiff.beforeText != null)
-        owner[st.step.memDiff.beforeText] = ph;
-      const i = c4Find(st.state, 'i'), sg = c4Find(st.state, 'sign'), r = c4Find(st.state, 'result');
-      if (!i || i.uninitialized || !ph) continue;
-      const key = i.valueText + ':' + ph + ':' + (r ? r.valueText : '');
-      if (key === prev) continue;
-      prev = key;
-      trail.push({ i: +i.valueText, ph,
-        sign: sg && !sg.uninitialized ? sg.valueText : '1',
-        result: r && !r.uninitialized ? r.valueText : '0' });
+         that phase just consumed. It is also the moment AFTER that character has
+         been dealt with: phase 2's `sign = -sign` and phase 3's accumulate both
+         run before the cursor moves. So one row per consumed character, carrying
+         the state that character produced, is exactly these steps — and the
+         table and the tape above it are then built from the same event.
+         Sampling anywhere else is what used to list a character under the phase
+         that only REJECTED it, print each digit twice, and show every '-' with
+         the sign it had before that '-' was applied. */
+      if (ph && st.step.phase === 'update' && st.step.memDiff && st.step.memDiff.beforeText != null) {
+        const at = st.step.memDiff.beforeText;
+        owner[at] = ph;
+        const sg = c4Find(st.state, 'sign'), r = c4Find(st.state, 'result');
+        trail.push({ i: +at, ph,
+          sign: sg && !sg.uninitialized ? sg.valueText : '1',
+          result: r && !r.uninitialized ? r.valueText : '0' });
+      }
+      /* Where the one cursor ended up, and the values it left behind. */
+      const iv = c4Find(st.state, 'i'), sv = c4Find(st.state, 'sign'), rv = c4Find(st.state, 'result');
+      if (iv && !iv.uninitialized) cursorAt = +iv.valueText;
+      if (sv && !sv.uninitialized) finalSign = sv.valueText;
+      if (rv && !rv.uninitialized) finalRes = rv.valueText;
     }
   }
-  const cursorAt = trail.length ? trail[trail.length - 1].i : 0;
   const phaseName = ['', 'whitespace', 'signs', 'digits'];
-  const finalSign = trail.length ? trail[trail.length - 1].sign : '1';
-  const finalRes = trail.length ? trail[trail.length - 1].result : '0';
   return c4Block('ft_atoi is three phases sharing ONE cursor',
     '<div class="c4-row"><label class="c4-lab" for="c4Atoi">input</label>' +
       '<input id="c4Atoi" class="c4-in mono vwide" value="' + c4Esc(input) + '" maxlength="40" spellcheck="false">' +
@@ -25043,9 +25077,14 @@ function c4Exercise(id) {
     h += c4AlgoBlock(ex);          // skeleton first
     h += c4FuncsBlock(ex);         // what you may and may not call
     h += c4Block('GIOPVC-LAC — the plan before the code',
+      /* The second C is Code — the letter the acronym and the caption below both
+         name, and the step that comes last. It is the skeleton on this same page
+         turned into the one file the subject asks for. */
       '<div class="c4-giop">' + [['G', 'Goal', g.G], ['I', 'Input', g.I], ['O', 'Output', g.O],
         ['P', 'Prototype', g.P], ['V', 'Variables', g.V], ['C', 'Conditions', g.C],
-        ['L', 'Loop', g.L], ['A', 'Algorithm', g.A]].map(([l, n, v]) =>
+        ['L', 'Loop', g.L], ['A', 'Algorithm', g.A],
+        ['C', 'Code', 'Written last: the skeleton above turned into ' + ex.official.files +
+          ', once G through A are settled.']].map(([l, n, v]) =>
         '<div class="c4-g"><span class="c4-g-l">' + l + '</span><span class="c4-g-n">' + n + '</span>' +
         '<span class="c4-g-v">' + c4Esc(v) + '</span></div>').join('') + '</div>' +
       '<div class="c4-proto mono">' + c4Esc(ex.official.proto) + '</div>',
@@ -25074,19 +25113,41 @@ function c4Exercise(id) {
     if (t.limitation) h += c4Limitation(t.limitation);
   }
   if (c4.tab === 'trace') {
-    const sel = c4.caseIx[ex.id] || 0;
+    /* Keyed by module as well as exercise: C 04 and C 05 both have an ex00. */
+    const sel = c4.caseIx[c4.mod + ':' + ex.id] || 0;
     const cs = ex.cases[Math.min(sel, ex.cases.length - 1)];
-    const src = cs.patch ? ex.program.src.split(cs.patch[0]).join(cs.patch[1]) : ex.program.src;
+    /* A case may need more than one substitution: the 5x5 board has to change
+       both the array size and the call that searches it. */
+    let src = ex.program.src;
+    for (const pt of [cs.patch, cs.patch2]) if (pt) src = src.split(pt[0]).join(pt[1]);
     const run = c4Run(src);
     h += c4Block('Run it',
       '<div class="c4-cases">' + ex.cases.map((c, i) =>
         '<button class="c4-chip' + (i === sel ? ' on' : '') + '" data-c4case="' + i + '">' +
         c4Esc(c.label) + '</button>').join('') + '</div>' +
-      '<div class="c4-expect">expected: <b class="mono">' + c4Esc(cs.expect) + '</b>' +
-        (run.ok ? '<span class="c4-got">engine output: <b class="mono">' +
-          c4Esc(run.output === '' ? '(nothing)' : run.output) + '</b></span>' : '') + '</div>' +
+      (() => {
+        /* Two separate facts about the same run, labelled as such. A tick appears
+           only where the subject's expected value really is that field, so an
+           expectation like "not 6227020800" or "2 solutions" simply shows plain. */
+        const ret = c4ReturnOf(run, ex.official.proto);
+        const pm = /([A-Za-z_]\w*)\s*\(/.exec(String(ex.official.proto || ''));
+        const protoName = pm ? pm[1] : null;
+        const out = run.ok && run.output !== '' ? run.output : null;
+        const hit = (v) => v !== null && String(v) === String(cs.expect);
+        return '<div class="c4-expect">expected: <b class="mono">' + c4Esc(cs.expect) + '</b>' +
+          (run.ok
+            ? (ret !== null ? '<span class="c4-got">' +
+                 (ret.name === protoName ? 'returned: ' : c4Esc(ret.name) + '() returned: ') +
+                 '<b class="mono">' + c4Esc(ret.value) + '</b>' +
+                 (hit(ret.value) ? ' <span class="c4-yes">✓</span>' : '') + '</span>' : '') +
+              '<span class="c4-got">stdout: <b class="mono">' +
+                c4Esc(out === null ? '(nothing printed)' : out) + '</b>' +
+                (hit(out) ? ' <span class="c4-yes">✓</span>' : '') + '</span>'
+            : '') + '</div>';
+      })() +
       c4Stepper(run, { watch: ex.program.watch, fn: ex.name }),
-      'Change the case above and the whole program is recompiled and re-run. Nothing here is pre-recorded.');
+      'The expected value is the subject’s; the returned value and stdout are this run’s. Change the ' +
+      'case above and the whole program is recompiled and re-run.');
   }
   if (c4.tab === 'practice') {
     h += c4Block('Read the code, then answer',
@@ -25261,7 +25322,8 @@ function wireLearn() {
   $$('#learnRoot [data-c4tab]').forEach(el => el.addEventListener('click', () => {
     c4.tab = el.dataset.c4tab; c4.step = null; renderLearn(); }));
   $$('#learnRoot [data-c4case]').forEach(el => el.addEventListener('click', () => {
-    const id = c4.page.slice(3); c4.caseIx[id] = +el.dataset.c4case; c4.step = null; renderLearn(); }));
+    const id = c4.mod + ':' + c4.page.slice(3);
+    c4.caseIx[id] = +el.dataset.c4case; c4.step = null; renderLearn(); }));
   $$('#learnRoot [data-c4step]').forEach(el => el.addEventListener('click', () => {
     const r = $('#learnRoot [data-c4range]');
     if (!r) return;
@@ -25833,18 +25895,22 @@ function c4AlgoBlock(ex) {
 
 /* Default state for the C05 widgets. Added lazily so the c4 object declared in
    p26 stays the single source of lesson UI state. */
+const C5_DEFAULTS = {
+  c5n: 5,        // factorial / recursion depth
+  c5b: 2,        // power base
+  c5p: 10,       // power exponent
+  c5fib: 7,      // fibonacci index
+  c5sq: 144,     // sqrt input
+  c5pr: 97,      // primality input
+  c5np: 20,      // next-prime input
+  c5qn: 4,       // queens board size
+  c5qsol: 0,     // which solution is being shown
+};
+/* Each field is filled in on its own. Testing only c5n meant that anything
+   which set one of the other eight before the first C05 render had its value
+   silently thrown away by the next call. */
 function c5State() {
-  if (c4.c5n === undefined) {
-    c4.c5n = 5;        // factorial / recursion depth
-    c4.c5b = 2;        // power base
-    c4.c5p = 10;       // power exponent
-    c4.c5fib = 7;      // fibonacci index
-    c4.c5sq = 144;     // sqrt input
-    c4.c5pr = 97;      // primality input
-    c4.c5np = 20;      // next-prime input
-    c4.c5qn = 4;       // queens board size
-    c4.c5qsol = 0;     // which solution is being shown
-  }
+  for (const k in C5_DEFAULTS) if (c4[k] === undefined) c4[k] = C5_DEFAULTS[k];
   return c4;
 }
 const c5Num = (v, lo, hi, dflt) => {
@@ -25895,7 +25961,10 @@ const C5_REC_FACT = (n) =>
 
 function c5IterRec() {
   const s = c5State();
-  const n = s.c5n;
+  /* c5n is shared with the factorial page, whose input allows 13. Each page
+     clamps to the range of the input it draws, so no field ever renders a
+     value its own min/max forbids. */
+  const n = Math.min(s.c5n, 12);
   const a = c4Run(C5_ITER_FACT(n)), b = c4Run(C5_REC_FACT(n));
   const av = c5Final(a, 'v'), bv = c5Final(b, 'v');
   const ac = c5Calls(a), bc = c5Calls(b);
@@ -25934,7 +26003,7 @@ function c5IterRec() {
  * ------------------------------------------------------------------ */
 function c5CallLadder() {
   const s = c5State();
-  const n = Math.min(s.c5n, 8);
+  const n = Math.max(1, Math.min(s.c5n, 8));   // this input's range is 1..8
   const run = c4Run(C5_REC_FACT(n));
   /* Every call's argument on the way down, and every return on the way up —
      read from the engine's own frames and return steps. */
@@ -25948,8 +26017,9 @@ function c5CallLadder() {
         const nb = deepest && deepest.vars.find(v => v.name === 'nb');
         if (nb && !nb.uninitialized) { down.push({ depth: fr.length, nb: nb.valueText }); seen = fr.length; }
       }
+      /* fact_rec's own returns only — main's return is not a rung on this ladder. */
       if (st.step.phase === 'call-return' && st.step.returnValue !== undefined &&
-          st.step.returnValue !== null && (st.step.callStack || []).length >= 1)
+          st.step.returnValue !== null && (st.step.callStack || []).slice(-1)[0] === 'fact_rec')
         up.push({ depth: (st.step.callStack || []).length, v: String(st.step.returnValue) });
     }
   }
@@ -25962,8 +26032,13 @@ function c5CallLadder() {
         '<span class="c5-rung-a">↓</span><span class="mono">fact_rec(' + c4Esc(d.nb) + ')</span>' +
         (i === down.length - 1 ? '<span class="c5-base">BASE CASE — returns without recursing</span>'
           : '<span class="c5-rung-n">waits for the answer below</span>') + '</div>').join('') +
-      up.slice().reverse().map((u, i) => '<div class="c5-rung up" style="margin-left:' +
-        ((down.length - 1 - i) * 20) + 'px">' +
+      /* The engine produces the returns deepest-first — 1, 2, 6, 24, 120 — and
+         they are drawn in that order, each stepping back out one level, so the
+         first lines up with the base case, and the last with the outermost call.
+         Reversing them here while the indent already counted outward paired
+         fact_rec(1) with 120 and fact_rec(5) with 1. */
+      up.map((u, i) => '<div class="c5-rung up" style="margin-left:' +
+        (Math.max(0, down.length - 1 - i) * 20) + 'px">' +
         '<span class="c5-rung-a">↑</span><span class="mono">returns ' + c4Esc(u.v) + '</span></div>').join('') +
     '</div>' +
     '<div class="c4-boxnote"><b>Nothing is multiplied on the way down.</b> Each call only makes a ' +
@@ -25976,6 +26051,28 @@ function c5CallLadder() {
 /* ------------------------------------------------------------------ *
  * 1.3 / ex00 / ex01 — factorial                                        *
  * ------------------------------------------------------------------ */
+/* One notice, used by both the factorial and the power visualizers, so the two
+   cannot drift from each other or from what c5Growth already teaches: the exact
+   mathematics is the answer, the wrapped int is only what this simulator did,
+   and the standard promises nothing about it. */
+function c5OverflowNote(what, exact, produced) {
+  const lim = CEngine.limitsOf(CEngine.scalarT('int'));
+  return '<div class="c4-warn"><span class="c4-badge alt">OUTSIDE THE RANGE OF AN INT</span>' +
+    '<p class="c4-p">' + what + ' is <b class="mono">' + c4Esc(exact) + '</b>, past INT_MAX ' +
+    '(<span class="mono">' + c4Esc(lim.max) + '</span>). This simulator produced ' +
+    '<b class="mono">' + c4Esc(c5Num0(produced)) + '</b>, but signed integer overflow is ' +
+    '<b>undefined behaviour</b>: the standard requires no particular result, so that number is ' +
+    'not the answer and not something to quote. The subject says overflows do not need to be ' +
+    'handled — ex03 adds “the function’s return value will be undefined in such cases”, while ' +
+    'ex02 says only “Overflows do not need to be handled.”</p></div>';
+}
+/* True when the exact value still fits a signed int, so a visualizer can tell
+   an answer from a wrap without recomputing the range itself. */
+function c5FitsInt(exact) {
+  const lim = CEngine.limitsOf(CEngine.scalarT('int'));
+  return exact >= BigInt(lim.min) && exact <= BigInt(lim.max);
+}
+
 function c5Factorial() {
   const s = c5State();
   const n = s.c5n;
@@ -25993,6 +26090,10 @@ function c5Factorial() {
     }
   }
   const answer = c5Final(run, 'v');
+  /* The mathematics, independent of the run: n! is a product, and a product does
+     not stop being what it is because an int cannot hold it. */
+  const factExact = (() => { let r = 1n; for (let k = 2n; k <= BigInt(Math.max(0, n)); k++) r *= k; return r; })();
+  const factFits = c5FitsInt(factExact);
   return c4Block('n! — every factor, one at a time',
     '<div class="c4-row"><label class="c4-lab" for="c5N3">nb</label>' +
       '<input id="c5N3" class="c4-in" type="number" min="0" max="13" value="' + n + '">' +
@@ -26000,7 +26101,9 @@ function c5Factorial() {
         '<button class="c4-chip' + (x === n ? ' on' : '') + '" data-c5n="' + x + '">' + x + '</button>').join('') +
       '</span></div>' +
     '<div class="c5-expand mono">' + (n <= 0 ? 'the empty product' :
-      Array.from({ length: n }, (_, k) => n - k).join(' × ') + ' = ' + c4Esc(c5Num0(answer))) + '</div>' +
+      Array.from({ length: n }, (_, k) => n - k).join(' × ') + ' = ' +
+      c4Esc(factFits ? c5Num0(answer) : factExact.toString())) + '</div>' +
+    (factFits ? '' : c5OverflowNote(n + '!', factExact.toString(), answer)) +
     (rows.length
       ? '<table class="c4-t"><thead><tr><th>step</th><th>factor</th><th>result before</th>' +
         '<th>× factor</th><th>result after</th></tr></thead><tbody>' +
@@ -26088,6 +26191,9 @@ function c5Power() {
   }
   const answer = c5Final(run, 'v');
   const zeroZero = nb === 0 && p === 0;
+  /* Same distinction as the factorial: the mathematics first, the int second. */
+  const powExact = p < 0 ? null : BigInt(nb) ** BigInt(p);
+  const powFits = powExact === null || c5FitsInt(powExact);
   return c4Block('nb to the power p — one multiplication per unit of p',
     '<div class="c4-row"><label class="c4-lab" for="c5B">nb</label>' +
       '<input id="c5B" class="c4-in" type="number" min="-10" max="10" value="' + nb + '">' +
@@ -26106,8 +26212,9 @@ function c5Power() {
             '<td class="mono c4-eq">' + c4Esc(r.before) + ' × ' + nb + '</td>' +
             '<td class="mono c4-hl">' + c4Esc(r.after) + '</td></tr>').join('') + '</tbody></table>' +
           '<div class="c4-final">' + nb + '<sup>' + p + '</sup> = <b class="mono">' +
-            c4Esc(c5Num0(answer)) + '</b> after ' + rows.length + ' multiplication' +
-            (rows.length === 1 ? '' : 's') + '</div>'
+            c4Esc(powFits ? c5Num0(answer) : powExact.toString()) + '</b> after ' + rows.length +
+            ' multiplication' + (rows.length === 1 ? '' : 's') + '</div>' +
+          (powFits ? '' : c5OverflowNote(nb + '<sup>' + p + '</sup>', powExact.toString(), answer))
         : '<div class="c4-verdict ok">power is 0, so the loop never runs and result keeps its starting ' +
           'value. The engine returned <b class="mono">' + c4Esc(c5Num0(answer)) + '</b>.' +
           (zeroZero ? ' <b>This is the 0⁰ case the subject legislates</b> — and it comes out right ' +
@@ -26329,10 +26436,12 @@ function c5NextPrime() {
 'int\tft_find_next_prime(int nb)\n{\n\twhile (ft_is_prime(nb) == 0)\n\t\tnb++;\n\treturn (nb);\n}\n\n' +
 'int\tmain(void)\n{\n\tint\tv;\n\n\tv = ft_find_next_prime(' + nb + ');\n\treturn (0);\n}\n';
   const run = c4Run(src);
-  /* Each candidate is one entry to ft_is_prime from ft_find_next_prime. */
+  /* Each candidate is one entry to ft_is_prime from ft_find_next_prime, read at
+     call-bind: at call-enter the callee's frame does not exist yet, so nb could
+     never be found and the strip came out empty for every input. */
   const cands = [];
   if (run.ok) for (const st of run.steps) {
-    if (st.step.phase !== 'call-enter') continue;
+    if (st.step.phase !== 'call-bind') continue;
     const fr = st.state.frames.filter(f => f.name === 'ft_is_prime');
     const d = fr[fr.length - 1];
     const v = d && d.vars.find(x => x.name === 'nb');
@@ -26355,7 +26464,7 @@ function c5NextPrime() {
       (String(nb) === String(answer)
         ? '. The input was already prime — the subject says <b>greater than or equal to</b>, so it is ' +
           'its own answer.' : '.') + '</div>',
-    'Each candidate above is one real call to ft_is_prime, counted from the engine’s call-enter steps.');
+    'Each candidate above is one real call to ft_is_prime, read from the engine at the step where its argument is bound.');
 }
 
 /* ------------------------------------------------------------------ *
