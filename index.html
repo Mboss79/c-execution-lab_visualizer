@@ -25161,7 +25161,7 @@ function renderLearn() {
   else body = c4Bugs();
 
   const mods = learnModules();
-  const nav = '<nav class="c4-nav" aria-label="Course contents">' +
+  const navInner =
     '<div class="c4-nav-h">' + c4Esc(learnMod().label) + '</div>' +
     (mods.length > 1 ? '<div class="c4-modsw" role="group" aria-label="Course">' + mods.map(m =>
       '<button class="c4-modb' + (m.id === c4.mod ? ' on' : '') + '" data-c4mod="' + c4Esc(m.id) + '">' +
@@ -25173,8 +25173,7 @@ function renderLearn() {
     '<div class="c4-nav-g">Part 2 — Official exercises</div>' +
     pages.filter(p => p.kind === 'ex').map(p => c4NavBtn(p)).join('') +
     '<div class="c4-nav-g">Part 3</div>' +
-    pages.filter(p => p.key === 'practice' || p.key === 'bugs').map(p => c4NavBtn(p)).join('') +
-    '</nav>';
+    pages.filter(p => p.key === 'practice' || p.key === 'bugs').map(p => c4NavBtn(p)).join('');
 
   const pager = '<div class="c4-pager">' +
     (prev ? '<button class="c4-pg" data-c4go="' + c4Esc(prev.key) + '"><span>← previous</span>' +
@@ -25182,9 +25181,47 @@ function renderLearn() {
     (next ? '<button class="c4-pg next" data-c4go="' + c4Esc(next.key) + '"><span>next →</span>' +
       '<b>' + c4Esc(next.label) + '</b></button>' : '<span></span>') + '</div>';
 
-  $('#learnRoot').innerHTML = '<div class="c4-wrap">' + nav +
-    '<main class="c4-main">' + body + pager + '</main></div>';
+  /* The lesson's two scroll containers must outlive the render. They used to
+     be rebuilt with everything else, which started both at scrollTop 0, so a
+     step change threw the learner back to the top of the lesson. The lab has
+     never had this bug because the element it assigns to, #labRoot, IS its
+     scroller: replacing the contents of a surviving element keeps its offset.
+     The shell is therefore built once, and each render fills it in.
+     Navigation that should start at the top says so explicitly — see go(). */
+  const root = $('#learnRoot');
+  let wrap = root.querySelector('.c4-wrap');
+  if (!wrap) {
+    root.innerHTML = '<div class="c4-wrap">' +
+      '<nav class="c4-nav" aria-label="Course contents"></nav>' +
+      '<main class="c4-main"></main></div>';
+    wrap = root.querySelector('.c4-wrap');
+  }
+  const restoreFocus = c4KeepFocus();
+  wrap.querySelector('.c4-nav').innerHTML = navInner;
+  wrap.querySelector('.c4-main').innerHTML = body + pager;
   wireLearn();
+  restoreFocus();
+}
+
+/* The step controls are rebuilt underneath whoever is using them, so keyboard
+   focus lands on <body> and the next key press goes nowhere — measured: one
+   ArrowRight moved the slider, the second did not. Remember which control had
+   focus and give it back afterwards. preventScroll matters: without it the
+   browser is entitled to scroll the restored control into view, which is the
+   very thing this fix exists to stop. */
+function c4KeepFocus() {
+  const a = document.activeElement;
+  const root = $('#learnRoot');
+  let sel = null;
+  if (a && root && root.contains(a) && a.dataset) {
+    if (a.dataset.c4step) sel = '[data-c4step="' + a.dataset.c4step + '"]';
+    else if (a.dataset.c4range) sel = '[data-c4range]';
+  }
+  return () => {
+    if (!sel) return;
+    const el = $('#learnRoot ' + sel);
+    if (el) el.focus({ preventScroll: true });
+  };
 }
 function c4NavBtn(p) {
   return '<button class="c4-nav-b' + (p.key === c4.page ? ' on' : '') + '" data-c4go="' + c4Esc(p.key) + '">' +
@@ -25218,6 +25255,8 @@ function wireLearn() {
   $$('#learnRoot [data-c4mod]').forEach(el => el.addEventListener('click', () => {
     c4.mod = el.dataset.c4mod; c4.page = 'overview'; c4.tab = 'subject'; c4.step = null;
     renderLearn();
+    // a different course's overview is a new page: start at the top, as go() does
+    const m = $('.c4-main'); if (m) m.scrollTop = 0;
   }));
   $$('#learnRoot [data-c4tab]').forEach(el => el.addEventListener('click', () => {
     c4.tab = el.dataset.c4tab; c4.step = null; renderLearn(); }));
@@ -25241,7 +25280,7 @@ function wireLearn() {
       const pos = el.selectionStart;
       renderLearn();
       const again = $(sel);
-      if (again) { again.focus(); try { again.setSelectionRange(pos, pos); } catch (e) {} }
+      if (again) { again.focus({ preventScroll: true }); try { again.setSelectionRange(pos, pos); } catch (e) {} }
     });
   };
   bind('#c4Base', 'base');
@@ -26488,7 +26527,7 @@ function wireC5() {
       const pos = el.selectionStart;
       renderLearn();
       const again = $(sel);
-      if (again) { again.focus(); try { again.setSelectionRange(pos, pos); } catch (e) {} }
+      if (again) { again.focus({ preventScroll: true }); try { again.setSelectionRange(pos, pos); } catch (e) {} }
     });
   };
   bindNum('#c5N', 'c5n', 0, 12); bindNum('#c5N2', 'c5n', 1, 8); bindNum('#c5N3', 'c5n', 0, 13);
