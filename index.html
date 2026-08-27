@@ -103,7 +103,12 @@ kbd{
 }
 
 /* ============================ APP SHELL ============================ */
-.shell{display:grid;grid-template-rows:auto auto 1fr auto;height:100vh;overflow:hidden;}
+/* Three children — titlebar, main, statusbar — and therefore three tracks.
+   The list used to declare four, which put .main in a content-sized auto
+   track and handed the flexible 1fr to the statusbar. The workspace then
+   shrank to its content whenever that content was shorter than the
+   viewport, and the footer rose with it. */
+.shell{display:grid;grid-template-rows:auto 1fr auto;height:100vh;overflow:hidden;}
 
 /* ---- title bar ---- */
 .titlebar{
@@ -12279,8 +12284,16 @@ const CViz3D = (() => {
           if (!r.width || !r.height) continue;
           const t = r.top - hr.top, bo = r.bottom - hr.top;
           const l = r.left - hr.left, ri = r.right - hr.left;
-          const tall = r.height > hr.height * 0.5;    // a real side panel
-          const wide = r.width > hr.width * 0.5;      // a real full-width band
+          /* Classify by what the overlay IS. A ratio alone made the error
+             banner change category as the workspace grew — 354px is 58% of a
+             611px host and 49.8% of a 711px one — so the same panel was
+             avoided at one size and framed under at another. The ratio stays
+             as the fallback for overlays not named here. */
+          const isPanel = el.classList.contains('viz-error') ||
+                          el.classList.contains('viz-detail');
+          const isBand  = el.classList.contains('viz-caption');
+          const tall = isPanel || (!isBand && r.height > hr.height * 0.5);
+          const wide = isBand  || (!isPanel && r.width > hr.width * 0.5);
           if (tall && !wide) {                        // side panel: eat sideways
             if (l > hr.width * 0.5) right = Math.min(right, l);
             else left = Math.max(left, ri);
@@ -12393,9 +12406,18 @@ const CViz3D = (() => {
        workspace, the dock or the window is resized, and never because a caption
        gained a line. That is exactly the difference between "the viewport
        changed" and "the program took a step". */
+    /* The free area is quantized more coarsely than the host, at the 48px the
+       note above names: a caption gaining a line moves it by about 20px and
+       must not re-fit, while a panel of 250 to 360px always crosses a boundary
+       and must. Keying on the host alone could never see a panel appear, because
+       a panel does not resize the host — which is why the error banner used to
+       sit on top of the scene until the learner pressed F. */
+    const FREE_Q = 48;
     function hostKey() {
       const r = host.getBoundingClientRect();
-      return Math.round(r.width / BOX_Q) + '|' + Math.round(r.height / BOX_Q);
+      const v = visibleBox();
+      return Math.round(r.width / BOX_Q) + '|' + Math.round(r.height / BOX_Q) +
+             '|' + Math.round(v.w / FREE_Q) + '|' + Math.round(v.h / FREE_Q);
     }
     function refitIfClean() {
       if (!fitIsClean) return false;
