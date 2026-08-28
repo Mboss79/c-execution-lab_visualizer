@@ -181,7 +181,13 @@ function check(name, ok, detail) {
 
   console.log('\n=== part 7: errors never crash, and never lie ===');
   const cases = [
-    ['gcc', /not available in the simulated terminal/],
+    /* gcc is a command now — it drives the same compiler cc does. What this
+       table is really about is that a failure never crashes and never lies, so
+       gcc keeps its place here with the diagnostic it actually produces, and a
+       genuinely absent command still stands for the unavailable case. */
+    ['gcc', /no input files/],
+    ['gcc -Wnope x.c', /unrecognized command line option/],
+    ['./nothing-was-built', /No such file or directory/],
     ['rm -rf /', /not available in the simulated terminal/],
     ['cat nope.c', /No such file/],
     ['cd nowhere', /no such directory/],

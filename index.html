@@ -31178,10 +31178,10 @@ const TERM_COMMANDS = {
       const groups = [
         ['Navigation', ['pwd', 'ls', 'cd']],
         ['Files', ['cat']],
-        ['C execution', ['cc', './a.out']],
+        ['C execution', ['gcc', 'cc', './a.out']],
         ['Piscine', ['norminette']],
         ['Terminal', ['clear', 'history', 'echo']],
-        ['Visualization', ['inspect', 'memory', 'pointers', 'stack', 'timeline']],
+        ['Visualization', ['argv', 'inspect', 'memory', 'pointers', 'stack', 'timeline']],
       ];
       for (const [g, names] of groups) {
         termEcho(g + ':');
@@ -31193,6 +31193,16 @@ const TERM_COMMANDS = {
       }
       termNote('Use: help <command>. This terminal simulates common C/Piscine commands using the ' +
                'lab’s educational execution engine. It is not a real operating-system shell.');
+    },
+  },
+  argv: {
+    usage: 'argv [index]', blurb: 'show argc, the argv pointer array, and one argument’s bytes',
+    detail: 'Reads the run the visualizers are showing. argv is a pointer to an array of pointers; ' +
+            'each argv[i] points at the first character of one argument. Pass an index to see a ' +
+            'different argument’s bytes.',
+    run(argv) {
+      const i = argv[0] === undefined ? undefined : parseInt(argv[0], 10);
+      termArgvDump(isNaN(i) ? undefined : i);
     },
   },
   clear: {
@@ -31274,47 +31284,21 @@ const TERM_COMMANDS = {
   },
 
   /* ---------------- the C toolchain, delegated to the real engine ---------------- */
-  cc: {
-    usage: 'cc <file>', blurb: 'compile with the lab’s simulated compiler',
-    detail: 'Runs the lab’s real parser and compiler over the source. It is not your system’s cc, and it does not produce a native binary.',
-    run(argv) {
-      const key = termCurrentKey();
-      if (!key) { termErr('cc: no source file is open'); return; }
-      const file = fileNameFor(key);
-      if (!argv[0]) { termErr('cc: no input files\n  usage: cc ' + file); return; }
-      if (argv[0].indexOf('*') >= 0) {
-        termErr('cc: wildcards are not supported in this simulation');
-        termNote('[simulation limitation] each exercise here holds a single translation unit; ' +
-                 'name the file directly, e.g. cc ' + file);
-        return;
-      }
-      if (argv[0] !== file) { termErr('cc: ' + argv[0] + ': No such file or directory'); return; }
-      termNote('[simulated compiler — the lab’s own parser, not your system cc]');
-      const src = termSourceOf(key);
-      const r = CEngine.createRun(src, {});
-      if (!r.ok) {
-        const e = r.error || {};
-        const line = (typeof e.line === 'number') ? e.line : '?';
-        termErr(file + ':' + line + ': error: ' + (e.message || 'compilation failed'));
-        term.aout = null;
-        termNote('the failing line is highlighted in the editor; the Build panel has the full diagnostic');
-        // showCompileError ends with setDockTab('build'), which would rip the
-        // terminal out from under the user. Let it record the diagnostic, then
-        // put the dock back where it was.
-        if (typeof showCompileError === 'function') {
-          const back = ui.dockTab;
-          showCompileError(r.error);
-          if (ui.dockTab !== back && typeof setDockTab === 'function') setDockTab(back);
-        }
-        return;
-      }
-      term.aout = { key, src, file };
-      termEcho('Compilation successful.');
-      termEcho('Generated simulated executable: a.out');
-    },
+  gcc: {
+    usage: 'gcc [-Wall -Wextra -Werror] <file.c> [-o <name>]',
+    blurb: 'compile with the lab’s engine (and the real cc, when the local bridge runs)',
+    detail: 'Same driver as cc. The lab’s own parser and compiler produce the diagnostics and the ' +
+            'executable that ./<name> runs; they are not your system’s gcc. If the optional local ' +
+            'bridge is running, the real cc -Wall -Wextra -Werror is also asked for its opinion and ' +
+            'its output is printed verbatim, labelled as such.',
+    run(argv) { termCompile('gcc', argv); },
   },
+  cc: {
+    usage: 'cc [-Wall -Wextra -Werror] <file.c> [-o <name>]', blurb: 'compile with the lab’s simulated compiler',
+    detail: 'Runs the lab’s real parser and compiler over the source. It is not your system’s cc, and it does not produce a native binary.',
+    run(argv) { termCompile('cc', argv); },},
   './a.out': {
-    usage: './a.out [args...]', blurb: 'run the simulated executable, with arguments',
+    usage: './<name> [args...]', blurb: 'run the executable the last compile produced, with arguments',
     detail: 'Executes the compiled source through the lab’s execution engine and shows what that run really produced. Anything after ./a.out becomes argv: a main(int argc, char **argv) receives it, a main(void) ignores it.',
     run(argv) {
       if (!term.aout) {
@@ -31327,15 +31311,17 @@ const TERM_COMMANDS = {
       const cmdArgs = argv.slice();
       const live = termSourceOf(term.aout.key);
       if (live !== term.aout.src) {
-        termErr('a.out is out of date — ' + term.aout.file + ' has changed since it was compiled.');
-        termNote('run: cc ' + term.aout.file);
+        termErr('./' + (term.aout.out || 'a.out') + ' is out of date — ' + term.aout.file + ' has changed since it was compiled.');
+        termNote('run: gcc ' + term.aout.file + ' -o ' + (term.aout.out || 'a.out'));
         return;
       }
       // The REAL execution the visualiser drives. Not a re-implementation.
       const before = ui.exampleKey;
       if (term.aout.key !== before) loadExample(term.aout.key);
+      /* argv[0] is the name the program was invoked with, exactly as in a shell. */
+      const argv0 = './' + (term.aout.out || 'a.out');
       const ok = (typeof launch === 'function')
-        ? launch(term.aout.src, { args: cmdArgs, argv0: './a.out' }) : false;
+        ? launch(term.aout.src, { args: cmdArgs, argv0 }) : false;
       if (!ok) { termErr('./a.out: the program did not start'); return; }
       // run it to completion so the terminal shows the whole output
       let last = -2;
@@ -31351,12 +31337,11 @@ const TERM_COMMANDS = {
         termErr(String(run.error.message || run.error));
         termNote('[stderr — the run stopped here]');
       }
-      if (cmdArgs.length) {
-        termNote('argc = ' + (cmdArgs.length + 1) + ', argv[0] = "./a.out"' +
-          cmdArgs.map((a, i) => ', argv[' + (i + 1) + '] = ' + JSON.stringify(a)).join(''));
-      }
+      termNote('argc = ' + (cmdArgs.length + 1) + ', argv[0] = ' + JSON.stringify(argv0) +
+        cmdArgs.map((a, i) => ', argv[' + (i + 1) + '] = ' + JSON.stringify(a)).join(''));
       const steps = run.history ? run.history.length : 0;
-      termNote('[' + steps + ' execution steps recorded — try: inspect, memory, pointers, stack, timeline]');
+      termNote('[' + steps + ' execution steps recorded — try: argv, inspect, memory, pointers, stack, timeline]');
+      termNote('step through it in the workspace — the current source line is highlighted as you go');
     },
   },
 
@@ -31536,6 +31521,188 @@ function termNormCheck(src) {
 }
 
 /* ---------------------- execution ---------------------- */
+/* Flags the driver understands. -Wall/-Wextra/-Werror are accepted because the
+   engine already reports everything it can find and never suppresses anything;
+   they are acknowledged rather than silently swallowed. An unknown flag gets a
+   real diagnostic instead of being ignored. */
+const TERM_CC_FLAGS = ['-Wall', '-Wextra', '-Werror', '-Wpedantic', '-pedantic',
+                       '-g', '-O0', '-O1', '-O2', '-std=c99', '-std=c11'];
+
+function termCompile(tool, argv) {
+  const key = termCurrentKey();
+  if (!key) { termErr(tool + ': no source file is open'); return; }
+  const openFile = fileNameFor(key);
+  let input = null, out = null, i = 0;
+  const flags = [];
+  while (i < argv.length) {
+    const a = argv[i];
+    if (a === '-o') {
+      out = argv[i + 1];
+      if (!out) { termErr(tool + ": argument to '-o' is missing"); return; }
+      i += 2; continue;
+    }
+    if (a.indexOf('-o') === 0 && a.length > 2) { out = a.slice(2); i++; continue; }
+    if (a[0] === '-') {
+      if (TERM_CC_FLAGS.indexOf(a) < 0) {
+        termErr(tool + ": error: unrecognized command line option '" + a + "'");
+        termNote('this driver accepts: ' + TERM_CC_FLAGS.join(' ') + ' and -o <name>');
+        return;
+      }
+      flags.push(a); i++; continue;
+    }
+    if (input === null) { input = a; i++; continue; }
+    termErr(tool + ': this simulation compiles one translation unit at a time');
+    termNote('it holds a single source buffer; name just the one file');
+    return;
+  }
+  if (!input) { termErr(tool + ': no input files\n  usage: ' + tool + ' ' + openFile); return; }
+  if (input.indexOf('*') >= 0) {
+    termErr(tool + ': wildcards are not supported in this simulation');
+    termNote('[simulation limitation] name the file directly, e.g. ' + tool + ' ' + openFile);
+    return;
+  }
+  if (!/\.c$/.test(input)) {
+    termErr(tool + ': ' + input + ': file format not recognized');
+    termNote('this driver compiles a single .c file');
+    return;
+  }
+  /* The simulated filesystem is generated from the built-in examples, so it has
+     no way to hold a file the learner has just invented. The editor buffer IS
+     the translation unit, so a new .c name is bound to it for this session —
+     which is what makes `gcc interval_spaces.c` work after pasting a program in.
+     The binding is announced, so nobody thinks a file appeared on disk. */
+  if (input !== openFile) {
+    if (!term.named) term.named = {};
+    if (term.named[input] !== key) {
+      term.named[input] = key;
+      termNote('[' + input + ' is bound to the editor buffer for this session — ' +
+               'the simulated filesystem holds only the built-in exercises]');
+    }
+  }
+  if (!out) out = 'a.out';
+  if (flags.length) termNote('[flags accepted: ' + flags.join(' ') + ' — the engine reports every ' +
+                             'diagnostic it can produce and suppresses none of them]');
+  /* Keep the terminal's established vocabulary: everything here says
+     'simulated' when it is the lab's own engine rather than a system tool. */
+  termNote('[simulated compiler — the lab’s own parser, not your system ' + tool + ']');
+  const src = termSourceOf(key);
+  const r = CEngine.createRun(src, {});
+  if (!r.ok) {
+    const e = r.error || {};
+    const line = (typeof e.line === 'number') ? e.line : '?';
+    termErr(input + ':' + line + ': error: ' + (e.message || 'compilation failed'));
+    term.aout = null;
+    termNote('the failing line is highlighted in the editor; the Build panel has the full diagnostic');
+    if (typeof showCompileError === 'function') {
+      const back = ui.dockTab;
+      showCompileError(r.error);
+      if (ui.dockTab !== back && typeof setDockTab === 'function') setDockTab(back);
+    }
+    termRealCc(tool, input, src);
+    return;
+  }
+  term.aout = { key, src, file: input, out };
+  termEcho('Compilation successful.');
+  termEcho('Generated simulated executable: ' + out);
+  termNote('run it with: ./' + out + ' [arguments]');
+  termRealCc(tool, input, src);
+}
+
+/* The optional local bridge compiles with the REAL cc. It cannot produce the
+   step trace the visualizers need — only the engine can — so this is strictly a
+   second opinion on the diagnostics, printed verbatim and labelled. When the
+   bridge is not running this does nothing at all and says nothing. */
+function termRealCc(tool, filename, source) {
+  const V = (typeof window !== 'undefined' && window.CValidate) || null;
+  if (!V || !V.Bridge || typeof V.Bridge.call !== 'function') return;
+  let p;
+  try { p = V.Bridge.call('/compile', { source, filename }, 20000); }
+  catch (e) { return; }
+  if (!p || typeof p.then !== 'function') return;
+  p.then(function (res) {
+    if (!res || res.unreachable || res.error) return;   // bridge not running: stay silent
+    const text = [res.stdout, res.stderr].filter(Boolean).join('\n').trim();
+    termNote('[real cc -Wall -Wextra -Werror, via the local bridge — verbatim]');
+    if (text) text.split('\n').forEach(function (l) { termEcho(l, res.ok ? 'note' : 'err'); });
+    else termEcho(res.ok ? 'no diagnostics from the system compiler'
+                         : 'the system compiler reported a failure');
+    if (typeof renderDock === 'function') renderDock();
+  }).catch(function () {});
+}
+
+/* The executable produced by the last successful compile, if the name matches. */
+function termExecutable(name) {
+  if (!term.aout) return null;
+  return name === './' + (term.aout.out || 'a.out') ? term.aout : null;
+}
+
+/* A dedicated argc/argv view: the count, the array of pointers, what each one
+   points at, and the bytes of one argument. Everything comes from the run the
+   visualizers are already showing. */
+function termArgvDump(which) {
+  if (!termNeedRun()) return;
+  /* Prefer the step the learner is looking at, so stepping and then asking for
+     argv shows that moment. After a completed run the cursor sits past the end
+     of main, where no frame is alive at all — so fall back to the last step
+     where argc and argv still existed, and say which step that was. */
+  const frameAt = function (i) {
+    const st = run.history.stateAt(i);
+    const f = (st.frames || [])[0];
+    const a = f && f.vars.find(function (v) { return v.name === 'argc'; });
+    const v = f && f.vars.find(function (x) { return x.name === 'argv'; });
+    return (a && v) ? { st: st, argcV: a, argvV: v } : null;
+  };
+  let at = run.index, found = frameAt(at);
+  if (!found) {
+    for (let i = run.history.length - 1; i >= 0; i--) { found = frameAt(i); if (found) { at = i; break; } }
+    if (found) termNote('[the run has finished, so this is step ' + (at + 1) +
+                        ' — the last one where main’s frame was still alive]');
+  }
+  if (!found) {
+    termNote('this program’s main does not take (int argc, char **argv), so there is no argv to show.');
+    termNote('compile and run one that does, then: argv');
+    return;
+  }
+  const st = found.st, argcV = found.argcV, argvV = found.argvV;
+  const argc = +argcV.valueText;
+  const arr = (st.blocks || []).find(function (b) { return b.label === 'argv array'; });
+  const strs = (st.blocks || []).filter(function (b) { return /^argv\[\d+\] /.test(b.label); })
+    .sort(function (a, b) { return (+/\[(\d+)\]/.exec(a.label)[1]) - (+/\[(\d+)\]/.exec(b.label)[1]); });
+  const psize = (st.graph && st.graph.pointerSize) || 8;
+  termEcho('argc = ' + argc + '   (the count, so the last valid index is ' + (argc - 1) + ')');
+  termEcho('');
+  termEcho('argv               ' + argvV.valueText + '   a char ** — it holds an address');
+  termEcho('  │');
+  termEcho('  ▼ the array of pointers' +
+           (arr ? '   at ' + hexA(arr.base) + ', ' + arr.size + ' bytes' : ''));
+  for (let k = 0; k < argc; k++) {
+    const blk = strs[k];
+    const slot = arr ? hexA(arr.base + k * psize) : '?';
+    const text = blk ? blk.label.replace(/^argv\[\d+\] /, '') : '?';
+    termEcho('    argv[' + k + ']  slot ' + slot + '  →  ' +
+             (blk ? hexA(blk.base) : '?') + '  ' + text);
+  }
+  termEcho('    argv[' + argc + ']  slot ' + (arr ? hexA(arr.base + argc * psize) : '?') +
+           '  →  NULL   the sentinel; present, but not an argument');
+  const pick = (which === undefined || which === null) ? (argc > 1 ? 1 : 0) : which;
+  const blk = strs[pick];
+  if (!blk) { termNote('no argv[' + pick + '] in this run'); return; }
+  const node = ((st.graph && st.graph.nodes) || []).find(function (x) { return x.blockId === blk.id; });
+  const bytes = (node && node.bytes) || [];
+  termEcho('');
+  termEcho('argv[' + pick + '] byte by byte — a char *, pointing at the first of these:');
+  termEcho('  index  address        byte  char');
+  bytes.forEach(function (by, k) {
+    const hex = by.value.toString(16).toUpperCase();
+    const hh = hex.length < 2 ? '0' + hex : hex;
+    const ch = by.value === 0 ? '\\0' : (by.value === 32 ? "' '" : String.fromCharCode(by.value));
+    termEcho('  ' + String(k).padStart(5) + '  ' + hexA(by.address).padEnd(14) + hh.padEnd(6) + ch);
+  });
+  termNote('argv is a pointer to pointers; argv[' + pick + '] is a pointer to the first character; ' +
+           'argv[' + pick + '][i] is one of the bytes above.');
+  termNote('[addresses are this simulator’s own, produced by the run — not your machine’s]');
+}
+
 function termRun(input) {
   const line = String(input == null ? '' : input);
   const trimmed = line.trim();
@@ -31545,7 +31712,19 @@ function termRun(input) {
   term.histAt = term.history.length;
   const argv = termParse(trimmed);
   const name = argv[0];
-  const cmd = Object.prototype.hasOwnProperty.call(TERM_COMMANDS, name) ? TERM_COMMANDS[name] : null;
+  let cmd = Object.prototype.hasOwnProperty.call(TERM_COMMANDS, name) ? TERM_COMMANDS[name] : null;
+  /* Any ./something is an attempt to run an executable. The one the last
+     compile produced answers to its own name; anything else does not exist. */
+  if (!cmd && name && name.indexOf('./') === 0) {
+    if (termExecutable(name)) cmd = TERM_COMMANDS['./a.out'];
+    else {
+      termErr('bash: ' + name + ': No such file or directory');
+      termNote(term.aout
+        ? 'the last compile produced ./' + (term.aout.out || 'a.out')
+        : 'nothing has been compiled yet - run: ' + (termCurrentFile() ? 'gcc ' + termCurrentFile() : 'gcc <file.c>'));
+      return;
+    }
+  }
   if (!cmd) {
     termErr("Command '" + name + "' is not available in the simulated terminal.");
     termNote('Try: help');
