@@ -4883,6 +4883,203 @@ html[data-theme=light] .viz-node.vz-frame::after{
   #learnRoot .mem-obj-s { display:none; }
 }
 /* ==== MEMCSS END ==== */
+/* ==== C06CSS START ====
+   C 06. Scoped under #learnRoot like every other module sheet, and reusing the
+   memory module's primitives (.mem-tape, .mem-eq, .mem-chk, .mem-time) rather
+   than restating them. Only genuinely new shapes are defined here. */
+
+#learnRoot .c6-cmd { margin-bottom: 14px; }
+#learnRoot .c6-prompt { color: var(--text-faint); font-size: 13px; }
+#learnRoot .c6-argwrap { display: inline-flex; align-items: center; gap: 3px; }
+#learnRoot .c6-arg { width: 110px; }
+
+/* ---- 1.1 the flow ---- */
+#learnRoot .c6-flow { display: grid; gap: 6px; }
+#learnRoot .c6-flow-s { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px;
+  background: var(--bg); }
+#learnRoot .c6-flow-h { font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text-faint); font-weight: 700; display: block; margin-bottom: 8px; }
+#learnRoot .c6-flow-a { text-align: center; font-size: 11.5px; color: var(--text-faint); }
+#learnRoot .c6-recv { display: grid; gap: 10px; }
+#learnRoot .c6-recv-c { display: flex; align-items: baseline; gap: 10px; }
+#learnRoot .c6-recv-c span { font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text-faint); font-weight: 700; }
+#learnRoot .c6-recv-c b { font-size: 22px; color: var(--execution); }
+#learnRoot .c6-recv-l { display: grid; gap: 3px; }
+#learnRoot .c6-recv-r { display: grid; grid-template-columns: 84px minmax(0, 1fr) auto; gap: 12px;
+  align-items: baseline; font-size: 12.5px; padding: 4px 0; border-bottom: 1px dotted var(--border); }
+#learnRoot .c6-recv-r.prog .c6-recv-v { color: var(--text-muted); }
+#learnRoot .c6-recv-r.nul .c6-recv-v { color: var(--text-faint); }
+#learnRoot .c6-recv-n { font-size: 11px; color: var(--text-faint); }
+#learnRoot .c6-four { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px; margin-top: 14px; }
+#learnRoot .c6-four .mem-col-h { grid-column: 1 / -1; }
+#learnRoot .c6-four-c { display: grid; gap: 3px; text-align: left; border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px; background: var(--bg); cursor: pointer; font: inherit;
+  color: var(--text); }
+#learnRoot .c6-four-c:hover { border-color: var(--execution); }
+#learnRoot .c6-four-c b { font-size: 13px; color: var(--execution); }
+#learnRoot .c6-four-c span { font-size: 11.5px; }
+#learnRoot .c6-four-h { color: var(--text-faint); font-size: 10.5px !important; }
+
+/* ---- the index ruler ---- */
+#learnRoot .c6-ruler { display: flex; gap: 6px; flex-wrap: wrap; margin: 14px 0; }
+#learnRoot .c6-rule { display: grid; justify-items: center; gap: 3px; min-width: 76px;
+  padding: 8px 6px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); }
+#learnRoot .c6-rule-i { font-size: 12px; font-weight: 700; }
+#learnRoot .c6-rule-bar { width: 100%; height: 3px; border-radius: 2px; background: var(--border); }
+#learnRoot .c6-rule.user .c6-rule-bar { background: var(--execution); }
+#learnRoot .c6-rule.prog .c6-rule-bar { background: var(--text-faint); }
+#learnRoot .c6-rule-v { font-size: 11.5px; }
+#learnRoot .c6-rule-k { font-size: 9.5px; color: var(--text-faint); text-align: center; }
+#learnRoot .c6-rule.nul { border-style: dashed; }
+#learnRoot .c6-rule.nul .c6-rule-v { color: var(--text-faint); }
+#learnRoot .c6-rule.cursor { border-color: var(--execution); border-width: 2px;
+  background: color-mix(in srgb, var(--execution) 15%, transparent); }
+#learnRoot .c6-rule.done { opacity: .62; }
+#learnRoot .c6-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 8px; margin: 14px 0; }
+#learnRoot .c6-fact { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
+  background: var(--bg); display: grid; gap: 2px; }
+#learnRoot .c6-fact span { font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text-faint); font-weight: 700; }
+#learnRoot .c6-fact b { font-size: 20px; color: var(--execution); }
+#learnRoot .c6-fact i { font-size: 11px; color: var(--text-muted); font-style: normal; }
+#learnRoot .c6-fact.nul b { color: var(--text-faint); font-size: 15px; }
+
+/* ---- traversal ---- */
+#learnRoot .c6-dir { font-size: 11px; letter-spacing: .06em; color: var(--text-faint);
+  text-transform: uppercase; font-weight: 700; }
+#learnRoot .c6-outbox { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
+  background: var(--bg); margin: 12px 0; }
+#learnRoot .c6-out { margin: 6px 0 0; font-size: 12.5px; white-space: pre-wrap; }
+#learnRoot .c6-bounds { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px; }
+#learnRoot .c6-bound { border: 1px solid var(--border); border-radius: 8px; padding: 9px 11px;
+  background: var(--bg); display: grid; gap: 3px; }
+#learnRoot .c6-bound span { font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text-faint); font-weight: 700; }
+#learnRoot .c6-bound b { font-size: 13px; }
+#learnRoot .c6-three { margin: 14px 0; }
+
+/* ---- ASCII ---- */
+#learnRoot .c6-ordbar { margin: 14px 0; }
+#learnRoot .c6-ord { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px; }
+#learnRoot .c6-ord-s { border: 1px solid var(--border); border-radius: 8px; padding: 9px 11px;
+  background: var(--bg); display: grid; gap: 2px; }
+#learnRoot .c6-ord-s b { font-size: 12px; }
+#learnRoot .c6-ord-s span { font-size: 11px; }
+#learnRoot .c6-pairs { margin: 14px 0; }
+#learnRoot .c6-pair { display: grid; grid-template-columns: auto auto auto auto minmax(0, 1.4fr);
+  gap: 10px; align-items: center; padding: 7px 10px; border: 1px solid var(--border);
+  border-radius: 7px; background: var(--bg); margin-bottom: 4px; font-size: 12.5px; }
+#learnRoot .c6-pair-v { color: var(--text-faint); font-size: 11px; }
+#learnRoot .c6-pair-r { color: var(--execution); font-weight: 700; font-size: 11.5px; }
+#learnRoot .c6-pair-w { font-size: 11px; color: var(--text-muted); }
+
+/* ---- comparison ---- */
+#learnRoot .c6-cmp { display: grid; gap: 5px; margin: 14px 0; overflow-x: auto; }
+#learnRoot .c6-cmp-r { display: flex; align-items: center; gap: 4px; }
+#learnRoot .c6-cmp-l { min-width: 84px; font-size: 12px; color: var(--text-muted); flex: 0 0 auto; }
+#learnRoot .c6-cc { display: grid; justify-items: center; gap: 1px; min-width: 38px; padding: 5px 3px;
+  border: 1px solid var(--border); border-radius: 6px; background: var(--bg); flex: 0 0 auto; }
+#learnRoot .c6-cc.empty { border: 1px dashed transparent; background: transparent; }
+#learnRoot .c6-cc.same { opacity: .55; }
+#learnRoot .c6-cc.here { border-color: var(--execution); border-width: 2px;
+  background: color-mix(in srgb, var(--execution) 16%, transparent); }
+#learnRoot .c6-cc.nul { border-style: dashed; }
+#learnRoot .c6-cc-c { font-size: 14px; font-weight: 700; }
+#learnRoot .c6-cc-d { font-size: 9.5px; color: var(--text-faint); }
+
+/* ---- pointer swap ---- */
+#learnRoot .c6-swap { display: grid; gap: 4px; }
+#learnRoot .c6-swap-r { display: grid; grid-template-columns: 74px auto auto minmax(0, 1fr);
+  gap: 9px; align-items: center; border: 1px solid var(--border); border-radius: 7px;
+  padding: 7px 9px; background: var(--bg); font-size: 12px; }
+#learnRoot .c6-swap-r.prog { opacity: .6; }
+#learnRoot .c6-swap-i { font-weight: 700; }
+#learnRoot .c6-swap-a { font-size: 10.5px; color: var(--execution); }
+#learnRoot .c6-swap-ar { color: var(--text-faint); }
+#learnRoot .c6-cost { margin: 14px 0; }
+
+/* ---- sorting ---- */
+#learnRoot .c6-derive { border-left: 2px solid var(--execution); padding: 10px 14px;
+  background: var(--bg); border-radius: 0 8px 8px 0; margin: 14px 0; }
+#learnRoot .c6-derive-q { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+#learnRoot .c6-passes { margin: 14px 0; }
+#learnRoot .c6-pass { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 12px; align-items: center; border: 1px solid var(--border); border-radius: 7px;
+  padding: 7px 10px; background: var(--bg); margin-bottom: 4px; font-size: 12px; }
+#learnRoot .c6-pass-n { width: 22px; height: 22px; display: grid; place-items: center;
+  border-radius: 50%; background: var(--surface); border: 1px solid var(--border); font-size: 11px; }
+#learnRoot .c6-pass-w { color: var(--text-muted); }
+#learnRoot .c6-pass-s { color: var(--execution); }
+#learnRoot .c6-state { display: flex; gap: 6px; flex-wrap: wrap; margin: 14px 0; }
+#learnRoot .c6-state-c { display: grid; justify-items: center; gap: 2px; min-width: 82px;
+  padding: 9px 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); }
+#learnRoot .c6-state-c.set { border-color: var(--execution);
+  background: color-mix(in srgb, var(--execution) 10%, transparent); }
+#learnRoot .c6-state-i { font-size: 9.5px; color: var(--text-faint); }
+#learnRoot .c6-state-w { font-size: 13px; font-weight: 700; }
+
+/* ---- exam mode ---- */
+#learnRoot .c6-exam { border: 1px solid var(--execution); border-radius: 10px; padding: 14px 16px;
+  background: color-mix(in srgb, var(--execution) 6%, transparent); margin-bottom: 16px; }
+#learnRoot .c6-exam-h { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 8px; }
+#learnRoot .c6-exam-h b { font-size: 15px; }
+#learnRoot .c6-exam-b { font-size: 13.5px; line-height: 1.7; margin: 0 0 8px; }
+#learnRoot .c6-exam-rules { font-size: 11.5px; color: var(--text-muted); }
+#learnRoot .c6-steps { display: grid; gap: 3px; margin: 16px 0; }
+#learnRoot .c6-step { display: grid; grid-template-columns: auto 110px minmax(0, 1fr); gap: 12px;
+  align-items: baseline; padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--bg); font-size: 12px; }
+#learnRoot .c6-step.code { border-color: var(--execution); }
+#learnRoot .c6-step-n { font-size: 10.5px; color: var(--text-faint); }
+#learnRoot .c6-step-t { font-weight: 700; }
+#learnRoot .c6-step-d { color: var(--text-muted); font-size: 11.5px; }
+#learnRoot .c6-hints { margin: 16px 0; display: grid; gap: 8px; justify-items: start; }
+#learnRoot .c6-hints .mem-col-h { justify-self: stretch; }
+#learnRoot .c6-hint { border: 1px solid var(--border); border-left: 2px solid var(--execution);
+  border-radius: 0 8px 8px 0; padding: 10px 13px; background: var(--bg); width: 100%; }
+#learnRoot .c6-hint-k { font-size: 9.5px; letter-spacing: .11em; text-transform: uppercase;
+  font-weight: 700; color: var(--text-faint); }
+#learnRoot .c6-hint p { margin: 5px 0 0; font-size: 12.5px; line-height: 1.65; }
+#learnRoot .c6-hint-end { font-size: 12px; color: var(--text-muted); line-height: 1.65;
+  padding: 10px 13px; border: 1px dashed var(--border); border-radius: 8px; width: 100%; }
+#learnRoot .c6-explain { margin-top: 18px; }
+#learnRoot .c6-ex-q { font-size: 12.5px; padding: 8px 12px; border: 1px solid var(--border);
+  border-radius: 7px; background: var(--bg); margin-bottom: 4px; }
+
+/* ---- cross-module reference ---- */
+#learnRoot .c6-see { display: grid; gap: 2px; width: 100%; text-align: left; cursor: pointer;
+  font: inherit; color: var(--text); border: 1px dashed var(--border); border-radius: 8px;
+  padding: 10px 13px; background: transparent; margin: 12px 0; }
+#learnRoot .c6-see:hover { border-color: var(--execution); border-style: solid; }
+#learnRoot .c6-see-t { font-size: 12.5px; font-weight: 700; color: var(--execution); }
+#learnRoot .c6-see-w { font-size: 11.5px; color: var(--text-muted); }
+
+/* ---- the honest prototype note ---- */
+#learnRoot .c4-proto-note { font-size: 11.5px; color: var(--text-muted); line-height: 1.6;
+  padding: 9px 12px; border: 1px dashed var(--border); border-radius: 7px; margin-top: 10px; }
+/* ---- a bug card's minimal example ---- */
+#learnRoot .c4-bug-eg { font-size: 11.5px; padding: 7px 10px; border-radius: 6px;
+  background: var(--bg); border: 1px solid var(--border); margin-top: 4px; }
+
+@media (max-width: 1100px) {
+  #learnRoot .c6-pair { grid-template-columns: 1fr; gap: 3px; }
+  #learnRoot .c6-step { grid-template-columns: auto 1fr; }
+  #learnRoot .c6-step-d { grid-column: 1 / -1; }
+  #learnRoot .c6-pass { grid-template-columns: auto 1fr; }
+  #learnRoot .c6-pass-s { grid-column: 1 / -1; }
+}
+@media (max-width: 720px) {
+  #learnRoot .c6-recv-r { grid-template-columns: 1fr; gap: 2px; }
+  #learnRoot .c6-swap-r { grid-template-columns: 1fr auto; }
+  #learnRoot .c6-arg { width: 88px; }
+  #learnRoot .c6-rule { min-width: 62px; }
+}
+/* ==== C06CSS END ==== */
 </style>
 </head>
 <body>
@@ -21750,6 +21947,690 @@ const MEM_PRACTICE = [
   edges: ['a static local', 'a global with no initialiser', 'a pointer local to a malloc block'] },
 ];
 /* ==== MEMDATA END ==== */
+/* ==== C06DATA START ====
+   C 06 — the content layer.
+
+   Transcribed from the official C Piscine C 06 subject, version 8. Everything
+   inside an `official` block is the subject's own words; everything else is
+   teaching material and is badged as such by the renderer.
+
+   Two things this module deliberately does NOT do:
+
+     - It does not carry a `program` or `cases`, so no exercise has a Trace tab.
+       For C 04 and C 05 that tab steps through the finished function; here the
+       finished function IS the submission, and handing it over is the one thing
+       the subject's own AI section asks us not to do. The lessons run building
+       blocks — a traversal, a comparison, a swap — never an answer.
+     - Its `skeleton` blocks have holes in them. The learner fills the holes.
+
+   The subject specifies no prototype for these exercises: it asks for a
+   PROGRAM, so the requirement is that the file contains main. That distinction
+   is recorded in protoNote rather than by inventing a prototype and printing it
+   inside the official panel.                                                */
+
+const C06_META = {
+  module: 'C 06',
+  version: '8',
+  summary: 'This document contains the subject for the C 06 module of the C Piscine at 42.',
+};
+
+const C06_PRACTICE_INTRO =
+  'None of these is from the subject. They are the shapes an examiner builds out of the same four ideas — ' +
+  'reasoning first, and no solutions anywhere on the page.';
+
+const C06_STARTS = [
+  ['f:indexes', 'argc counts, it does not index', 'Where every C 06 off-by-one comes from.'],
+  ['f:forward', 'Walking forward', 'ex01 is one loop once you can say its bounds out loud.'],
+  ['f:compare', 'Comparing two strings', 'The single idea ex03 is built on.'],
+  ['f:swap', 'Swapping pointers, not characters', 'Why sorting argv is cheap.'],
+  ['f:exam', 'Exam mode', 'A problem, graduated hints, and no answer key.'],
+];
+
+const C06_DEPS = {
+  before: [
+    ['Memory module', 'argc, argv, char **, the NULL sentinel and pointer arithmetic'],
+    ['C 03', 'strings as char * and the \\0 terminator'],
+    ['C 04', 'reading a string one character at a time'],
+    ['C 00 – C 02', 'write(), loops and functions'],
+  ],
+  adds: ['argv[0]', 'forward traversal', 'reverse traversal', 'ASCII order',
+         'string comparison', 'pointer swapping', 'sorting an array of pointers'],
+  chain: [
+    { id: 'ex00', needs: [] },
+    { id: 'ex01', needs: ['ex00'] },
+    { id: 'ex02', needs: ['ex01'] },
+    { id: 'ex03', needs: ['ex02'] },
+  ],
+  concepts: [
+    ['argv[0]', ['ex00']],
+    ['traversal', ['ex01', 'ex02']],
+    ['loop direction', ['ex02']],
+    ['ASCII comparison', ['ex03']],
+    ['pointer swapping', ['ex03']],
+  ],
+};
+
+/* ------------------------------------------------------------------ *
+ * Lessons                                                              *
+ * ------------------------------------------------------------------ */
+const C06_FOUND = [
+{
+  id: 'pipeline', n: '1.1', title: 'From your command line to main()',
+  what: 'You type a line. The shell splits it into words, the system starts your program, and those words arrive as argc and argv. Every C 06 exercise is a different way of walking that array.',
+  why: 'C 06 adds no new syntax. What it tests is whether you can turn "the arguments" into indexes you can name with confidence.',
+  keys: [
+    ['the shell', 'splits the line into words — before your program exists'],
+    ['the system', 'starts the process and passes them on'],
+    ['main', 'receives a count and an array of char *'],
+    ['C 06', 'four ways of reading that array: one, all, all backwards, all sorted'],
+  ],
+  viz: ['mC06Command'],
+},
+{
+  id: 'indexes', n: '1.2', title: 'argc counts; the last index is argc − 1',
+  what: 'argc is how many arguments there are. argv holds them. Those are two different things, and confusing them is the most common way to fail C 06.',
+  why: 'Every exercise here is bounded by argc. If you cannot say the first and last valid index out loud, the loop will be wrong in a way the compiler cannot see.',
+  keys: [
+    ['argc', 'a count, including the program name'],
+    ['first user argument', 'index 1 — because index 0 is the program name'],
+    ['last valid index', 'argc − 1'],
+    ['argv[argc]', 'NULL — real, but not one of the arguments'],
+  ],
+  viz: ['mC06Indexes'],
+},
+{
+  id: 'forward', n: '1.3', title: 'Walking forward, from argv[1]',
+  what: 'ex01 in one sentence: start at 1, stop before argc, print each one.',
+  why: 'Derive the bounds rather than remember them. Start and stop both come from the same fact — argc is a count.',
+  keys: [
+    ['start', 'i = 1, skipping the program name'],
+    ['continue while', 'i < argc'],
+    ['move by', 'i++'],
+    ['what it prints', 'argv[1] first, argv[argc − 1] last'],
+  ],
+  viz: ['mC06Forward'],
+},
+{
+  id: 'reverse', n: '1.4', title: 'Walking backwards, from argv[argc − 1]',
+  what: 'ex02 is ex01 with the cursor going the other way. Only three things change: where it starts, when it stops, and which way it moves.',
+  why: 'Reversing a loop is a skill, not a trick. Naming those three things separately is what makes it reliable under exam pressure.',
+  keys: [
+    ['start', 'i = argc − 1, the last valid index'],
+    ['continue while', 'i > 0 — stop before the program name'],
+    ['move by', 'i--'],
+    ['the trap', 'starting at argc reads the NULL sentinel'],
+  ],
+  viz: ['mC06Reverse'],
+},
+{
+  id: 'write', n: '1.5', title: 'Printing a string when write is all you have',
+  what: 'write needs an address and a LENGTH. A char * carries no length, so you have to find it — by counting up to the \\0.',
+  why: 'All four exercises print. If printing one string is automatic, every exercise reduces to choosing indexes.',
+  keys: [
+    ['write(1, s, n)', 'send n bytes starting at s to standard output'],
+    ['the length', 'count characters until the \\0 — do not count the \\0 itself'],
+    ['the newline', 'a separate write of one byte'],
+    ['too large an n', 'reads past the end of the argument: undefined behaviour'],
+  ],
+  viz: ['mC06Write'],
+},
+{
+  id: 'ascii', n: '1.6', title: 'ASCII order is not alphabetical order',
+  what: 'The subject says ASCII order. That means comparing the numeric character codes, and in ASCII every uppercase letter comes before every lowercase one.',
+  why: 'Sorting "by alphabet" and sorting by ASCII give different answers the moment case or punctuation appears. The subject asks for one of them.',
+  keys: [
+    ['\'A\'', '65'],
+    ['\'Z\'', '90'],
+    ['\'a\'', '97'],
+    ['so', '"Zebra" comes before "apple" — Z is 90, a is 97'],
+    ['digits', '\'0\' is 48, so numbers sort before every letter'],
+  ],
+  viz: ['mC06Ascii'],
+},
+{
+  id: 'compare', n: '1.7', title: 'Comparing two strings, one character at a time',
+  what: 'Walk both strings together while the characters match. The first position where they differ decides the order. If one runs out first, the shorter one comes first.',
+  why: 'This is the whole of ex03\'s decision. Get it right and sorting is bookkeeping.',
+  keys: [
+    ['walk while', 'the characters are equal AND the current one is not \\0'],
+    ['the verdict', 'the difference of the two characters at the stopping position'],
+    ['a prefix', '"abc" vs "abcd" stops at the \\0 — 0 minus \'d\' is negative, so "abc" is first'],
+    ['equal strings', 'both reach \\0 together; the difference is 0'],
+  ],
+  viz: ['mC06Compare'],
+},
+{
+  id: 'swap', n: '1.8', title: 'Swapping pointers, not characters',
+  what: 'argv is an array of pointers. To reorder the arguments you reorder the pointers — the characters never move.',
+  why: 'This is the conceptual heart of ex03, and the place where most people write something far more complicated than they need to.',
+  keys: [
+    ['what you swap', 'two char * values inside the argv array'],
+    ['what you do not touch', 'the strings themselves'],
+    ['the cost', 'three assignments, whatever the strings are'],
+    ['the shape', 'tmp = a; a = b; b = tmp;'],
+  ],
+  viz: ['mC06PointerSwap'],
+},
+{
+  id: 'sorting', n: '1.9', title: 'Deriving a sort from repeated comparisons',
+  what: 'You can only compare two arguments at a time. Sorting is what you get when you keep doing that and swapping whenever a pair is in the wrong order.',
+  why: 'The exercise is not "know a sorting algorithm". It is "notice that repeated local fixes produce a global order", which is something you can rebuild from scratch in an exam.',
+  keys: [
+    ['one comparison', 'tells you about one pair, nothing else'],
+    ['one pass', 'fixes some pairs and may break none'],
+    ['repeat', 'until a whole pass makes no swap at all'],
+    ['then', 'nothing is out of order anywhere — that is what sorted means'],
+  ],
+  viz: ['mC06SortScan', 'mC06SortComplete'],
+},
+{
+  id: 'exam', n: '1.10', title: 'Exam mode',
+  what: 'A C 06-shaped problem, a checklist that makes you state your reasoning before you write anything, and hints that stop short of the answer.',
+  why: 'In the exam there is no lesson to scroll back to. What you carry in is the ability to derive the bounds and the comparison — so practise deriving them.',
+  keys: [
+    ['step 1', 'say the goal, the input and the output in your own words'],
+    ['step 2', 'name every index before writing a loop'],
+    ['step 3', 'trace one example by hand, on paper'],
+    ['step 4', 'only then write code'],
+  ],
+  viz: ['mC06ExamMode'],
+},
+];
+
+/* ------------------------------------------------------------------ *
+ * The four exercises                                                   *
+ * ------------------------------------------------------------------ */
+const C06_EX = [
+{
+  id: 'ex00', name: 'ft_print_program_name', chapter: 'IV',
+  tabs: [['subject', 'Subject'], ['understand', 'Understand'], ['visualize', 'Visualize'], ['practice', 'Practice']],
+  viz: ['mC06Command'],
+  official: {
+    dir: 'ex00/', files: 'ft_print_program_name.c', allowed: 'write',
+    proto: null,
+    protoNote: 'The subject gives no prototype: it asks for a program, so the requirement is that the .c file contains a main function.',
+    bullets: [
+      'Since this is a program, your .c file must contain a main function.',
+      'Write a program that displays its own name, followed by a new line.',
+    ],
+    examples: ['$>./a.out | cat -e', './a.out$', '$>'],
+  },
+  teaching: {
+    testing: 'Whether you know that the program name arrives as data, in argv[0], rather than being something the program has to be told.',
+    giopvc: {
+      G: 'Print the name the program was invoked with, then a newline.',
+      I: 'argc and argv. Only argv[0] is needed.',
+      O: 'The characters of argv[0], then one \\n, on standard output.',
+      P: 'A program, so main. To see argv[0] main must take (int argc, char **argv).',
+      V: 'One index for counting the length of argv[0].',
+      C: 'None required by the subject. Decide for yourself whether to guard argc.',
+      L: 'One loop, to find the length — write needs a byte count.',
+      A: 'Count the characters of argv[0]; write that many bytes; write a newline.',
+    },
+    notSpecified: [
+      'The subject does not say what to do if argv[0] is empty. On a hosted system a caller can pass anything there, including nothing useful.',
+      'The subject does not require a check on argc. In the example the program is run with no arguments and argv[0] still exists.',
+    ],
+    mistakes: [
+      ['Printing a hardcoded "./a.out"', 'That is not the program\'s name — it is one possible name. Run the compiled file under a different name and the output is wrong.'],
+      ['Forgetting the newline', 'The subject says "followed by a new line", and the example shows it as $ under cat -e.'],
+      ['Passing a guessed length to write', 'write sends exactly the count you give it. The count has to come from the string.'],
+    ],
+    traps: [
+      'argv[0] is a convention, not a guarantee. Do not build logic on its contents.',
+      'cat -e in the example is showing you that a trailing newline is expected — read examples for details the text omits.',
+    ],
+    reading: [
+      ['Why is the program name available at all — who put it there?',
+       'Whatever launched the program supplied it. The shell passes the word you typed; the system hands the whole list to your process before main runs.'],
+      ['Why can you not just write the string without counting it first?',
+       'write takes a byte count, and a char * carries no length. Nothing but the \\0 marks the end, and write does not look for it.'],
+      ['If the compiled file is renamed, does the output change?',
+       'Yes — argv[0] is what it was invoked as. That is the point of the exercise.'],
+    ],
+    pattern: 'One string, one length, two writes. Every other exercise in this module is this plus a loop over indexes.',
+    takeaway: 'The program name is data your program receives, not something it knows about itself.',
+  },
+  algo: {
+    one: 'Find the length of argv[0], write it, write a newline.',
+    human: [
+      'Take argv[0] — the name the program was invoked with.',
+      'Count characters from index 0 until you reach the \\0. Do not count the \\0.',
+      'Send that many bytes to fd 1, starting at argv[0].',
+      'Send one more byte: the newline.',
+    ],
+    skeleton:
+'int  main(int argc, char **argv)\n' +
+'{\n' +
+'    int  i;\n' +
+'\n' +
+'    i = ?;                 <- where does counting start?\n' +
+'    while (?)              <- what says "there is another character"?\n' +
+'        i?;                <- which way does i move?\n' +
+'    write(1, ?, ?);        <- which address, and how many bytes?\n' +
+'    write(1, "\\n", ?);     <- how many bytes is a newline?\n' +
+'    return (0);\n' +
+'}',
+  },
+},
+{
+  id: 'ex01', name: 'ft_print_params', chapter: 'V',
+  tabs: [['subject', 'Subject'], ['understand', 'Understand'], ['visualize', 'Visualize'], ['practice', 'Practice']],
+  viz: ['mC06Forward'],
+  official: {
+    dir: 'ex01/', files: 'ft_print_params.c', allowed: 'write',
+    proto: null,
+    protoNote: 'The subject gives no prototype: it asks for a program, so the requirement is that the .c file contains a main function.',
+    bullets: [
+      'Since this is a program, your .c file must contain a main function.',
+      'Write a program that displays its given arguments.',
+      'Each argument should be printed on a new line, in the same order as in the command line.',
+      'The program should display all arguments except argv[0].',
+    ],
+    examples: ['$>./a.out test1 test2 test3 | cat -e', 'test1$', 'test2$', 'test3$', '$>'],
+  },
+  teaching: {
+    testing: 'Whether you can state the bounds of a loop over argv from the meaning of argc, instead of guessing and adjusting until the output looks right.',
+    giopvc: {
+      G: 'Print every user argument, in order, one per line.',
+      I: 'argc and argv[1] .. argv[argc − 1].',
+      O: 'Each argument followed by \\n.',
+      P: 'A program, so main taking (int argc, char **argv).',
+      V: 'An index over the arguments, and an index over the characters of one argument.',
+      C: 'The outer loop must stop before argc; there is nothing to do when argc is 1.',
+      L: 'Two nested loops: one over arguments, one over the characters of each.',
+      A: 'For each index from 1 up to argc − 1, count that argument\'s length and write it, then a newline.',
+    },
+    notSpecified: [
+      'The subject does not say what to print when there are no arguments. The example does not cover it. Printing nothing is the reading that follows from "display its given arguments".',
+      'The subject does not say what to do with an empty argument. An empty string has length 0, so it prints as a bare newline.',
+    ],
+    mistakes: [
+      ['Starting the loop at 0', 'That prints the program name, which the subject explicitly excludes.'],
+      ['Writing i <= argc', 'argv[argc] is the NULL sentinel. Dereferencing it is undefined behaviour, usually a crash.'],
+      ['Resetting the character index outside the outer loop', 'The second argument then starts counting from where the first stopped.'],
+      ['One newline at the end instead of one per argument', 'The example shows a $ after every argument.'],
+    ],
+    traps: [
+      'The shell has already split and unquoted the words. "a b" arrives as ONE argument containing a space.',
+      'An argument can be empty. It still counts towards argc and still gets its own line.',
+    ],
+    reading: [
+      ['Why does the loop start at 1?',
+       'Index 0 is the program name, and the subject says to display all arguments except argv[0].'],
+      ['Why does it stop before argc rather than at it?',
+       'argc is a count, so the last argument is at argc − 1. argv[argc] is the NULL sentinel, not an argument.'],
+      ['If the user runs the program with no arguments, what should happen?',
+       'The loop body never runs, so nothing is printed. There is no argument to display.'],
+      ['Where must the character index be reset, and why?',
+       'Inside the outer loop, before each argument — otherwise the count continues from the previous argument.'],
+    ],
+    pattern: 'An outer loop choosing an argument and an inner loop walking its characters. Recognise this shape and ex02 and ex03 are variations of it.',
+    takeaway: 'Both loop bounds come from one fact: argc is a count, so the arguments live at 1 .. argc − 1.',
+  },
+  algo: {
+    one: 'For every index from 1 to argc − 1, print that argument and a newline.',
+    human: [
+      'Start at the first user argument.',
+      'While there is still an argument left, take it.',
+      'Count its characters, write them, then write a newline.',
+      'Move to the next argument and repeat.',
+    ],
+    skeleton:
+'int  main(int argc, char **argv)\n' +
+'{\n' +
+'    int  i;\n' +
+'    int  j;\n' +
+'\n' +
+'    i = ?;                     <- first USER argument\n' +
+'    while (?)                  <- while an argument is left\n' +
+'    {\n' +
+'        j = ?;                 <- reset for THIS argument (where?)\n' +
+'        while (?)              <- until the end of the string\n' +
+'            j++;\n' +
+'        write(1, ?, ?);\n' +
+'        write(1, "\\n", 1);\n' +
+'        i?;\n' +
+'    }\n' +
+'    return (0);\n' +
+'}',
+  },
+},
+{
+  id: 'ex02', name: 'ft_rev_params', chapter: 'VI',
+  tabs: [['subject', 'Subject'], ['understand', 'Understand'], ['visualize', 'Visualize'], ['practice', 'Practice']],
+  viz: ['mC06Reverse'],
+  official: {
+    dir: 'ex02/', files: 'ft_rev_params.c', allowed: 'write',
+    proto: null,
+    protoNote: 'The subject gives no prototype: it asks for a program, so the requirement is that the .c file contains a main function.',
+    bullets: [
+      'Since this is a program, your .c file must contain a main function.',
+      'Write a program that displays its given arguments.',
+      'Each argument should be printed on a new line, in the reverse order from the command line.',
+      'The program should display all arguments except argv[0].',
+    ],
+  },
+  teaching: {
+    testing: 'Whether you can reverse a loop deliberately — by changing its start, its condition and its step — rather than by trial and error.',
+    giopvc: {
+      G: 'Print every user argument in reverse order, one per line.',
+      I: 'argc and argv[1] .. argv[argc − 1].',
+      O: 'argv[argc − 1] first, argv[1] last, each followed by \\n.',
+      P: 'A program, so main taking (int argc, char **argv).',
+      V: 'An index over the arguments, and an index over the characters of one.',
+      C: 'Stop before index 0, so the program name is never printed.',
+      L: 'The same two nested loops as ex01; only the outer one is reversed.',
+      A: 'Start at argc − 1, print, step down by one, and stop once the index reaches 0.',
+    },
+    notSpecified: [
+      'The subject gives no example for this exercise. The output format is inherited from the wording — one argument per line — and from ex01\'s example.',
+      'As in ex01, nothing is said about the case with no arguments.',
+    ],
+    mistakes: [
+      ['Starting at argc', 'That is the NULL sentinel, not an argument.'],
+      ['Stopping at i >= 0', 'That prints argv[0], the program name, which is excluded.'],
+      ['Reversing the inner loop as well', 'Each argument must still read left to right. Only the ORDER OF ARGUMENTS is reversed, not their characters.'],
+      ['Using i++ with a start of argc − 1', 'The loop then runs away past the end of the array.'],
+    ],
+    traps: [
+      'Three things change together — start, condition, step. Changing two of the three is the usual bug.',
+      'With one user argument, ex01 and ex02 print the same thing. Do not test only that case.',
+    ],
+    reading: [
+      ['Why does this start at argc − 1 rather than argc?',
+       'argc is a count. The last argument is one before it; argv[argc] is NULL.'],
+      ['Why does it stop when the index reaches 0 rather than going below it?',
+       'Index 0 is the program name, which the subject excludes. Stopping at 0 also avoids indexing with a negative number.'],
+      ['Which loop is reversed, and which is not?',
+       'The outer loop over arguments is reversed. The inner loop over characters still runs forwards — the words are not spelled backwards.'],
+      ['What is the smallest number of arguments that distinguishes ex01 from ex02?',
+       'Two. With one argument both print the same single line.'],
+    ],
+    pattern: 'Same body, opposite cursor. When a problem says "reverse", change exactly three things and check each one separately.',
+    takeaway: 'Reversing a loop is three deliberate decisions, not one adjustment.',
+  },
+  algo: {
+    one: 'Walk the arguments from argc − 1 down to 1, printing each with a newline.',
+    human: [
+      'Start at the last valid argument index.',
+      'While the index is still above 0, take that argument.',
+      'Count its characters, write them, then a newline.',
+      'Step the index down by one and repeat.',
+    ],
+    skeleton:
+'int  main(int argc, char **argv)\n' +
+'{\n' +
+'    int  i;\n' +
+'    int  j;\n' +
+'\n' +
+'    i = ?;                     <- LAST valid argument index\n' +
+'    while (?)                  <- stop before which index?\n' +
+'    {\n' +
+'        j = ?;\n' +
+'        while (?)\n' +
+'            j++;\n' +
+'        write(1, ?, ?);\n' +
+'        write(1, "\\n", 1);\n' +
+'        i?;                    <- which direction now?\n' +
+'    }\n' +
+'    return (0);\n' +
+'}',
+  },
+},
+{
+  id: 'ex03', name: 'ft_sort_params', chapter: 'VII', deep: true,
+  tabs: [['subject', 'Subject'], ['understand', 'Understand'], ['visualize', 'Visualize'], ['practice', 'Practice']],
+  viz: ['mC06Compare', 'mC06PointerSwap', 'mC06SortComplete'],
+  official: {
+    dir: 'ex03/', files: 'ft_sort_params.c', allowed: 'write',
+    proto: null,
+    protoNote: 'The subject gives no prototype: it asks for a program, so the requirement is that the .c file contains a main function.',
+    bullets: [
+      'Since this is a program, your .c file must contain a main function.',
+      'Write a program that displays its given arguments sorted in ASCII order.',
+      'The program should display all arguments except argv[0].',
+      'Each argument should be printed on a new line.',
+    ],
+  },
+  teaching: {
+    testing: 'Whether you can build an ordering out of a single pairwise comparison — and whether you understand that reordering an array of pointers does not move any characters.',
+    giopvc: {
+      G: 'Print the user arguments in ASCII order, one per line.',
+      I: 'argc and argv[1] .. argv[argc − 1].',
+      O: 'The same arguments, reordered, each followed by \\n.',
+      P: 'A program, so main taking (int argc, char **argv).',
+      V: 'Two indexes to name the pair being compared, one index to walk the two strings, and one char * to hold a value during a swap.',
+      C: 'A pair is out of order when the first differing character of the earlier one is greater. Never involve index 0.',
+      L: 'A loop over pairs, repeated until a whole pass changes nothing; and a loop inside the comparison.',
+      A: 'Compare pairs; swap the two pointers whenever the pair is in the wrong order; repeat until a pass makes no swap; then print.',
+    },
+    notSpecified: [
+      'The subject names ASCII order but not an algorithm. Any method producing that order is acceptable.',
+      'The subject does not say whether equal arguments may be reordered relative to each other. With identical strings the printed output is the same either way.',
+      'Nothing is said about how many arguments there may be.',
+    ],
+    mistakes: [
+      ['Swapping the characters instead of the pointers', 'You end up copying strings — and if they have different lengths, copying them wrongly. Only the two char * values need to move.'],
+      ['Comparing with == on the pointers', 'That compares addresses. Two identical strings at different addresses are not equal that way.'],
+      ['Including index 0 in the sort', 'The program name would then be sorted among the arguments, and might be printed.'],
+      ['Stopping after a single pass', 'One pass does not finish the job. You have to repeat until a pass makes no swap.'],
+      ['Comparing only the first character', 'That orders "apple" and "avocado" arbitrarily. The comparison must walk until the characters differ.'],
+    ],
+    traps: [
+      'ASCII order, not dictionary order: every uppercase letter sorts before every lowercase one.',
+      'A prefix sorts before the longer string, because the \\0 is 0 and is smaller than any character.',
+      'Two arguments can be identical. Your comparison must not treat "equal" as "out of order", or the loop may never settle.',
+    ],
+    reading: [
+      ['When sorting, why can you swap pointers instead of copying whole strings?',
+       'argv is an array of char *. The order of the arguments is the order of those pointers; the characters never have to move.'],
+      ['How do you know that two arguments are in the wrong order?',
+       'Walk both while the characters are equal. At the first position where they differ, the one with the greater character code comes later.'],
+      ['Why is ASCII comparison different from how a person alphabetises?',
+       'A person ignores case and treats "a" and "A" as the same letter. ASCII does not: A is 65 and a is 97, so every capital sorts first.'],
+      ['Why must the comparison stop at the \\0?',
+       'Otherwise it reads past the end of the shorter string. Stopping there also gives the right answer for a prefix: 0 is less than any character.'],
+      ['How do you know the whole list is sorted, rather than just the pair you looked at?',
+       'When a complete pass over every pair produces no swap, no adjacent pair is out of order — and that is the same thing as being sorted.'],
+    ],
+    pattern: 'Compare a pair, fix it if it is wrong, repeat until nothing is wrong. That shape solves far more than this exercise.',
+    takeaway: 'Sorting argv is reordering pointers. The strings stay exactly where they are.',
+  },
+  algo: {
+    one: 'Repeatedly compare pairs of arguments and swap the pointers when a pair is out of order, until a whole pass changes nothing.',
+    human: [
+      'Look at two arguments at a time.',
+      'Walk both strings together while their characters match.',
+      'At the first difference, the larger character code belongs later.',
+      'If the pair is in the wrong order, exchange the two pointers.',
+      'Keep passing over the arguments until a pass makes no swap at all.',
+      'Then print the arguments in their new order, one per line.',
+    ],
+    skeleton:
+'int  main(int argc, char **argv)\n' +
+'{\n' +
+'    int   i;\n' +
+'    int   k;\n' +
+'    char  *tmp;\n' +
+'\n' +
+'    /* keep going until a whole pass changes nothing */\n' +
+'    while (?)\n' +
+'    {\n' +
+'        i = ?;                     <- first pair starts where?\n' +
+'        while (?)                  <- last pair ends where?\n' +
+'        {\n' +
+'            k = 0;\n' +
+'            while (? && ?)         <- equal AND not the end\n' +
+'                k++;\n' +
+'            if (?)                 <- wrong order means what, exactly?\n' +
+'            {\n' +
+'                tmp = ?;           <- three assignments, no copying\n' +
+'                ? = ?;\n' +
+'                ? = tmp;\n' +
+'            }\n' +
+'            i++;\n' +
+'        }\n' +
+'    }\n' +
+'    /* then print, exactly as in ex01 */\n' +
+'    return (0);\n' +
+'}',
+  },
+},
+];
+
+const C06_EXFUNCS = {
+  ex00: [{ fn: 'write', allowed: true, reason: 'The only function the subject allows, and the only one you need: an address and a byte count.' }],
+  ex01: [{ fn: 'write', allowed: true, reason: 'Allowed here. Everything else — including any length function — you write yourself.' }],
+  ex02: [{ fn: 'write', allowed: true, reason: 'Allowed here. The reversal is in your loop, not in the output call.' }],
+  ex03: [{ fn: 'write', allowed: true, reason: 'Allowed here. Note that no comparison function is allowed: the comparison is yours to write.' }],
+};
+
+/* ------------------------------------------------------------------ *
+ * Bug cards — [title, symptom, why, how to detect, how to reason, example]
+ * ------------------------------------------------------------------ */
+const C06_BUGS = [
+['Treating argc as an index',
+ 'The last argument is missing, or the program crashes on the last iteration.',
+ 'argc is a COUNT. With argc arguments the valid indexes are 0 to argc − 1. Using argc itself reaches the NULL sentinel.',
+ 'Look at the loop condition. If it says <= argc or starts at argc, this is it.',
+ 'Say the sentence "argc arguments, last index argc minus one" and write the bound from the sentence, not from memory.',
+ './a.out a b   ->  argc is 3, arguments are argv[1] and argv[2], argv[3] is NULL'],
+['Assuming argc counts only user arguments',
+ 'One argument too few is printed, or an argument is skipped.',
+ 'argv[0] is one of the argc entries. A command with two user arguments has argc 3, not 2.',
+ 'Run with a known number of arguments and print argc. If it is one more than you expected, this is why.',
+ 'Count the WORDS on the command line, including the program. That number is argc.',
+ './a.out one two   ->  argc = 3'],
+['Forgetting that argv[0] exists',
+ 'The program name appears in the output of ex01, ex02 or ex03.',
+ 'Every one of those exercises says "all arguments except argv[0]". A loop starting at 0 includes it.',
+ 'Run with no arguments at all. If anything is printed, index 0 is being reached.',
+ 'The user arguments begin at 1. Make that the loop\'s starting value and it can never happen.',
+ './a.out   ->  ex01 must print nothing at all'],
+['Reading argv[argc] as a string',
+ 'A crash, or garbage output, at the very end.',
+ 'argv[argc] is a null pointer marking the end of the array. It is not an argument, and dereferencing it is undefined behaviour.',
+ 'The failure happens on the final iteration only, and disappears if you shorten the loop by one.',
+ 'The sentinel is there so a loop can stop WITHOUT knowing argc. If you are using argc, stop before it.',
+ 'argc = 3  ->  argv[3] is NULL, not ""'],
+['Starting ex02 at argc instead of argc − 1',
+ 'The first thing printed is garbage, or the program crashes immediately.',
+ 'The reverse walk must begin at the last valid index, which is one below the count.',
+ 'It fails on the very first iteration, before anything correct is printed.',
+ 'Ask "what is the last index?" before writing the start value. The answer is always argc − 1.',
+ 'argc = 4  ->  start at 3'],
+['Reversing the inner loop too',
+ 'Each argument is printed with its characters backwards.',
+ 'Only the ORDER OF THE ARGUMENTS is reversed in ex02. Each string is still read from its first character.',
+ 'The order of the lines is right but every word is spelled backwards.',
+ 'Two loops, two separate decisions. Write down which one the word "reverse" applies to.',
+ './a.out ab cd   ->  "cd" then "ab", not "dc" then "ba"'],
+['Not resetting the character index per argument',
+ 'The first argument prints correctly and later ones are truncated or empty.',
+ 'The inner counter keeps the value left over from the previous argument, so counting starts in the wrong place.',
+ 'Output gets shorter as it goes. The first line is always right.',
+ 'A variable used inside a loop that must start fresh each time has to be set inside that loop.',
+ 'j must be set to 0 immediately before each argument is measured'],
+['Passing a guessed length to write',
+ 'Output is truncated, or extra rubbish appears after the argument.',
+ 'write sends exactly the number of bytes it is given. A char * carries no length, so the count must be derived by counting to the \\0.',
+ 'The wrongness scales with the argument: short arguments print rubbish, long ones get cut.',
+ 'The count and the string must come from the same place. Count first, then write.',
+ 'write(1, argv[1], 5) on "hi" reads three bytes past the end'],
+['Forgetting the newline, or printing only one',
+ 'All the arguments run together on a single line.',
+ 'Each exercise says one argument per line. The newline is a separate write of one byte.',
+ 'Pipe the output through cat -e: every line should end with a $.',
+ 'The newline belongs inside the loop, with the argument it follows.',
+ './a.out a b | cat -e   ->  a$ then b$'],
+['Comparing strings with == or with pointers',
+ 'Two identical arguments are treated as different, or the sort never settles.',
+ '== on two char * compares ADDRESSES. Two equal strings stored separately have different addresses.',
+ 'Identical arguments sort unpredictably, or the program loops forever.',
+ 'Comparison means walking the characters. There is no shortcut, and no allowed function that does it for you.',
+ 'argv[1] == argv[2] is an address test, not a string test'],
+['Comparing only the first character',
+ 'Arguments sharing a first letter come out in the wrong order.',
+ 'One character decides the order only when the two differ there. If they match you must look at the next one.',
+ 'Sort a list where several arguments start with the same letter — "apple", "avocado", "ant".',
+ 'The comparison walks forward while the characters are EQUAL, and stops at the first difference.',
+ '"apple" vs "avocado" is decided at index 1, not index 0'],
+['Walking past the end when the strings differ in length',
+ 'A prefix sorts wrongly, or the program reads memory it does not own.',
+ 'The walk must stop at the \\0 as well as at the first difference — otherwise it keeps going past the shorter string.',
+ 'Compare "abc" with "abcd". If that misbehaves, the terminator is not part of the stopping condition.',
+ 'Stopping at the \\0 also produces the right answer: 0 is smaller than any character, so the shorter one comes first.',
+ '"abc" vs "abcd"  ->  stops at index 3, where 0 meets \'d\''],
+['Swapping the characters instead of the pointers',
+ 'Arguments come out corrupted, mixed together, or truncated.',
+ 'argv holds pointers. Reordering the arguments means reordering those pointers; copying characters between strings of different lengths destroys them.',
+ 'The output contains fragments of two different arguments.',
+ 'Ask what the smallest thing is that has to move. It is two addresses — three assignments, whatever the strings are.',
+ 'tmp = argv[i]; argv[i] = argv[j]; argv[j] = tmp;'],
+['Swapping without a temporary',
+ 'Both entries end up holding the same argument, and one is lost.',
+ 'The first assignment overwrites the value the second one needed.',
+ 'The same argument appears twice in the output and another disappears.',
+ 'You cannot exchange two values without somewhere to put one of them. That is what the temporary is for.',
+ 'argv[i] = argv[j]; argv[j] = argv[i];  ->  both are now argv[j]'],
+['Sorting index 0 along with the rest',
+ 'The program name appears somewhere in the sorted output.',
+ 'The sort must range over the user arguments only, and those start at index 1.',
+ 'Run it with an argument that sorts before "./a.out" and the name appears.',
+ 'The excluded index is excluded everywhere: in the sort and in the printing.',
+ 'the pair loop starts at 1, never 0'],
+['Stopping after one pass',
+ 'The output is nearly sorted but not quite.',
+ 'A single pass fixes some pairs but can leave others out of order behind it.',
+ 'Give it a reversed list — the worst case makes the shortfall obvious.',
+ 'You are finished when an entire pass makes no swap at all. Until then, go round again.',
+ 'zebra cat apple  ->  one pass is not enough'],
+];
+
+/* ------------------------------------------------------------------ *
+ * Practice — exam-shaped, no solutions
+ * ------------------------------------------------------------------ */
+const C06_PRACTICE = [
+{ name: 'ft_print_last_param', difficulty: 'easy',
+  subject: 'Display only the last argument, followed by a newline. Print nothing if there is no argument.',
+  concepts: ['argc', 'last index', 'write'],
+  hints: ['Which index holds the last argument?', 'What is argc when there are no arguments at all?'],
+  checklist: ['Say the last valid index before writing any code.', 'Decide what "no arguments" means and handle it first.'],
+  edges: ['./a.out', './a.out one', './a.out a b c'] },
+{ name: 'ft_print_numbered_params', difficulty: 'easy',
+  subject: 'Display each argument preceded by its index and a colon, one per line — for example "1: hello".',
+  concepts: ['traversal', 'write', 'digits'],
+  hints: ['You may only use write. How do you print a number with it?', 'For a single digit, what is the relationship between the number and its character?'],
+  checklist: ['State the loop bounds.', 'Decide what to do if there are more than nine arguments.'],
+  edges: ['./a.out', './a.out a', './a.out a b c d e f g h i j'] },
+{ name: 'ft_print_params_upper', difficulty: 'medium',
+  subject: 'Display the arguments in command-line order, with every lowercase letter shown as uppercase. Other characters are unchanged.',
+  concepts: ['traversal', 'ASCII', 'character arithmetic'],
+  hints: ['What is the numeric distance between a lowercase letter and its uppercase form?', 'How do you know a character is a lowercase letter?'],
+  checklist: ['Say the test for "is a lowercase letter" as a range.', 'Confirm that digits and punctuation are untouched.'],
+  edges: ['./a.out abc', './a.out ABC', './a.out a1b2', './a.out "hello world"'] },
+{ name: 'ft_rev_each_param', difficulty: 'medium',
+  subject: 'Display the arguments in command-line order, but print each one with its characters reversed.',
+  concepts: ['traversal', 'reverse', 'two loops'],
+  hints: ['Which of the two loops does the word "reverse" apply to here?', 'Where does the inner loop start, and where does it stop?'],
+  checklist: ['Name the direction of each loop separately.', 'Check that the ORDER of arguments is unchanged.'],
+  edges: ['./a.out ab cd', './a.out a', './a.out ""'] },
+{ name: 'ft_print_sorted_first', difficulty: 'medium',
+  subject: 'Display only the argument that comes first in ASCII order, followed by a newline.',
+  concepts: ['comparison', 'ASCII order', 'tracking a best-so-far'],
+  hints: ['You do not need to sort anything to answer this.', 'What do you keep as you walk the list, and when do you replace it?'],
+  checklist: ['Describe the comparison in words before writing it.', 'Decide what happens when two arguments are equal.'],
+  edges: ['./a.out', './a.out only', './a.out b a c', './a.out Zebra apple'] },
+{ name: 'ft_sort_params_desc', difficulty: 'hard',
+  subject: 'Display the arguments sorted in descending ASCII order, one per line.',
+  concepts: ['comparison', 'sorting', 'pointer swapping'],
+  hints: ['What is the smallest change to the ordering test?', 'Does anything about the swap need to change?'],
+  checklist: ['Point at the single comparison that decides the direction.',
+              'Verify with a list that is already ascending — the hardest case for a sort to get right.'],
+  edges: ['./a.out a b c', './a.out c b a', './a.out a a a', './a.out A a'] },
+];
+/* ==== C06DATA END ==== */
 
 /* ==== FNLAB START ====
    PHASE 7 — Functions, Libraries & System Calls.
@@ -24956,6 +25837,13 @@ function learnModules() {
     founds: MEM_FOUND, ex: [], practice: MEM_PRACTICE, bugs: MEM_BUGS, deps: MEM_DEPS,
     exfuncs: {}, algo: {}, starts: MEM_STARTS, practiceIntro: MEM_PRACTICE_INTRO,
   });
+  /* After Memory: C 06 applies what that module explains. */
+  if (has(C06_EX)) out.push({
+    id: 'C06', label: 'C 06', meta: C06_META,
+    blurb: 'Command-line arguments in use: read one, read them all, read them backwards, put them in order.',
+    founds: C06_FOUND, ex: C06_EX, practice: C06_PRACTICE, bugs: C06_BUGS, deps: C06_DEPS,
+    exfuncs: C06_EXFUNCS, algo: {}, starts: C06_STARTS, practiceIntro: C06_PRACTICE_INTRO,
+  });
   return out;
 }
 function learnMod() {
@@ -25049,6 +25937,8 @@ function c4VizRegistry() {
     mMainProto, mArgvWrite, mStackVsHeap, mSizeof, mMalloc, mMallocFail,
     mCalloc, mRealloc, mFree, mLifecycle, mLeak,
     mRamMap, mRegions, mLiteralVsArray, mFrames, mPointee, mArrays, mExplorer,
+    mC06Command, mC06Indexes, mC06Forward, mC06Reverse, mC06Write,
+    mC06Ascii, mC06Compare, mC06PointerSwap, mC06SortScan, mC06SortComplete, mC06ExamMode,
   };
 }
 function c4WriteAnatomy() { return c4AnatomyCard('write'); }
@@ -25085,7 +25975,8 @@ function c4Subject(ex) {
     (o.invalid ? '<div class="c4-subj-inv"><b>Examples of invalid arguments:</b><ul>' +
        o.invalid.map(b => '<li>' + c4Esc(b) + '</li>').join('') + '</ul></div>' : '') +
     (o.tip ? '<div class="c4-subj-tip"><span>TIP BOX IN THE SUBJECT</span>' + c4Esc(o.tip) + '</div>' : '') +
-    '<div class="c4-proto mono">' + c4Esc(o.proto) + '</div>' +
+    (o.proto ? '<div class="c4-proto mono">' + c4Esc(o.proto) + '</div>'
+       : o.protoNote ? '<div class="c4-proto-note">' + c4Esc(o.protoNote) + '</div>' : '') +
     (o.examples ? '<div class="c4-subj-ex">' + o.examples.map(e =>
        '<div class="mono">' + c4Esc(e) + '</div>').join('') + '</div>' : '') +
     (o.sub && o.examples ? '<ul class="c4-subj-b">' + o.sub.map(b =>
@@ -25824,8 +26715,14 @@ function c4AsciiViz() {
 
 function c4Exercise(id) {
   const ex = learnMod().ex.find(x => x.id === id) || learnMod().ex[0];
-  const tabs = [['subject', 'Subject'], ['understand', 'Understand'], ['visualize', 'Visualize'],
+  /* An exercise may name its own tabs. C 06 omits Trace deliberately: there the
+     finished function is the submission, and the subject's own AI section asks
+     us not to hand it over. */
+  const tabs = ex.tabs || [['subject', 'Subject'], ['understand', 'Understand'], ['visualize', 'Visualize'],
                 ['trace', 'Trace'], ['practice', 'Practice']];
+  /* Coming from an exercise that has a Trace tab to one that does not must not
+     leave the page blank. */
+  if (!tabs.some(t => t[0] === c4.tab)) c4.tab = tabs[0][0];
   let h = '<header class="c4-page-h"><span class="c4-kicker">Exercise ' + c4Esc(ex.id.slice(2)) +
     (ex.deep ? ' · deep dive' : '') + '</span><h1 class="mono">' + c4Esc(ex.name) + '</h1></header>';
   h += '<nav class="c4-tabs" role="tablist">' + tabs.map(([k, l]) =>
@@ -25958,13 +26855,15 @@ function c4Bugs() {
   return '<header class="c4-page-h"><span class="c4-kicker">Reference</span><h1>Common mistakes</h1>' +
     '<p class="c4-p muted">' + learnMod().bugs.length + ' bugs that cost ' + c4Esc(learnMod().label) + ' exercises, each with what happened, ' +
     'why, how to spot it and how to fix the reasoning.</p></header>' +
-    '<div class="c4-bugs">' + learnMod().bugs.map(([title, what, why, spot, fix], i) =>
+    '<div class="c4-bugs">' + learnMod().bugs.map(([title, what, why, spot, fix, eg], i) =>
       '<details class="c4-bug"><summary><span class="c4-bug-n">' + String(i + 1).padStart(2, '0') + '</span>' +
       c4Esc(title) + '</summary><div class="c4-bug-b">' +
       '<div class="c4-bug-r"><span>what happens</span><p>' + c4Esc(what) + '</p></div>' +
       '<div class="c4-bug-r"><span>why</span><p>' + c4Esc(why) + '</p></div>' +
       '<div class="c4-bug-r"><span>how to recognise it</span><p>' + c4Esc(spot) + '</p></div>' +
       '<div class="c4-bug-r fix"><span>how to fix the reasoning</span><p>' + c4Esc(fix) + '</p></div>' +
+      (eg ? '<div class="c4-bug-r"><span>minimal example</span>' +
+        '<div class="c4-bug-eg mono">' + c4Esc(eg) + '</div></div>' : '') +
       '</div></details>').join('') + '</div>';
 }
 
@@ -26129,6 +27028,7 @@ function wireLearn() {
   chip('c4ws', 'ws'); chip('c4s2i', 's2i'); chip('c4adig', 'adig');
   if (typeof wireC5 === 'function') wireC5();
   if (typeof wireMem === 'function') wireMem();
+  if (typeof wireC06 === 'function') wireC06();
   $$('#learnRoot [data-c4vex]').forEach(el => el.addEventListener('click', () => {
     c4.vex = el.dataset.c4vex; renderLearn(); }));
   $$('#learnRoot [data-c4work]').forEach(el => el.addEventListener('click', () => showWorkspace()));
@@ -26604,7 +27504,8 @@ function c4FuncsBlock(ex) {
   return c4Block('Functions & libraries',
     '<table class="c4-t c4-fl"><tbody>' +
       '<tr><th>the function you are writing</th><td class="mono c4-sym-out">' + c4Esc(ex.name) + '</td></tr>' +
-      '<tr><th>prototype</th><td class="mono">' + c4Esc(ex.official.proto) + '</td></tr>' +
+      '<tr><th>prototype</th><td class="' + (ex.official.proto ? 'mono' : 'c4-dim') + '">' +
+        c4Esc(ex.official.proto || ex.official.protoNote || '—') + '</td></tr>' +
       '<tr><th>header it would live in</th><td class="c4-dim">none — the subject asks for ' +
         '<span class="mono">' + c4Esc(ex.official.files) + '</span> alone, with no header of your own</td></tr>' +
       '<tr><th>allowed functions <span class="c4-fl-src">subject</span></th>' +
@@ -28783,6 +29684,784 @@ function wireMem() {
   }));
 }
 /* ==== MEMRAM END ==== */
+/* ==== C06UI START ====
+   C 06 — visualizers.
+
+   Every panel here runs the engine. The traversals, the comparison, the swap
+   and the whole sort are real executions of the C shown beside them, with the
+   engine's own argv: opts.argv0 names argv[0] and opts.args supplies the rest.
+
+   The one thing that needed care is the argv POINTER ARRAY. The engine models
+   it as a block of bytes rather than as typed elements — which is the truth,
+   since it is an array of char * — so c6Slots decodes those bytes into pointer
+   values and matches each against the string blocks. That is what makes the
+   swap and the sort visible as pointers moving rather than as text changing.  */
+
+const C06_DEFAULTS = {
+  c6Args: ['test1', 'test2', 'test3'],  // the command line under study
+  c6Prog: './a.out',                    // argv[0]
+  c6Step: null,                         // traversal / sort step
+  c6A: 'cat',                           // comparison, left
+  c6B: 'car',                           // comparison, right
+  c6Sort: ['zebra', 'apple', 'cat'],    // the list being sorted
+  c6SortStep: null,
+  c6Pair: 0,                            // which pair the scan is looking at
+  c6Hint: 0,                            // exam mode: how many hints are open
+  c6Quiz: null,                         // answered checks
+};
+function c6State() {
+  for (const k in C06_DEFAULTS) {
+    if (c4[k] === undefined) c4[k] = Array.isArray(C06_DEFAULTS[k]) ? C06_DEFAULTS[k].slice() : C06_DEFAULTS[k];
+  }
+  if (!c4.c6Quiz) c4.c6Quiz = {};
+  return c4;
+}
+/* Reuse the memory module's runner: same engine, same memoisation, same
+   argv0/args contract. No second execution path. */
+function c6Run(src, args, argv0) { return memRun(src, args, argv0); }
+
+/* The argv pointer array, decoded from the block's bytes. Returns one entry per
+   slot including the NULL sentinel, each naming the string block it points at. */
+function c6Slots(state) {
+  if (!state) return [];
+  const arr = (state.blocks || []).find(b => b.label === 'argv array');
+  if (!arr) return [];
+  const node = ((state.graph && state.graph.nodes) || []).find(n => n.blockId === arr.id);
+  const bytes = (node && node.bytes) || [];
+  const ps = (state.graph && state.graph.pointerSize) || 8;
+  const strs = (state.blocks || []).filter(b => /^argv\[\d+\] /.test(b.label));
+  const out = [];
+  for (let k = 0; k + ps <= bytes.length; k += ps) {
+    let v = 0n, init = true;
+    for (let j = ps - 1; j >= 0; j--) {
+      const by = bytes[k + j];
+      if (!by || !by.init) init = false;
+      v = (v << 8n) | BigInt(by ? by.value : 0);
+    }
+    const hit = strs.find(s => BigInt(s.base) === v);
+    out.push({
+      slot: k / ps, addr: arr.base + k, value: v, init,
+      isNull: init && v === 0n,
+      text: hit ? hit.label.replace(/^argv\[\d+\] /, '').replace(/^"|"$/g, '') : null,
+      target: hit ? hit.base : (init && v !== 0n ? Number(v) : null),
+    });
+  }
+  return out;
+}
+const c6Hex = (n) => (n === null || n === undefined) ? '—' : hexA(Number(n));
+
+/* A learning check. Same shape as the memory module's, so the two modules
+   behave identically for the reader. */
+function c6Check(id, q, a, why) {
+  const s = c6State();
+  const open = !!s.c6Quiz[id];
+  return '<div class="mem-chk' + (open ? ' open' : '') + '">' +
+    '<button class="mem-chk-q" data-c6q="' + c4Esc(id) + '"><span class="mem-chk-tag">CHECK</span>' +
+    c4Esc(q) + '</button>' +
+    (open ? '<div class="mem-chk-a"><b class="mono">' + c4Esc(a) + '</b>' +
+      (why ? '<p>' + c4Esc(why) + '</p>' : '') + '</div>' : '') + '</div>';
+}
+/* A pointer back to the deeper lesson, so C 06 references rather than repeats. */
+function c6SeeAlso(page, label, why) {
+  return '<button class="c6-see" data-c6go="' + c4Esc(page) + '">' +
+    '<span class="c6-see-t">' + c4Esc(label) + '</span>' +
+    '<span class="c6-see-w">' + c4Esc(why) + '</span></button>';
+}
+
+/* The command-line editor, shared by several lessons. */
+function c6Editor() {
+  const s = c6State();
+  return '<div class="mem-args c6-cmd">' +
+    '<div class="mem-args-r"><span class="c6-prompt mono">$</span>' +
+      '<input id="c6Prog" class="c4-in mono" value="' + c4Esc(s.c6Prog) + '" maxlength="20" spellcheck="false" aria-label="Program name">' +
+      s.c6Args.map((a, i) => '<span class="c6-argwrap">' +
+        '<input class="c4-in mono c6-arg" data-c6arg="' + i + '" value="' + c4Esc(a) + '" maxlength="16" spellcheck="false" aria-label="Argument ' + (i + 1) + '">' +
+        '<button class="mem-x" data-c6del="' + i + '" aria-label="Remove argument ' + (i + 1) + '">✕</button></span>').join('') +
+      '<button class="c4-chip add" data-c6add="1">+ argument</button></div>' +
+    '<div class="mem-args-r"><span class="c4-presets">' +
+      [['test1 test2 test3', ['test1', 'test2', 'test3']], ['none', []], ['one', ['one']],
+       ['a b c d', ['a', 'b', 'c', 'd']], ['an empty one', ['']], ['"a b" quoted', ['a b']]].map(([lab, v]) =>
+      '<button class="c4-chip" data-c6set="' + c4Esc(JSON.stringify(v)) + '">' + c4Esc(lab) + '</button>').join('') +
+    '</span></div></div>';
+}
+
+/* ------------------------------------------------------------------ *
+ * 1.1 — the command line reaching main                                 *
+ * ------------------------------------------------------------------ */
+const C06_ARGV_SRC =
+'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\n\ti = 0;\n\twhile (i < argc)\n\t\ti++;\n\treturn (0);\n}\n';
+
+function c6ArgvState() {
+  const s = c6State();
+  const run = c6Run(C06_ARGV_SRC, s.c6Args, s.c6Prog);
+  return run.ok ? { run, st: memLive(run) } : { run, st: null };
+}
+
+function mC06Command() {
+  const s = c6State();
+  const { run, st } = c6ArgvState();
+  if (!st) return c4Block('The command line reaching main()', memUnsup(run));
+  const argc = +memVar(st, 'argc').valueText;
+  const slots = c6Slots(st);
+  return c4Block('One command line, four exercises',
+    c6Editor() +
+    '<div class="c6-flow">' +
+      '<div class="c6-flow-s"><span class="c6-flow-h">you type</span>' +
+        '<div class="mem-term mono">$ ' + [s.c6Prog].concat(s.c6Args).map(w =>
+          '<span class="mem-word">' + c4Esc(w === '' ? '""' : w) + '</span>').join(' ') + '</div></div>' +
+      '<div class="c6-flow-a">↓ the shell splits it into words</div>' +
+      '<div class="c6-flow-s"><span class="c6-flow-h">main receives</span>' +
+        '<div class="c6-recv"><div class="c6-recv-c"><span>argc</span><b class="mono">' + argc + '</b></div>' +
+        '<div class="c6-recv-l">' + slots.map(x =>
+          '<div class="c6-recv-r' + (x.isNull ? ' nul' : (x.slot === 0 ? ' prog' : '')) + '">' +
+          '<span class="mono c6-recv-i">argv[' + x.slot + ']</span>' +
+          '<span class="mono c6-recv-v">' + (x.isNull ? 'NULL' : '"' + c4Esc(x.text === null ? '?' : x.text) + '"') + '</span>' +
+          '<span class="c6-recv-n">' + (x.isNull ? 'the end marker' : x.slot === 0 ? 'the program name' : 'user argument') +
+          '</span></div>').join('') + '</div></div></div>' +
+    '</div>' +
+    '<div class="c6-four"><div class="mem-col-h">what each C 06 exercise does with this</div>' +
+      [['ex00', 'prints argv[0] only', 'the program name'],
+       ['ex01', 'prints 1 → argc − 1', 'in order'],
+       ['ex02', 'prints argc − 1 → 1', 'backwards'],
+       ['ex03', 'prints 1 → argc − 1', 'reordered by ASCII']].map(([id, what, how]) =>
+      '<button class="c6-four-c" data-c6go="ex:' + id + '"><b class="mono">' + id + '</b>' +
+      '<span>' + c4Esc(what) + '</span><span class="c6-four-h">' + c4Esc(how) + '</span></button>').join('') +
+    '</div>' +
+    c6SeeAlso('f:argv-array', 'Memory · argv, layer by layer',
+      'why argv is a char ** and what the array of pointers looks like in RAM') +
+    c6Check('cmd1', 'For ./a.out hello world, what is argc?', '3',
+      'The program name counts as one of them. Three words, so argc is 3 and the indexes are 0, 1 and 2.') +
+    c6Check('cmd2', 'Which exercise is the only one that uses argv[0]?', 'ex00',
+      'The other three are all told to display every argument EXCEPT argv[0].'),
+    'argc and every entry above were read from a real run of that command line.');
+}
+
+/* ------------------------------------------------------------------ *
+ * 1.2 — argc is a count                                                *
+ * ------------------------------------------------------------------ */
+function mC06Indexes() {
+  const s = c6State();
+  const { run, st } = c6ArgvState();
+  if (!st) return c4Block('argc and the last index', memUnsup(run));
+  const argc = +memVar(st, 'argc').valueText;
+  const slots = c6Slots(st);
+  return c4Block('Derive the bounds, do not remember them',
+    c6Editor() +
+    '<div class="c6-ruler">' + slots.map(x =>
+      '<div class="c6-rule' + (x.isNull ? ' nul' : x.slot === 0 ? ' prog' : ' user') + '">' +
+      '<span class="c6-rule-i mono">' + x.slot + '</span>' +
+      '<span class="c6-rule-bar"></span>' +
+      '<span class="c6-rule-v mono">' + (x.isNull ? 'NULL' : c4Esc(x.text === null ? '?' : (x.text === '' ? '""' : x.text))) + '</span>' +
+      '<span class="c6-rule-k">' + (x.isNull ? 'not an argument' : x.slot === 0 ? 'program name' : 'user') + '</span>' +
+      '</div>').join('') + '</div>' +
+    '<div class="c6-facts">' +
+      '<div class="c6-fact"><span>argc</span><b class="mono">' + argc + '</b><i>how many arguments there are</i></div>' +
+      '<div class="c6-fact"><span>first user index</span><b class="mono">1</b><i>0 is the program name</i></div>' +
+      '<div class="c6-fact"><span>last valid index</span><b class="mono">' + (argc - 1) + '</b><i>argc − 1, always</i></div>' +
+      '<div class="c6-fact nul"><span>argv[' + argc + ']</span><b class="mono">NULL</b><i>the end marker, not an argument</i></div>' +
+    '</div>' +
+    '<div class="c4-ud"><div class="c4-ud-r no"><span>✕ reaches the sentinel</span>' +
+      '<pre class="c4-pre mono">i = 1;\nwhile (i &lt;= argc)</pre>' +
+      '<p>The last iteration uses argv[' + argc + '], which is NULL.</p></div>' +
+      '<div class="c4-ud-r ok"><span>✓ stops in time</span>' +
+      '<pre class="c4-pre mono">i = 1;\nwhile (i &lt; argc)</pre>' +
+      '<p>The last iteration uses argv[' + (argc - 1) + '] — the last real argument.</p></div></div>' +
+    c6Check('idx1', 'If argc is 1, what is the last valid ARGUMENT index?',
+      'There is none', 'argc 1 means only argv[0] exists — the program name. There are no user arguments at all, so ex01 prints nothing.') +
+    c6Check('idx2', 'Is argv[argc] a string?', 'No — it is a null pointer',
+      'It marks the end of the array. Reading it as a string is undefined behaviour.') +
+    c6Check('idx3', 'Why does argv[argc] exist at all if it is not an argument?',
+      'So a loop can find the end without knowing argc',
+      'You can walk argv until you meet the NULL. When you already have argc, stop before it instead.') +
+    c6Check('idx4', 'Why does ex01 start at 1 rather than 0?',
+      'Because the subject excludes argv[0]',
+      'The subject says "all arguments except argv[0]". Index 0 is the program name.') +
+    c6Check('idx5', 'With argc = 5, how many arguments does ex01 print?', '4',
+      'Indexes 1, 2, 3 and 4 — that is argc − 1 of them, since index 0 is skipped.'),
+    'The ruler above is built from the engine\'s own argv for this command line.');
+}
+
+/* ------------------------------------------------------------------ *
+ * traversal — shared by 1.3 and 1.4                                    *
+ * ------------------------------------------------------------------ */
+const C06_FWD_SRC =
+'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\tint\tj;\n\n\ti = 1;\n\twhile (i < argc)\n\t{\n' +
+'\t\tj = 0;\n\t\twhile (argv[i][j])\n\t\t\tj++;\n\t\twrite(1, argv[i], j);\n\t\twrite(1, "\\n", 1);\n' +
+'\t\ti++;\n\t}\n\treturn (0);\n}\n';
+const C06_REV_SRC =
+'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\tint\tj;\n\n\ti = argc - 1;\n\twhile (i > 0)\n\t{\n' +
+'\t\tj = 0;\n\t\twhile (argv[i][j])\n\t\t\tj++;\n\t\twrite(1, argv[i], j);\n\t\twrite(1, "\\n", 1);\n' +
+'\t\ti--;\n\t}\n\treturn (0);\n}\n';
+
+function c6Traversal(title, src, dirLabel, extra) {
+  const s = c6State();
+  const run = c6Run(src, s.c6Args, s.c6Prog);
+  if (!run.ok) return c4Block(title, memUnsup(run));
+  /* one entry per time the outer index changes, so the reader sees the cursor
+     move rather than every engine step */
+  const marks = [];
+  let last = null;
+  run.steps.forEach((st, k) => {
+    const iv = memVar(st.state, 'i');
+    if (!iv || iv.uninitialized) return;
+    if (iv.valueText === last) return;
+    last = iv.valueText;
+    marks.push({ k, i: +iv.valueText, out: st.state.output || '' });
+  });
+  const pos = Math.max(0, Math.min(s.c6Step === null ? marks.length - 1 : s.c6Step, marks.length - 1));
+  const cur = marks[pos] || marks[0];
+  const st = run.steps[cur ? cur.k : 0].state;
+  const slots = c6Slots(st);
+  const argc = +memVar(st, 'argc').valueText;
+  return c4Block(title,
+    c6Editor() +
+    '<div class="mem-time"><input type="range" class="fn-range" min="0" max="' + Math.max(0, marks.length - 1) +
+      '" value="' + pos + '" data-c6step="1" aria-label="Cursor position">' +
+      '<span class="mem-time-n mono">cursor ' + (pos + 1) + ' / ' + marks.length + '</span>' +
+      '<span class="c6-dir">' + c4Esc(dirLabel) + '</span></div>' +
+    '<div class="c6-ruler">' + slots.map(x => {
+      const on = cur && x.slot === cur.i;
+      const done = cur && (dirLabel.indexOf('forward') >= 0 ? (x.slot >= 1 && x.slot < cur.i)
+                                                            : (x.slot > cur.i && x.slot <= argc - 1));
+      return '<div class="c6-rule' + (x.isNull ? ' nul' : x.slot === 0 ? ' prog' : ' user') +
+        (on ? ' cursor' : '') + (done ? ' done' : '') + '">' +
+        '<span class="c6-rule-i mono">' + x.slot + '</span>' +
+        '<span class="c6-rule-bar"></span>' +
+        '<span class="c6-rule-v mono">' + (x.isNull ? 'NULL' : c4Esc(x.text === null ? '?' : (x.text === '' ? '""' : x.text))) + '</span>' +
+        '<span class="c6-rule-k">' + (on ? 'i = ' + cur.i : done ? 'printed' : '') + '</span></div>';
+    }).join('') + '</div>' +
+    '<pre class="c4-pre mono">' + src.replace(/\t/g, '    ').split('\n').map((l, k) =>
+      '<span class="c4-cl' + (cur && k + 1 === run.steps[cur.k].step.line ? ' on' : '') + '">' +
+      String(k + 1).padStart(2) + '  ' + c4Esc(l || ' ') + '</span>').join('') + '</pre>' +
+    '<div class="c6-outbox"><span class="mem-k">printed so far</span>' +
+      '<pre class="mono c6-out">' + (cur && cur.out ? c4Esc(cur.out) : '<span class="c4-dim">(nothing yet)</span>') + '</pre></div>' +
+    '<div class="c6-bounds">' +
+      '<div class="c6-bound"><span>start</span><b class="mono">' + (dirLabel.indexOf('forward') >= 0 ? 'i = 1' : 'i = argc − 1') + '</b></div>' +
+      '<div class="c6-bound"><span>continue while</span><b class="mono">' + (dirLabel.indexOf('forward') >= 0 ? 'i &lt; argc' : 'i &gt; 0') + '</b></div>' +
+      '<div class="c6-bound"><span>step</span><b class="mono">' + (dirLabel.indexOf('forward') >= 0 ? 'i++' : 'i--') + '</b></div>' +
+    '</div>' + (extra || ''),
+    'The cursor, the highlighted line and the output are all read from one real run with those arguments.');
+}
+
+function mC06Forward() {
+  return c6Traversal('Walking forward from argv[1]', C06_FWD_SRC, 'forward · 1 → argc − 1',
+    '<div class="c4-boxnote"><b>The shell got there first.</b> Quoting happens before your program runs: ' +
+      '<span class="mono">"a b"</span> arrives as ONE argument containing a space, and an empty ' +
+      '<span class="mono">""</span> arrives as an argument of length 0 that still gets its own line. ' +
+      'Try both with the presets above.</div>' +
+    c6Check('fw1', 'Which argv index should ex01 start with?', '1',
+      'Index 0 is the program name and the subject excludes it.') +
+    c6Check('fw2', 'Why does ex01 stop BEFORE argc rather than at it?',
+      'Because argc is a count, so the last argument is argc − 1',
+      'argv[argc] is the NULL sentinel. Using it as a string is undefined behaviour.') +
+    c6Check('fw3', 'Where must the inner index j be reset, and why?',
+      'Inside the outer loop, before each argument',
+      'Otherwise the second argument starts counting from wherever the first one stopped.'));
+}
+function mC06Reverse() {
+  return c6Traversal('Walking backwards from argv[argc − 1]', C06_REV_SRC, 'reverse · argc − 1 → 1',
+    '<div class="c6-three"><div class="mem-col-h">reversing a loop is exactly three decisions</div>' +
+      '<table class="c4-t"><thead><tr><th></th><th>forward (ex01)</th><th>reverse (ex02)</th></tr></thead><tbody>' +
+      '<tr><td>start</td><td class="mono">i = 1</td><td class="mono c4-hl">i = argc − 1</td></tr>' +
+      '<tr><td>condition</td><td class="mono">i &lt; argc</td><td class="mono c4-hl">i &gt; 0</td></tr>' +
+      '<tr><td>step</td><td class="mono">i++</td><td class="mono c4-hl">i--</td></tr>' +
+      '<tr><td>the inner loop</td><td class="mono">unchanged</td><td class="mono">unchanged</td></tr>' +
+      '</tbody></table></div>' +
+    '<div class="c4-boxnote"><b>Only the outer loop reverses.</b> Each argument is still read from its ' +
+      'first character — ex02 prints the words in the opposite order, not the words spelled backwards.</div>' +
+    c6Check('rv1', 'Which index does ex02 start with?', 'argc − 1',
+      'The last valid argument index. Starting at argc reads the NULL sentinel.') +
+    c6Check('rv2', 'Why does the loop stop at i > 0 rather than i >= 0?',
+      'Because index 0 is the program name',
+      'It is excluded by the subject — and stopping there also avoids a negative index.') +
+    c6Check('rv3', 'With one user argument, do ex01 and ex02 print the same thing?', 'Yes',
+      'Which is why one argument is a useless test for ex02. Use at least two.'));
+}
+
+/* ------------------------------------------------------------------ *
+ * 1.5 — write needs a length                                           *
+ * ------------------------------------------------------------------ */
+function mC06Write() {
+  const s = c6State();
+  const word = s.c6Args[0] === undefined ? 'hello' : s.c6Args[0];
+  const src =
+'int\tmain(int argc, char **argv)\n{\n\tint\tj;\n\n\tj = 0;\n\tif (argc > 1)\n\t{\n' +
+'\t\twhile (argv[1][j])\n\t\t\tj++;\n\t\twrite(1, argv[1], j);\n\t\twrite(1, "\\n", 1);\n\t}\n\treturn (0);\n}\n';
+  const run = c6Run(src, s.c6Args, s.c6Prog);
+  if (!run.ok) return c4Block('write needs a length', memUnsup(run));
+  const st = memLive(run);
+  const j = memVar(st, 'j');
+  const model = memArgvModel ? null : null;
+  const chars = (() => {
+    const blk = (st.blocks || []).find(b => b.label.indexOf('argv[1] ') === 0);
+    if (!blk) return [];
+    const node = ((st.graph && st.graph.nodes) || []).find(n => n.blockId === blk.id);
+    return ((node && node.bytes) || []).map((b, k) => ({ k, code: b.value, addr: b.address,
+      ch: b.value === 0 ? '\\0' : String.fromCharCode(b.value), nul: b.value === 0 }));
+  })();
+  const len = j && !j.uninitialized ? +j.valueText : 0;
+  return c4Block('write takes an address and a count — never a string',
+    c6Editor() +
+    '<pre class="c4-pre mono">' + c4Esc(src.replace(/\t/g, '    ')) + '</pre>' +
+    (chars.length
+      ? '<div class="mem-tape">' + chars.map(c =>
+          '<span class="mem-cell' + (c.k < len ? ' sent' : '') + (c.nul ? ' nul' : '') + '">' +
+          '<span class="mem-cell-a mono">' + c.k + '</span>' +
+          '<span class="mem-cell-c mono">' + c4Esc(c.ch) + '</span>' +
+          '<span class="mem-cell-d mono">' + c.code + '</span></span>').join('') + '</div>'
+      : '<div class="c4-empty">give the command line at least one argument</div>') +
+    '<div class="mem-eq">' +
+      '<div class="mem-eq-r"><span>the loop counted</span><span class="mono c4-hl">' + len +
+        '</span></div>' +
+      '<div class="mem-eq-r"><span>which is</span><span>the characters before the \\0 — the \\0 itself is not sent</span></div>' +
+      '<div class="mem-eq-r"><span>write(1, argv[1], ' + len + ')</span><span>sends exactly those bytes</span></div>' +
+      '<div class="mem-eq-r"><span>the newline</span><span>a second write, of one byte</span></div>' +
+    '</div>' +
+    '<div class="c6-outbox"><span class="mem-k">what the program printed</span>' +
+      '<pre class="mono c6-out">' + (run.output ? c4Esc(run.output) : '<span class="c4-dim">(nothing)</span>') + '</pre></div>' +
+    c6SeeAlso('f:argv-bytes', 'Memory · every argument is bytes ending in \\0',
+      'the byte-level view of why a char * has no length of its own') +
+    c6Check('wr1', 'Does write stop when it reaches a \\0?', 'No',
+      'It sends exactly the number of bytes you ask for. The \\0 matters to your counting loop, not to write.') +
+    c6Check('wr2', 'Should the count include the \\0?', 'No',
+      'The terminator is not part of the text. Counting it would print an extra invisible byte.'),
+    'The count above is the value the engine\'s own loop produced for that argument.');
+}
+
+/* ------------------------------------------------------------------ *
+ * 1.6 — ASCII order                                                    *
+ * ------------------------------------------------------------------ */
+function mC06Ascii() {
+  const rows = ['0', '9', 'A', 'M', 'Z', '_', 'a', 'm', 'z'].map(ch => ({ ch, a: CEngine.asciiInfo(ch.charCodeAt(0)) }));
+  const pairs = [['Zebra', 'apple'], ['apple', 'Apple'], ['a', 'A'], ['9', 'a'], ['_', 'a']];
+  return c4Block('ASCII order is numeric order, and case matters',
+    '<table class="c4-t"><thead><tr><th>character</th><th>code</th><th>sorts…</th></tr></thead><tbody>' +
+      rows.map(({ ch, a }) => '<tr><td class="mono c4-sym-out">' + c4Esc(ch) + '</td>' +
+        '<td class="mono c4-hl">' + a.code + '</td>' +
+        '<td class="c4-dim">' + (a.code < 58 ? 'digits first' : a.code < 91 ? 'then uppercase' :
+          a.code < 97 ? 'then a few symbols' : 'lowercase last') + '</td></tr>').join('') +
+    '</tbody></table>' +
+    '<div class="c6-ordbar"><div class="mem-col-h">the order the codes impose</div>' +
+      '<div class="c6-ord">' + [['digits', '48–57', '0 … 9'], ['uppercase', '65–90', 'A … Z'],
+        ['some symbols', '91–96', '[ \\ ] ^ _ `'], ['lowercase', '97–122', 'a … z']].map(([n, r, e]) =>
+      '<div class="c6-ord-s"><b>' + n + '</b><span class="mono">' + r + '</span>' +
+      '<span class="mono c4-dim">' + c4Esc(e) + '</span></div>').join('') + '</div></div>' +
+    '<div class="c6-pairs"><div class="mem-col-h">which comes first?</div>' +
+      pairs.map(([a, b], i) => {
+        const first = a < b ? a : b;
+        return '<div class="c6-pair"><span class="mono">' + c4Esc(a) + '</span>' +
+          '<span class="c6-pair-v">vs</span><span class="mono">' + c4Esc(b) + '</span>' +
+          '<span class="c6-pair-r mono">' + c4Esc(first) + ' first</span>' +
+          '<span class="c6-pair-w">' + (a.charCodeAt(0) !== b.charCodeAt(0)
+            ? '\'' + c4Esc(a[0]) + '\' is ' + a.charCodeAt(0) + ', \'' + c4Esc(b[0]) + '\' is ' + b.charCodeAt(0)
+            : 'they share the first character — the decision is further along') + '</span></div>';
+      }).join('') + '</div>' +
+    '<div class="c4-warn"><span class="c4-badge alt">NOT DICTIONARY ORDER</span>' +
+      '<p class="c4-p">A person alphabetising a list treats <span class="mono">a</span> and ' +
+      '<span class="mono">A</span> as the same letter and puts "apple" before "Zebra". ASCII does not: ' +
+      '<span class="mono">Z</span> is 90 and <span class="mono">a</span> is 97, so ' +
+      '<b>"Zebra" sorts before "apple"</b>. The subject asks for ASCII order.</p></div>' +
+    c6Check('as1', 'Which comes first in ASCII order, "A" or "a"?', '"A"',
+      'A is 65 and a is 97. Every uppercase letter sorts before every lowercase one.') +
+    c6Check('as2', 'Where do digits sort relative to letters?', 'Before all of them',
+      '\'0\' is 48, below both the uppercase range (65–90) and the lowercase range (97–122).') +
+    c6Check('as3', 'Sorting "banana", "Apple" and "cherry" in ASCII order gives what first?', '"Apple"',
+      'Its first character is A (65), lower than b (98) and c (99). Case wins over letter here.'),
+    'The character codes come from the engine\'s own ASCII table.');
+}
+
+/* ------------------------------------------------------------------ *
+ * 1.7 — comparing two strings                                          *
+ * ------------------------------------------------------------------ */
+function mC06Compare() {
+  const s = c6State();
+  const a = s.c6A, b = s.c6B;
+  const src =
+'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\tint\td;\n\n\ti = 0;\n' +
+'\twhile (argv[1][i] == argv[2][i] && argv[1][i])\n\t\ti++;\n' +
+'\td = argv[1][i] - argv[2][i];\n\tif (argc > 99)\n\t\td = 0;\n\treturn (0);\n}\n';
+  const run = c6Run(src, [a, b], './cmp');
+  if (!run.ok) return c4Block('Comparing two strings', memUnsup(run));
+  const st = memLive(run);
+  const iv = memVar(st, 'i'), dv = memVar(st, 'd');
+  const stop = iv && !iv.uninitialized ? +iv.valueText : 0;
+  const diff = dv && !dv.uninitialized ? +dv.valueText : 0;
+  const row = (word) => {
+    const cells = [];
+    for (let k = 0; k <= Math.max(a.length, b.length); k++) {
+      const ch = k < word.length ? word[k] : (k === word.length ? '\\0' : null);
+      if (ch === null) { cells.push('<span class="c6-cc empty"></span>'); continue; }
+      const code = k < word.length ? word.charCodeAt(k) : 0;
+      cells.push('<span class="c6-cc' + (k < stop ? ' same' : k === stop ? ' here' : '') +
+        (ch === '\\0' ? ' nul' : '') + '">' +
+        '<span class="c6-cc-c mono">' + c4Esc(ch) + '</span>' +
+        '<span class="c6-cc-d mono">' + code + '</span></span>');
+    }
+    return cells.join('');
+  };
+  const presets = [['cat', 'car'], ['abc', 'abd'], ['abc', 'abcd'], ['A', 'a'], ['Z', 'a'],
+                   ['hello', 'hello'], ['apple', 'banana']];
+  const verdict = diff === 0 ? 'the two strings are equal'
+    : diff < 0 ? '"' + a + '" comes first' : '"' + b + '" comes first';
+  return c4Block('Walk together while they match; the first difference decides',
+    '<div class="mem-pick"><label class="c4-lab" for="c6A">first</label>' +
+      '<input id="c6A" class="c4-in mono" value="' + c4Esc(a) + '" maxlength="12" spellcheck="false">' +
+      '<label class="c4-lab" for="c6B">second</label>' +
+      '<input id="c6B" class="c4-in mono" value="' + c4Esc(b) + '" maxlength="12" spellcheck="false">' +
+      '<span class="c4-presets">' + presets.map(([x, y]) =>
+        '<button class="c4-chip' + (x === a && y === b ? ' on' : '') + '" data-c6cmp="' +
+        c4Esc(JSON.stringify([x, y])) + '">' + c4Esc(x) + ' / ' + c4Esc(y) + '</button>').join('') +
+      '</span></div>' +
+    '<div class="c6-cmp">' +
+      '<div class="c6-cmp-r"><span class="c6-cmp-l mono">"' + c4Esc(a) + '"</span>' + row(a) + '</div>' +
+      '<div class="c6-cmp-r"><span class="c6-cmp-l mono">"' + c4Esc(b) + '"</span>' + row(b) + '</div>' +
+    '</div>' +
+    '<div class="mem-eq">' +
+      '<div class="mem-eq-r"><span>the loop stopped at</span><span class="mono c4-hl">index ' + stop + '</span></div>' +
+      '<div class="mem-eq-r"><span>because</span><span>' +
+        (stop >= a.length && stop >= b.length ? 'both reached the \\0 together'
+         : stop >= a.length ? '"' + c4Esc(a) + '" ended first — its \\0 met a real character'
+         : stop >= b.length ? '"' + c4Esc(b) + '" ended first — its \\0 met a real character'
+         : 'the characters differ there') + '</span></div>' +
+      '<div class="mem-eq-r"><span>the difference</span><span class="mono">' +
+        (stop < a.length ? a.charCodeAt(stop) : 0) + ' − ' + (stop < b.length ? b.charCodeAt(stop) : 0) +
+        ' = <b class="c4-hl">' + diff + '</b></span></div>' +
+      '<div class="mem-eq-r"><span>so</span><span><b>' + c4Esc(verdict) + '</b></span></div>' +
+    '</div>' +
+    '<div class="c4-boxnote"><b>Why the \\0 has to be in the condition.</b> The loop continues while the ' +
+      'characters are equal <i>and</i> the current one is not \\0. Drop the second half and a pair of ' +
+      'identical strings walks off the end of both. Keep it, and a prefix gets the right answer for free: ' +
+      '0 is smaller than any character, so the shorter string comes first.</div>' +
+    c6Check('cp1', 'Which string comes first, "abc" or "abd"?', '"abc"',
+      'They match at 0 and 1. At index 2, c is 99 and d is 100, so "abc" is smaller.') +
+    c6Check('cp2', 'Which comes first, "abc" or "abcd"?', '"abc"',
+      'They match for three characters. Then "abc" has its \\0 (0) against \'d\' (100). 0 is smaller, so the prefix comes first.') +
+    c6Check('cp3', 'At what character position do you know the answer for "apple" and "avocado"?',
+      'Index 1', 'Both start with a. At index 1, p is 112 and v is 118 — that settles it, and nothing after matters.') +
+    c6Check('cp4', 'What does the comparison give for two identical strings?', '0',
+      'Both reach the \\0 at the same index, and 0 − 0 is 0. Equal is not "out of order".'),
+    'The stopping index and the difference are the values the engine computed in that loop.');
+}
+
+/* ------------------------------------------------------------------ *
+ * 1.8 — swapping pointers                                              *
+ * ------------------------------------------------------------------ */
+function mC06PointerSwap() {
+  const src =
+'int\tmain(int argc, char **argv)\n{\n\tchar\t*tmp;\n\tint\tn;\n\n\tn = argc;\n' +
+'\ttmp = argv[1];\n\targv[1] = argv[2];\n\targv[2] = tmp;\n\treturn (0);\n}\n';
+  const run = c6Run(src, ['zebra', 'apple'], './a.out');
+  if (!run.ok) return c4Block('Swapping pointers', memUnsup(run));
+  const before = c6Slots(run.steps[1].state);
+  const after = c6Slots(memLive(run));
+  const side = (title, slots, cls) =>
+    '<div class="c4-half' + cls + '"><div class="c4-half-h">' + title + '</div>' +
+    '<div class="c6-swap">' + slots.filter(x => !x.isNull).map(x =>
+      '<div class="c6-swap-r' + (x.slot === 0 ? ' prog' : '') + '">' +
+      '<span class="mono c6-swap-i">argv[' + x.slot + ']</span>' +
+      '<span class="c6-swap-a mono">' + c6Hex(x.value === 0n ? null : Number(x.value)) + '</span>' +
+      '<span class="c6-swap-ar">→</span>' +
+      '<span class="mono c6-swap-t">"' + c4Esc(x.text === null ? '?' : x.text) + '"</span></div>').join('') +
+    '</div></div>';
+  return c4Block('The strings never move — only the pointers do',
+    '<pre class="c4-pre mono">' + c4Esc(src.replace(/\t/g, '    ')) + '</pre>' +
+    '<div class="c4-two">' + side('before the swap', before, '') + side('after the swap', after, ' alt') + '</div>' +
+    '<div class="mem-say"><b>Look at the addresses, not the words.</b> The two strings sit at exactly the ' +
+      'same addresses in both columns — nothing was copied. What changed is which slot of the argv array ' +
+      'holds which address. That is the whole of reordering arguments.</div>' +
+    '<div class="c6-cost"><div class="mem-col-h">what a swap costs</div>' +
+      '<table class="c4-t"><thead><tr><th>approach</th><th>work</th><th>correct?</th></tr></thead><tbody>' +
+      '<tr><td>exchange the two pointers</td><td class="mono">3 assignments</td>' +
+        '<td class="c4-yes">yes, whatever the strings are</td></tr>' +
+      '<tr><td>copy the characters across</td><td class="mono">as many as the strings are long</td>' +
+        '<td class="c4-bad">no — different lengths do not fit</td></tr>' +
+      '</tbody></table></div>' +
+    c6SeeAlso('f:pointee', 'Memory · pointer vs pointee',
+      'the general form of this: a variable holding an address is not the object at that address') +
+    c6Check('sw1', 'When sorting, why can you swap pointers instead of copying whole strings?',
+      'Because argv holds pointers, and the order of the arguments IS the order of those pointers',
+      'The characters never need to move. Three assignments reorder any two arguments, however long they are.') +
+    c6Check('sw2', 'What goes wrong with argv[i] = argv[j]; argv[j] = argv[i];',
+      'Both end up holding argv[j]',
+      'The first assignment destroys the value the second one needed. That is what the temporary is for.'),
+    'Both columns are the argv pointer array decoded from the engine\'s memory, before and after a real swap.');
+}
+
+/* ------------------------------------------------------------------ *
+ * 1.9 — deriving a sort                                                *
+ * ------------------------------------------------------------------ */
+const C06_SORT_SRC =
+'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\tint\tk;\n\tint\tswapped;\n\tchar\t*tmp;\n\n' +
+'\tswapped = 1;\n\twhile (swapped)\n\t{\n\t\tswapped = 0;\n\t\ti = 1;\n\t\twhile (i < argc - 1)\n\t\t{\n' +
+'\t\t\tk = 0;\n\t\t\twhile (argv[i][k] == argv[i + 1][k] && argv[i][k])\n\t\t\t\tk++;\n' +
+'\t\t\tif (argv[i][k] > argv[i + 1][k])\n\t\t\t{\n\t\t\t\ttmp = argv[i];\n' +
+'\t\t\t\targv[i] = argv[i + 1];\n\t\t\t\targv[i + 1] = tmp;\n\t\t\t\tswapped = 1;\n\t\t\t}\n' +
+'\t\t\ti++;\n\t\t}\n\t}\n\treturn (0);\n}\n';
+
+function c6SortRun() {
+  const s = c6State();
+  const args = s.c6Sort.slice(0, 5);
+  return { args, run: c6Run(C06_SORT_SRC, args, './a.out') };
+}
+function c6SortEditor() {
+  const s = c6State();
+  return '<div class="mem-args-r"><span class="c4-lab">list</span>' +
+    s.c6Sort.map((w, i) => '<span class="c6-argwrap">' +
+      '<input class="c4-in mono c6-arg" data-c6sortarg="' + i + '" value="' + c4Esc(w) +
+      '" maxlength="10" spellcheck="false" aria-label="Item ' + (i + 1) + '"></span>').join('') +
+    '<span class="c4-presets">' + [['zebra apple cat', ['zebra', 'apple', 'cat']],
+      ['already sorted', ['ant', 'bee', 'cow']], ['reversed', ['dog', 'cat', 'ant']],
+      ['duplicates', ['bee', 'ant', 'bee']], ['case matters', ['apple', 'Zebra', 'Apple']],
+      ['prefixes', ['abc', 'ab', 'abcd']]].map(([lab, v]) =>
+      '<button class="c4-chip" data-c6sortset="' + c4Esc(JSON.stringify(v)) + '">' + c4Esc(lab) + '</button>').join('') +
+    '</span></div>';
+}
+
+function mC06SortScan() {
+  const { args, run } = c6SortRun();
+  if (!run.ok) return c4Block('One pass at a time', memUnsup(run));
+  /* every moment the engine finished a comparison: the pair, and whether it swapped */
+  const events = [];
+  let lastI = null, prevSlots = null;
+  run.steps.forEach((st) => {
+    const iv = memVar(st.state, 'i');
+    if (!iv || iv.uninitialized) return;
+    const i = +iv.valueText;
+    const slots = c6Slots(st.state);
+    if (lastI !== null && prevSlots) {
+      const changed = slots.some((x, k) => prevSlots[k] && x.text !== prevSlots[k].text);
+      if (changed) events.push({ i: lastI, swapped: true, after: slots.map(x => x.text) });
+    }
+    if (i !== lastI) { lastI = i; prevSlots = slots; }
+    else prevSlots = slots;
+  });
+  const sorted = args.slice().sort();
+  return c4Block('One comparison tells you about one pair — and nothing else',
+    c6SortEditor() +
+    '<div class="c6-derive">' +
+      '<div class="c6-derive-q">What does “sorted” actually mean here?</div>' +
+      '<p class="c4-p">It means: there is no pair anywhere in the list that is in the wrong order. ' +
+      'You can only look at two at a time — so keep fixing pairs until a whole pass finds nothing to fix. ' +
+      'When a pass changes nothing, no pair is wrong anywhere, and that is the same statement as “sorted”.</p>' +
+    '</div>' +
+    '<div class="c6-passes"><div class="mem-col-h">every swap the engine actually performed</div>' +
+      (events.length ? events.map((e, k) =>
+        '<div class="c6-pass"><span class="c6-pass-n mono">' + (k + 1) + '</span>' +
+        '<span class="c6-pass-w">swapped the pair at index ' + e.i + ' and ' + (e.i + 1) + '</span>' +
+        '<span class="c6-pass-s mono">' + c4Esc(e.after.filter(x => x !== null).slice(1).join('  ')) + '</span></div>').join('')
+        : '<div class="c4-empty">no swap was needed — the list was already in ASCII order</div>') +
+    '</div>' +
+    '<div class="mem-eq">' +
+      '<div class="mem-eq-r"><span>started as</span><span class="mono">' + c4Esc(args.join('  ')) + '</span></div>' +
+      '<div class="mem-eq-r"><span>ended as</span><span class="mono c4-hl">' +
+        c4Esc(c6Slots(memLive(run)).filter(x => !x.isNull && x.slot > 0).map(x => x.text).join('  ')) + '</span></div>' +
+      '<div class="mem-eq-r"><span>swaps performed</span><span class="mono">' + events.length + '</span></div>' +
+    '</div>' +
+    c6Check('so1', 'How do you know two arguments are in the wrong order?',
+      'Compare them character by character; if the earlier one is greater at the first difference, they are wrong',
+      'One comparison, one verdict, about that pair only.') +
+    c6Check('so2', 'After one full pass, is the list definitely sorted?', 'No',
+      'A pass fixes some pairs but can leave others out of order behind it. You repeat until a pass makes no swap.') +
+    c6Check('so3', 'When do you know you can stop?', 'When a complete pass makes no swap at all',
+      'That means no pair anywhere is out of order — which is exactly what sorted means.'),
+    'The swap list above is every reordering the engine really performed on the argv array.');
+}
+
+function mC06SortComplete() {
+  const s = c6State();
+  const { args, run } = c6SortRun();
+  if (!run.ok) return c4Block('The sort, running', memUnsup(run));
+  const marks = [];
+  let prev = null;
+  run.steps.forEach((st, k) => {
+    const slots = c6Slots(st.state);
+    const key = slots.map(x => x.text).join('|');
+    if (key === prev) return;
+    prev = key;
+    marks.push({ k, order: slots.filter(x => !x.isNull && x.slot > 0).map(x => x.text) });
+  });
+  const pos = Math.max(0, Math.min(s.c6SortStep === null ? marks.length - 1 : s.c6SortStep, marks.length - 1));
+  const cur = marks[pos];
+  const expect = args.slice().sort();
+  const final = marks[marks.length - 1].order;
+  return c4Block('The whole sort, executed',
+    c6SortEditor() +
+    '<div class="mem-time"><input type="range" class="fn-range" min="0" max="' + Math.max(0, marks.length - 1) +
+      '" value="' + pos + '" data-c6sortstep="1" aria-label="Sort state">' +
+      '<span class="mem-time-n mono">state ' + (pos + 1) + ' / ' + marks.length + '</span></div>' +
+    '<div class="c6-state">' + cur.order.map((w, i) =>
+      '<span class="c6-state-c' + (final[i] === w ? ' set' : '') + '">' +
+      '<span class="c6-state-i mono">' + (i + 1) + '</span>' +
+      '<span class="c6-state-w mono">' + c4Esc(w === null ? '?' : w) + '</span></span>').join('') + '</div>' +
+    '<div class="mem-eq">' +
+      '<div class="mem-eq-r"><span>engine result</span><span class="mono c4-hl">' + c4Esc(final.join('  ')) + '</span></div>' +
+      '<div class="mem-eq-r"><span>ASCII order</span><span class="mono">' + c4Esc(expect.join('  ')) + '</span></div>' +
+      '<div class="mem-eq-r"><span>agree?</span><span class="' +
+        (final.join('|') === expect.join('|') ? 'c4-yes">yes' : 'c4-bad">no') + '</span></div>' +
+    '</div>' +
+    '<div class="c4-boxnote"><b>Try the awkward lists.</b> Already sorted, exactly reversed, duplicates, ' +
+      'mixed case, and prefixes are the five cases that break a hand-written sort. All five are presets above.</div>' +
+    c6Check('sc1', 'Sorting zebra, cat, apple, dog — what is the first comparison?',
+      'zebra against cat', 'The first pair, at indexes 1 and 2. Nothing else is looked at yet.') +
+    c6Check('sc2', 'And is that pair swapped?', 'Yes',
+      'z is 122 and c is 99, so zebra is greater and belongs later.') +
+    c6Check('sc3', 'What is the final order?', 'apple  cat  dog  zebra',
+      'All lowercase here, so ASCII order and alphabetical order happen to agree. Add a capital and they stop agreeing.'),
+    'Each state on the slider is the argv pointer array decoded from a real step of a real sort.');
+}
+
+/* ------------------------------------------------------------------ *
+ * 1.10 — exam mode                                                     *
+ * ------------------------------------------------------------------ */
+const C06_EXAM = {
+  title: 'ft_print_params_sep',
+  brief: 'Write a program that displays its arguments, except argv[0], separated by a comma and a space, ' +
+         'all on one line, followed by a newline. With no arguments it must print only the newline.',
+  steps: [
+    ['Understand', 'Restate the problem in your own words, without looking at it.'],
+    ['Input', 'What does the program receive, and which parts of it matter?'],
+    ['Output', 'Exactly what bytes appear, in what order? Where does the separator NOT appear?'],
+    ['Variables', 'Name each one and say what it counts.'],
+    ['Indexes', 'First index, last index, direction. Say them out loud.'],
+    ['Algorithm', 'Write it in plain language, as numbered steps.'],
+    ['Trace', 'Take ./a.out a b and walk your steps by hand on paper.'],
+    ['Edge cases', 'No arguments. One argument. An empty argument.'],
+    ['Code', 'Only now.'],
+    ['Compile', 'cc -Wall -Wextra -Werror. Zero warnings.'],
+    ['Test', 'Pipe through cat -e and check every line ending.'],
+    ['Explain', 'Say why the separator logic is where it is, as if to an evaluator.'],
+  ],
+  hints: [
+    ['conceptual', 'The separator sits BETWEEN arguments, so there is one fewer separator than there are arguments. Which iteration is the odd one out?'],
+    ['structural', 'You still have the ex01 shape: an outer loop over indexes and an inner loop counting characters. The only new decision is when to emit the separator.'],
+    ['algorithmic', 'Either write the separator before every argument except the first, or after every argument except the last. Pick one and say which index test it needs.'],
+    ['debugging', 'If a stray separator appears, print the index alongside each write and check which iteration produced it. If the line ending is wrong, look at where the newline is relative to the loop.'],
+  ],
+};
+
+function mC06ExamMode() {
+  const s = c6State();
+  const open = Math.max(0, Math.min(s.c6Hint, C06_EXAM.hints.length));
+  return c4Block('Exam mode — a problem, and no answer key',
+    '<div class="c6-exam"><div class="c6-exam-h"><span class="c4-badge alt">NOT FROM THE SUBJECT</span>' +
+      '<b class="mono">' + c4Esc(C06_EXAM.title) + '</b></div>' +
+      '<p class="c6-exam-b">' + c4Esc(C06_EXAM.brief) + '</p>' +
+      '<div class="c6-exam-rules">Allowed: <span class="mono">write</span>. ' +
+      'Compiles with <span class="mono">-Wall -Wextra -Werror</span>. Norminette clean.</div></div>' +
+    '<div class="c6-steps"><div class="mem-col-h">work in this order — the code is step 9 of 12</div>' +
+      C06_EXAM.steps.map(([n, d], i) =>
+        '<div class="c6-step' + (i === 8 ? ' code' : '') + '">' +
+        '<span class="c6-step-n mono">' + String(i + 1).padStart(2, '0') + '</span>' +
+        '<span class="c6-step-t">' + c4Esc(n) + '</span>' +
+        '<span class="c6-step-d">' + c4Esc(d) + '</span></div>').join('') + '</div>' +
+    '<div class="c6-hints"><div class="mem-col-h">hints — each one is a nudge, not an answer</div>' +
+      C06_EXAM.hints.slice(0, open).map(([k, t], i) =>
+        '<div class="c6-hint"><span class="c6-hint-k">' + c4Esc(k) + '</span>' +
+        '<p>' + c4Esc(t) + '</p></div>').join('') +
+      (open < C06_EXAM.hints.length
+        ? '<button class="c4-chip" data-c6hint="' + (open + 1) + '">' +
+          (open === 0 ? 'I am stuck — give me a conceptual nudge' : 'still stuck — next hint') + '</button>'
+        : '<div class="c6-hint-end">That is every hint. There is no tenth hint containing the code — ' +
+          'if you are still stuck, trace <span class="mono">./a.out a b</span> by hand and watch where ' +
+          'the separator has to go.</div>') +
+      (open > 0 ? '<button class="c4-chip" data-c6hint="0">hide the hints again</button>' : '') +
+    '</div>' +
+    '<div class="c6-explain"><div class="mem-col-h">before you say you are done — can you explain it?</div>' +
+      ['Why is argv[0] excluded?',
+       'Why is argc a count and not the last index?',
+       'Why can argv be described as an array of char *?',
+       'How many separators does a list of n arguments need, and why?',
+       'Which iteration of your loop is different from all the others?',
+       'What does your program print when there are no arguments, and why is that right?'].map(q =>
+      '<div class="c6-ex-q">' + c4Esc(q) + '</div>').join('') +
+      '<p class="c4-p muted">These are the questions an evaluator asks. If any one of them is hard to ' +
+      'answer, that is the part to go back to — not the code.</p></div>',
+    'Nothing on this page contains a solution, and no hint will produce one.');
+}
+
+/* ------------------------------------------------------------------ *
+ * wiring                                                               *
+ * ------------------------------------------------------------------ */
+function wireC06() {
+  const s = c6State();
+  const re = () => { c4.step = null; renderLearn(); };
+  const live = (sel, set) => {
+    const el = $(sel);
+    if (!el) return;
+    el.addEventListener('input', () => {
+      const pos = el.selectionStart;
+      set(el.value);
+      renderLearn();
+      const again = $(sel);
+      if (again) { again.focus({ preventScroll: true }); try { again.setSelectionRange(pos, pos); } catch (e) {} }
+    });
+  };
+  live('#c6Prog', (v) => { c4.c6Prog = v; });
+  live('#c6A', (v) => { c4.c6A = v; });
+  live('#c6B', (v) => { c4.c6B = v; });
+  $$('#learnRoot [data-c6arg]').forEach(el => el.addEventListener('input', () => {
+    const i = +el.dataset.c6arg, pos = el.selectionStart;
+    const a = s.c6Args.slice(); a[i] = el.value; c4.c6Args = a;
+    renderLearn();
+    const again = $('#learnRoot [data-c6arg="' + i + '"]');
+    if (again) { again.focus({ preventScroll: true }); try { again.setSelectionRange(pos, pos); } catch (e) {} }
+  }));
+  $$('#learnRoot [data-c6sortarg]').forEach(el => el.addEventListener('input', () => {
+    const i = +el.dataset.c6sortarg, pos = el.selectionStart;
+    const a = s.c6Sort.slice(); a[i] = el.value; c4.c6Sort = a;
+    c4.c6SortStep = null;
+    renderLearn();
+    const again = $('#learnRoot [data-c6sortarg="' + i + '"]');
+    if (again) { again.focus({ preventScroll: true }); try { again.setSelectionRange(pos, pos); } catch (e) {} }
+  }));
+  $$('#learnRoot [data-c6del]').forEach(el => el.addEventListener('click', () => {
+    const a = s.c6Args.slice(); a.splice(+el.dataset.c6del, 1);
+    c4.c6Args = a; c4.c6Step = null; re();
+  }));
+  $$('#learnRoot [data-c6add]').forEach(el => el.addEventListener('click', () => {
+    c4.c6Args = s.c6Args.concat(['arg' + (s.c6Args.length + 1)]); c4.c6Step = null; re();
+  }));
+  $$('#learnRoot [data-c6set]').forEach(el => el.addEventListener('click', () => {
+    try { c4.c6Args = JSON.parse(el.dataset.c6set); } catch (e) { c4.c6Args = []; }
+    c4.c6Step = null; re();
+  }));
+  $$('#learnRoot [data-c6sortset]').forEach(el => el.addEventListener('click', () => {
+    try { c4.c6Sort = JSON.parse(el.dataset.c6sortset); } catch (e) { c4.c6Sort = []; }
+    c4.c6SortStep = null; re();
+  }));
+  $$('#learnRoot [data-c6cmp]').forEach(el => el.addEventListener('click', () => {
+    try { const p = JSON.parse(el.dataset.c6cmp); c4.c6A = p[0]; c4.c6B = p[1]; } catch (e) {}
+    re();
+  }));
+  $$('#learnRoot [data-c6q]').forEach(el => el.addEventListener('click', () => {
+    if (!c4.c6Quiz) c4.c6Quiz = {};
+    c4.c6Quiz[el.dataset.c6q] = !c4.c6Quiz[el.dataset.c6q];
+    renderLearn();
+  }));
+  $$('#learnRoot [data-c6hint]').forEach(el => el.addEventListener('click', () => {
+    c4.c6Hint = +el.dataset.c6hint; renderLearn();
+  }));
+  $$('#learnRoot [data-c6go]').forEach(el => el.addEventListener('click', () => {
+    const k = el.dataset.c6go;
+    /* a cross-module link: the memory pages live in another module */
+    if (k.indexOf('f:') === 0 && !c4Pages().some(p => p.key === k)) c4.mod = 'MEM';
+    c4.page = k; c4.tab = 'subject'; c4.step = null; renderLearn();
+    const m = $('.c4-main'); if (m) m.scrollTop = 0;
+  }));
+  const step = $('#learnRoot [data-c6step]');
+  if (step) step.addEventListener('input', () => {
+    c4.c6Step = +step.value; renderLearn();
+    const again = $('#learnRoot [data-c6step]');
+    if (again) again.focus({ preventScroll: true });
+  });
+  const ss = $('#learnRoot [data-c6sortstep]');
+  if (ss) ss.addEventListener('input', () => {
+    c4.c6SortStep = +ss.value; renderLearn();
+    const again = $('#learnRoot [data-c6sortstep]');
+    if (again) again.focus({ preventScroll: true });
+  });
+}
+/* ==== C06UI END ==== */
 
 /* ==== TERM START ====
    PHASE 8 — the simulated C / 1337 terminal.
