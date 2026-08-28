@@ -72,6 +72,14 @@ const BASELINE = {
   ex7:  { ok:true,  output:'' },
   exBug1:{ ok:false, kind:'out-of-bounds' },
   exBug2:{ ok:false, kind:'use-after-free' },
+  // C03 string functions (Phase 7.5). None of them writes, so none produces
+  // output; what matters here is that all six keep running cleanly.
+  c03_strcmp:  { ok:true, output:'' },
+  c03_strncmp: { ok:true, output:'' },
+  c03_strcat:  { ok:true, output:'' },
+  c03_strncat: { ok:true, output:'' },
+  c03_strstr:  { ok:true, output:'' },
+  c03_strlcat: { ok:true, output:'' },
 };
 
 console.log('=== PART A: regression of the 13 original examples ===');

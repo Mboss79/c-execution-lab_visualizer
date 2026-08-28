@@ -4883,6 +4883,87 @@ html[data-theme=light] .viz-node.vz-frame::after{
   #learnRoot .mem-obj-s { display:none; }
 }
 /* ==== MEMCSS END ==== */
+
+/* ---- the deep additions: pipeline, strings, bridge, lifecycle, bugs ---- */
+#learnRoot .mem-chain-v { display:grid; gap:6px; }
+#learnRoot .mem-stage-b { border:1px solid var(--border); border-radius:8px; padding:12px 14px;
+  background:var(--bg); }
+#learnRoot .mem-stage-h { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+  margin-bottom:9px; }
+#learnRoot .mem-stage-n { width:20px; height:20px; display:grid; place-items:center;
+  border-radius:50%; background:var(--surface); border:1px solid var(--border); font-size:10.5px;
+  flex:0 0 auto; }
+#learnRoot .mem-stage-h b { font-size:11.5px; letter-spacing:.09em; }
+#learnRoot .mem-stage-w { font-size:11px; color:var(--text-faint); }
+#learnRoot .mem-stage-a { text-align:center; font-size:11px; color:var(--text-faint); }
+#learnRoot .mem-toks { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:10px; }
+#learnRoot .mem-tok { display:grid; justify-items:center; gap:1px; padding:4px 7px;
+  border:1px solid var(--border); border-radius:5px; background:var(--surface); }
+#learnRoot .mem-tok-t { font-size:8.5px; letter-spacing:.06em; color:var(--text-faint); }
+#learnRoot .mem-tok-v { font-size:12px; font-weight:700; }
+#learnRoot .mem-tok.t-keyword { border-color:var(--execution); }
+#learnRoot .mem-tok.more { align-self:center; font-size:11px; color:var(--text-faint);
+  border-style:dashed; }
+#learnRoot .mem-decls { display:grid; gap:4px; }
+#learnRoot .mem-decl { display:grid; grid-template-columns:auto auto minmax(0,1fr); gap:10px;
+  align-items:baseline; padding:6px 9px; border:1px solid var(--border); border-radius:6px;
+  font-size:12px; }
+#learnRoot .mem-decl-k { font-size:10px; letter-spacing:.07em; text-transform:uppercase;
+  font-weight:700; color:var(--execution); }
+#learnRoot .mem-decl-w { font-size:11px; color:var(--text-muted); }
+#learnRoot .mem-map.compact .mem-region.tight .mem-region-h { padding:5px 10px; }
+#learnRoot .mem-map.compact .mem-region.tight .mem-region-b { padding:6px 10px; }
+#learnRoot .mem-map.compact .mem-obj { font-size:11px; }
+
+/* lifecycle */
+#learnRoot .mem-lifebar { display:flex; gap:3px; flex-wrap:wrap; margin:12px 0; }
+#learnRoot .mem-lifest { flex:1 1 88px; display:grid; justify-items:center; gap:2px; padding:7px 5px;
+  border:1px solid var(--border); border-radius:7px; background:var(--bg); text-align:center; }
+#learnRoot .mem-lifest b { font-size:10px; letter-spacing:.05em; color:var(--text-faint); }
+#learnRoot .mem-lifest-n { font-size:9px; color:var(--text-faint); }
+#learnRoot .mem-lifest.on { border-color:var(--execution);
+  background:color-mix(in srgb, var(--execution) 15%, transparent); }
+#learnRoot .mem-lifest.on b { color:var(--text); }
+#learnRoot .mem-lifest.past { opacity:.55; }
+#learnRoot .mem-lifewhat { font-size:12.5px; line-height:1.65; padding:9px 12px;
+  border-left:2px solid var(--execution); background:var(--bg); border-radius:0 6px 6px 0;
+  margin-bottom:12px; }
+
+/* bug cards with a memory picture */
+#learnRoot .mem-bugs2 { display:grid; gap:5px; }
+#learnRoot .mem-bugc { border:1px solid var(--border); border-radius:8px; background:var(--bg);
+  overflow:hidden; }
+#learnRoot .mem-bugc summary { display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  padding:10px 13px; cursor:pointer; font-size:12.5px; }
+#learnRoot .mem-bugc[open] { border-color:var(--execution); }
+#learnRoot .mem-bugc-t { font-weight:700; }
+#learnRoot .mem-bugc-k { margin-left:auto; font-size:10px; letter-spacing:.07em;
+  text-transform:uppercase; font-weight:700; color:var(--text-faint); }
+#learnRoot .mem-bugc-k.bad { color:var(--bad,#d05c5c); }
+#learnRoot .mem-bugc-b { padding:0 13px 13px; display:grid; gap:9px; }
+#learnRoot .mem-bugc-r { display:grid; gap:4px; }
+#learnRoot .mem-bugc-r > span { font-size:9.5px; letter-spacing:.09em; text-transform:uppercase;
+  font-weight:700; color:var(--text-faint); }
+#learnRoot .mem-bugc-r p { margin:0; font-size:12px; line-height:1.6; }
+#learnRoot .mem-bugc-r.fix p { color:var(--text); }
+#learnRoot .mem-bugc-diag { color:var(--bad,#d05c5c); font-family:var(--mono); font-size:11px !important; }
+
+/* the bridge on to C 06 */
+#learnRoot .mem-next { margin-top:16px; }
+#learnRoot .mem-next-l { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:6px; }
+#learnRoot .mem-go { display:grid; gap:2px; text-align:left; border:1px solid var(--border);
+  border-radius:8px; padding:9px 11px; background:var(--bg); cursor:pointer; font:inherit;
+  color:var(--text); }
+#learnRoot .mem-go:hover { border-color:var(--execution); }
+#learnRoot .mem-go b { font-size:12px; color:var(--execution); }
+#learnRoot .mem-go span { font-size:11px; color:var(--text-muted); }
+#learnRoot .mem-casetag { font-size:10.5px; letter-spacing:.09em; text-transform:uppercase;
+  font-weight:700; color:var(--execution); margin-bottom:8px; }
+
+@media (max-width:1100px) {
+  #learnRoot .mem-decl { grid-template-columns:1fr; gap:2px; }
+  #learnRoot .mem-lifest { flex:1 1 66px; }
+}
 /* ==== C06CSS START ====
    C 06. Scoped under #learnRoot like every other module sheet, and reusing the
    memory module's primitives (.mem-tape, .mem-eq, .mem-chk, .mem-time) rather
@@ -21554,6 +21635,8 @@ const MEM_STARTS = [
   ['f:malloc', 'malloc asks for bytes', 'Not items. This is why sizeof exists.'],
   ['f:free', 'free, and the pointer that survives it', 'The object dies; the variable keeps the address.'],
   ['f:ram-map', 'The conceptual memory map', 'Six regions, and what the standard does and does not promise.'],
+  ['f:pipeline', 'Source text to a process', 'What the compiler actually produces — and what it discards.'],
+  ['f:bugcards', 'Ten memory bugs, drawn', 'Nine the engine catches, one it cannot.'],
   ['f:explorer', 'Explore a program in RAM', 'One program, every region, click anything.'],
 ];
 
@@ -21671,6 +21754,19 @@ const MEM_FOUND = [
   viz: ['mArgvWrite'],
 },
 
+{
+  id: 'argv-bridge', n: '1.9', title: 'argv in the address space',
+  what: 'Everything from 1.1 to 1.8, drawn on the memory map: which of these objects is in the frame, which is not, and how far apart they really are.',
+  why: 'It is the bridge between knowing what argv IS and using it. C 06 is four exercises that do nothing but walk this array.',
+  keys: [
+    ['in the frame', 'argc and argv themselves — two small objects'],
+    ['not in the frame', 'the pointer array and the argument strings'],
+    ['argv holds', 'an address, like every other pointer'],
+    ['what comes next', 'C 06 — read one, read all, read them backwards, order them'],
+  ],
+  viz: ['mArgvBridge'],
+},
+
 /* ---------------------------- dynamic memory ---------------------------- */
 {
   id: 'why-heap', n: '2.1', title: 'Why dynamic memory exists',
@@ -21746,9 +21842,48 @@ const MEM_FOUND = [
   viz: ['mFree', 'mLifecycle', 'mLeak'],
 },
 
+{
+  id: 'lifecycle', n: '2.7', title: 'The complete lifecycle of an allocation',
+  what: 'Declare, allocate, initialise, use, reallocate, use again, free — and then the state in which the pointer still exists and nothing may be done with it.',
+  why: 'Each stage changes exactly one thing. Seeing the map change at every step is what turns the rules into a picture you can carry.',
+  keys: [
+    ['declare', 'the pointer exists; its value is indeterminate'],
+    ['allocate', 'bytes are reserved; their contents are still indeterminate'],
+    ['initialize', 'the first write — only now may the bytes be read'],
+    ['reallocate', 'a bigger block, the contents carried across'],
+    ['free', 'the object ends; the variable does not'],
+  ],
+  viz: ['mFullLifecycle'],
+},
+{
+  id: 'bugcards', n: '2.8', title: 'Ten memory bugs, drawn in RAM',
+  what: 'One card per bug: the code, the bad state, the memory picture, what the engine says, and the mental model that prevents it.',
+  why: 'Nine of the ten stop the engine with a named diagnosis. The tenth — the leak — runs to the end without complaint, which is precisely why it is the one that survives testing.',
+  keys: [
+    ['nine of them', 'are caught: null, out-of-bounds, uninitialised, use-after-free, double free, use-after-return, two invalid frees'],
+    ['one of them', 'is not caught at all — the leak'],
+    ['each card', 'is a real program, really executed'],
+    ['the eleventh', 'realloc failure, explained rather than run, and labelled as such'],
+  ],
+  viz: ['mBugRam'],
+},
+
 /* ------------------------------- the RAM map ---------------------------- */
 {
-  id: 'ram-map', n: '3.1', title: 'The conceptual memory map',
+  id: 'pipeline', n: '3.1', title: 'From source text to a running process',
+  what: 'A .c file is characters. What runs is instructions and objects laid out in an address space. These are the stages in between, run on a real program.',
+  why: 'Most confusion about "where does a variable live" comes from imagining the source file being loaded. It is not: it is consumed, and something quite different is produced.',
+  keys: [
+    ['source', 'characters — no variables, no instructions yet'],
+    ['tokens', 'the compiler\'s first pass over those characters'],
+    ['syntax tree', 'declarations and definitions, grouped'],
+    ['program, then process', 'instructions and objects, placed in regions'],
+    ['what is NOT there', 'the source text, and the variable names'],
+  ],
+  viz: ['mCompilePipeline'],
+},
+{
+  id: 'ram-map', n: '3.2', title: 'The conceptual memory map',
   what: 'A running program sees one flat range of addresses. Different KINDS of object are placed in different parts of it.',
   why: 'The picture below is a conceptual model, not a photograph of your machine. It is the right model to reason with, and the lesson is careful to say which parts the C standard actually promises.',
   keys: [
@@ -21760,7 +21895,7 @@ const MEM_FOUND = [
   viz: ['mRamMap'],
 },
 {
-  id: 'regions', n: '3.2', title: 'TEXT, RODATA, DATA and BSS',
+  id: 'regions', n: '3.3', title: 'TEXT, RODATA, DATA and BSS',
   what: 'Code, read-only constants, initialised globals and zero-initialised globals are four different things with four different homes.',
   why: 'char *s = "hello" and char s[] = "hello" look almost identical and land in different places with different rules. This is where that difference lives.',
   keys: [
@@ -21773,7 +21908,19 @@ const MEM_FOUND = [
   viz: ['mRegions', 'mLiteralVsArray'],
 },
 {
-  id: 'frames', n: '3.3', title: 'The stack — frames, LIFO, and recursion',
+  id: 'strings', n: '3.4', title: 'Strings in memory, byte by byte',
+  what: 'A string is a run of bytes ending in \\0. Where those bytes live, and whether you may change them, is decided entirely by how you declared it.',
+  why: 'char *s = "hello" and char s[] = "hello" look nearly identical and produce two different objects with two different rules. This is the distinction that catches everyone once.',
+  keys: [
+    ['char s[] = "hello"', 'your own array — writable, 6 bytes'],
+    ['char *s = "hello"', 'a pointer to a literal — the literal is not writable'],
+    ['the \\0', 'one byte of value 0, part of the object'],
+    ['what depends on it', 'strlen counts to it; write does not look for it'],
+  ],
+  viz: ['mStringsRam'],
+},
+{
+  id: 'frames', n: '3.5', title: 'The stack — frames, LIFO, and recursion',
   what: 'Each call gets a frame holding that call\'s parameters and locals. The frame appears on entry and disappears on return.',
   why: 'You already met this in C 05 as recursion. It is the same mechanism seen from the memory side: recursion is not special, it is just many frames of the same function.',
   keys: [
@@ -21785,7 +21932,7 @@ const MEM_FOUND = [
   viz: ['mFrames'],
 },
 {
-  id: 'pointee', n: '3.4', title: 'Pointer vs pointee, arrays, and strings',
+  id: 'pointee', n: '3.6', title: 'Pointer vs pointee, arrays, and strings',
   what: 'A pointer is a variable that holds an address. The pointee is the object at that address. They are two separate objects in two separate places.',
   why: 'p is not the heap. p is a variable — usually a local, on the stack — whose value happens to be a heap address. Keeping these apart is most of pointer competence.',
   keys: [
@@ -21798,7 +21945,7 @@ const MEM_FOUND = [
   viz: ['mPointee', 'mArrays'],
 },
 {
-  id: 'explorer', n: '3.5', title: 'Explore a C program in RAM',
+  id: 'explorer', n: '3.7', title: 'Explore a C program in RAM',
   what: 'One program using globals, statics, a literal, locals, argv and the heap — with every object it creates laid out by region.',
   why: 'Everything in this module at once. Click any object to see its region, type, size, address, and what it points to.',
   keys: [
@@ -25937,6 +26084,7 @@ function c4VizRegistry() {
     mMainProto, mArgvWrite, mStackVsHeap, mSizeof, mMalloc, mMallocFail,
     mCalloc, mRealloc, mFree, mLifecycle, mLeak,
     mRamMap, mRegions, mLiteralVsArray, mFrames, mPointee, mArrays, mExplorer,
+    mCompilePipeline, mStringsRam, mArgvBridge, mFullLifecycle, mBugRam,
     mC06Command, mC06Indexes, mC06Forward, mC06Reverse, mC06Write,
     mC06Ascii, mC06Compare, mC06PointerSwap, mC06SortScan, mC06SortComplete, mC06ExamMode,
   };
@@ -28349,6 +28497,7 @@ const MEM_DEFAULTS = {
   mSelCh: 0,                // which character inside it
   mBytes: 4,                // malloc element count
   mLife: 0,                 // lifecycle timeline position
+  mLife2: null,             // the full-lifecycle timeline, null = the end
   mRe: 'grow',              // realloc case: grow | shrink | move | fail
   mExp: null,               // selected block in the explorer
   mExpStep: null,           // explorer step
@@ -28510,8 +28659,9 @@ function memArgEditor() {
   return '<div class="mem-args">' +
     '<div class="mem-args-r"><label class="c4-lab" for="mProg">argv[0]</label>' +
       '<input id="mProg" class="c4-in mono vwide" value="' + c4Esc(s.mProg) + '" maxlength="24" spellcheck="false"></div>' +
-    s.mArgs.map((a, i) => '<div class="mem-args-r"><label class="c4-lab mono">argv[' + (i + 1) + ']</label>' +
-      '<input class="c4-in mono vwide" data-memarg="' + i + '" value="' + c4Esc(a) + '" maxlength="24" spellcheck="false">' +
+    s.mArgs.map((a, i) => '<div class="mem-args-r"><label class="c4-lab mono" for="mArg' + i + '">argv[' + (i + 1) + ']</label>' +
+      '<input id="mArg' + i + '" class="c4-in mono vwide" data-memarg="' + i + '" value="' + c4Esc(a) +
+      '" maxlength="24" spellcheck="false" aria-label="Argument ' + (i + 1) + '">' +
       '<button class="mem-x" data-memdel="' + i + '" aria-label="Remove argument ' + (i + 1) + '">✕</button></div>').join('') +
     '<div class="mem-args-r"><button class="c4-chip add" data-memadd="1">+ add an argument</button>' +
       '<span class="c4-presets">' + [['hello 42', ['hello', '42']], ['one', ['one']], ['none', []],
@@ -29008,8 +29158,8 @@ function mCalloc() {
  * ------------------------------------------------------------------ */
 function mRealloc() {
   const s = memState();
-  const cases = [['grow', 'grow — 3 ints to 5'], ['shrink', 'shrink — 5 ints to 3'],
-                 ['move', 'move — new address, contents copied'], ['fail', 'failure — returns NULL']];
+  const cases = [['grow', 'CASE A — extended where it was'], ['shrink', 'shrink — 5 ints to 3'],
+                 ['move', 'CASE B — moved, contents copied'], ['fail', 'failure — returns NULL']];
   const kind = cases.some(c => c[0] === s.mRe) ? s.mRe : 'grow';
   /* The move case is realloc's definition, executed: allocate the new block,
      copy, release the old one. */
@@ -29035,11 +29185,15 @@ function mRealloc() {
   const oldBlk = heap[0], newBlk = heap[1];
   let body = '';
   if (kind === 'grow') {
-    body = '<div class="mem-ba"><div class="mem-ba-c"><div class="mem-col-h">before — 3 ints</div>' +
+    body = '<div class="mem-casetag">CASE A — the same address comes back</div>' +
+      '<div class="mem-ba"><div class="mem-ba-c"><div class="mem-col-h">before — 3 ints</div>' +
       cells(oldBlk, 3) + '</div><div class="mem-ba-a">realloc(p, 5 * sizeof(int))</div>' +
       '<div class="mem-ba-c"><div class="mem-col-h">after — 5 ints</div>' + cells(newBlk, 5) + '</div></div>' +
-      '<p class="c4-p">The first three values are preserved. The two new elements are ' +
-      '<b>indeterminate</b> — realloc initialises nothing beyond what it copied.</p>';
+      '<p class="c4-p">This is the outcome where the block was extended where it already was, so the ' +
+      'address you had is still the address you have. The first three values are preserved; the two ' +
+      'new elements are <b>indeterminate</b> — realloc initialises nothing beyond what it copied. ' +
+      'You cannot tell in advance that you will get this case rather than CASE B, which is exactly ' +
+      'why the returned pointer is the only one to trust.</p>';
   } else if (kind === 'shrink') {
     body = '<div class="mem-ba"><div class="mem-ba-c"><div class="mem-col-h">before — 5 ints</div>' +
       cells(newBlk, 5) + '</div><div class="mem-ba-a">realloc(p, 3 * sizeof(int))</div>' +
@@ -29051,7 +29205,7 @@ function mRealloc() {
       (oldBlk ? ' <span class="mem-dim mono">' + hexA(oldBlk.base) + '</span>' : '') + '</div>' +
       cells(oldBlk, 3) + '<div class="mem-tagx ' + (oldBlk && oldBlk.state === 'freed' ? 'freed' : '') + '">' +
       (oldBlk ? oldBlk.state : '') + '</div></div>' +
-      '<div class="mem-ba-a">copied, then released</div>' +
+      '<div class="mem-ba-a">CASE B — a different address<br>copied, then released</div>' +
       '<div class="mem-ba-c"><div class="mem-col-h">new block' +
       (newBlk ? ' <span class="mem-dim mono">' + hexA(newBlk.base) + '</span>' : '') + '</div>' +
       cells(newBlk, 5) + '</div></div>' +
@@ -29451,6 +29605,8 @@ function mPointee() {
       '<tr><td class="mono">p</td><td>the address stored in p</td><td class="mono">' + c4Esc(p ? p.valueText : '—') + '</td></tr>' +
       '<tr><td class="mono">*p</td><td>the object at that address</td><td class="mono">' + c4Esc(x ? x.valueText : '—') + '</td></tr>' +
       '<tr><td class="mono">&amp;x</td><td>the address of x</td><td class="mono">' + (x ? hexA(x.address) : '—') + '</td></tr>' +
+      '<tr><td class="mono">&amp;p</td><td>the address of p itself — where the POINTER lives</td>' +
+        '<td class="mono">' + (p ? hexA(p.address) : '—') + '</td></tr>' +
       '<tr><td class="mono">pp</td><td>the address stored in pp</td><td class="mono">' + c4Esc(pp ? pp.valueText : '—') + '</td></tr>' +
       '<tr><td class="mono">*pp</td><td>p itself</td><td class="mono">' + c4Esc(p ? p.valueText : '—') + '</td></tr>' +
       '<tr><td class="mono">**pp</td><td>x</td><td class="mono">' + c4Esc(x ? x.valueText : '—') + '</td></tr>' +
@@ -29458,6 +29614,14 @@ function mPointee() {
     (before && after ? '<div class="mem-say"><span class="mono">*p = 99;</span> did not change p. ' +
       'It changed the object p points at: x went from <span class="mono">42</span> to ' +
       '<span class="mono c4-hl">99</span>, while p kept the same address throughout.</div>' : '') +
+    '<div class="mem-eq"><div class="mem-col-h">the two words, side by side</div>' +
+      '<div class="mem-eq-r"><span>pointer</span><span>the POINTER is the variable — here <span class="mono">p</span>, ' +
+        'which lives at <span class="mono">' + (p ? hexA(p.address) : '—') + '</span> and whose value is an address</span></div>' +
+      '<div class="mem-eq-r"><span>pointee</span><span>the POINTEE is the object at that address — here ' +
+        '<span class="mono">x</span>, at <span class="mono">' + (x ? hexA(x.address) : '—') + '</span></span></div>' +
+      '<div class="mem-eq-r"><span>&amp;p vs p</span><span><span class="mono">&amp;p</span> is where the pointer is; ' +
+        '<span class="mono">p</span> is where it points. Two different addresses.</span></div>' +
+    '</div>' +
     '<div class="c4-boxnote"><b>This is argv\'s shape.</b> <span class="mono">int **pp</span> and ' +
       '<span class="mono">char **argv</span> are the same idea: a pointer whose pointee is itself a ' +
       'pointer. Once you can read this diagram, you can read argv.</div>' +
@@ -29658,6 +29822,18 @@ function wireMem() {
     c4.mQuiz[el.dataset.memq] = !c4.mQuiz[el.dataset.memq];
     renderLearn();
   }));
+  const life2 = $('#learnRoot [data-memlife2]');
+  if (life2) life2.addEventListener('input', () => {
+    c4.mLife2 = +life2.value; renderLearn();
+    const again = $('#learnRoot [data-memlife2]');
+    if (again) again.focus({ preventScroll: true });
+  });
+  /* the bridge into C 06: a different module, so switch to it first */
+  $$('#learnRoot [data-memc06]').forEach(el => el.addEventListener('click', () => {
+    c4.mod = 'C06'; c4.page = el.dataset.memc06; c4.tab = 'subject'; c4.step = null;
+    renderLearn();
+    const m = $('.c4-main'); if (m) m.scrollTop = 0;
+  }));
   const life = $('#learnRoot [data-memlife]');
   if (life) life.addEventListener('input', () => {
     c4.mLife = +life.value; renderLearn();
@@ -29684,6 +29860,425 @@ function wireMem() {
   }));
 }
 /* ==== MEMRAM END ==== */
+/* ==== MEMDEEP START ====
+   Memory — the deep additions.
+
+   Five visualizers that fill genuine gaps in the module rather than restating
+   what it already covers:
+
+     mCompilePipeline  source text -> tokens -> AST -> program -> address space
+     mStringsRam       a string as bytes, and the literal/array distinction
+     mArgvBridge       argv drawn as process state, linking on to C 06
+     mFullLifecycle    declare -> allocate -> initialise -> use -> reallocate
+                       -> use -> free -> invalid, with the map at every step
+     mBugRam           ten memory bugs, each with the engine's own diagnosis
+
+   Everything is executed. The compiler stages come from CEngine.tokenize and
+   CEngine.compile, so the token count and the declaration list are the real
+   ones for the program on the page — not a drawing of what a compiler
+   generally does. The one thing that cannot be executed is a realloc failure,
+   because this engine's malloc does not fail; that card says so.            */
+
+/* Region bands, in the conventional high-to-low order, reusing the module's
+   existing ordering rather than inventing a second one. */
+function memMapRows(state, opts) {
+  const only = (opts && opts.regions) || null;
+  return MEM_REGION_ORDER.filter(([r]) => !only || only.indexOf(r) >= 0).map(([region, label]) => {
+    const blocks = memBlocks(state, region);
+    return '<div class="mem-region r-' + region + ' tight">' +
+      '<div class="mem-region-h"><b>' + label + '</b>' +
+      '<span class="mem-region-n mono">' + blocks.length + '</span></div>' +
+      (blocks.length ? '<div class="mem-region-b">' + blocks.map(b =>
+        '<div class="mem-obj' + (b.readonly ? ' ro' : '') + (b.state === 'freed' ? ' freed' : '') + '">' +
+        '<span class="mem-obj-l mono">' + c4Esc(b.label) + '</span>' +
+        '<span class="mem-obj-a mono">' + hexA(b.base) + '</span>' +
+        '<span class="mem-obj-z mono">' + b.size + ' B</span></div>').join('') + '</div>'
+        : '<div class="mem-region-e">—</div>') + '</div>';
+  }).join('');
+}
+
+/* ------------------------------------------------------------------ *
+ * 3.1 — from source text to a running process                          *
+ * ------------------------------------------------------------------ */
+const MEM_PIPE_SRC =
+'int\tg = 42;\n\nint\tmain(void)\n{\n\tint\tx;\n\n\tx = g + 1;\n\treturn (0);\n}\n';
+
+function mCompilePipeline() {
+  let toks = [], ast = null, astErr = null;
+  try { toks = CEngine.tokenize(MEM_PIPE_SRC) || []; } catch (e) { astErr = e.message; }
+  try { const c = CEngine.compile(MEM_PIPE_SRC); ast = c && c.ok ? Array.from(c.ast || []) : null; }
+  catch (e) { astErr = astErr || e.message; }
+  const run = memRun(MEM_PIPE_SRC, null);
+  const st = run.ok ? memLive(run) : null;
+  const byType = {};
+  toks.forEach(t => { byType[t.type] = (byType[t.type] || 0) + 1; });
+  const stage = (n, title, what, body) =>
+    '<div class="mem-stage-b"><div class="mem-stage-h">' +
+      '<span class="mem-stage-n mono">' + n + '</span><b>' + title + '</b>' +
+      '<span class="mem-stage-w">' + what + '</span></div>' + body + '</div>';
+  return c4Block('What actually happens between your file and a running program',
+    '<div class="mem-chain-v">' +
+      stage('1', 'SOURCE', 'characters in a file',
+        '<pre class="c4-pre mono">' + c4Esc(MEM_PIPE_SRC.replace(/\t/g, '    ')) + '</pre>' +
+        '<p class="c4-p muted">Text. Nothing here is a variable or an instruction yet — it is ' +
+        MEM_PIPE_SRC.length + ' characters.</p>') +
+      '<div class="mem-stage-a">↓ the compiler reads it</div>' +
+      stage('2', 'TOKENS', toks.length + ' of them',
+        '<div class="mem-toks">' + toks.slice(0, 14).map(t =>
+          '<span class="mem-tok t-' + c4Esc(String(t.type).toLowerCase()) + '">' +
+          '<span class="mem-tok-t">' + c4Esc(t.type) + '</span>' +
+          '<span class="mem-tok-v mono">' + c4Esc(String(t.value)) + '</span></span>').join('') +
+          (toks.length > 14 ? '<span class="mem-tok more">+ ' + (toks.length - 14) + ' more</span>' : '') +
+        '</div>' +
+        '<div class="mem-eq">' + Object.keys(byType).map(k =>
+          '<div class="mem-eq-r"><span>' + c4Esc(k) + '</span><span class="mono">' + byType[k] + '</span></div>').join('') +
+        '</div>') +
+      '<div class="mem-stage-a">↓ grouped into declarations</div>' +
+      stage('3', 'SYNTAX TREE', ast ? ast.length + ' top-level declarations' : 'did not parse',
+        ast ? '<div class="mem-decls">' + ast.map(d =>
+          '<div class="mem-decl"><span class="mem-decl-k">' + c4Esc(d.kind) + '</span>' +
+          '<span class="mono">' + c4Esc(d.name || (d.decls && d.decls[0] && d.decls[0].name) || '—') + '</span>' +
+          '<span class="mem-decl-w">' + (d.kind === 'FuncDef' ? 'becomes instructions in the code region'
+            : 'becomes an object with static storage duration') + '</span></div>').join('') + '</div>'
+          : '<div class="c4-empty">' + c4Esc(astErr || 'no tree') + '</div>') +
+      '<div class="mem-stage-a">↓ translated and laid out</div>' +
+      stage('4', 'PROGRAM, THEN PROCESS', st ? memBlocks(st).length + ' objects at run time' : '—',
+        st ? '<div class="mem-map compact">' + memMapRows(st) + '</div>'
+           : '<div class="c4-empty">did not run</div>') +
+    '</div>' +
+    '<div class="c4-warn"><span class="c4-badge alt">WHAT DOES AND DOES NOT LIVE IN THE CODE REGION</span>' +
+      '<p class="c4-p">The <b>machine instructions</b> the compiler produced for ' +
+      '<span class="mono">main</span> live in the code region. The <b>source text</b> does not — ' +
+      'it was consumed at stage 2 and is not part of the running program at all. Nor are the ' +
+      'variable names: <span class="mono">x</span> is a location, and the name existed only for ' +
+      'the compiler.</p></div>' +
+    memCheck('pipe1', 'Is the text of your .c file present in the running program?', 'No',
+      'The compiler turned it into instructions and layout decisions. The characters themselves are not loaded.') +
+    memCheck('pipe2', 'Which stage decides that g has static storage duration?',
+      'The compiler, from the declaration', 'It is declared outside any function, so its lifetime is the whole program — decided before anything runs.'),
+    'The token count, the token types and the declaration list above are what ' +
+    'CEngine.tokenize and CEngine.compile actually produced for that program.');
+}
+
+/* ------------------------------------------------------------------ *
+ * 3.4 — strings in memory                                              *
+ * ------------------------------------------------------------------ */
+function mStringsRam() {
+  const arrSrc = 'int\tmain(void)\n{\n\tchar\ts[] = "hello";\n\tint\tn;\n\n\tn = 0;\n' +
+    '\twhile (s[n])\n\t\tn++;\n\treturn (0);\n}\n';
+  const litSrc = 'int\tmain(void)\n{\n\tchar\t*s;\n\tint\tn;\n\n\ts = "hello";\n\tn = 0;\n' +
+    '\twhile (s[n])\n\t\tn++;\n\treturn (0);\n}\n';
+  const A = memRun(arrSrc, null), B = memRun(litSrc, null);
+  if (!A.ok) return c4Block('Strings in memory', memUnsup(A));
+  const aSt = memLive(A), bSt = memLive(B);
+  const aVar = memVar(aSt, 's'), aLen = memVar(aSt, 'n');
+  const bVar = memVar(bSt, 's'), bLen = memVar(bSt, 'n');
+  const aBlk = memBlocks(aSt).find(x => x.label === 's');
+  const bBlk = bVar && bVar.pointerTarget ? memBlocks(bSt).find(x => x.id === bVar.pointerTarget.blockId) : null;
+  const cells = (v) => v && v.elements ? '<div class="mem-tape">' + v.elements.map(e => {
+    const code = e.initialized && e.repr ? +e.repr.decimal : null;
+    const nul = code === 0;
+    return '<span class="mem-cell' + (nul ? ' nul' : '') + '">' +
+      '<span class="mem-cell-a mono">' + hexA(e.address) + '</span>' +
+      '<span class="mem-cell-c mono">' + c4Esc(nul ? '\\0' : (code === null ? '?' : String.fromCharCode(code))) + '</span>' +
+      '<span class="mem-cell-d mono">' + (code === null ? '?' : code) + '</span></span>';
+  }).join('') + '</div>' : '';
+  const bytesOf = (blk, st) => {
+    if (!blk) return '';
+    const node = ((st.graph && st.graph.nodes) || []).find(n => n.blockId === blk.id);
+    return '<div class="mem-tape">' + ((node && node.bytes) || []).map(b =>
+      '<span class="mem-cell' + (b.value === 0 ? ' nul' : '') + '">' +
+      '<span class="mem-cell-a mono">' + hexA(b.address) + '</span>' +
+      '<span class="mem-cell-c mono">' + c4Esc(b.value === 0 ? '\\0' : String.fromCharCode(b.value)) + '</span>' +
+      '<span class="mem-cell-d mono">' + b.value + '</span></span>').join('') + '</div>';
+  };
+  return c4Block('"hello" is six bytes, and where they live depends on how you declared it',
+    '<div class="mem-col-h mono">char s[] = "hello";</div>' + cells(aVar) +
+    '<div class="mem-eq">' +
+      '<div class="mem-eq-r"><span>the object</span><span class="mono">' +
+        (aBlk ? c4Esc(aBlk.label) + ' — ' + aBlk.size + ' bytes in ' + c4Esc(aBlk.sectionLabel) : '—') + '</span></div>' +
+      '<div class="mem-eq-r"><span>writable</span><span class="mono ' +
+        (aBlk && aBlk.readonly ? 'c4-bad">no' : 'c4-yes">yes') + '</span></div>' +
+      '<div class="mem-eq-r"><span>a counting loop found</span><span class="mono c4-hl">' +
+        (aLen && !aLen.uninitialized ? aLen.valueText : '—') + ' characters</span></div>' +
+    '</div>' +
+    '<div class="mem-col-h mono">char *s = "hello";</div>' + bytesOf(bBlk, bSt) +
+    '<div class="mem-eq">' +
+      '<div class="mem-eq-r"><span>s itself</span><span class="mono">' +
+        (bVar ? c4Esc(bVar.typeName) + ' at ' + hexA(bVar.address) + ', holding ' + c4Esc(bVar.valueText) : '—') + '</span></div>' +
+      '<div class="mem-eq-r"><span>the characters</span><span class="mono">' +
+        (bBlk ? c4Esc(bBlk.sectionLabel) + ' — a separate object entirely' : '—') + '</span></div>' +
+      '<div class="mem-eq-r"><span>writable</span><span class="mono ' +
+        (bBlk && bBlk.readonly ? 'c4-bad">no' : 'c4-yes">yes') + '</span></div>' +
+      '<div class="mem-eq-r"><span>the same counting loop found</span><span class="mono c4-hl">' +
+        (bLen && !bLen.uninitialized ? bLen.valueText : '—') + ' characters</span></div>' +
+    '</div>' +
+    '<div class="c4-boxnote"><b>Two declarations, two different objects.</b> The array version copies ' +
+      'the characters into storage of your own, which you may modify. The pointer version gives you ' +
+      'one pointer to a string literal — and a literal is not writable, so ' +
+      '<span class="mono">s[0] = \'H\';</span> through it is undefined behaviour. Both count to the ' +
+      'same length, because both end in the same <span class="mono">\\0</span>.</div>' +
+    '<div class="mem-eq"><div class="mem-col-h">what depends on that \\0</div>' +
+      '<div class="mem-eq-r"><span class="mono">strlen</span><span>counts forward until it meets the terminator</span></div>' +
+      '<div class="mem-eq-r"><span class="mono">write(1, s, n)</span><span>does NOT: it needs the count you worked out</span></div>' +
+      '<div class="mem-eq-r"><span class="mono">argv[i]</span><span>is exactly this — a pointer to bytes ending in \\0</span></div>' +
+    '</div>' +
+    memCheck('str1', 'How many bytes does "hello" occupy?', '6',
+      'Five characters and the one \\0 that ends it. The terminator is part of the object, not of the text.') +
+    memCheck('str2', 'Which of the two declarations may you modify?', 'char s[] = "hello"',
+      'It is your own array. Writing through a pointer to a literal is undefined behaviour.'),
+    'Both declarations were executed; the bytes, addresses, sections and both loop counts are the engine\'s.');
+}
+
+/* ------------------------------------------------------------------ *
+ * 1.9 — argv as process state, and the bridge to C 06                  *
+ * ------------------------------------------------------------------ */
+function mArgvBridge() {
+  const m = memArgvModel();
+  const s = memState();
+  if (!m) return c4Block('argv in the address space', memUnsup(memArgvRun()));
+  const st = m.st;
+  const words = [s.mProg].concat(s.mArgs);
+  const one = m.slots[1] || m.slots[0];
+  const chars = memArgChars(m, one ? one.i : 0);
+  return c4Block('Where argc and argv actually sit',
+    '<div class="mem-explore"><div class="mem-explore-map">' +
+      memMapRows(st, { regions: ['stack', 'global'] }) + '</div>' +
+      '<div class="mem-explore-i"><div class="mem-col-h">reading it back out</div>' +
+      '<div class="mem-eq">' +
+        '<div class="mem-eq-r"><span class="mono">argc</span><span>an int in the frame — <span class="mono">' +
+          m.argc + '</span></span></div>' +
+        '<div class="mem-eq-r"><span class="mono">argv</span><span>a <span class="mono">char **</span> in the frame, holding <span class="mono">' +
+          c4Esc(m.argv.valueText) + '</span></span></div>' +
+        '<div class="mem-eq-r"><span class="mono">argv[1]</span><span>the pointer in slot 1 — <span class="mono">' +
+          (one && one.target !== null ? hexA(one.target) : '—') + '</span></span></div>' +
+        '<div class="mem-eq-r"><span class="mono">*(argv + 1)</span><span>the same thing, written with pointer arithmetic</span></div>' +
+        '<div class="mem-eq-r"><span class="mono">argv[1][0]</span><span>the first byte of that string — ' +
+          (chars[0] ? '‘' + c4Esc(chars[0].ch) + '’ (' + chars[0].code + ')' : '—') + '</span></div>' +
+        '<div class="mem-eq-r"><span class="mono">argv[argc]</span><span>NULL — present, but not an argument</span></div>' +
+      '</div>' +
+      '<div class="c4-boxnote">Notice what the map shows: <span class="mono">argv</span> is a small ' +
+        'object in the frame. The array of pointers and the argument strings are somewhere else ' +
+        'entirely — the frame holds only the address.</div></div></div>' +
+    '<div class="mem-eq"><div class="mem-col-h">the command line that produced this</div>' +
+      '<div class="mem-eq-r"><span class="mono">$ ' + c4Esc(words.map(w => w === '' ? '""' : w).join(' ')) +
+        '</span><span>edit it on lesson 1.2 or 1.4 and this map follows</span></div></div>' +
+    '<div class="mem-next"><div class="mem-col-h">where this goes next</div>' +
+      '<p class="c4-p">That is the memory side. <b>C 06</b> is the using side: four exercises that do ' +
+      'nothing but walk this array — read one entry, read them all, read them backwards, put them in ' +
+      'ASCII order.</p>' +
+      '<div class="mem-next-l">' + [
+        ['ex:ex00', 'C 06 ex00', 'print argv[0]'],
+        ['ex:ex01', 'C 06 ex01', 'walk 1 → argc − 1'],
+        ['ex:ex02', 'C 06 ex02', 'walk argc − 1 → 1'],
+        ['ex:ex03', 'C 06 ex03', 'reorder the pointers'],
+      ].map(([k, t, w]) => '<button class="mem-go" data-memc06="' + c4Esc(k) + '">' +
+        '<b>' + c4Esc(t) + '</b><span>' + c4Esc(w) + '</span></button>').join('') + '</div></div>' +
+    memCheck('br1', 'What does argv point to?', 'The first element of an array of char *',
+      'Not to a string. To an array of pointers, each of which points to a string.') +
+    memCheck('br2', 'What is argv[argc]?', 'A null pointer',
+      'The sentinel that ends the array. It is not one of the argc arguments.') +
+    memCheck('br3', 'Why is char ** the right type for argv?',
+      'Because it points at pointers, and those point at characters',
+      'One star for "address of a char", a second for "address of one of those addresses".'),
+    'Every address, block and byte above came from running that command line in the engine.');
+}
+
+/* ------------------------------------------------------------------ *
+ * 2.7 — the complete lifecycle                                         *
+ * ------------------------------------------------------------------ */
+/* declare, allocate, initialise, use, reallocate (as its definition: a bigger
+   block, a copy, and the old one released), use again, free, and then the
+   state in which nothing may be touched. */
+const MEM_LIFE_SRC =
+'int\tmain(void)\n{\n\tint\t*p;\n\tint\t*bigger;\n\tint\ti;\n\n' +
+'\tp = malloc(2 * sizeof(int));\n\tp[0] = 10;\n\tp[1] = 20;\n' +
+'\ti = p[0] + p[1];\n' +
+'\tbigger = malloc(4 * sizeof(int));\n\ti = 0;\n\twhile (i < 2)\n\t{\n\t\tbigger[i] = p[i];\n\t\ti++;\n\t}\n' +
+'\tfree(p);\n\tp = bigger;\n\tp[2] = 30;\n\tfree(p);\n\treturn (0);\n}\n';
+
+const MEM_LIFE_STAGES = [
+  ['DECLARE', 'p exists as a variable; it holds nothing meaningful yet', /p = malloc\(2/],
+  ['ALLOCATE', 'malloc reserves bytes and returns their address', /p\[0\] = 10/],
+  ['INITIALIZE', 'the bytes are given values — until now reading them was undefined', /i = p\[0\]/],
+  ['USE', 'the object is read', /bigger = malloc/],
+  ['REALLOCATE', 'a larger block, the contents copied across, the old one released', /p = bigger/],
+  ['USE', 'the enlarged object is used', /free\(p\);\n\treturn/],
+  ['FREE', 'the lifetime of the allocation ends', null],
+  ['INVALID', 'p still holds an address; nothing may be read or written through it', null],
+];
+
+function mFullLifecycle() {
+  const s = memState();
+  const run = memRun(MEM_LIFE_SRC, null);
+  if (!run.ok) return c4Block('The complete lifecycle', memUnsup(run));
+  /* one mark per line change, so the slider steps through the program */
+  const marks = [];
+  let lastLine = null;
+  run.steps.forEach((st, k) => {
+    if (st.step.line === lastLine) return;
+    lastLine = st.step.line;
+    marks.push({ k, line: st.step.line, desc: st.step.description || '' });
+  });
+  const pos = Math.max(0, Math.min(s.mLife2 === undefined || s.mLife2 === null ? marks.length - 1 : s.mLife2,
+    marks.length - 1));
+  const cur = marks[pos];
+  const st = run.steps[cur.k].state;
+  const counts = st.counts || {};
+  const heap = memBlocks(st, 'heap');
+  const p = memVar(st, 'p');
+  /* which named stage the current line belongs to */
+  const srcLines = MEM_LIFE_SRC.split('\n');
+  let stageIx = 0;
+  for (let i = 0; i < MEM_LIFE_STAGES.length; i++) {
+    const marker = MEM_LIFE_STAGES[i][2];
+    if (!marker) continue;
+    const at = srcLines.findIndex(l => marker.test(l));
+    if (at >= 0 && cur.line > at) stageIx = i + 1;
+  }
+  if (pos === marks.length - 1) stageIx = MEM_LIFE_STAGES.length - 1;
+  stageIx = Math.min(stageIx, MEM_LIFE_STAGES.length - 1);
+  return c4Block('One allocation, from declaration to unusable',
+    '<div class="mem-time"><input type="range" class="fn-range" min="0" max="' + (marks.length - 1) +
+      '" value="' + pos + '" data-memlife2="1" aria-label="Lifecycle step">' +
+      '<span class="mem-time-n mono">step ' + (pos + 1) + ' / ' + marks.length + '</span></div>' +
+    '<div class="mem-lifebar">' + MEM_LIFE_STAGES.map(([n], i) =>
+      '<div class="mem-lifest' + (i === stageIx ? ' on' : (i < stageIx ? ' past' : '')) + '">' +
+      '<span class="mem-lifest-n">' + (i + 1) + '</span><b>' + n + '</b></div>').join('') + '</div>' +
+    '<div class="mem-lifewhat">' + c4Esc(MEM_LIFE_STAGES[stageIx][1]) + '</div>' +
+    '<div class="mem-explore"><div>' +
+      '<pre class="c4-pre mono">' + MEM_LIFE_SRC.replace(/\t/g, '    ').split('\n').map((l, k) =>
+        '<span class="c4-cl' + (k + 1 === cur.line ? ' on' : '') + '">' +
+        String(k + 1).padStart(2) + '  ' + c4Esc(l || ' ') + '</span>').join('') + '</pre></div>' +
+      '<div><div class="mem-col-h">the map at this step</div>' +
+      '<div class="mem-map compact">' + memMapRows(st, { regions: ['stack', 'heap'] }) + '</div>' +
+      '<div class="mem-counters">' +
+        '<div class="c5-stat"><span>heap live</span><b class="mono">' + (counts.heapLive || 0) + '</b></div>' +
+        '<div class="c5-stat"><span>released</span><b class="mono">' + (counts.heapFreed || 0) + '</b></div>' +
+        '<div class="c5-stat"><span>heap bytes</span><b class="mono">' + (counts.heapBytes || 0) + '</b></div>' +
+      '</div>' +
+      '<div class="mem-eq"><div class="mem-eq-r"><span class="mono">p</span><span class="mono">' +
+        c4Esc(p ? (p.uninitialized ? 'not set' : p.valueText) : '—') + '</span></div>' +
+        '<div class="mem-eq-r"><span>points at</span><span class="mono">' +
+        c4Esc(p && p.pointerTarget ? p.pointerTarget.label + ' (' + p.pointerTarget.kind + ')' :
+              (p && p.uninitialized ? 'nothing yet' : '—')) + '</span></div>' +
+        '<div class="mem-eq-r"><span>heap blocks</span><span class="mono">' +
+        (heap.length ? heap.map(x => x.size + 'B ' + x.state).join(', ') : 'none') + '</span></div>' +
+      '</div></div></div>' +
+    '<div class="mem-say">' + c4Esc(cur.desc) + '</div>' +
+    c4Limitation('This engine has no realloc builtin, so the REALLOCATE stage runs what realloc does: ' +
+      'a second malloc, a copy loop, and free of the original. That is why two heap blocks are briefly ' +
+      'live at once — a real realloc may instead extend the block in place, and then there is only ever one.') +
+    memCheck('life1', 'Between DECLARE and ALLOCATE, what does p contain?',
+      'Nothing you may rely on', 'An uninitialised pointer holds an indeterminate value. Reading through it is undefined behaviour.') +
+    memCheck('life2', 'Why is INITIALIZE a separate stage from ALLOCATE?',
+      'Because malloc does not set the bytes', 'The block exists but its contents are indeterminate until you write them.') +
+    memCheck('life3', 'After the final free, what is p?', 'A dangling pointer',
+      'It still holds the old address. The object is gone; the variable is not.'),
+    'Every block, counter and value on this page is read from the engine\'s snapshot for the step on the slider.');
+}
+
+/* ------------------------------------------------------------------ *
+ * 2.8 — ten bugs, each drawn from a real run                           *
+ * ------------------------------------------------------------------ */
+const MEM_BUG_CARDS = [
+  { id: 'null', title: 'NULL dereference',
+    src: 'int\tmain(void)\n{\n\tint\t*p;\n\n\tp = 0;\n\t*p = 1;\n\treturn (0);\n}\n',
+    bad: 'p holds no address at all, and the program writes through it anyway.',
+    model: 'A null pointer is a valid VALUE meaning "points at nothing". Test it before you use it — that is what the check after malloc is for.' },
+  { id: 'overflow', title: 'Buffer overflow',
+    src: 'int\tmain(void)\n{\n\tint\t*p;\n\n\tp = malloc(4);\n\tp[4] = 1;\n\treturn (0);\n}\n',
+    bad: 'The block is 4 bytes. Index 4 is past its end.',
+    model: 'The allocation size and the index range must come from the same expression: n elements means n * sizeof(t) bytes and indexes 0 .. n-1.' },
+  { id: 'wrongsize', title: 'Wrong allocation size',
+    src: 'int\tmain(void)\n{\n\tint\t*p;\n\n\tp = malloc(5);\n\tp[1] = 7;\n\treturn (0);\n}\n',
+    bad: 'malloc(5) was meant as "five ints". It reserved five BYTES, so the second int is already outside.',
+    model: 'malloc counts bytes. Write count * sizeof(type) every time, even when you are sure of the size.' },
+  { id: 'uninit', title: 'Reading uninitialised memory',
+    src: 'int\tmain(void)\n{\n\tint\t*p;\n\tint\tv;\n\n\tp = malloc(4);\n\tv = *p;\n\treturn (0);\n}\n',
+    bad: 'The block exists, but nothing has been written into it yet.',
+    model: 'malloc does not initialise. Write before you read, or use calloc when zero is what you want.' },
+  { id: 'uaf', title: 'Use after free',
+    src: 'int\tmain(void)\n{\n\tint\t*p;\n\n\tp = malloc(4);\n\tfree(p);\n\t*p = 1;\n\treturn (0);\n}\n',
+    bad: 'The object\'s lifetime ended at free. The pointer did not change, so the source looks fine.',
+    model: 'free ends the object, not the variable. After it, p names nothing you may touch.' },
+  { id: 'double', title: 'Double free',
+    src: 'int\tmain(void)\n{\n\tint\t*p;\n\n\tp = malloc(4);\n\tfree(p);\n\tfree(p);\n\treturn (0);\n}\n',
+    bad: 'The second free is handed a block that has already been released.',
+    model: 'One owner, one free. Setting the pointer to NULL afterwards makes a second free harmless, because free(NULL) is defined to do nothing.' },
+  { id: 'dangling', title: 'Dangling pointer (use after return)',
+    src: 'int\t*bad(void)\n{\n\tint\tx;\n\n\tx = 1;\n\treturn (&x);\n}\n\nint\tmain(void)\n{\n\tint\t*p;\n\n\tp = bad();\n\t*p = 2;\n\treturn (0);\n}\n',
+    bad: 'The address is of a local. Its frame was destroyed when bad() returned.',
+    model: 'Automatic storage ends at the closing brace. Return a value, take a caller-supplied buffer, or allocate — and then say who frees it.' },
+  { id: 'lost', title: 'Lost pointer — freeing one that was moved',
+    src: 'int\tmain(void)\n{\n\tint\t*p;\n\n\tp = malloc(8);\n\tp = p + 1;\n\tfree(p);\n\treturn (0);\n}\n',
+    bad: 'p no longer holds the address malloc returned, so free has nothing valid to release.',
+    model: 'Keep the original pointer. Walk a copy if you need to move through the block.' },
+  { id: 'wrongptr', title: 'Freeing something that was never allocated',
+    src: 'int\tmain(void)\n{\n\tint\tx;\n\tint\t*p;\n\n\tx = 1;\n\tp = &x;\n\tfree(p);\n\treturn (0);\n}\n',
+    bad: 'p points at an automatic object. free may only be given an address malloc returned.',
+    model: 'Allocated storage and automatic storage are released in completely different ways — one by you, one by the language.' },
+  { id: 'leak', title: 'Memory leak — the pointer overwritten',
+    src: 'int\tmain(void)\n{\n\tint\t*p;\n\n\tp = malloc(4);\n\tp = malloc(4);\n\treturn (0);\n}\n',
+    bad: 'The first block is still allocated and nothing refers to it any more. It cannot be used and cannot be freed.',
+    model: 'A block\'s lifetime does not end when the pointer stops pointing at it. Only free ends it.' },
+];
+
+function mBugRam() {
+  const card = (c) => {
+    const run = memRun(c.src, null);
+    const st = run.ok || run.steps ? memLive(run) : null;
+    const heap = st ? memBlocks(st, 'heap') : [];
+    const counts = (st && st.counts) || {};
+    const leaked = c.id === 'leak'
+      ? heap.filter(x => x.state === 'live').length - (() => {
+          const p = memVar(st, 'p');
+          return heap.filter(x => p && p.pointerTarget && p.pointerTarget.blockId === x.id).length;
+        })()
+      : null;
+    const diag = run.kind ? (CEngine.MEM_SAFETY_LABELS[run.kind] || run.kind) : null;
+    return '<details class="mem-bugc"><summary><span class="mem-bugc-t">' + c4Esc(c.title) + '</span>' +
+      '<span class="mem-bugc-k' + (diag ? ' bad' : '') + '">' +
+      c4Esc(diag || (leaked ? leaked + ' block leaked' : 'runs without stopping')) + '</span></summary>' +
+      '<div class="mem-bugc-b">' +
+      '<div class="mem-bugc-r"><span>the code</span>' +
+        '<pre class="c4-pre mono">' + c4Esc(c.src.replace(/\t/g, '    ').replace(/\n\treturn \(0\);\n\}\n$/, '')) + '</pre></div>' +
+      '<div class="mem-bugc-r"><span>the bad state</span><p>' + c4Esc(c.bad) + '</p></div>' +
+      '<div class="mem-bugc-r"><span>in memory</span>' +
+        (st ? '<div class="mem-map compact">' + memMapRows(st, { regions: ['stack', 'heap'] }) + '</div>'
+            : '<div class="c4-empty">the run stopped before any object existed</div>') + '</div>' +
+      '<div class="mem-bugc-r"><span>what the engine says</span>' +
+        '<p class="' + (diag ? 'mem-bugc-diag' : '') + '">' +
+        c4Esc(run.error || 'It runs to the end. Nothing stops it — which is what makes a leak the hardest of these to notice.') +
+        '</p></div>' +
+      '<div class="mem-bugc-r fix"><span>the correct mental model</span><p>' + c4Esc(c.model) + '</p></div>' +
+      '</div></details>';
+  };
+  return c4Block('Ten ways to get memory wrong, each one executed',
+    '<p class="c4-p">Every card below runs its own program. The diagnosis is the engine\'s, not a ' +
+      'description of what would probably happen.</p>' +
+    '<div class="mem-bugs2">' + MEM_BUG_CARDS.map(card).join('') + '</div>' +
+    '<details class="mem-bugc"><summary><span class="mem-bugc-t">Mishandling a realloc failure</span>' +
+      '<span class="mem-bugc-k">conceptual — see the note</span></summary>' +
+      '<div class="mem-bugc-b">' +
+      '<div class="mem-bugc-r"><span>the code</span>' +
+        '<pre class="c4-pre mono">p = realloc(p, bigger);</pre></div>' +
+      '<div class="mem-bugc-r"><span>the bad state</span><p>If realloc fails it returns NULL, and this ' +
+        'assignment overwrites the only pointer to a block that is still allocated. The block is now ' +
+        'unreachable and unfreeable.</p></div>' +
+      '<div class="mem-bugc-r"><span>the correct mental model</span><p>On failure the original ' +
+        'allocation is untouched and still yours. Keep it: tmp = realloc(p, bigger); if (tmp != NULL) p = tmp;</p></div>' +
+      '<div class="mem-bugc-r"><span>why there is no run here</span><p>This engine implements neither ' +
+        'realloc nor a failing malloc, so this card is explained rather than executed. Every other card ' +
+        'on this page is a real run.</p></div>' +
+      '</div></details>' +
+    memCheck('bug1', 'Which of these ten does the engine NOT stop on?', 'The leak',
+      'Nothing is violated at the moment it happens — that is exactly why leaks survive testing.') +
+    memCheck('bug2', 'Does free(p) set p to NULL?', 'No',
+      'It ends the object\'s lifetime and leaves the variable alone. Assigning NULL afterwards is your choice, and a good one.'),
+    'Ten programs, ten real executions. The diagnostics are CEngine\'s own memory-safety reports.');
+}
+/* ==== MEMDEEP END ==== */
 /* ==== C06UI START ====
    C 06 — visualizers.
 

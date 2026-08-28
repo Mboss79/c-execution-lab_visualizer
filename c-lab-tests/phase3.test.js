@@ -39,10 +39,31 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
   console.log('=== Phase 3: application shell ===');
   check('loads with no console errors', errs.length === 0, errs.slice(0, 3).join(' | '));
   check('opens on the dashboard', await page.evaluate(() => ui.view) === 'dashboard');
-  check('dashboard shows Continue / Exercises / Tools',
-    await page.evaluate(() => { const t = document.querySelector('.dash').textContent; return /Continue/.test(t) && /Exercises/.test(t) && /Tools/.test(t); }));
-  check('future tools are marked coming next, not implemented',
-    await page.evaluate(() => { const t = document.querySelector('.dash').textContent; return /Norm Lab/.test(t) && /Moulinette/.test(t) && /coming next/.test(t); }));
+  check('the dashboard presents the application\'s capabilities, and each routes somewhere',
+    await page.evaluate(() => {
+      const heads = [...document.querySelectorAll('#dashRoot .dash-sec h2')].map(h => h.textContent.trim());
+      if (!heads.includes('Labs') || !heads.includes('Tools')) return 'sections: ' + heads.join(',');
+      const cards = [...document.querySelectorAll('#dashRoot .dash-sec .dcard')];
+      if (cards.length < 15) return 'only ' + cards.length + ' cards';
+      const unrouted = cards.filter(c =>
+        !(c.dataset.lab || c.dataset.dpanel || c.dataset.ddock || c.id));
+      return unrouted.length ? unrouted.length + ' unrouted' : true;
+    }) === true);
+  check('the dashboard offers no destination that does not exist',
+    await page.evaluate(() => {
+      const bad = [];
+      for (const x of document.querySelectorAll('#dashRoot [data-open]'))
+        if (!EXAMPLES[x.dataset.open]) bad.push('example ' + x.dataset.open);
+      for (const x of document.querySelectorAll('#dashRoot [data-lab]'))
+        if (!LAB_TABS.some(t => t.id === x.dataset.lab)) bad.push('lab ' + x.dataset.lab);
+      for (const x of document.querySelectorAll('#dashRoot [data-dpanel]'))
+        if (!document.getElementById(x.dataset.dpanel)) bad.push('panel ' + x.dataset.dpanel);
+      for (const x of document.querySelectorAll('#dashRoot [data-ddock]'))
+        if (!document.querySelector('.dock-tab[data-dock="' + x.dataset.ddock + '"]')) bad.push('dock ' + x.dataset.ddock);
+      return bad.length ? bad.join(' | ') : true;
+    }) === true);
+  check('and parks no disabled placeholder on the entry page',
+    await page.evaluate(() => [...document.querySelectorAll('#dashRoot button')].filter(x => x.disabled).length) === 0);
   check('exercises have distinct filenames', await page.evaluate(() => {
     const names = EXAMPLE_ORDER.map(fileNameFor);
     return new Set(names).size === names.length;
@@ -385,7 +406,13 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
   await page.evaluate(() => setDockTab('build'));
   check('build tab exists', /cc -Wall/.test(await page.$eval('#dockBody', e => e.textContent)));
   await page.evaluate(() => setDockTab('terminal'));
-  check('terminal tab exists', /c-execution-lab/.test(await page.$eval('#dockBody', e => e.textContent)));
+  check('terminal tab renders the real simulated terminal',
+        await page.evaluate(() => {
+          const t = document.querySelector('#dockBody .tm');
+          const input = document.querySelector('#dockBody #termInput');
+          const sim = document.querySelector('#dockBody .tm-sim');
+          return !!t && !!input && !!sim && sim.textContent.trim() === 'SIMULATION';
+        }));
   check('dock collapses', await page.evaluate(() => { toggleDock(); const a = document.querySelector('#dock').classList.contains('collapsed'); toggleDock(); return a; }));
   await page.evaluate(() => setDockTab('output'));
 

@@ -188,9 +188,16 @@ const LONG = (() => {
     const code = sv.querySelector('.codeline .code');
     const cr = code.getBoundingClientRect(), tr = ta.getBoundingClientRect();
     const cs = getComputedStyle(ta), cc = getComputedStyle(code);
+    // Compare TEXT ORIGINS, not border boxes. getBoundingClientRect returns the
+    // border box, and .code carries a padding-left, so a border-box comparison
+    // called the layers aligned while the caret sat a character to the left of
+    // the glyph. Tab parity is asserted here too: the layers disagreeing on the
+    // tab stop was the larger half of the same caret bug.
     return {
-      dx: Math.round(tr.left - cr.left),
+      dx: Math.round((tr.left + parseFloat(cs.paddingLeft)) -
+                     (cr.left + parseFloat(cc.paddingLeft))),
       dy: Math.round((tr.top + parseFloat(cs.paddingTop)) - cr.top),
+      sameTabStop: (cs.tabSize || cs.MozTabSize) === (cc.tabSize || cc.MozTabSize),
       sameFont: cs.fontFamily === cc.fontFamily && cs.fontSize === cc.fontSize,
       sameLine: cs.lineHeight === cc.lineHeight || Math.abs(parseFloat(cs.lineHeight) - parseFloat(cc.lineHeight)) < 0.6,
       transparentText: cs.color === 'rgba(0, 0, 0, 0)' || cs.color === 'transparent',
@@ -199,7 +206,8 @@ const LONG = (() => {
   });
   check('the editing layer is aligned to the code column to the pixel',
         Math.abs(align.dx) <= 1 && Math.abs(align.dy) <= 1, JSON.stringify(align));
-  check('the two layers use identical text metrics', align.sameFont && align.sameLine, JSON.stringify(align));
+  check('the two layers use identical text metrics',
+        align.sameFont && align.sameLine && align.sameTabStop, JSON.stringify(align));
   check('the caret is visible even though the textarea text is not',
         align.transparentText && align.caretVisible, JSON.stringify(align));
   check('the gutter is not covered by the editor, so breakpoints stay clickable',
@@ -273,10 +281,66 @@ const LONG = (() => {
           sc.scrollTop = 900;
           const sv = document.querySelector('#sourceView'), ta = document.querySelector('#sourceEdit');
           const code = sv.querySelector('.codeline .code');
-          const d = Math.round(ta.getBoundingClientRect().left - code.getBoundingClientRect().left);
+          // text origin to text origin, for the reason given at check [16]
+          const d = Math.round(
+            (ta.getBoundingClientRect().left + parseFloat(getComputedStyle(ta).paddingLeft)) -
+            (code.getBoundingClientRect().left + parseFloat(getComputedStyle(code).paddingLeft)));
           sc.scrollTop = 0;
           return Math.abs(d) <= 1 ? true : 'drift ' + d + 'px';
         }) === true);
+
+  /* The assertion the pixel checks above could not make: click a glyph the
+     learner can see and ask where the caret actually went. Tab-indented code is
+     the case that matters — Piscine style indents with tabs, and a tab-stop
+     disagreement between the two layers moved the caret four columns per
+     indent level while every geometry check still passed. */
+  await setSrc(['int\tmain(void)', '{',
+                '\t\tunsigned char alpha = 65; beta = 66; gamma = 67;',
+                '\tint\tdeep = 1;',
+                '\t\t\tint\tdeeper = 2;', '}'].join('\n'));
+  await sleep(250);
+  const caretTargets = await page.evaluate(() => {
+    const view = document.querySelector('#sourceView');
+    const ta = document.querySelector('#sourceEdit');
+    const lines = ta.value.split('\n');
+    const out = [];
+    for (const ln of [3, 4, 5]) {
+      let base = 0;
+      for (let k = 0; k < ln - 1; k++) base += lines[k].length + 1;
+      const el = view.querySelector('.codeline[data-line="' + ln + '"] .code');
+      if (!el) continue;
+      const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      const flat = [];
+      let n;
+      while ((n = w.nextNode())) for (let i = 0; i < n.length; i++) flat.push({ nd: n, i });
+      for (let col = 1; col < flat.length - 1; col += 7) {
+        const r = document.createRange();
+        r.setStart(flat[col].nd, flat[col].i);
+        r.setEnd(flat[col].nd, flat[col].i + 1);
+        const rect = r.getBoundingClientRect();
+        if (!rect.width) continue;
+        out.push({ xL: Math.round(rect.left + rect.width * 0.25),
+                   xR: Math.round(rect.left + rect.width * 0.75),
+                   y: Math.round(rect.top + rect.height / 2),
+                   before: base + col, after: base + col + 1, line: ln });
+      }
+    }
+    return out;
+  });
+  let caretBad = [];
+  for (const t of caretTargets) {
+    await page.mouse.click(t.xL, t.y);
+    const gotL = await page.evaluate(() => document.querySelector('#sourceEdit').selectionStart);
+    await page.mouse.click(t.xR, t.y);
+    const gotR = await page.evaluate(() => document.querySelector('#sourceEdit').selectionStart);
+    if (gotL !== t.before || gotR !== t.after) {
+      caretBad.push('line ' + t.line + ' want ' + t.before + '/' + t.after + ' got ' + gotL + '/' + gotR);
+    }
+  }
+  check('clicking a glyph puts the caret on that glyph, on tab-indented lines',
+        caretTargets.length >= 9 && caretBad.length === 0,
+        caretBad.length ? caretBad.slice(0, 4).join('; ') : (caretTargets.length + ' positions'));
+
   await page.screenshot({ path: path.join(SHOTS, 'p12_editor.png') });
 
   console.log('\n=== Phase 11 · part 3: expanding the source ===');
