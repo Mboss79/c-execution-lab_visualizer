@@ -70,7 +70,7 @@ function counted(name, n, floor, detail) {
 
   /* every section must actually render something */
   const navs = await page.evaluate(() => [...document.querySelectorAll('#examRoot .x-navb')].map(b => b.textContent));
-  check('[5] all eight sections are present', navs.length === 8, navs.join(' | '));
+  check('[5] all nine sections are present', navs.length === 9, navs.join(' | '));
   let sectionChars = 0, thin = [];
   for (const label of navs) {
     await page.evaluate((t) => {

@@ -35866,6 +35866,7 @@ function xEnterMode(mode) {
 const XPAGES = [
   ['recoding',  'Recoding Prep',            'C00–C07, organised by the situations you actually meet'],
   ['exam',      'Final Exam Prep',          'Practice and a configurable simulator'],
+  ['examshell', 'ExamShell Training',       'Fifteen exercises in a deliberate order'],
   ['browse',    'Practice Browser',         'Every exercise, filterable'],
   ['skills',    'Skills & Algorithms',      'Taught before they are asked for'],
   ['functions', 'String Function Trainer',  'The family you keep confusing'],
@@ -36431,19 +36432,13 @@ function xProgress() {
 
 /* ============================= FINAL EXAM PREP =========================== */
 function xExamTabs() {
-  return '<div class="x-tabs">' + [['', 'Sessions & practice'],
-      ['examshell', 'ExamShell Training'], ['validation', 'Validation Challenges']]
+  return '<div class="x-tabs">' + [['', 'Sessions & practice'], ['validation', 'Validation Challenges']]
     .map(([k, t]) => '<button class="x-tab' + ((xs.sub || '') === k ? ' on' : '') +
       '" data-xsub="' + k + '">' + t + '</button>').join('') + '</div>';
 }
 
 function xExam() {
   if (xs.sim) return xSim();
-  if (xs.sub === 'examshell') {
-    return '<header class="x-head"><h1>ExamShell Training</h1>' +
-      '<p class="x-sub">Fifteen exercises in a deliberate order.</p></header>' +
-      xExamTabs() + xExamShell();
-  }
   if (xs.sub === 'validation') {
     return '<header class="x-head"><h1>Validation Challenges</h1>' +
       '<p class="x-sub">The hard end of Track A.</p></header>' + xExamTabs() + xValidation();
@@ -36527,7 +36522,8 @@ function xExamShell() {
   const done = list.filter(x => xSolved(x.id)).length;
   const chk = list.filter(x => x.examshell.checkpoint);
   const chkDone = chk.filter(x => xSolved(x.id)).length;
-  let h = '<p class="x-sub">Fifteen exercises ordered so the difficulty rises, falls back, and rises ' +
+  let h = '<header class="x-head"><h1>ExamShell Training</h1></header>' +
+    '<p class="x-sub">Fifteen exercises ordered so the difficulty rises, falls back, and rises ' +
     'further \u2014 the way a real sitting does. Three of them are checkpoints: no hints, and they ' +
     're-test something you met earlier in a form you have not seen. Two came from the July exam itself; ' +
     'the rest are labelled for what they actually are.</p>';
@@ -36619,6 +36615,7 @@ function renderExam() {
     body = x ? xExercise(x) : '<p class="x-empty">That exercise no longer exists.</p>';
   } else if (xs.page === 'recoding') body = xRecoding();
   else if (xs.page === 'exam') body = xExam();
+  else if (xs.page === 'examshell') body = xExamShell();
   else if (xs.page === 'browse') body = xBrowse();
   else if (xs.page === 'skills') body = xSkills();
   else if (xs.page === 'functions') body = xFunctions();

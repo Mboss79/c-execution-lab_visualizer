@@ -45,31 +45,48 @@ function counted(name, n, floor, detail) {
   await page.click('#railExam');
   await sleep(400);
 
-  console.log('\n=== part 1: it is a SECTION inside Final Exam Prep, not a mode ===');
+  console.log('\n=== part 1: a TOP-LEVEL section, after Final Exam Prep, not a mode ===');
   const nav = await page.evaluate(() => {
     xs.page = 'exam'; xs.sub = null; xs.ex = null; xs.sim = null; renderExam();
-    const tabs = [...document.querySelectorAll('#examRoot .x-tabs .x-tab')].map(b => b.textContent);
-    const modes = [...document.querySelectorAll('#examRoot .x-modeb')].map(b => b.textContent);
-    return { tabs, modes, modeKeys: Object.keys(MODE_CONFIG) };
+    return {
+      top: [...document.querySelectorAll('#examRoot .x-navb')].map(b => b.textContent),
+      keys: XPAGES.map(p => p[0]),
+      examTabs: [...document.querySelectorAll('#examRoot .x-tabs .x-tab')].map(b => b.textContent),
+      modes: [...document.querySelectorAll('#examRoot .x-modeb')].map(b => b.textContent),
+      modeKeys: Object.keys(MODE_CONFIG),
+    };
   });
-  check('[1] ExamShell Training is a tab inside Final Exam Prep',
-    nav.tabs.indexOf('ExamShell Training') >= 0, nav.tabs.join(' | '));
-  check('[2] it sits between the two tabs that were already there',
-    nav.tabs.join('|') === 'Sessions & practice|ExamShell Training|Validation Challenges',
-    nav.tabs.join('|'));
-  check('[3] it is NOT a sixth mode', nav.modes.length === 5 && nav.modeKeys.length === 5,
-    nav.modes.join(','));
-  check('[4] the five existing modes are untouched',
-    nav.modeKeys.join(',') === 'guided,blind,challenge,drill,validation', nav.modeKeys.join(','));
-  const top = await page.evaluate(() => [...document.querySelectorAll('#examRoot .x-navb')].map(b => b.textContent));
-  check('[5] the eight top-level sections are unchanged', top.length === 8, top.length + ' sections');
+  const iExam = nav.top.indexOf('Final Exam Prep');
+  const iShell = nav.top.indexOf('ExamShell Training');
+  const iBrowse = nav.top.indexOf('Practice Browser');
+  check('[1] ExamShell Training is a TOP-LEVEL section',
+    iShell >= 0 && nav.keys.indexOf('examshell') >= 0, nav.top.join(' | '));
+  check('[2] the order is Final Exam Prep -> ExamShell Training -> Practice Browser',
+    iShell === iExam + 1 && iBrowse === iShell + 1,
+    'exam=' + iExam + ' examshell=' + iShell + ' browse=' + iBrowse);
+  check('[3] it is NOT nested inside Final Exam Prep',
+    nav.examTabs.indexOf('ExamShell Training') < 0, nav.examTabs.join(' | '));
+  check('[4] Final Exam Prep keeps its own two tabs',
+    nav.examTabs.join('|') === 'Sessions & practice|Validation Challenges', nav.examTabs.join('|'));
+  check('[5] the section that followed Practice Browser still does',
+    nav.top[iBrowse + 1] === 'Skills & Algorithms', nav.top[iBrowse + 1]);
+  check('[5b] every previously existing section is still present, in order',
+    nav.top.filter(t => t !== 'ExamShell Training').join('|') ===
+    ['Recoding Prep','Final Exam Prep','Practice Browser','Skills & Algorithms',
+     'String Function Trainer','Cross-Subject Challenges','My Projects','Progress'].join('|'),
+    nav.top.join(' | '));
+  check('[5c] nine sections in total', nav.top.length === 9, String(nav.top.length));
+  check('[5d] it is NOT a sixth mode',
+    nav.modes.length === 5 && nav.modeKeys.join(',') === 'guided,blind,challenge,drill,validation',
+    nav.modeKeys.join(','));
+  const top = nav.top;
 
   console.log('\n=== part 2: the section renders and opens exercises ===');
   const sec = await page.evaluate(() => {
-    const t = [...document.querySelectorAll('#examRoot .x-tabs .x-tab')].find(b => b.textContent === 'ExamShell Training');
+    const t = [...document.querySelectorAll('#examRoot .x-navb')].find(b => b.textContent === 'ExamShell Training');
     t.click();
     return {
-      sub: xs.sub,
+      sub: xs.page,
       rows: document.querySelectorAll('#examRoot .x-esrow').length,
       chars: document.querySelector('#examRoot .x-main').textContent.length,
       bar: !!document.querySelector('#examRoot .x-esbar'),
@@ -77,7 +94,7 @@ function counted(name, n, floor, detail) {
       chk: document.querySelectorAll('#examRoot .x-esrow.chk').length,
     };
   });
-  check('[6] clicking the tab opens the section', sec.sub === 'examshell');
+  check('[6] clicking the top-level button opens the section', sec.sub === 'examshell');
   counted('[7] exercise rows rendered', sec.rows, 15, 'expected exactly 15');
   check('[8] exactly fifteen rows', sec.rows === 15, String(sec.rows));
   check('[9] progress and sourcing are shown', sec.bar && sec.conf === 3, 'conf blocks=' + sec.conf);
@@ -305,7 +322,7 @@ function counted(name, n, floor, detail) {
   console.log('\n=== part 10: progress state ===');
   const prog2 = await page.evaluate(() => {
     localStorage.removeItem('cexlab.progress.v1'); examProgress.data = null;
-    xs.page = 'exam'; xs.sub = 'examshell'; xs.ex = null; renderExam();
+    xs.page = 'examshell'; xs.sub = null; xs.ex = null; renderExam();
     const before = document.querySelectorAll('#examRoot .x-esrow.done').length;
     const x = EXAMSHELL[0];
     examProgress.record(x, 'pass');
