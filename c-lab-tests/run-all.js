@@ -44,6 +44,7 @@ const SUITES = [
   ['P41 exercise database',   'phase36.test.js'],
   ['P42 practice view',       'phase37.test.js'],
   ['P43 modes + code editor', 'phase38.test.js'],
+  ['P44 ExamShell Training',  'phase39.test.js'],
 ];
 
 let failed = 0;

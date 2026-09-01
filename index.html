@@ -5513,6 +5513,51 @@ html[data-theme=light] .viz-node.vz-frame::after{
 #examRoot .chrome-stark .x-srct, #examRoot .chrome-exam .x-srct { display:none; }
 #examRoot .chrome-exam .x-task { border-color:var(--warn,#d98b3a); }
 #examRoot .chrome-exam .x-brief { font-size:16px; }
+
+/* ==== ExamShell Training — a section inside Final Exam Prep ==== */
+#examRoot .x-esbar { display:flex; align-items:center; gap:26px; padding:14px 18px; margin:16px 0 18px;
+  border:1px solid var(--border); border-radius:10px; background:var(--surface); }
+#examRoot .x-esbar b { display:block; font-size:22px; font-weight:800; letter-spacing:-.02em; }
+#examRoot .x-esbar span { font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); }
+#examRoot .x-esprog { flex:1; height:6px; border-radius:3px; background:var(--border); overflow:hidden; }
+#examRoot .x-esprog i { display:block; height:100%; background:var(--execution); }
+#examRoot .x-eslist { display:flex; flex-direction:column; gap:4px; }
+#examRoot .x-esrow { display:grid; grid-template-columns:34px minmax(0,1fr) 90px 108px 60px;
+  align-items:center; gap:10px; text-align:left; font:inherit; cursor:pointer; padding:10px 13px;
+  border-radius:8px; border:1px solid var(--border); background:var(--surface); }
+#examRoot .x-esrow:hover { border-color:var(--execution); }
+#examRoot .x-esrow.chk { border-left:3px solid var(--warn,#d98b3a); }
+#examRoot .x-esrow.done { opacity:.72; }
+#examRoot .x-esn { font-family:var(--mono); font-size:12px; color:var(--text-faint); }
+#examRoot .x-esname { font-size:13.5px; font-weight:600; }
+#examRoot .x-esd { font-size:9.5px; letter-spacing:.07em; text-transform:uppercase; font-weight:700;
+  padding:2px 7px; border-radius:4px; border:1px solid currentColor; justify-self:start; }
+#examRoot .x-esd.d-easy { color:var(--ok,#3ddc84); }
+#examRoot .x-esd.d-medium { color:var(--execution); }
+#examRoot .x-esd.d-hard { color:var(--warn,#d98b3a); }
+#examRoot .x-esd.d-final { color:var(--error,#e5484d); }
+#examRoot .x-eschk { font-size:9.5px; letter-spacing:.07em; text-transform:uppercase; font-weight:700;
+  color:var(--warn,#d98b3a); }
+#examRoot .x-esst { font-size:9.5px; letter-spacing:.07em; text-transform:uppercase; font-weight:700;
+  color:var(--ok,#3ddc84); text-align:right; }
+#examRoot .x-esconf { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px; }
+#examRoot .x-esc { border:1px solid var(--border); border-radius:9px; padding:12px 14px; background:var(--surface); }
+#examRoot .x-esc b { font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; }
+#examRoot .x-esc.ok b { color:var(--ok,#3ddc84); }
+#examRoot .x-esc.warn b { color:var(--warn,#d98b3a); }
+#examRoot .x-esc.adv b { color:var(--memory,#8b7ad9); }
+#examRoot .x-esc span { float:right; font-family:var(--mono); font-size:11px; color:var(--text-faint); }
+#examRoot .x-esc p { margin:7px 0 0; font-size:11.5px; line-height:1.6; color:var(--text-muted); clear:both; }
+#examRoot .x-esrev { border:1px solid var(--execution); border-radius:10px; padding:16px 18px;
+  background:var(--surface); }
+#examRoot .x-esdims { display:flex; flex-wrap:wrap; gap:6px; margin-top:9px; }
+#examRoot .x-esdims span { font-size:10.5px; padding:3px 8px; border-radius:5px; border:1px solid var(--border);
+  color:var(--text-faint); }
+#examRoot .x-esdims i { font-style:normal; font-weight:700; color:var(--text); }
+@media (max-width: 760px) {
+  #examRoot .x-esrow { grid-template-columns:30px minmax(0,1fr) 80px; }
+  #examRoot .x-eschk, #examRoot .x-esst { display:none; }
+}
 </style>
 </head>
 <body>
@@ -34067,6 +34112,486 @@ EX({ id:'tb.tree_levels', title:'breadth, not depth',
 ];
 /* ==== EXLIST END ==== */
 
+/* ==== EXAMSHELL START ==== */
+/* ============================================================================
+   EXAMSHELL TRAINING — a fifteen-exercise curriculum inside Final Exam Prep
+   ----------------------------------------------------------------------------
+   A SECTION, not a mode. The five practice modes are untouched; this is a
+   curriculum with its own ordering, its own difficulty model and its own
+   checkpoints, and its exercises are ordinary EXAM_EXERCISES records so the
+   workspace, gating, progress and persistence all work without duplication.
+
+   WHAT IS ACTUALLY KNOWN, AND WHAT IS NOT
+   ---------------------------------------
+   Three confidence levels, and every record carries one. Nothing invented is
+   presented as an exam exercise.
+
+   verified   Supplied by the learner as July 1337 exam intelligence, or
+              readable on the photographed cards. Two exercises qualify:
+              squeeze_spaces (subject text supplied verbatim) and the Vigenere
+              cipher program (three cards: the task, the rule, and two worked
+              examples). BOTH worked examples were reproduced by computation
+              before anything was built on them — "hello"+"key" -> "rijvs" and
+              "Attack"+"abc" -> "Auvadm" match exactly, which is what makes the
+              shift rule, the key cycling and the case preservation trustworthy.
+              CAVEAT, recorded rather than glossed: neither worked example
+              contains a non-alphabetic character, so the "non-alpha does not
+              consume a key letter" clause is STATED on the rule card and not
+              demonstrated by an example.
+
+   inferred   Drawn from material photographed alongside the exam — a
+              handwritten list (rotate array, print memory, sliding strings,
+              max subarray) and a set of LeetCode links (best time to buy and
+              sell, move zeroes, valid anagram, two sum II sorted, rotate
+              array, missing number, maximum subarray, maximal square). That
+              material was collected AROUND the exam. It is good evidence about
+              what the cohort was preparing for. It is NOT evidence that these
+              appeared on the paper, and this file never says it is.
+
+   training   Written for this curriculum to make the progression work: entry
+              exercises, recovery exercises, and checkpoints that re-test an
+              earlier skill in an unfamiliar form.
+
+   There is no "official 1337 difficulty algorithm" here, because none is
+   public. ES_DIMENSIONS below is OUR model, and it says so.
+
+   Historical corpus already analysed in this project (P41): DKMR/42exams, 72
+   exercises over six levels; wkratos/42-examshell's 6-points-per-exercise
+   final. Those informed the shape of the progression and are cited, not copied.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   THE DIFFICULTY MODEL
+   ---------------------------------------------------------------------------
+   Nine dimensions, each 1..5. `implementationLength` is recorded on every
+   exercise and is DELIBERATELY ABSENT from the weighting: an exercise is not
+   hard because it is long. squeeze_spaces is twelve lines and one of the
+   hardest things here; print_memory is four times the length and easier to
+   reason about. phase39 asserts that length does not predict difficulty.
+   ------------------------------------------------------------------------- */
+const ES_DIMENSIONS = [
+  ['reasoning',   1.4, 'How much has to be worked out before a line can be written.'],
+  ['edgeCases',   1.3, 'How many unusual inputs break a solution that looks right.'],
+  ['pointerMem',  1.2, 'How much address, mutation and buffer understanding is needed.'],
+  ['constraints', 1.1, 'How restrictive the allowed functions and requirements are.'],
+  ['pattern',     1.1, 'How far the solution shape is from being recognisable at sight.'],
+  ['combination', 1.0, 'How many separately learned ideas must be held together.'],
+  ['concept',     0.9, 'How many concepts must be understood at all.'],
+  ['wording',     0.9, 'How much careful interpretation the subject itself demands.'],
+  ['pressure',    0.8, 'How much worse it gets with a clock running.'],
+];
+
+function esScore(p) {
+  let sum = 0, w = 0;
+  for (const [k, weight] of ES_DIMENSIONS) { sum += (p[k] || 1) * weight; w += weight; }
+  return Math.round((sum / w) * 100) / 100;
+}
+/* Cut points calibrated AFTER scoring all fifteen, against a range of 1.38 to
+   4.21. The dimensions and weights above are the model and were not touched;
+   no exercise profile was edited to move it across a line. Only these four
+   numbers were set, so that a label carries information instead of putting a
+   quarter of the curriculum in the top tier. */
+const ES_BANDS = [
+  { id:'easy',   max: 2.10, label:'Easy' },
+  { id:'medium', max: 3.00, label:'Medium' },
+  { id:'hard',   max: 3.80, label:'Hard' },
+  { id:'final',  max: 99,   label:'Hardest' },
+];
+function esDifficulty(p) {
+  const s = esScore(p);
+  return (ES_BANDS.find(b => s <= b.max) || ES_BANDS[3]).id;
+}
+
+/* Maps our nine dimensions onto the five axes EX() already understands, so an
+   ExamShell exercise sorts and filters alongside every other exercise instead
+   of needing a parallel browser. */
+function esAxes(p) {
+  const c = (n) => Math.max(1, Math.min(5, Math.round(n)));
+  return [c(p.concept), c(p.reasoning), c((p.pointerMem + p.constraints) / 2),
+          c(p.edgeCases), c(p.combination)];
+}
+
+/* ---------------------------------------------------------------------------
+   THE FIFTEEN
+   ---------------------------------------------------------------------------
+   `brief` is the exam-facing subject and nothing else. Skills, patterns, the
+   reasoning profile and the edge-case list live in `examshell` and are shown
+   only AFTER the exercise is solved — a list of edge cases handed over in
+   advance is the answer to half the exercise.
+   ------------------------------------------------------------------------- */
+const ES_SRC = [
+{ n:1, id:'es.echo_arg', title:'echo_arg', file:'echo_arg.c', kind:'program',
+  confidence:'training', source:'Entry exercise written for this curriculum.',
+  allowed:['write'],
+  brief:'Write a program that takes one string as an argument and displays it, followed by a newline. ' +
+        'If the number of arguments is not 1, display only a newline.',
+  constraints:['A program, so it needs a main.', 'Only write may be used.'],
+  profile:{ concept:1, constraints:2, reasoning:1, edgeCases:3, pointerMem:1, pattern:1, wording:1, combination:1, pressure:1 },
+  length:'short',
+  skills:['ARGC_ARGV','STRING_SCAN','CHAR_OUTPUT'], subjects:['C00','C02','C06'],
+  purpose:'The argument guard, on its own, once. Everything after this assumes you never write it wrong again.',
+  edgeCases:['no arguments at all','more than one argument','an empty string argument'],
+  cases:[[['hello'],'hello\n'], [[],'\n'], [['a','b'],'\n'], [[''],'\n']],
+  solution:
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\n\ti = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\twhile (argv[1][i])\n\t\t{\n\t\t\twrite(1, &argv[1][i], 1);\n\t\t\ti++;\n\t\t}\n\t}\n' +
+    '\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' },
+
+{ n:2, id:'es.swap_case_inplace', title:'swap_case', file:'swap_case.c', kind:'function',
+  confidence:'training', source:'Written to introduce in-place mutation before it is needed under pressure.',
+  allowed:[],
+  brief:'Write a function that takes a string and modifies it in place so that every uppercase letter ' +
+        'becomes lowercase and every lowercase letter becomes uppercase. Every other character is left ' +
+        'unchanged. The function must return a pointer to the modified string.\n\n' +
+        'Your function must be declared as follows:\n\nchar *swap_case(char *str);',
+  constraints:['Strictly in place.', 'No allocation.', 'Must return the string.'],
+  profile:{ concept:2, constraints:3, reasoning:2, edgeCases:2, pointerMem:3, pattern:2, wording:1, combination:1, pressure:1 },
+  length:'short',
+  skills:['TRANSFORMATION','CHAR_CLASSIFICATION','POINTER_MANIPULATION'], subjects:['C02'],
+  purpose:'In-place mutation with a one-to-one mapping — the easy case, so that the hard case later ' +
+          'is only hard for the right reason.',
+  edgeCases:['an empty string','a string with no letters','digits and punctuation must survive'],
+  cases:[] },
+
+{ n:3, id:'es.trim_inplace', title:'trim', file:'trim.c', kind:'function', checkpoint:1,
+  confidence:'training', source:'Checkpoint written for this curriculum.',
+  allowed:[],
+  brief:'Write a function that removes every leading and trailing space (\' \') from a string, in place. ' +
+        'Spaces inside the string are left exactly as they are. The function must return a pointer to ' +
+        'the modified string.\n\nYour function must be declared as follows:\n\nchar *trim(char *str);',
+  constraints:['Strictly in place — the caller still owns the same buffer.', 'No allocation.',
+               'The returned pointer must be the buffer that was passed in.'],
+  profile:{ concept:2, constraints:4, reasoning:3, edgeCases:4, pointerMem:4, pattern:2, wording:2, combination:2, pressure:3 },
+  length:'short',
+  skills:['STRING_SCAN','REVERSE_TRAVERSAL','POINTER_MANIPULATION'], subjects:['C02'],
+  purpose:'First checkpoint. Returning str while having shifted its contents is the whole exercise: ' +
+          'returning a pointer INTO the buffer would compile, run, and be wrong.',
+  edgeCases:['a string of nothing but spaces','no spaces at all','spaces at only one end',
+             'the terminator has to move too'],
+  cases:[] },
+
+{ n:4, id:'es.squeeze_spaces', title:'squeeze_spaces', file:'squeeze_spaces.c', kind:'function',
+  confidence:'verified', source:'July 1337 exam. Subject supplied verbatim by the learner.',
+  allowed:[],
+  brief:'Write a function that takes a string as a parameter and modifies it in-place so that any ' +
+        'sequence of multiple consecutive space characters (\' \') is replaced by a single space character.\n\n' +
+        'Other whitespace characters (such as tabs \'\\t\', newlines \'\\n\', etc.) must remain completely unchanged.\n\n' +
+        'The modification must be strictly in-place. You are not allowed to allocate new memory (no malloc).\n\n' +
+        'The function must return a pointer to the modified string.\n\n' +
+        'Your function must be declared as follows:\n\nchar *squeeze_spaces(char *str);',
+  constraints:['Allowed functions: None.', 'Strictly in-place; no malloc.',
+               'Only the space character collapses — tabs and newlines are untouched.',
+               'Must return a pointer to the modified string.'],
+  profile:{ concept:2, constraints:4, reasoning:4, edgeCases:5, pointerMem:4, pattern:3, wording:4, combination:2, pressure:4 },
+  length:'short',
+  skills:['STRING_SCAN','TRANSFORMATION','POINTER_MANIPULATION','CHAR_CLASSIFICATION'], subjects:['C02'],
+  purpose:'Twelve lines, and the hardest thing in the first half. Two positions move at different ' +
+          'speeds through one buffer, and the subject quietly excludes every whitespace character ' +
+          'except the space — a solution that treats \\t as whitespace passes the obvious test and fails.',
+  edgeCases:['a run of spaces at the very start','a run at the very end','tabs and newlines must NOT collapse',
+             'a tab BETWEEN two spaces — do the spaces either side still collapse separately?',
+             'a string that is entirely spaces','the terminator must be written at the new end'],
+  cases:[[['a  b'],'a b\n'], [['a \t b'],'a \t b\n'], [['   '],' \n'], [['ab'],'ab\n'], [[''],'\n']],
+  /* The harness prints the result so the function can be checked from stdout. */
+  harness:'\nint\tmain(int argc, char **argv)\n{\n\tchar\t*r;\n\tint\ti;\n\n\ti = 0;\n' +
+          '\tif (argc == 2)\n\t{\n\t\tr = squeeze_spaces(argv[1]);\n\t\twhile (r[i])\n\t\t{\n' +
+          '\t\t\twrite(1, &r[i], 1);\n\t\t\ti++;\n\t\t}\n\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n',
+  solution:
+    'char\t*squeeze_spaces(char *str)\n{\n\tint\tr;\n\tint\tw;\n\n\tr = 0;\n\tw = 0;\n' +
+    '\twhile (str[r])\n\t{\n\t\tif (str[r] == 32 && w > 0 && str[w - 1] == 32)\n\t\t\tr++;\n' +
+    '\t\telse\n\t\t{\n\t\t\tstr[w] = str[r];\n\t\t\tw++;\n\t\t\tr++;\n\t\t}\n\t}\n' +
+    '\tstr[w] = 0;\n\treturn (str);\n}\n' },
+
+{ n:5, id:'es.count_words_es', title:'count_words', file:'count_words.c', kind:'program',
+  confidence:'training', source:'Recovery exercise written for this curriculum.',
+  allowed:['write'],
+  brief:'Write a program that takes one string as an argument and displays the number of words it ' +
+        'contains, followed by a newline. A word is a sequence of characters that are neither spaces ' +
+        'nor tabs. If the number of arguments is not 1, display only a newline.',
+  constraints:['A program, so it needs a main.', 'Only write may be used.'],
+  profile:{ concept:2, constraints:2, reasoning:2, edgeCases:3, pointerMem:1, pattern:2, wording:2, combination:2, pressure:2 },
+  length:'short',
+  skills:['WORD_DETECTION','COUNTING','NUMBER_DECOMPOSITION'], subjects:['C00','C02','C04','C06'],
+  purpose:'Recovery after the spike. Different skill, low pointer load, and it re-establishes that ' +
+          'printing a number needs its own small routine.',
+  edgeCases:['runs of separators must not count twice','leading and trailing separators','only separators'],
+  cases:[[['a bb  ccc'],'3\n'], [['   '],'0\n'], [['one'],'1\n'], [[],'\n']] },
+
+{ n:6, id:'es.move_zeroes', title:'move_zeroes', file:'move_zeroes.c', kind:'program',
+  confidence:'inferred',
+  source:'Pattern from the LeetCode list photographed alongside the July exam (move-zeroes). ' +
+         'Collected as preparation material; not evidence that it was on the paper.',
+  allowed:['write'],
+  brief:'Write a program that takes any number of integer arguments and displays them separated by ' +
+        'single spaces, followed by a newline, with every zero moved to the end and the order of the ' +
+        'remaining values preserved. If there are no arguments, display only a newline.',
+  constraints:['A program, so it needs a main.', 'Only write may be used.',
+               'The relative order of the non-zero values must not change.'],
+  profile:{ concept:2, constraints:3, reasoning:3, edgeCases:3, pointerMem:3, pattern:3, wording:2, combination:3, pressure:2 },
+  length:'short',
+  skills:['ARRAY_TRAVERSAL','FILTERING','NUMBER_CONSTRUCTION','ARGC_ARGV'], subjects:['C01','C04','C06'],
+  purpose:'The same two-position idea as squeeze_spaces, on an array of numbers instead of a string. ' +
+          'Recognising that is the point of putting it here.',
+  edgeCases:['all zeroes','no zeroes','a single zero','order must be stable'],
+  cases:[[['0','1','0','3'],'1 3 0 0\n'], [['0'],'0\n'], [[],'\n']] },
+
+{ n:7, id:'es.vigenere', title:'vigenere', file:'vigenere.c', kind:'program',
+  confidence:'verified',
+  source:'July 1337 exam. Read from three photographed cards: the task, the rule, and two worked ' +
+         'examples. Both worked examples were reproduced by computation before this record was written.',
+  allowed:['write'],
+  brief:'Write a program that takes a string and an alphabetic key as arguments and displays the ' +
+        'string encoded with a Vigenere cipher using the key, followed by a newline.\n\n' +
+        'Each letter is shifted forward by the alphabet position (0 to 25) of the matching key letter, ' +
+        'the key repeating across the letters of the string. Case is preserved. Non-alphabetic ' +
+        'characters stay unchanged and do not consume a key letter.\n\n' +
+        'If the number of arguments is not 2, display a newline.',
+  constraints:['A program, so it needs a main.', 'Only write may be used.',
+               'The key is alphabetic; its case does not affect the shift.',
+               'A non-alphabetic character in the string must not advance the key.'],
+  profile:{ concept:3, constraints:3, reasoning:4, edgeCases:4, pointerMem:2, pattern:3, wording:5, combination:4, pressure:4 },
+  length:'medium',
+  skills:['TRANSFORMATION','ASCII','ARGC_ARGV','CHAR_CLASSIFICATION','COUNTING'], subjects:['C00','C02','C06'],
+  purpose:'The hardest thing about it is the sentence, not the cipher. Two independent positions — one ' +
+          'in the string, one in the key — that advance at different rates, plus case preservation.',
+  edgeCases:['a non-alphabetic character must not advance the key',
+             'an uppercase letter must stay uppercase','a key shorter than the string, repeating',
+             'an uppercase key letter shifts the same as its lowercase',
+             'the wrong number of arguments'],
+  cases:[[['hello','key'],'rijvs\n'], [['Attack','abc'],'Auvadm\n'],
+         [['ab cd','abcd'],'ac eg\n'], [['hello'],'\n'], [[],'\n']],
+  solution:
+    'int\tkeylen(char *k)\n{\n\tint\ti;\n\n\ti = 0;\n\twhile (k[i])\n\t\ti++;\n\treturn (i);\n}\n\n' +
+    'int\tkeyshift(char c)\n{\n\tif (c >= 65 && c <= 90)\n\t\treturn (c - 65);\n\treturn (c - 97);\n}\n\n' +
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\tint\tk;\n\tint\tn;\n\tchar\tc;\n\tint\tbase;\n\n' +
+    '\ti = 0;\n\tk = 0;\n\tif (argc == 3)\n\t{\n\t\tn = keylen(argv[2]);\n' +
+    '\t\twhile (argv[1][i] && n > 0)\n\t\t{\n\t\t\tc = argv[1][i];\n\t\t\tbase = 0;\n' +
+    '\t\t\tif (c >= 65 && c <= 90)\n\t\t\t\tbase = 65;\n' +
+    '\t\t\tif (c >= 97 && c <= 122)\n\t\t\t\tbase = 97;\n' +
+    '\t\t\tif (base > 0)\n\t\t\t{\n' +
+    '\t\t\t\tc = base + (c - base + keyshift(argv[2][k % n])) % 26;\n' +
+    '\t\t\t\tk++;\n\t\t\t}\n' +
+    '\t\t\twrite(1, &c, 1);\n\t\t\ti++;\n\t\t}\n\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' },
+
+{ n:8, id:'es.rotate_array', title:'rotate_array', file:'rotate_array.c', kind:'program', checkpoint:2,
+  confidence:'inferred',
+  source:'Named on the handwritten list photographed alongside the July exam ("rot-arr"), and present ' +
+         'in the accompanying LeetCode links (rotate-array). Preparation material, not the paper.',
+  allowed:['write'],
+  brief:'Write a program whose first argument is a number k and whose remaining arguments are integers. ' +
+        'Display those integers rotated k places to the right, separated by single spaces, followed by ' +
+        'a newline. If there are fewer than two arguments, display only a newline.',
+  constraints:['A program, so it needs a main.', 'Only write may be used.',
+               'k may be larger than the number of values.'],
+  profile:{ concept:2, constraints:3, reasoning:4, edgeCases:4, pointerMem:3, pattern:3, wording:3, combination:3, pressure:4 },
+  length:'short',
+  skills:['ARRAY_TRAVERSAL','NUMBER_CONSTRUCTION','ARGC_ARGV','COUNTING'], subjects:['C01','C04','C06'],
+  purpose:'Second checkpoint. Pure index arithmetic: get the modulo wrong in either direction and it ' +
+          'still runs and still prints numbers.',
+  edgeCases:['k larger than the number of values','k exactly equal to the count','k of zero',
+             'a single value','no values at all'],
+  cases:[[['2','1','2','3','4'],'3 4 1 2\n'], [['0','1','2'],'1 2\n'], [['5','1','2'],'2 1\n'], [[],'\n']] },
+
+{ n:9, id:'es.anagram', title:'anagram', file:'anagram.c', kind:'program',
+  confidence:'inferred',
+  source:'Pattern from the LeetCode list photographed alongside the July exam (valid-anagram).' +
+    ' Preparation material collected around the exam; not evidence that it appeared on the paper.',
+  allowed:['write'],
+  brief:'Write a program that takes two strings as arguments and displays 1 followed by a newline if ' +
+        'each is a rearrangement of the other, and 0 followed by a newline otherwise. Comparison is ' +
+        'case sensitive. If the number of arguments is not 2, display only a newline.',
+  constraints:['A program, so it needs a main.', 'Only write may be used.', 'No allocation.'],
+  profile:{ concept:2, constraints:2, reasoning:2, edgeCases:3, pointerMem:2, pattern:2, wording:2, combination:2, pressure:2 },
+  length:'long',
+  skills:['COUNTING','COMPARISON','ARRAY_TRAVERSAL','STRING_SCAN'], subjects:['C01','C02','C06'],
+  purpose:'Deliberately the longest solution in the curriculum and only a medium: a counting table is ' +
+          'a lot of lines and almost no thinking. Length is not difficulty, and this exercise exists ' +
+          'partly to make that concrete.',
+  edgeCases:['two empty strings are anagrams','different lengths cannot be','repeated characters',
+             'case matters'],
+  cases:[[['abc','cba'],'1\n'], [['abc','abd'],'0\n'], [['a','ab'],'0\n'], [['',''],'1\n'], [['a'],'\n']] },
+
+{ n:10, id:'es.max_subarray', title:'max_subarray', file:'max_subarray.c', kind:'program',
+  confidence:'inferred',
+  source:'Named on the handwritten list photographed alongside the July exam ("Max-subarray"), and ' +
+         'present in the accompanying LeetCode links (maximum-subarray). Preparation material; ' +
+         'not evidence that it appeared on the paper.',
+  allowed:['write'],
+  brief:'Write a program that takes any number of integer arguments and displays the largest sum ' +
+        'obtainable from a contiguous, non-empty run of them, followed by a newline. If there are no ' +
+        'arguments, display only a newline.',
+  constraints:['A program, so it needs a main.', 'Only write may be used.',
+               'Negative values may appear, and negative sums may be the answer.'],
+  profile:{ concept:3, constraints:3, reasoning:5, edgeCases:4, pointerMem:2, pattern:5, wording:3, combination:3, pressure:5 },
+  length:'short',
+  skills:['ARRAY_TRAVERSAL','NUMBER_CONSTRUCTION','COMPARISON','ARGC_ARGV'], subjects:['C01','C04','C06'],
+  purpose:'The clearest short-code-hard-reasoning exercise here. The loop is four lines. Arriving at ' +
+          'those four lines, and at why the answer can be negative, is the exercise.',
+  edgeCases:['every value negative — the answer is the least bad one, not zero','a single value',
+             'the best run ending at the last position','all zeroes'],
+  cases:[] },
+
+{ n:11, id:'es.missing_number', title:'missing_number', file:'missing_number.c', kind:'program',
+  confidence:'inferred',
+  source:'Pattern from the LeetCode list photographed alongside the July exam (missing-number).' +
+    ' Preparation material collected around the exam; not evidence that it appeared on the paper.',
+  allowed:['write'],
+  brief:'Write a program that takes n distinct integer arguments, all between 0 and n inclusive, and ' +
+        'displays the one value in that range which was not given, followed by a newline. If there are ' +
+        'no arguments, display 0 followed by a newline.',
+  constraints:['A program, so it needs a main.', 'Only write may be used.'],
+  profile:{ concept:2, constraints:2, reasoning:2, edgeCases:2, pointerMem:1, pattern:2, wording:3, combination:2, pressure:2 },
+  length:'short',
+  skills:['COUNTING','NUMBER_CONSTRUCTION','ARGC_ARGV','SEARCH'], subjects:['C01','C04','C06'],
+  purpose:'Recovery. Short, satisfying, and it rewards noticing the sum identity rather than searching.',
+  edgeCases:['the missing value is 0','the missing value is n','no arguments at all'],
+  cases:[[['0','1','3'],'2\n'], [['1'],'0\n'], [['0'],'1\n'], [[],'0\n']] },
+
+{ n:12, id:'es.two_sum_sorted', title:'two_sum_sorted', file:'two_sum_sorted.c', kind:'program',
+  confidence:'inferred',
+  source:'Pattern from the LeetCode list photographed alongside the July exam (two-sum-ii-input-array-is-sorted).' +
+    ' Preparation material collected around the exam; not evidence that it appeared on the paper.',
+  allowed:['write'],
+  brief:'Write a program whose first argument is a target number and whose remaining arguments are ' +
+        'integers given in non-decreasing order. Display the one-based positions of the two values ' +
+        'that add up to the target, separated by a single space, followed by a newline. Exactly one ' +
+        'such pair exists. If there are fewer than three arguments, display only a newline.',
+  constraints:['A program, so it needs a main.', 'Only write may be used.',
+               'The values are already in order, and the solution should use that.'],
+  profile:{ concept:3, constraints:3, reasoning:4, edgeCases:3, pointerMem:2, pattern:4, wording:3, combination:3, pressure:3 },
+  length:'short',
+  skills:['SEARCH','COMPARISON','ARRAY_TRAVERSAL','NUMBER_CONSTRUCTION'], subjects:['C01','C04','C06'],
+  purpose:'The sortedness is the whole exercise. A nested scan works and is the wrong answer to the ' +
+          'question being asked; two positions closing in from the ends is the right one.',
+  edgeCases:['the pair is the first and last','the pair is adjacent','negative values',
+             'exactly two values'],
+  cases:[] },
+
+{ n:13, id:'es.print_memory_es', title:'print_memory', file:'print_memory.c', kind:'function',
+  confidence:'inferred',
+  source:'Named on the handwritten list photographed alongside the July exam ("Print-memory"). The same ' +
+         'problem is C02 ex12 in the supplied subject and appears at Level 5 of DKMR/42exams, so the ' +
+         'shape is well attested even though its presence on the paper is not evidence of the paper itself.',
+  allowed:['write'],
+  brief:'Write a function that displays a memory area on screen, in three columns separated by a space: ' +
+        'the hexadecimal address of the first character of the line followed by a colon; the content in ' +
+        'hexadecimal, a space every two characters, padded with spaces where the line is short; and the ' +
+        'content in printable characters, a non-printable character being replaced by a dot.\n\n' +
+        'Each line displays sixteen characters. If size is 0, nothing is displayed. The function returns addr.\n\n' +
+        'Your function must be declared as follows:\n\nvoid *print_memory(void *addr, unsigned int size);',
+  constraints:['Allowed functions: None but write.', 'Sixteen characters a line, always.',
+               'A short final line must still be padded.', 'Size 0 displays nothing at all.'],
+  profile:{ concept:3, constraints:4, reasoning:3, edgeCases:4, pointerMem:4, pattern:2, wording:4, combination:3, pressure:5 },
+  length:'long',
+  skills:['BASE_CONVERSION','CHAR_CLASSIFICATION','CHAR_OUTPUT','ARRAY_TRAVERSAL'], subjects:['C02','C04'],
+  purpose:'Long, fiddly, and only moderately hard to reason about — the mirror image of max_subarray. ' +
+          'What it really tests is whether you can hold a rigid output format together while the clock runs.',
+  edgeCases:['size 0','exactly one full line','one byte past a line boundary','the padding on a short line',
+             'non-printable bytes in the text column'],
+  cases:[],
+  engineNote:'The engine has no casts and no void * arithmetic, so this one cannot be run here. ' +
+             'Write it on paper or against the local compiler bridge.' },
+
+{ n:14, id:'es.squeeze_all', title:'squeeze_all', file:'squeeze_all.c', kind:'function', checkpoint:3,
+  confidence:'training',
+  source:'Checkpoint written for this curriculum, deliberately adjacent to the verified squeeze_spaces.',
+  allowed:[],
+  brief:'Write a function that modifies a string in place so that any sequence of one or more whitespace ' +
+        'characters — space, tab or newline — is replaced by a single space, and so that no whitespace ' +
+        'remains at the start or the end. The function must return a pointer to the modified string.\n\n' +
+        'Your function must be declared as follows:\n\nchar *squeeze_all(char *str);',
+  constraints:['Allowed functions: None.', 'Strictly in place; no allocation.',
+               'Every whitespace character collapses here, unlike squeeze_spaces.',
+               'Must return a pointer to the modified string.'],
+  profile:{ concept:3, constraints:4, reasoning:4, edgeCases:5, pointerMem:4, pattern:3, wording:4, combination:4, pressure:4 },
+  length:'short',
+  skills:['STRING_SCAN','TRANSFORMATION','POINTER_MANIPULATION','WORD_DETECTION'], subjects:['C02'],
+  purpose:'Third checkpoint, and the transfer test the whole curriculum is built around. It is ' +
+          'squeeze_spaces with two rules changed. If you reach for your earlier answer and adapt it, ' +
+          'you have learned the pattern; if you start again, you memorised a solution.',
+  edgeCases:['a tab and a space adjacent collapse to ONE space','leading whitespace disappears entirely',
+             'trailing whitespace disappears entirely','a string of nothing but whitespace becomes empty',
+             'a newline in the middle becomes a space'],
+  cases:[] },
+
+{ n:15, id:'es.maximal_square', title:'maximal_square', file:'maximal_square.c', kind:'program',
+  confidence:'inferred',
+  source:'Pattern from the LeetCode list photographed alongside the July exam (maximal-square).' +
+    ' Preparation material collected around the exam; not evidence that it appeared on the paper.',
+  allowed:['write'],
+  brief:'Write a program whose arguments are the rows of a rectangular grid, each row a string of the ' +
+        'characters \'0\' and \'1\' and all rows the same length. Display the area of the largest square ' +
+        'made entirely of \'1\', followed by a newline. If there are no arguments, display 0 followed by ' +
+        'a newline.',
+  constraints:['A program, so it needs a main.', 'Only write may be used.',
+               'The grid may be a single row or a single column.'],
+  profile:{ concept:4, constraints:3, reasoning:5, edgeCases:4, pointerMem:3, pattern:5, wording:4, combination:5, pressure:5 },
+  length:'medium',
+  skills:['ARRAY_TRAVERSAL','SEARCH','COUNTING','COMPARISON','ARGC_ARGV'], subjects:['C01','C02','C04','C06'],
+  purpose:'The final one. Nothing in the earlier fourteen tells you how to do it, which is the point: ' +
+          'by here you should be able to take an unfamiliar problem apart without recognising it.',
+  edgeCases:['a grid with no 1 at all','a single row','a single column','the whole grid is 1',
+             'the answer is an AREA, not a side length'],
+  cases:[] },
+];
+
+/* ------------------------------------------------------------------ build */
+/* Built through EX() so every ExamShell exercise IS an EXAM_EXERCISES record:
+   the workspace, the gate, progress and persistence all work with no parallel
+   system. The exam-facing record carries no edge-case list and no pattern —
+   those live under `examshell` and the section reveals them after solving. */
+const ES_CONF_LABEL = {
+  verified: { text:'JULY EXAM — VERIFIED', tone:'ok',
+    note:'Supplied or photographed as July 1337 exam material and checked before use.' },
+  inferred: { text:'PREPARATION MATERIAL', tone:'warn',
+    note:'From notes and links collected around the July exam. Good evidence about what was being ' +
+         'prepared for; NOT evidence that it appeared on the paper.' },
+  training: { text:'TRAINING DESIGN', tone:'adv',
+    note:'Written for this curriculum to make the progression work. It has never been an exam exercise.' },
+};
+
+const EXAMSHELL = ES_SRC.map(r => {
+  const difficulty = esDifficulty(r.profile);
+  const rec = EX({
+    id: r.id, title: r.title, brief: r.brief,
+    required_subjects: r.subjects, skills: r.skills,
+    algorithm_patterns: [], allowed_functions: r.allowed.slice(),
+    d: esAxes(r.profile),
+    io: { argv: r.kind === 'program' ? 'command-line arguments' : 'called as a function',
+          stdout: 'see the subject', cases: r.cases || [] },
+    edge_cases: [],                    /* exam-facing: deliberately empty */
+    hideInspiration: true,             /* nothing about the shape before it is solved */
+    source_type: r.confidence === 'verified' ? 'official' : (r.confidence === 'inferred' ? 'pattern' : 'generated'),
+    source: { type:'examshell', confidence: r.confidence, statement: r.source },
+    /* the harness makes a function-kind solution runnable, so phase36 executes it */
+    reference_solution: r.solution ? (r.solution + (r.harness || '')) : null,
+    note: r.engineNote || null,
+    engine_support: r.engineNote ? 'none' : 'full',
+  });
+  rec.examshell = {
+    n: r.n, file: r.file, kind: r.kind,
+    checkpoint: r.checkpoint || 0,
+    difficulty, score: esScore(r.profile), profile: r.profile,
+    implementationLength: r.length,
+    constraints: r.constraints, edgeCases: r.edgeCases,
+    purpose: r.purpose, confidence: r.confidence, statement: r.source,
+    harness: r.harness || null,
+  };
+  return rec;
+});
+
+/* One array of exercises, not two. Everything downstream — xById, the browser,
+   the filters, the gate, progress, persistence — reads EXAM_EXERCISES, so the
+   curriculum gets all of it for free and cannot drift from the rest. */
+for (const r of EXAMSHELL) EXAM_EXERCISES.push(r);
+
+const esById = (id) => EXAMSHELL.find(x => x.id === id) || null;
+
+if (typeof window !== 'undefined') {
+  window.CExamShell = { EXAMSHELL, ES_DIMENSIONS, ES_BANDS, esScore, esDifficulty, ES_CONF_LABEL };
+}
+/* ==== EXAMSHELL END ==== */
+
 /* ==== EXAMSTORE START ==== */
 /* ============================================================================
    FINAL EXAM PREP — state: persistence, progress, recommendations, exam config
@@ -35537,6 +36062,9 @@ function xExercise(x) {
       xEsc((x.allowed_functions || []).join(', ') || 'none') + '</span></div>' +
     (x.io.argv ? '<div class="x-io"><b>Input</b><span>' + xEsc(x.io.argv) + '</span></div>' : '') +
     (x.io.stdout ? '<div class="x-io"><b>Output</b><span>' + xEsc(x.io.stdout) + '</span></div>' : '') +
+    (x.examshell && x.examshell.constraints.length
+      ? '<div class="x-io"><b>Constraints</b><span>' +
+        x.examshell.constraints.map(c => xEsc(c)).join('<br>') + '</span></div>' : '') +
     (x.note ? '<p class="x-exnote">' + xEsc(x.note) + '</p>' : '') + '</div>';
 
   /* Examples and edge cases are part of the problem, not a hint. */
@@ -35584,6 +36112,8 @@ function xExercise(x) {
     h += '<p class="x-empty">Attempt it first. The solution unlocks after you have run a check.</p>';
   }
 
+  /* The curriculum's own review layer, and only once it is solved. */
+  if (x.examshell && solved) h += xEsReview(x);
   /* Source and pattern only AFTER solving — before that it gives the shape away. */
   if (solved) {
     h += '<div class="x-sec-h">Where this came from</div><div class="x-prov"><p>' +
@@ -35901,13 +36431,19 @@ function xProgress() {
 
 /* ============================= FINAL EXAM PREP =========================== */
 function xExamTabs() {
-  return '<div class="x-tabs">' + [['', 'Sessions & practice'], ['validation', 'Validation Challenges']]
+  return '<div class="x-tabs">' + [['', 'Sessions & practice'],
+      ['examshell', 'ExamShell Training'], ['validation', 'Validation Challenges']]
     .map(([k, t]) => '<button class="x-tab' + ((xs.sub || '') === k ? ' on' : '') +
       '" data-xsub="' + k + '">' + t + '</button>').join('') + '</div>';
 }
 
 function xExam() {
   if (xs.sim) return xSim();
+  if (xs.sub === 'examshell') {
+    return '<header class="x-head"><h1>ExamShell Training</h1>' +
+      '<p class="x-sub">Fifteen exercises in a deliberate order.</p></header>' +
+      xExamTabs() + xExamShell();
+  }
   if (xs.sub === 'validation') {
     return '<header class="x-head"><h1>Validation Challenges</h1>' +
       '<p class="x-sub">The hard end of Track A.</p></header>' + xExamTabs() + xValidation();
@@ -35958,6 +36494,83 @@ function xValidation() {
       e.length + ' are band E \u2014 the hardest, and the only ones that hide their pattern entirely.</p>' +
     '<div class="x-sec-h">Band E \u2014 validation style</div>' + xList(e) +
     '<div class="x-sec-h">Band D \u2014 algorithmic pipelines</div>' + xList(d);
+}
+
+/* ---------------------------- ExamShell Training ------------------------- *
+ * A curriculum, not a mode. Its exercises are ordinary EXAM_EXERCISES records,
+ * so opening one uses the same workspace, gate, progress and persistence as
+ * everything else — there is no second exercise system here.
+ *
+ * WHAT IS SHOWN BEFORE SOLVING: number, title, difficulty label, checkpoint
+ * marker, completion. That is what a candidate would reasonably have.
+ * WHAT IS NOT: skills, the reasoning profile, the edge-case list, the training
+ * purpose, and which pattern it trains. All of that exists in the record and is
+ * revealed by xEsReview() only once the exercise is solved. Handing over a list
+ * of edge cases in advance answers half the exercise.
+ */
+const ES_DIFF_LABEL = { easy:'Easy', medium:'Medium', hard:'Hard', final:'Hardest' };
+
+function xEsRow(x) {
+  const e = x.examshell;
+  const done = xSolved(x.id);
+  return '<button class="x-esrow' + (done ? ' done' : '') + (e.checkpoint ? ' chk' : '') +
+    '" data-xopen="' + xEsc(x.id) + '">' +
+    '<span class="x-esn">' + String(e.n).padStart(2, '0') + '</span>' +
+    '<span class="x-esname mono">' + xEsc(x.title) + '</span>' +
+    '<span class="x-esd d-' + e.difficulty + '">' + xEsc(ES_DIFF_LABEL[e.difficulty]) + '</span>' +
+    (e.checkpoint ? '<span class="x-eschk">checkpoint ' + e.checkpoint + '</span>' : '<span></span>') +
+    '<span class="x-esst">' + (done ? 'solved' : '') + '</span></button>';
+}
+
+function xExamShell() {
+  const list = (typeof EXAMSHELL !== 'undefined' ? EXAMSHELL : []);
+  const done = list.filter(x => xSolved(x.id)).length;
+  const chk = list.filter(x => x.examshell.checkpoint);
+  const chkDone = chk.filter(x => xSolved(x.id)).length;
+  let h = '<p class="x-sub">Fifteen exercises ordered so the difficulty rises, falls back, and rises ' +
+    'further \u2014 the way a real sitting does. Three of them are checkpoints: no hints, and they ' +
+    're-test something you met earlier in a form you have not seen. Two came from the July exam itself; ' +
+    'the rest are labelled for what they actually are.</p>';
+
+  h += '<div class="x-esbar"><div><b>' + done + ' / ' + list.length + '</b><span>solved</span></div>' +
+    '<div><b>' + chkDone + ' / ' + chk.length + '</b><span>checkpoints passed</span></div>' +
+    '<div class="x-esprog"><i style="width:' + Math.round(done / list.length * 100) + '%"></i></div></div>';
+
+  h += '<div class="x-eslist">' + list.map(xEsRow).join('') + '</div>';
+
+  /* Sourcing, stated plainly and up front rather than buried in a tooltip. */
+  h += '<div class="x-sec-h">Where these come from</div><div class="x-esconf">' +
+    Object.keys(ES_CONF_LABEL).map(k => {
+      const n = list.filter(x => x.examshell.confidence === k).length;
+      const L = ES_CONF_LABEL[k];
+      return '<div class="x-esc ' + L.tone + '"><b>' + xEsc(L.text) + '</b><span>' + n +
+        ' of ' + list.length + '</span><p>' + xEsc(L.note) + '</p></div>';
+    }).join('') + '</div>';
+  h += '<p class="x-exnote">The Vigenere subject was read from photographed cards; both of its worked ' +
+    'examples were reproduced by computation before it was written down here. Neither example contains ' +
+    'a non-alphabetic character, so the rule that such characters do not consume a key letter is quoted ' +
+    'from the card and not independently confirmed.</p>';
+  return h;
+}
+
+/* Shown on an ExamShell exercise ONLY once it is solved. */
+function xEsReview(x) {
+  const e = x.examshell;
+  const L = ES_CONF_LABEL[e.confidence];
+  return '<div class="x-sec-h">Now that you have solved it</div>' +
+    '<div class="x-esrev">' +
+    '<div class="x-l"><b>Why it is here</b><p>' + xEsc(e.purpose) + '</p></div>' +
+    '<div class="x-l"><b>Where it came from</b><p><span class="x-gate ' + L.tone + '">' +
+      xEsc(L.text) + '</span> ' + xEsc(e.statement) + '</p></div>' +
+    '<div class="x-l"><b>What it was testing</b><p>' + x.skills.join(', ') + '</p></div>' +
+    '<div class="x-l"><b>The edge cases that break a naive answer</b><ul>' +
+      e.edgeCases.map(c => '<li>' + xEsc(c) + '</li>').join('') + '</ul></div>' +
+    '<div class="x-l"><b>Difficulty, and why</b><p>Scored ' + e.score + ' \u2014 ' +
+      xEsc(ES_DIFF_LABEL[e.difficulty]) + '. Implementation length: ' + xEsc(e.implementationLength) +
+      ', which is deliberately not part of the score.</p>' +
+      '<div class="x-esdims">' + ES_DIMENSIONS.map(([k, w, desc]) =>
+        '<span title="' + xEsc(desc) + '">' + xEsc(k) + ' <i>' + e.profile[k] + '</i></span>').join('') +
+      '</div></div></div>';
 }
 
 /* ------------------------------- simulator ------------------------------ */
