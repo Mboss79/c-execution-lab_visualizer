@@ -4,6 +4,7 @@ package-lock.json
 
 # local build + test artefacts
 c-lab-tests/screenshots/
+c-lab-tests/shots/
 *.log
 *.tmp
 *.bak

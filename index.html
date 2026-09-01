@@ -5901,10 +5901,10 @@ int	main(void)
 c03_strncat: {
   needsInput:false, label:"strncat — append, bounded by source count",
   src:
-`char	*ft_strncat(char *dest, char *src, int nb)
+`char	*ft_strncat(char *dest, char *src, unsigned int nb)
 {
-	int	i;
-	int	j;
+	unsigned int	i;
+	unsigned int	j;
 
 	i = 0;
 	while (dest[i])
@@ -23354,12 +23354,13 @@ function wireLabFunctions() {
    positions, the destination bytes and the return values are all read out of
    execution snapshots.
 
-   NOTE ON THE SUBJECT: the official C03 subject has not been supplied, so no
-   exercise number is claimed for any of these functions and no prototype is
-   presented as "the" required one. The implementations shown are ordinary,
-   readable versions written to be stepped through; when the real subject and
-   the user's own implementations arrive they replace the `src` in EXAMPLES and
-   everything here follows. */
+   NOTE ON THE SUBJECT: the official C03 subject (Version 5) has been supplied and
+   reconciled against: ex00..ex05, the six prototypes, and "Allowed functions:
+   None" for every one of them. Reconciling found one real defect - ft_strncat
+   took `int nb` where the subject requires `unsigned int nb`. The
+   implementations shown are still ordinary readable versions written to be
+   stepped through, not model answers; when the learner supplies their own they
+   replace the `src` in EXAMPLES and everything here follows. */
 
 const C03_CATEGORIES = [
   { id:'compare', label:'COMPARE', blurb:'Read two strings, report how they relate. Nothing is modified.' },
@@ -23371,7 +23372,7 @@ const C03_CATEGORIES = [
    the badges all read THIS — the same fact is never written twice. */
 const C03_FUNCS = [
   {
-    id:'strcmp', key:'c03_strcmp', cat:'compare',
+    id:'strcmp', key:'c03_strcmp', ex:'ex00', allowed:'None', cat:'compare',
     prototype:'int ft_strcmp(char *s1, char *s2);',
     idea:'Compare',
     reads:'both strings', writes:'nothing', writesMem:false, usesSize:false, destMod:false,
@@ -23391,7 +23392,7 @@ const C03_FUNCS = [
     ],
   },
   {
-    id:'strncmp', key:'c03_strncmp', cat:'compare',
+    id:'strncmp', key:'c03_strncmp', ex:'ex01', allowed:'None', cat:'compare',
     prototype:'int ft_strncmp(char *s1, char *s2, unsigned int n);',
     idea:'Compare, bounded',
     reads:'both strings, at most n bytes', writes:'nothing', writesMem:false, usesSize:true, destMod:false,
@@ -23410,7 +23411,7 @@ const C03_FUNCS = [
     ],
   },
   {
-    id:'strcat', key:'c03_strcat', cat:'concat',
+    id:'strcat', key:'c03_strcat', ex:'ex02', allowed:'None', cat:'concat',
     prototype:'char *ft_strcat(char *dest, char *src);',
     idea:'Append',
     reads:'src, and dest up to its \\0', writes:'dest', writesMem:true, usesSize:false, destMod:true,
@@ -23428,8 +23429,8 @@ const C03_FUNCS = [
     ],
   },
   {
-    id:'strncat', key:'c03_strncat', cat:'concat',
-    prototype:'char *ft_strncat(char *dest, char *src, int nb);',
+    id:'strncat', key:'c03_strncat', ex:'ex03', allowed:'None', cat:'concat',
+    prototype:'char *ft_strncat(char *dest, char *src, unsigned int nb);',
     idea:'Append at most n source bytes',
     reads:'src, at most nb bytes', writes:'dest', writesMem:true, usesSize:true, destMod:true,
     returns:'dest — the same pointer that was passed in',
@@ -23447,7 +23448,7 @@ const C03_FUNCS = [
     ],
   },
   {
-    id:'strstr', key:'c03_strstr', cat:'search',
+    id:'strstr', key:'c03_strstr', ex:'ex04', allowed:'None', cat:'search',
     prototype:'char *ft_strstr(char *str, char *to_find);',
     idea:'Find',
     reads:'both strings', writes:'nothing', writesMem:false, usesSize:false, destMod:false,
@@ -23467,7 +23468,7 @@ const C03_FUNCS = [
     ],
   },
   {
-    id:'strlcat', key:'c03_strlcat', cat:'concat',
+    id:'strlcat', key:'c03_strlcat', ex:'ex05', allowed:'None', cat:'concat',
     prototype:'unsigned int ft_strlcat(char *dest, char *src, unsigned int size);',
     idea:'Append, bounded by the DESTINATION buffer',
     reads:'src, and dest up to size', writes:'dest, never past size', writesMem:true, usesSize:true, destMod:true,
@@ -23758,23 +23759,26 @@ function c03ExperimentHtml() {
 function c03CardHtml(id) {
   const f = c03Of(id);
   const rows = [
+    ['subject exercise', f.ex],
+    ['allowed functions', f.allowed],
     ['category', (C03_CATEGORIES.find(c => c.id === f.cat) || {}).label],
     ['prototype', f.prototype], ['problem it solves', f.problem], ['reads', f.reads],
     ['writes', f.writes], ['what it modifies', f.modifies], ['how it moves', f.traverse],
     ['stop condition', f.stops], ['returns', f.returns], ['about the return', f.ret],
     ['the \\0', f.nul], ['pointers', f.pointer],
   ];
-  if (f.sizeMeans) rows.splice(2, 0, ['third argument', f.sizeMeans]);
-  return '<div class="c3-block"><div class="c3-block-h">' + esc(f.id) + ' — reference</div>' +
+  if (f.sizeMeans) rows.splice(4, 0, ['third argument', f.sizeMeans]);
+  return '<div class="c3-block"><div class="c3-block-h">' + esc(f.ex) + '  ' + esc(f.id) + ' — reference</div>' +
     '<div class="c3-card-grid">' + rows.map(([k, v]) =>
       '<span class="c3-ck">' + esc(k) + '</span><span class="c3-cv">' + esc(v || '—') + '</span>').join('') + '</div>' +
     '<div class="c3-sub-h">COMMON MISTAKES</div>' +
     f.mistakes.map(([wrong, right]) =>
       '<div class="c3-mistake"><div class="c3-wrong"><span>✕</span>' + esc(wrong) + '</div>' +
       '<div class="c3-right"><span>✓</span>' + esc(right) + '</div></div>').join('') +
-    '<div class="c3-note">The official C03 subject has not been supplied, so no exercise number is claimed and the ' +
-    'prototype above is the one this implementation uses — not a quoted requirement. When the subject arrives, the ' +
-    'source and the prototype are replaced and everything on this page follows.</div></div>';
+    '<div class="c3-note">Exercise number, prototype and allowed-function list are quoted from the official C03 ' +
+    'subject, Version 5. All six exercises allow no functions at all. The implementation shown is an ordinary ' +
+    'readable version written to be stepped through, not a model answer. Replace it with your own and every ' +
+    'panel on this page follows.</div></div>';
 }
 
 function labC03Html() {
@@ -31843,6 +31847,553 @@ function termSyncToProject(key) {
   }
 }
 /* ==== TERM END ==== */
+
+/* ==== EXAMDATA START ==== */
+/* ============================================================================
+   FINAL EXAM PREP — the knowledge base
+   ----------------------------------------------------------------------------
+   Three separate things live here, in this order, and nothing else:
+
+     1. EXAM_SUBJECTS   what each C Piscine subject actually contains
+     2. EXAM_SKILLS     the reasoning skills, independent of any exercise
+     3. the derivation  track + studied status, COMPUTED, never hand-assigned
+
+   The exercises themselves are in p41_examex.js. Splitting them keeps this file
+   readable and means a new exercise source can be added without touching the
+   knowledge map.
+
+   PROVENANCE IS A FIELD, NOT A FOOTNOTE. Every subject carries `provenance`,
+   every exercise carries `source`, and the UI prints both. This project has a
+   standing rule that a claim shown to the learner has to be one we can stand
+   behind, and a subject we have not read is not the same as a subject we have.
+   ========================================================================== */
+
+/* Four evidence levels. These strings are rendered as badges, so they are the
+   vocabulary of the whole feature — see EV_LABEL for what each one promises. */
+const EV = {
+  PDF:       'pdf',        // transcribed from the official subject PDF
+  PENDING:   'pending',    // subject supplied, not yet transcribed here
+  HISTORICAL:'historical', // seen in an exam-corpus repository
+  PATTERN:   'pattern',    // recurs across several corpora
+  GENERATED: 'generated',  // written by this training system
+};
+const EV_LABEL = {
+  pdf:        { text:'FROM THE SUBJECT',   note:'Transcribed from the official subject PDF supplied by the learner.' },
+  pending:    { text:'PDF NOT TRANSCRIBED',note:'The learner supplied this subject, but its text has not been entered here yet. Concepts shown are provisional.' },
+  historical: { text:'HISTORICAL',         note:'Observed in a public exam-practice repository. Not a statement about any current exam.' },
+  pattern:    { text:'COMMON PATTERN',     note:'Recurs across several independent exam collections. Still not an official rule.' },
+  generated:  { text:'GENERATED PRACTICE', note:'Written by C-Execution-Lab to train a skill. It has never been an exam exercise.' },
+};
+
+/* ---------------------------------------------------------------------------
+   1. THE SUBJECTS
+   ---------------------------------------------------------------------------
+   `concepts` is the load-bearing field: the exercise gating, the cross-subject
+   challenge builder and the "you have not studied this" explanation all read it.
+   `ex` is the official exercise list, verbatim where provenance is `pdf`.
+
+   The learner's position, stated once, here, and nowhere else:
+     studied      C00..C07
+     track A      C00..C08   (the current recoding priority)
+     track B      C09..C13   (advanced / next stage)
+   Change STUDIED_THROUGH and every badge, filter and score in the app follows.
+   ------------------------------------------------------------------------- */
+const STUDIED_THROUGH = 7;      // C00..C07 have been studied
+const TRACK_A_THROUGH = 8;      // C00..C08 is the main practical track
+
+const EXAM_SUBJECTS = [
+  {
+    id:'C00', n:0, label:'C 00', provenance: EV.PENDING,
+    title:'First steps: write, characters, simple output',
+    concepts:['ft_putchar','write','char literals','a first function','compilation'],
+    skills:['CHAR_OUTPUT','ASCII'],
+    ex:[],
+    note:'Supplied by the learner; not yet transcribed into this knowledge base.',
+  },
+  {
+    id:'C01', n:1, label:'C 01', provenance: EV.PENDING,
+    title:'Pointers, variables and passing by address',
+    concepts:['pointers','dereferencing','swap through addresses','int arrays','loops'],
+    skills:['POINTER_MANIPULATION','ARRAY_TRAVERSAL','SORTING'],
+    ex:[],
+    note:'Supplied by the learner; not yet transcribed into this knowledge base.',
+  },
+  {
+    id:'C02', n:2, label:'C 02', provenance: EV.PENDING,
+    title:'Strings: traversal, classification, copying',
+    concepts:['char *','the \\0 terminator','character classification','string copy','string traversal'],
+    skills:['STRING_SCAN','CHAR_CLASSIFICATION','WORD_DETECTION'],
+    ex:[],
+    note:'Supplied by the learner; not yet transcribed into this knowledge base.',
+  },
+  {
+    /* Transcribed from en.subject c03.pdf, Version 5. This replaces the
+       placeholder the C03 lab shipped with — see C03_FUNCS, which now agrees
+       with the subject rather than merely resembling it. */
+    id:'C03', n:3, label:'C 03', provenance: EV.PDF, version:'5',
+    title:'Reproducing the standard string functions',
+    summary:'This document is the subject for the C 03 module of the C Piscine @ 42.',
+    norminette:'-R CheckForbiddenSourceHeader',
+    concepts:['reproducing a man-page contract','string comparison','string concatenation',
+              'bounded (n-limited) variants','substring search','truncating concatenation',
+              'unsigned int sizes','return-value conventions'],
+    skills:['STRING_SCAN','SUBSTRING_SEARCH','COMPARISON','BOUNDED_LOOP','POINTER_MANIPULATION'],
+    ex:[
+      { id:'ex00', name:'ft_strcmp',   allowed:'None', proto:'int ft_strcmp(char *s1, char *s2);',
+        task:'Reproduce the behavior of the function strcmp (man strcmp).' },
+      { id:'ex01', name:'ft_strncmp',  allowed:'None', proto:'int ft_strncmp(char *s1, char *s2, unsigned int n);',
+        task:'Reproduce the behavior of the function strncmp (man strncmp).' },
+      { id:'ex02', name:'ft_strcat',   allowed:'None', proto:'char *ft_strcat(char *dest, char *src);',
+        task:'Reproduce the behavior of the function strcat (man strcat).' },
+      { id:'ex03', name:'ft_strncat',  allowed:'None', proto:'char *ft_strncat(char *dest, char *src, unsigned int nb);',
+        task:'Reproduce the behavior of the function strncat (man strncat).' },
+      { id:'ex04', name:'ft_strstr',   allowed:'None', proto:'char *ft_strstr(char *str, char *to_find);',
+        task:'Reproduce the behavior of the function strstr (man strstr).' },
+      { id:'ex05', name:'ft_strlcat',  allowed:'None', proto:'unsigned int ft_strlcat(char *dest, char *src, unsigned int size);',
+        task:'Reproduce the behavior of the function strlcat (man strlcat).' },
+    ],
+  },
+  {
+    id:'C04', n:4, label:'C 04', provenance: EV.PDF, version:'6',
+    title:'Strings, write, numbers, number bases, recursion and parsing',
+    concepts:['ft_strlen','ft_putstr','ft_putnbr','base conversion','atoi','atoi_base',
+              'digit extraction','number reconstruction','recursion','input validation'],
+    skills:['STRING_SCAN','NUMBER_DECOMPOSITION','NUMBER_CONSTRUCTION','BASE_CONVERSION',
+            'RECURSION','VALIDATION'],
+    ex:[], /* the full C 04 module already ships in the Learn view; see C04_EX */
+    seeModule:'C04',
+  },
+  {
+    id:'C05', n:5, label:'C 05', provenance: EV.PDF, version:'6',
+    title:'Iteration and recursion: factorials, powers, Fibonacci, roots, primes',
+    concepts:['iterative vs recursive','factorial','power','fibonacci','square root',
+              'prime testing','next prime','ten queens / backtracking'],
+    skills:['RECURSION','ITERATION','NUMBER_THEORY','BACKTRACKING','SEARCH'],
+    ex:[],
+    seeModule:'C05',
+  },
+  {
+    id:'C06', n:6, label:'C 06', provenance: EV.PDF, version:'8',
+    title:'Command-line arguments',
+    concepts:['argc','argv','argv[0]','walking argv forward','walking argv backwards',
+              'sorting argv by swapping pointers'],
+    skills:['ARGC_ARGV','ARRAY_TRAVERSAL','REVERSE_TRAVERSAL','SORTING','COMPARISON'],
+    ex:[],
+    seeModule:'C06',
+  },
+  {
+    id:'C07', n:7, label:'C 07', provenance: EV.PENDING,
+    title:'Dynamic allocation',
+    concepts:['malloc','allocation size','allocation failure','free','ft_strdup',
+              'ranges','ft_split-like splitting','char **','int *'],
+    skills:['DYNAMIC_MEMORY','POINTER_MANIPULATION','STRING_SCAN','ARRAY_TRAVERSAL'],
+    ex:[],
+    note:'Supplied by the learner; not yet transcribed into this knowledge base.',
+  },
+  {
+    /* Transcribed from en.subject c08.pdf, Version 14. */
+    id:'C08', n:8, label:'C 08', provenance: EV.PDF, version:'14',
+    title:'Header files, macros, typedefs and structures',
+    summary:'This document is the subject for C 08 module of the C Piscine @ 42.',
+    norminette:'-R CheckDefine (ex01, ex02)',
+    concepts:['header files','include guards','function prototypes in a header',
+              '#define','object-like and function-like macros','typedef',
+              'enum-like boolean types','struct','struct pointer and ->',
+              'array of structures','allocating an array of structures'],
+    skills:['HEADERS','MACROS','STRUCTS','DYNAMIC_MEMORY','ARRAY_TRAVERSAL','STRING_SCAN'],
+    ex:[
+      { id:'ex00', name:'ft.h', allowed:'None', files:'ft.h',
+        task:'Create your ft.h file containing the prototypes of ft_putchar, ft_swap, ft_putstr, ft_strlen and ft_strcmp.' },
+      { id:'ex01', name:'ft_boolean.h', allowed:'None', files:'ft_boolean.h',
+        task:'Create a ft_boolean.h that compiles and runs the given main: it needs t_bool, TRUE, FALSE, EVEN(), EVEN_MSG, ODD_MSG and SUCCESS.',
+        expects:['I have an even number of arguments.','I have an odd number of arguments.'] },
+      { id:'ex02', name:'ft_abs.h', allowed:'None', files:'ft_abs.h',
+        task:'Create a macro ABS which replaces its argument with its absolute value.' },
+      { id:'ex03', name:'ft_point.h', allowed:'None', files:'ft_point.h',
+        task:'Create ft_point.h so the given main compiles: it uses t_point with members x and y, set through a pointer.' },
+      { id:'ex04', name:'ft_strs_to_tab', allowed:'malloc, free', files:'ft_strs_to_tab.c',
+        proto:'struct s_stock_str *ft_strs_to_tab(int ac, char **av);',
+        task:'Turn each element of av into a t_stock_str {int size; char *str; char *copy;}, keeping the order of av. The returned array is allocated and its last element has str set to 0. Return NULL on error.' },
+      { id:'ex05', name:'ft_show_tab', allowed:'write', files:'ft_show_tab.c',
+        proto:'void ft_show_tab(struct s_stock_str *par);',
+        task:'Display, for each element: the string then \\n, the size then \\n, the copy then \\n.' },
+    ],
+  },
+  {
+    /* Transcribed from en.subject c09.pdf, Version 5.0. */
+    id:'C09', n:9, label:'C 09', provenance: EV.PDF, version:'5.0',
+    title:'Building a static library, and a Makefile',
+    summary:'This document is the subject for the module C 09 of the C Piscine @ 42.',
+    norminette:'-R CheckForbiddenSourceHeader',
+    concepts:['separate compilation','.o object files','ar and libft.a','a shell build script',
+              'Makefile rules','all / clean / fclean / re','srcs and includes directories',
+              'not recompiling unnecessarily','wildcards are a trap','splitting a string on a charset'],
+    skills:['BUILD_SYSTEM','MULTI_FILE','DYNAMIC_MEMORY','STRING_SCAN','WORD_DETECTION'],
+    ex:[
+      { id:'ex00', name:'libft', allowed:'write',
+        files:'libft_creator.sh, ft_putchar.c, ft_swap.c, ft_putstr.c, ft_strlen.c, ft_strcmp.c',
+        task:'Create libft.a. A shell script libft_creator.sh compiles the sources and creates the library. Run as: sh libft_creator.sh' },
+      { id:'ex01', name:'Makefile', allowed:'None', files:'Makefile',
+        task:'A Makefile that builds libft.a from srcs/ with headers from includes/, compiling with cc -Wall -Wextra -Werror, implementing clean, fclean, re, all and libft.a, printing its commands and never compiling a file unnecessarily.' },
+      { id:'ex02', name:'ft_split', allowed:'malloc', files:'ft_split.c',
+        proto:'char **ft_split(char *str, char *charset);',
+        task:'Split str using every character of charset as a separator. Return a NULL-terminated array of the substrings between separators, with no empty strings. str must not be modified.' },
+    ],
+  },
+  {
+    /* Transcribed from en.subject c10.pdf, Version 7.1. */
+    id:'C10', n:10, label:'C 10', provenance: EV.PDF, version:'7.1',
+    title:'File descriptors: reading files from the command line',
+    summary:'This document is the subject for the module C 10 of the C Piscine @ 42.',
+    concepts:['open / read / close','file descriptors','fixed-size read buffers','errno and strerror',
+              'basename','command-line options','reproducing a unix tool','hex formatting'],
+    skills:['FILE_IO','BUFFERED_READ','ERROR_REPORTING','ARGC_ARGV','BASE_CONVERSION','BUILD_SYSTEM'],
+    ex:[
+      { id:'ex00', name:'display_file', allowed:'close, open, read, write',
+        files:'Makefile, and files needed for your program', binary:'ft_display_file',
+        task:'Display on standard output only the content of the file given as an argument. malloc is forbidden: use a fixed-size array.',
+        errors:['File name missing.','Too many arguments.','Cannot read file.'] },
+      { id:'ex01', name:'cat', allowed:'close, open, read, write, strerror, basename',
+        files:'Makefile, and files needed for your program', binary:'ft_cat',
+        task:'Reproduce cat, without options. Fixed-size array, slightly under 30 KB. errno may be used.' },
+      { id:'ex02', name:'tail', allowed:'close, open, read, write, malloc, free, strerror, basename',
+        files:'Makefile, and files needed for your program', binary:'ft_tail',
+        task:'Reproduce tail. Only the -c option must be handled, without + or - signs.' },
+      { id:'ex03', name:'hexdump', allowed:'close, open, read, write, malloc, free, strerror, basename',
+        files:'Makefile, and files needed for your program', binary:'ft_hexdump',
+        task:'Reproduce hexdump without redirection. Only the -C option must be handled.' },
+    ],
+  },
+  {
+    /* Transcribed from en.subject c11.pdf, Version 8.0. */
+    id:'C11', n:11, label:'C 11', provenance: EV.PDF, version:'8.0',
+    title:'Function pointers',
+    summary:'This document is the subject for the module C 11 of the C Piscine @ 42.',
+    concepts:['a pointer to a function','passing behaviour as an argument','applying f to every element',
+              'mapping into a new array','predicates','counting by predicate','comparison functions',
+              'an array of function pointers','dispatching on an operator'],
+    skills:['FUNCTION_POINTER','ARRAY_TRAVERSAL','FILTERING','COUNTING','SORTING','COMPARISON',
+            'DYNAMIC_MEMORY','ARGC_ARGV','NUMBER_CONSTRUCTION'],
+    ex:[
+      { id:'ex00', name:'ft_foreach', allowed:'None', proto:'void ft_foreach(int *tab, int length, void(*f)(int));',
+        task:'Apply f to every element of an integer array, in order.' },
+      { id:'ex01', name:'ft_map', allowed:'malloc', proto:'int *ft_map(int *tab, int length, int(*f)(int));',
+        task:'Apply f to every element in order and return a new array of the return values.' },
+      { id:'ex02', name:'ft_any', allowed:'None', proto:'int ft_any(char **tab, int(*f)(char*));',
+        task:'Return 1 if f returns non-zero for at least one element, else 0. The array is delimited by a null pointer.' },
+      { id:'ex03', name:'ft_count_if', allowed:'None', proto:'int ft_count_if(char **tab, int length, int(*f)(char*));',
+        task:'Return the number of elements for which f does not return 0.' },
+      { id:'ex04', name:'ft_is_sort', allowed:'None', proto:'int ft_is_sort(int *tab, int length, int(*f)(int, int));',
+        task:'Return 1 if the array is sorted, 0 otherwise. f returns negative / 0 / positive like a comparison function.' },
+      { id:'ex05', name:'do-op', allowed:'write', files:'Your program files',
+        task:'A program run as do-op value1 operator value2, using an array of function pointers to dispatch on the operator. Handle + - / * and %. Invalid operator prints 0; an invalid number of arguments prints nothing.',
+        errors:['Stop : division by zero','Stop : modulo by zero'],
+        examples:['$>./do-op 42 "+" 21','63'] },
+      { id:'ex06', name:'ft_sort_string_tab', allowed:'None', proto:'void ft_sort_string_tab(char **tab);',
+        task:'Sort a null-terminated array of strings in ASCII order, by exchanging the array’s pointers.' },
+      { id:'ex07', name:'ft_advanced_sort_string_tab', allowed:'None',
+        proto:'void ft_advanced_sort_string_tab(char **tab, int(*cmp)(char *, char *));',
+        task:'Sort according to the return value of the given comparison function, by exchanging pointers.' },
+    ],
+  },
+  {
+    /* Transcribed from en.subject c12.pdf, Version 9.1. */
+    id:'C12', n:12, label:'C 12', provenance: EV.PDF, version:'9.1',
+    title:'Linked lists',
+    summary:'This document is the subject for the module C 12 of the C Piscine @ 42.',
+    structure:'typedef struct s_list { struct s_list *next; void *data; } t_list;',
+    concepts:['a self-referential struct','void * data','allocating an element','the head pointer',
+              't_list ** to update the head','traversal','insertion at front and back',
+              'clearing and freeing','indexing','reversal','applying a function to each element',
+              'predicate-driven traversal','removal while traversing','merging','sorting a list',
+              'keeping a list sorted on insert'],
+    skills:['LINKED_LIST','POINTER_MANIPULATION','DYNAMIC_MEMORY','FUNCTION_POINTER',
+            'RECURSION','SORTING','FILTERING','SEARCH'],
+    ex:[
+      { id:'ex00', name:'ft_create_elem', allowed:'malloc', proto:'t_list *ft_create_elem(void *data);',
+        task:'Create a new t_list element, assigning data and setting next to NULL.' },
+      { id:'ex01', name:'ft_list_push_front', allowed:'ft_create_elem', proto:'void ft_list_push_front(t_list **begin_list, void *data);',
+        task:'Add a new element at the beginning of the list, updating the head pointer if necessary.' },
+      { id:'ex02', name:'ft_list_size', allowed:'None', proto:'int ft_list_size(t_list *begin_list);',
+        task:'Return the number of elements in the list.' },
+      { id:'ex03', name:'ft_list_last', allowed:'None', proto:'t_list *ft_list_last(t_list *begin_list);',
+        task:'Return the last element of the list.' },
+      { id:'ex04', name:'ft_list_push_back', allowed:'ft_create_elem', proto:'void ft_list_push_back(t_list **begin_list, void *data);',
+        task:'Add a new element at the end of the list, updating the head pointer if necessary.' },
+      { id:'ex05', name:'ft_list_push_strs', allowed:'ft_create_elem', proto:'t_list *ft_list_push_strs(int size, char **strs);',
+        task:'Build a list of all the strings in strs, size being its size, with the first element ending up last. Return the address of the first link.' },
+      { id:'ex06', name:'ft_list_clear', allowed:'free', proto:'void ft_list_clear(t_list *begin_list, void (*free_fct)(void *));',
+        task:'Remove and free every link, freeing each data with free_fct.' },
+      { id:'ex07', name:'ft_list_at', allowed:'None', proto:'t_list *ft_list_at(t_list *begin_list, unsigned int nbr);',
+        task:'Return the Nth element, the first being nbr 0. Return a null pointer on error.' },
+      { id:'ex08', name:'ft_list_reverse', allowed:'None', proto:'void ft_list_reverse(t_list **begin_list);',
+        task:'Reverse the order of the elements. Each element keeps its value.' },
+      { id:'ex09', name:'ft_list_foreach', allowed:'None', proto:'void ft_list_foreach(t_list *begin_list, void (*f)(void *));',
+        task:'Apply f to each element’s data, in list order. Used as (*f)(list_ptr->data).' },
+      { id:'ex10', name:'ft_list_foreach_if', allowed:'None',
+        proto:'void ft_list_foreach_if(t_list *begin_list, void (*f)(void *), void *data_ref, int (*cmp)(void *, void *));',
+        task:'Apply f only where cmp(data, data_ref) returns 0, in list order.' },
+      { id:'ex11', name:'ft_list_find', allowed:'None', proto:'t_list *ft_list_find(t_list *begin_list, void *data_ref, int (*cmp)());',
+        task:'Return the address of the first element whose data compares equal to data_ref (cmp returns 0).' },
+      { id:'ex12', name:'ft_list_remove_if', allowed:'free',
+        proto:'void ft_list_remove_if(t_list **begin_list, void *data_ref, int (*cmp)(), void (*free_fct)(void *));',
+        task:'Remove every element whose data compares equal to data_ref, freeing its data with free_fct.' },
+      { id:'ex13', name:'ft_list_merge', allowed:'None', proto:'void ft_list_merge(t_list **begin_list1, t_list *begin_list2);',
+        task:'Place the elements of begin2 at the end of begin1. Creating elements is not authorised.' },
+      { id:'ex14', name:'ft_list_sort', allowed:'None', proto:'void ft_list_sort(t_list **begin_list, int (*cmp)());',
+        task:'Sort the list ascending, comparing two elements’ data with cmp.' },
+      { id:'ex15', name:'ft_list_reverse_fun', allowed:'None', proto:'void ft_list_reverse_fun(t_list *begin_list);',
+        task:'Reverse the order of the elements in the list.' },
+      { id:'ex16', name:'ft_sorted_list_insert', allowed:'ft_create_elem', proto:'void ft_sorted_list_insert(t_list **begin_list, void *data, int (*cmp)());',
+        task:'Create an element and insert it so the sorted list stays sorted ascending.' },
+      { id:'ex17', name:'ft_sorted_list_merge', allowed:'None', proto:'void ft_sorted_list_merge(t_list **begin_list1, t_list *begin_list2, int (*cmp)());',
+        task:'Integrate the elements of a sorted begin2 into a sorted begin1 so begin1 stays sorted ascending.' },
+    ],
+  },
+  {
+    /* Transcribed from en.subject c13.pdf, Version 6.0. */
+    id:'C13', n:13, label:'C 13', provenance: EV.PDF, version:'6.0',
+    title:'Binary trees',
+    summary:'This document is the subject for the module C 13 of the C Piscine @ 42.',
+    structure:'typedef struct s_btree { struct s_btree *left; struct s_btree *right; void *item; } t_btree;',
+    concepts:['a node with two children','prefix traversal','infix traversal','suffix traversal',
+              'a binary search tree','insertion by comparison','searching by comparison',
+              'the depth of the deepest branch','breadth-first / level-by-level traversal'],
+    skills:['BINARY_TREE','RECURSION','FUNCTION_POINTER','DYNAMIC_MEMORY','SEARCH','COMPARISON'],
+    ex:[
+      { id:'ex00', name:'btree_create_node', allowed:'malloc', proto:'t_btree *btree_create_node(void *item);',
+        task:'Allocate a new node, set item from the argument and every other member to 0. Return its address.' },
+      { id:'ex01', name:'btree_apply_prefix', allowed:'None', proto:'void btree_apply_prefix(t_btree *root, void (*applyf)(void *));',
+        task:'Apply applyf to the item of each node, using prefix traversal.' },
+      { id:'ex02', name:'btree_apply_infix', allowed:'None', proto:'void btree_apply_infix(t_btree *root, void (*applyf)(void *));',
+        task:'Apply applyf to the item of each node, using infix traversal.' },
+      { id:'ex03', name:'btree_apply_suffix', allowed:'None', proto:'void btree_apply_suffix(t_btree *root, void (*applyf)(void *));',
+        task:'Apply applyf to the item of each node, using suffix traversal.' },
+      { id:'ex04', name:'btree_insert_data', allowed:'btree_create_node',
+        proto:'void btree_insert_data(t_btree **root, void *item, int (*cmpf)(void *, void *));',
+        task:'Insert item into a sorted tree: lower elements to the left, higher or equal to the right. On the first call root points to NULL.' },
+      { id:'ex05', name:'btree_search_item', allowed:'None',
+        proto:'void *btree_search_item(t_btree *root, void *data_ref, int (*cmpf)(void *, void *));',
+        task:'Return the first item matching data_ref, traversing infix. Return NULL if it is not found.' },
+      { id:'ex06', name:'btree_level_count', allowed:'None', proto:'int btree_level_count(t_btree *root);',
+        task:'Return the size of the largest branch.' },
+      { id:'ex07', name:'btree_apply_by_level', allowed:'malloc, free',
+        proto:'void btree_apply_by_level(t_btree *root, void (*applyf)(void *item, int current_level, int is_first_elem));',
+        task:'Apply applyf to each node level by level. applyf receives the item, the level (0 for the root) and 1 if it is the first node of its level, else 0.' },
+    ],
+  },
+];
+
+/* The Instructions page is identical across every subject we have read, so it is
+   stated once. phase36 asserts these are shown wherever an exercise declares an
+   allowed-function list, because "-42 for a forbidden function" is the single
+   rule this whole feature exists to keep the learner safe from. */
+const EXAM_SUBJECT_RULES = {
+  provenance: EV.PDF,
+  seenIn: ['C03','C08','C09','C10','C11','C12','C13'],
+  rules: [
+    'Only this page serves as your reference, do not trust rumors.',
+    'These exercises are arranged in order of difficulty, from easiest to hardest. We will not consider a successfully completed harder exercise if an easier one is not fully functional.',
+    'Using a forbidden function is considered cheating. Cheaters receive a grade of -42, which is non-negotiable.',
+    'You only need to submit a main() function if we specifically ask for a program.',
+    'Moulinette compiles with the following flags: -Wall -Wextra -Werror, using cc.',
+    'If your program does not compile, you will receive a grade of 0.',
+    'You cannot leave any additional file in your directory beyond those specified in the assignment.',
+  ],
+};
+
+/* 42's own position on AI, transcribed from the AI Instructions chapter that
+   appears in every subject read here. It is shown, verbatim and attributed, at
+   the top of Reference Solutions — the one screen in this application that can
+   hand over an answer. The learner decided this feature should exist; the rule
+   it sits next to is theirs to weigh, so it is quoted rather than paraphrased. */
+const EXAM_AI_RULES = {
+  provenance: EV.PDF,
+  heading: '42’s own instructions on AI, from the subject',
+  learner: [
+    'You should apply reasoning to your assigned tasks, especially before turning to AI.',
+    'You should not ask for direct answers to the AI.',
+    'You should learn about 42 global approach on AI.',
+  ],
+  why: 'Keep in mind that during exams, AI is not available — no internet, no smartphones, etc. ' +
+       'You’ll quickly realise if you’ve relied too heavily on AI in your learning process.',
+  ours: 'This is why a reference solution here is reachable only after a real attempt, is absent ' +
+        'from Exam Mode entirely, and is never what a hint ladder ends on.',
+};
+
+/* ---------------------------------------------------------------------------
+   2. THE SKILLS
+   ---------------------------------------------------------------------------
+   Deliberately independent of exercises: a skill is a thing you can recognise
+   in a problem you have never seen. `firstSeen` is the earliest subject that
+   teaches it, and is what lets the gate explain itself in one sentence.
+   ------------------------------------------------------------------------- */
+const EXAM_SKILLS = [
+  /* strings & characters */
+  { id:'STRING_SCAN',        group:'Strings',    label:'String traversal',        firstSeen:'C02',
+    is:'Walking a string one character at a time until the \\0, holding an index or a pointer.' },
+  { id:'CHAR_CLASSIFICATION',group:'Strings',    label:'Character classification',firstSeen:'C02',
+    is:'Deciding what a character is — letter, digit, upper, lower, whitespace — from its code alone.' },
+  { id:'WORD_DETECTION',     group:'Strings',    label:'Word boundary detection', firstSeen:'C02',
+    is:'Turning a flat string into words by noticing the transitions between separator and non-separator.' },
+  { id:'REVERSE_TRAVERSAL',  group:'Strings',    label:'Reverse traversal',       firstSeen:'C02',
+    is:'Finding the end first, then walking backwards — and knowing why that is a different loop.' },
+  { id:'SUBSTRING_SEARCH',   group:'Strings',    label:'Substring searching',     firstSeen:'C03',
+    is:'A nested scan: an outer position, an inner match that can fail and restart.' },
+  { id:'TRANSFORMATION',     group:'Strings',    label:'Character transformation',firstSeen:'C02',
+    is:'Rewriting characters by a rule while preserving everything the rule does not touch.' },
+  { id:'BOUNDED_LOOP',       group:'Strings',    label:'Bounded (n-limited) loops',firstSeen:'C03',
+    is:'A loop with two stop conditions at once — the terminator and a count.' },
+  /* numbers */
+  { id:'NUMBER_DECOMPOSITION',group:'Numbers',   label:'Digit extraction',        firstSeen:'C04',
+    is:'Taking a number apart with / and %, most or least significant digit first.' },
+  { id:'NUMBER_CONSTRUCTION',group:'Numbers',    label:'Number reconstruction',   firstSeen:'C04',
+    is:'Building a value from characters: result = result * base + digit.' },
+  { id:'BASE_CONVERSION',    group:'Numbers',    label:'Base conversion',         firstSeen:'C04',
+    is:'The same two loops as above with the base as a parameter rather than ten.' },
+  { id:'NUMBER_THEORY',      group:'Numbers',    label:'Divisibility and primes', firstSeen:'C05',
+    is:'Factorials, powers, primes, gcd/lcm — and where the loop can stop.' },
+  /* control */
+  { id:'RECURSION',          group:'Control',    label:'Recursion',               firstSeen:'C04',
+    is:'A base case, a strictly smaller recursive case, and trusting the call.' },
+  { id:'ITERATION',          group:'Control',    label:'Iteration',               firstSeen:'C01',
+    is:'The same decomposition written as a loop with explicit state.' },
+  { id:'BACKTRACKING',       group:'Control',    label:'Backtracking',            firstSeen:'C05',
+    is:'Try, recurse, undo. The undo is the part people forget.' },
+  { id:'VALIDATION',         group:'Control',    label:'Input validation',        firstSeen:'C04',
+    is:'Deciding what counts as invalid before computing anything, and what to output when it is.' },
+  /* data */
+  { id:'ARRAY_TRAVERSAL',    group:'Arrays',     label:'Array traversal',         firstSeen:'C01',
+    is:'Indexing a known length, as opposed to scanning for a terminator.' },
+  { id:'SEARCH',             group:'Arrays',     label:'Searching',               firstSeen:'C01',
+    is:'Finding a position, and having an answer for "not present".' },
+  { id:'SORTING',            group:'Arrays',     label:'Sorting',                 firstSeen:'C01',
+    is:'Repeated comparison and swap. Which two things you swap is the whole design.' },
+  { id:'COUNTING',           group:'Arrays',     label:'Counting',                firstSeen:'C01',
+    is:'One accumulator, incremented on a condition. Where you increment decides off-by-one.' },
+  { id:'FILTERING',          group:'Arrays',     label:'Filtering',               firstSeen:'C02',
+    is:'Traversal plus a predicate: keep, skip, or emit.' },
+  { id:'COMPARISON',         group:'Arrays',     label:'Comparison',              firstSeen:'C03',
+    is:'Returning a sign rather than a boolean, and what the sign is computed from.' },
+  /* pointers & memory */
+  { id:'POINTER_MANIPULATION',group:'Pointers',  label:'Pointer manipulation',    firstSeen:'C01',
+    is:'Dereferencing, pointer arithmetic, and writing through an address the caller owns.' },
+  { id:'DYNAMIC_MEMORY',     group:'Pointers',   label:'Dynamic memory',          firstSeen:'C07',
+    is:'Deciding the size before allocating, checking the result, and freeing exactly once.' },
+  { id:'ARGC_ARGV',          group:'Pointers',   label:'argc / argv',             firstSeen:'C06',
+    is:'Arguments as an array of char * with a count — argc is a count, not a last index.' },
+  { id:'CHAR_OUTPUT',        group:'Pointers',   label:'Writing output',          firstSeen:'C00',
+    is:'write(1, &c, 1) and its cost: you must know the byte count before you can print.' },
+  { id:'ASCII',              group:'Pointers',   label:'ASCII arithmetic',        firstSeen:'C00',
+    is:'Characters are small integers, so ‘a’ + 1 and c - ‘0’ are ordinary arithmetic.' },
+  /* track B */
+  { id:'HEADERS',            group:'Advanced',   label:'Header files',            firstSeen:'C08',
+    is:'What belongs in a .h, and why it needs a guard.' },
+  { id:'MACROS',             group:'Advanced',   label:'Macros',                  firstSeen:'C08',
+    is:'Textual substitution before compilation, and the parenthesis traps that follow.' },
+  { id:'STRUCTS',            group:'Advanced',   label:'Structures',              firstSeen:'C08',
+    is:'Grouping related values, reaching them with . and ->.' },
+  { id:'BUILD_SYSTEM',       group:'Advanced',   label:'Makefiles and libraries', firstSeen:'C09',
+    is:'Separate compilation, archives, and rules that do not rebuild what is current.' },
+  { id:'MULTI_FILE',         group:'Advanced',   label:'Multi-file programs',     firstSeen:'C09',
+    is:'Declaration in a header, definition in a .c, one translation unit each.' },
+  { id:'FILE_IO',            group:'Advanced',   label:'File descriptors',        firstSeen:'C10',
+    is:'open, read, close, and that read returns how many bytes it actually got.' },
+  { id:'BUFFERED_READ',      group:'Advanced',   label:'Buffered reading',        firstSeen:'C10',
+    is:'A fixed buffer, a loop, and never assuming one read is the whole file.' },
+  { id:'ERROR_REPORTING',    group:'Advanced',   label:'Error reporting',         firstSeen:'C10',
+    is:'errno, strerror, and writing the message to the descriptor it belongs on.' },
+  { id:'FUNCTION_POINTER',   group:'Advanced',   label:'Function pointers',       firstSeen:'C11',
+    is:'Passing behaviour as an argument, and dispatching through an array of them.' },
+  { id:'LINKED_LIST',        group:'Advanced',   label:'Linked lists',            firstSeen:'C12',
+    is:'A chain of allocated nodes, and the t_list ** needed to change the head.' },
+  { id:'BINARY_TREE',        group:'Advanced',   label:'Binary trees',            firstSeen:'C13',
+    is:'Two children per node, and traversal order as the whole of the algorithm.' },
+];
+
+/* ---------------------------------------------------------------------------
+   3. THE DERIVATION
+   ---------------------------------------------------------------------------
+   Track and studied-status are FUNCTIONS of required_subjects. Nothing anywhere
+   assigns them by hand. Phase 12b established this pattern in the engine (region
+   derived from section) and it landed with zero test churn; the reason to repeat
+   it here is the learner's own: when C08 is studied, one constant changes and
+   every badge, filter, gate and readiness figure follows without an edit.
+   ------------------------------------------------------------------------- */
+const subjectN = (id) => {
+  const m = /^C(\d\d)$/.exec(String(id || ''));
+  return m ? parseInt(m[1], 10) : -1;
+};
+const examSubject = (id) => EXAM_SUBJECTS.find(s => s.id === id) || null;
+
+/* 'C00-C08' | 'C09-C13' | 'C00-C13-MIXED' — from the subjects alone. */
+function examTrackOf(required) {
+  const ns = (required || []).map(subjectN).filter(n => n >= 0);
+  if (!ns.length) return 'C00-C08';
+  const anyA = ns.some(n => n <= TRACK_A_THROUGH);
+  const anyB = ns.some(n => n > TRACK_A_THROUGH);
+  if (anyA && anyB) return 'C00-C13-MIXED';
+  return anyB ? 'C09-C13' : 'C00-C08';
+}
+
+/* 'STUDIED' | 'NOT_STUDIED' | 'ADVANCED', plus the subjects responsible, so the
+   UI can say WHICH subject is missing rather than only that one is. */
+function examGate(required) {
+  const ns = (required || []).map(subjectN).filter(n => n >= 0);
+  const beyond = ns.filter(n => n > STUDIED_THROUGH).sort((a, b) => a - b);
+  const advanced = beyond.filter(n => n > TRACK_A_THROUGH);
+  const id = (n) => 'C' + String(n).padStart(2, '0');
+  if (!beyond.length) return { status:'STUDIED', missing:[], track: examTrackOf(required) };
+  return {
+    status: advanced.length ? 'ADVANCED' : 'NOT_STUDIED',
+    missing: beyond.map(id),
+    track: examTrackOf(required),
+  };
+}
+
+const EXAM_GATE_LABEL = {
+  STUDIED:     { text:'STUDIED',      tone:'ok',
+                 blurb:'Every subject this needs is one you have studied. If it is hard, it is the algorithm that is hard.' },
+  NOT_STUDIED: { text:'NOT STUDIED',  tone:'warn',
+                 blurb:'This needs a subject you have not studied yet. Not understanding it is not the same as not being able to solve it.' },
+  ADVANCED:    { text:'ADVANCED — C09–C13', tone:'adv',
+                 blurb:'This belongs to the advanced track. It is here to show you what comes next, not to be recoded now.' },
+};
+
+/* The five difficulty axes, kept separate on purpose: "hard" is not one number.
+   combination is the axis the learner asked for most — it counts how many
+   distinct skills have to be alive in your head at the same time. */
+const EXAM_DIFFICULTY_AXES = [
+  ['concept',       'Concept',        'How much new understanding the problem itself demands.'],
+  ['algorithm',     'Algorithm',      'How hard it is to find the method, once the problem is understood.'],
+  ['implementation','Implementation', 'How hard the method is to write correctly in C.'],
+  ['edges',         'Edge cases',     'How much of the difficulty hides in empty, single, and malformed input.'],
+  ['combination',   'Combination',    'How many separate skills must be held together at once.'],
+];
+
+/* Combination bands A..E. The learner's own ladder, made computable: band is
+   read off `combination`, so a task cannot claim to be a Level E while training
+   one skill. */
+const EXAM_BANDS = [
+  { id:'A', min:1, label:'Single skill',        blurb:'One technique, stated plainly.' },
+  { id:'B', min:2, label:'Two skills',          blurb:'Two techniques that have to cooperate.' },
+  { id:'C', min:3, label:'Multiple skills',     blurb:'Three or more, with the wiring between them being the work.' },
+  { id:'D', min:4, label:'Algorithmic combination',
+    blurb:'A pipeline: extract, store, process, order, print. Each stage can be right while the whole is wrong.' },
+  { id:'E', min:5, label:'Validation-style',
+    blurb:'Unfamiliar by design. You are told nothing about what it resembles.' },
+];
+function examBand(d) {
+  const c = Math.max(1, Math.min(5, (d && d.combination) || 1));
+  let out = EXAM_BANDS[0];
+  for (const b of EXAM_BANDS) if (c >= b.min) out = b;
+  return out;
+}
+
+if (typeof window !== 'undefined') {
+  window.CExamData = { EXAM_SUBJECTS, EXAM_SKILLS, EXAM_BANDS, examGate, examTrackOf, examBand };
+}
+/* ==== EXAMDATA END ==== */
 
 /* ================================ WIRING ================================ */
 function inEditable(el) {

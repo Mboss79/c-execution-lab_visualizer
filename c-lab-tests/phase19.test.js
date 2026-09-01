@@ -304,8 +304,14 @@ function runKey(key) {
     lab.c03Fn = 'strcmp'; renderLab();
     return all;
   });
-  check('no exercise number is claimed while the subject is unsupplied',
-        /official C03 subject has not been supplied/i.test(text) && !/\bex0[0-9]\b/.test(text));
+  // The subject (Version 5) has been supplied and the lab is reconciled against
+  // it, so these assert what it now claims rather than what it used to withhold.
+  check('it cites the official C03 subject by version',
+        /official C03\s+subject, Version 5/i.test(text));
+  check('every exercise number is claimed, and is the subject\u2019s',
+        ['ex00','ex01','ex02','ex03','ex04','ex05'].every(e => text.includes(e)));
+  check('it states the allowed-function list the -42 rule turns on',
+        /Allowed functions:\s*None|allow no functions at all/i.test(text));
   check('it states strlcat is not strncat with a size',
         /strncat.{0,40}bounds the SOURCE/i.test(text) && /strlcat.{0,40}bounds the DESTINATION/i.test(text));
   check('it corrects the "strcmp returns 1" mistake',
