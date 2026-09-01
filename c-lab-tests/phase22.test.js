@@ -85,8 +85,8 @@ const lastLive = (src, name) => {
         e2.s === '"ABC"' && e2.p !== e1.p, e2.s + ' p=' + e2.p);
 
   console.log('\n=== part 3: the ft_putstr walkthrough, against the real run ===');
-  const FT = 'void\tft_putstr(char **str)\n{\n\twhile (**str != 0)\n\t{\n\t\twrite(1, *str, 1);\n\t\t(*str)++;\n\t}\n}\n\n' +
-             'int\tmain(void)\n{\n\tchar\t*text;\n\n\ttext = "ABC";\n\tft_putstr(&text);\n\treturn (0);\n}\n';
+  const FT = 'void\tputstr_advance(char **str)\n{\n\twhile (**str != 0)\n\t{\n\t\twrite(1, *str, 1);\n\t\t(*str)++;\n\t}\n}\n\n' +
+             'int\tmain(void)\n{\n\tchar\t*text;\n\n\ttext = "ABC";\n\tputstr_advance(&text);\n\treturn (0);\n}\n';
   const ftr = E.runToCompletion(FT);
   check('it runs and prints ABC', ftr.ok && ftr.output === 'ABC', JSON.stringify(ftr.output));
   const seen = [];
