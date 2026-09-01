@@ -32568,6 +32568,1147 @@ if (typeof window !== 'undefined') {
 }
 /* ==== EXAMDATA END ==== */
 
+/* ==== EXAMEX START ==== */
+/* ============================================================================
+   FINAL EXAM PREP — the exercise database
+   ----------------------------------------------------------------------------
+   Reads the knowledge base in p40_examdata.js. Four things live here:
+
+     1. EXAM_CORPUS      the historical corpus, ANALYSED — never imported
+     2. EXAM_PATTERNS    the problem structures extracted from it
+     3. EXAM_EXERCISES   generated practice, banded A..E
+     4. the constructor  EX(), which DERIVES track and studied status
+
+   WHY THE CORPUS IS NOT THE EXERCISE LIST. DKMR/42exams holds 72 exercises over
+   six levels. Shipping them as practice would train recognition of those 72.
+   What the learner needs is to recognise the STRUCTURE inside a problem they
+   have never seen, so the corpus is stored as analysis rows — name, level, the
+   pattern it instantiates, the subjects it needs — and the practice is written
+   against the patterns instead. A corpus row carries no task text and no
+   solution: it is evidence about what shapes recur, not something to solve.
+
+   PROVENANCE, same four levels as the knowledge base:
+     official     a subject exercise (those live in EXAM_SUBJECTS, not here)
+     historical   observed in a public exam-practice repository
+     pattern      a structure recurring across several collections
+     generated    written by this system to train a pattern
+   A generated exercise may record what inspired it in `inspiredBy`, which is
+   deliberately NOT rendered for band E — an unfamiliar problem stops being
+   unfamiliar the moment the page names its ancestor.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   1. THE HISTORICAL CORPUS, AS ANALYSIS
+   ---------------------------------------------------------------------------
+   [name, level, patternId, requiredSubjects, whatItReallyAsks]
+   Levels are the repository's own 0..5. The subjects are this project's
+   reading of what a solution actually needs, not a claim from the repository.
+   ------------------------------------------------------------------------- */
+const EXAM_CORPUS_SRC = [
+  /* Level 0 — one idea, no composition */
+  ['aff_a',              0, 'SCAN_EMIT',      ['C00','C02','C06'], 'find the first a in an argument and print it'],
+  ['aff_first_param',    0, 'ARGC_GUARD',     ['C00','C06'],       'print argv[1], or nothing but a newline'],
+  ['aff_last_param',     0, 'ARGC_GUARD',     ['C00','C06'],       'print the last argument'],
+  ['aff_z',              0, 'SCAN_EMIT',      ['C00','C02','C06'], 'find the first z, or print a newline'],
+  ['ft_countdown',       0, 'FIXED_SEQUENCE', ['C00'],             'print 9 down to 0 with no input at all'],
+  ['ft_print_numbers',   0, 'FIXED_SEQUENCE', ['C00'],             'print the digits in order'],
+  ['hello',              0, 'FIXED_SEQUENCE', ['C00'],             'print a fixed string — the write() smoke test'],
+  ['maff_alpha',         0, 'FIXED_SEQUENCE', ['C00'],             'generate the alphabet by arithmetic, not by a literal'],
+  ['maff_revalpha',      0, 'FIXED_SEQUENCE', ['C00'],             'the same generator counting the other way'],
+  ['only_a',             0, 'FIXED_SEQUENCE', ['C00'],             'print one character'],
+  ['only_z',             0, 'FIXED_SEQUENCE', ['C00'],             'print one character'],
+  /* Level 1 — a scan with a decision inside it */
+  ['first_word',         1, 'WORD_BOUNDARY',  ['C02','C06'],       'skip separators, then print until the next one'],
+  ['fizzbuzz',           1, 'FIXED_SEQUENCE', ['C00','C04'],       'a loop whose body is a decision tree'],
+  ['ft_putstr',          1, 'SCAN_EMIT',      ['C01'],             'walk to the terminator, writing as you go'],
+  ['ft_strcpy',          1, 'SCAN_EMIT',      ['C02'],             'copy including the terminator, return dest'],
+  ['ft_strlen',          1, 'SCAN_EMIT',      ['C01'],             'count to the terminator'],
+  ['ft_swap',            1, 'PTR_WRITE',      ['C01'],             'exchange two values through their addresses'],
+  ['repeat_alpha',       1, 'CHAR_MAP',       ['C02','C06'],       'each letter repeated by its alphabet position'],
+  ['rev_print',          1, 'REVERSE_TRAVERSE',['C02','C06'],      'find the end first, then walk back'],
+  ['rot_13',             1, 'CHAR_MAP',       ['C02','C06'],       'a wrapping shift applied only to letters'],
+  ['rotone',             1, 'CHAR_MAP',       ['C02','C06'],       'the same shift with a different constant'],
+  ['search_and_replace', 1, 'CHAR_MAP',       ['C02','C06'],       'per-character substitution driven by two more arguments'],
+  ['ulstr',              1, 'CHAR_MAP',       ['C02','C06'],       'invert case, leave everything else alone'],
+  /* Level 2 — two sequences, or a number crossing into characters */
+  ['alpha_mirror',       2, 'CHAR_MAP',       ['C02','C06'],       'reflect each letter about the middle of the alphabet'],
+  ['do_op',              2, 'NUM_PARSE',      ['C04','C06'],       'parse two numbers and dispatch on an operator'],
+  ['ft_atoi',            2, 'NUM_PARSE',      ['C04'],             'signs, whitespace, then digits, stopping at the first non-digit'],
+  ['ft_strcmp',          2, 'TWO_SEQ_COMPARE',['C03'],             'walk together and return the first difference'],
+  ['ft_strdup',          2, 'ALLOC_BUILD',    ['C07'],             'measure, allocate, copy'],
+  ['ft_strrev',          2, 'REVERSE_TRAVERSE',['C02'],            'reverse in place with two indices'],
+  ['inter',              2, 'TWO_SEQ_COMPARE',['C02','C06'],       'print each character of s1 present in s2, once'],
+  ['is_power_of_2',      2, 'BIT_OPS',        ['C04'],             'a numeric property that a bit trick answers'],
+  ['last_word',          2, 'WORD_BOUNDARY',  ['C02','C06'],       'the same boundary scan, anchored at the end'],
+  ['max',                2, 'ARRAY_ORDER',    ['C01'],             'one pass holding the best so far'],
+  ['print_bits',         2, 'BIT_OPS',        ['C00','C04'],       'eight bits, most significant first'],
+  ['reverse_bits',       2, 'BIT_OPS',        ['C04'],             'build a value while consuming another'],
+  ['swap_bits',          2, 'BIT_OPS',        ['C04'],             'exchange the two halves of a byte'],
+  ['union',              2, 'TWO_SEQ_COMPARE',['C02','C06'],       'every character of both, each printed once'],
+  ['wdmatch',            2, 'TWO_SEQ_COMPARE',['C02','C06'],       'is s1 a subsequence of s2 — one index each, advanced unevenly'],
+  /* Level 3 — a pipeline, or an allocation whose size must be reasoned about */
+  ['add_prime_sum',      3, 'NUM_THEORY',     ['C04','C05','C06'], 'parse, then sum every prime up to it'],
+  ['epur_str',           3, 'WORD_BOUNDARY',  ['C02','C06'],       'normalise the separators between words'],
+  ['expand_str',         3, 'WORD_BOUNDARY',  ['C02','C06'],       'the same scan with a different separator rule'],
+  ['ft_atoi_base',       3, 'NUM_PARSE',      ['C04'],             'parse in an arbitrary base after validating the base'],
+  ['ft_list_size',       3, 'LINKED',         ['C12'],             'walk a chain counting links'],
+  ['ft_range',           3, 'ALLOC_BUILD',    ['C07'],             'compute the size before allocating'],
+  ['ft_rrange',          3, 'ALLOC_BUILD',    ['C07'],             'the same, filled the other way'],
+  ['hidenp',             3, 'TWO_SEQ_COMPARE',['C02','C06'],       'subsequence again, answered with one character'],
+  ['lcm',                3, 'NUM_THEORY',     ['C04','C05'],       'a second numeric relation built on the first'],
+  ['paramsum',           3, 'ARGC_GUARD',     ['C00','C06'],       'count the arguments and print the count'],
+  ['pgcd',               3, 'NUM_THEORY',     ['C04','C05'],       'a loop whose stop condition is the answer'],
+  ['print_hex',          3, 'NUM_EMIT',       ['C04'],             'emit a number in another base, digit order reversed'],
+  ['rstr_capitalizer',   3, 'WORD_BOUNDARY',  ['C02','C06'],       'word boundaries deciding which letter gets the capital'],
+  ['str_capitalizer',    3, 'WORD_BOUNDARY',  ['C02','C06'],       'the same, capital at the front instead of the end'],
+  ['tab_mult',           3, 'NUM_EMIT',       ['C04','C06'],       'a formatted table built from one parsed number'],
+  /* Level 4 — several stages, each of which can be right while the whole is wrong */
+  ['brainfuck',          4, 'STATE_MACHINE',  ['C02','C07'],       'an interpreter loop over a program and a tape'],
+  ['check_mate',         4, 'GRID',           ['C02','C07'],       'find a piece on a board, then walk rays from it'],
+  ['flood_fill',         4, 'GRID',           ['C02','C07'],       'recursion over a grid with a visited rule'],
+  ['fprime',             4, 'NUM_THEORY',     ['C04','C05'],       'factorise, printing as you divide'],
+  ['ft_itoa',            4, 'ALLOC_BUILD',    ['C04','C07'],       'count the digits before you can allocate for them'],
+  ['ft_list_foreach',    4, 'LINKED',         ['C11','C12'],       'apply a function pointer along a chain'],
+  ['ft_list_remove_if',  4, 'LINKED',         ['C11','C12'],       'delete while traversing, without losing the head'],
+  ['ft_split',           4, 'ALLOC_BUILD',    ['C07'],             'count the words, allocate the table, then each word'],
+  ['moment',             4, 'NUM_EMIT',       ['C04','C06'],       'formatting driven by a parsed quantity'],
+  ['rev_wstr',           4, 'WORD_BOUNDARY',  ['C02','C06'],       'words printed in reverse order, separators normalised'],
+  ['rostring',           4, 'WORD_BOUNDARY',  ['C02','C06'],       'the first word moved to the end, spacing rebuilt'],
+  ['sort_int_tab',       4, 'ARRAY_ORDER',    ['C01'],             'an in-place sort of a fixed array'],
+  ['sort_list',          4, 'LINKED',         ['C11','C12'],       'sorting a chain through a comparison function'],
+  /* Level 5 — the structure itself is the difficulty */
+  ['biggest_pal',        5, 'TWO_SEQ_COMPARE',['C02','C07'],       'every substring tested for a symmetry property'],
+  ['brackets',           5, 'STACK_MATCH',    ['C02','C06'],       'nesting checked with a counter or a stack'],
+  ['cycle_detector',     5, 'LINKED',         ['C12'],             'two pointers at different speeds'],
+  ['options',            5, 'STATE_MACHINE',  ['C02','C06','C08'], 'flags accumulated into a bit field, then reported'],
+  ['print_memory',       5, 'MEM_DUMP',       ['C02','C04'],       'three columns, sixteen bytes a line, padded'],
+  ['rpn_calc',           5, 'STACK_MATCH',    ['C04','C06','C07'], 'a stack machine over tokens'],
+];
+
+/* ---------------------------------------------------------------------------
+   2. THE PATTERNS
+   ---------------------------------------------------------------------------
+   This is the layer the practice is written against. `recognise` is the
+   sentence the learner is being trained to be able to say when a new problem
+   arrives; `traps` are what actually costs marks.
+   ------------------------------------------------------------------------- */
+const EXAM_PATTERNS = [
+  { id:'FIXED_SEQUENCE', label:'Generated sequence', level:[0,1],
+    skills:['CHAR_OUTPUT','ITERATION','ASCII'],
+    structure:'No input. A loop produces characters by arithmetic rather than from a stored literal.',
+    recognise:'The output is fully determined before the program runs.',
+    traps:['writing a literal instead of generating it','the separator after the last item',
+           'off-by-one at both ends of the range'],
+    edges:['the first item','the last item','whether a trailing newline is required'] },
+  { id:'SCAN_EMIT', label:'Scan and emit', level:[0,1],
+    skills:['STRING_SCAN','CHAR_OUTPUT','CHAR_CLASSIFICATION'],
+    structure:'One index walks a string to its \\0; each character is tested and possibly written.',
+    recognise:'One loop, one decision inside it, nothing remembered between iterations.',
+    traps:['forgetting write needs a byte count','emitting the \\0','stopping on the wrong condition'],
+    edges:['empty string','no character satisfies the test','every character satisfies it'] },
+  { id:'ARGC_GUARD', label:'Argument-count guard', level:[0,1],
+    skills:['ARGC_ARGV','VALIDATION','CHAR_OUTPUT'],
+    structure:'argc is checked first; the wrong count produces a fixed minimal output and stops.',
+    recognise:'The subject states what happens for the wrong number of arguments before it states the task.',
+    traps:['argc is a count, not the last index','argv[0] is the program, not data',
+           'printing nothing when a newline was required'],
+    edges:['no arguments','one too many','an empty string as the argument'] },
+  { id:'WORD_BOUNDARY', label:'Word boundary detection', level:[1,4],
+    skills:['WORD_DETECTION','STRING_SCAN','CHAR_CLASSIFICATION'],
+    structure:'A scan that notices TRANSITIONS between separator and non-separator, not characters in isolation.',
+    recognise:'The answer depends on where words start or end, never on a single character alone.',
+    traps:['leading and trailing separators','runs of separators counting as several words',
+           'the last word having no separator after it','tabs as well as spaces'],
+    edges:['empty string','only separators','one word','separators at both ends','a single character word'] },
+  { id:'CHAR_MAP', label:'Per-character transformation', level:[1,2],
+    skills:['TRANSFORMATION','CHAR_CLASSIFICATION','ASCII'],
+    structure:'Every character is rewritten by a rule; anything the rule does not cover passes through untouched.',
+    recognise:'Input and output have a character-for-character correspondence.',
+    traps:['transforming characters the rule should not touch','wrapping at the end of the alphabet',
+           'handling upper and lower case with one branch'],
+    edges:['the wrap points a and z, A and Z','digits and punctuation','an empty string'] },
+  { id:'REVERSE_TRAVERSE', label:'Reverse traversal', level:[1,2],
+    skills:['REVERSE_TRAVERSAL','STRING_SCAN'],
+    structure:'The end must be found before anything can be produced, then an index walks back to zero.',
+    recognise:'The first thing the program outputs depends on the last thing it read.',
+    traps:['starting at len instead of len-1','the loop condition when the index is unsigned',
+           'reversing in place with one index instead of two'],
+    edges:['empty string','one character','even and odd lengths'] },
+  { id:'PTR_WRITE', label:'Writing through an address', level:[1,2],
+    skills:['POINTER_MANIPULATION'],
+    structure:'The result is delivered by writing through a pointer the caller owns, not by returning.',
+    recognise:'The function returns void, or returns a count while the data goes out through a parameter.',
+    traps:['assigning the pointer instead of what it points at','needing a temporary for a swap',
+           'forgetting & at the call site'],
+    edges:['both pointers to the same object','a null pointer'] },
+  { id:'TWO_SEQ_COMPARE', label:'Two sequences walked together', level:[2,5],
+    skills:['COMPARISON','STRING_SCAN','SEARCH'],
+    structure:'Two indices over two strings, advanced at different rates depending on what is found.',
+    recognise:'The question is about a relationship between two inputs, not a property of one.',
+    traps:['advancing both indices when only one should move','stopping when the first string ends',
+           'printing a character twice when it recurs'],
+    edges:['either string empty','identical strings','no characters in common','one a prefix of the other'] },
+  { id:'NUM_PARSE', label:'Characters to a number', level:[2,3],
+    skills:['NUMBER_CONSTRUCTION','VALIDATION','CHAR_CLASSIFICATION'],
+    structure:'result = result * base + digit, run over the characters that qualify.',
+    recognise:'A number arrives as text and has to become a value before anything can be computed.',
+    traps:['signs, and more than one of them','stopping at the first non-digit',
+           'leading whitespace','overflow'],
+    edges:['empty string','no digits at all','a lone sign','a very long number'] },
+  { id:'NUM_EMIT', label:'A number to characters', level:[3,4],
+    skills:['NUMBER_DECOMPOSITION','BASE_CONVERSION','CHAR_OUTPUT'],
+    structure:'Repeated / and % produce digits least significant first, so order must be restored.',
+    recognise:'A computed value has to be printed, and write only takes bytes.',
+    traps:['zero printing nothing','the negative sign','digits emitted backwards',
+           'INT_MIN having no positive counterpart'],
+    edges:['0','a single digit','a negative value','INT_MIN'] },
+  { id:'ALLOC_BUILD', label:'Measure, allocate, fill', level:[2,4],
+    skills:['DYNAMIC_MEMORY','STRING_SCAN','ARRAY_TRAVERSAL'],
+    structure:'A first pass computes the size; only then can memory be requested and filled by a second pass.',
+    recognise:'The output is larger than one value and its size is not known in advance.',
+    traps:['no room for the terminator','not checking the allocation',
+           'counting in the first pass differently from the second','freeing on the error path'],
+    edges:['size zero','a single element','allocation failure'] },
+  { id:'ARRAY_ORDER', label:'Ordering and selection', level:[2,4],
+    skills:['SORTING','ARRAY_TRAVERSAL','COMPARISON','SEARCH'],
+    structure:'Repeated comparison; what gets exchanged is the whole design.',
+    recognise:'The output is the same data in a different order, or one element chosen from it.',
+    traps:['swapping the wrong pair','a bubble pass that stops one element early',
+           'comparing pointers when the values were meant'],
+    edges:['already sorted','reverse sorted','all equal','one element','empty'] },
+  { id:'BIT_OPS', label:'Bit-level work', level:[2,3],
+    skills:['ASCII','NUMBER_DECOMPOSITION','ITERATION'],
+    structure:'Shifts and masks read or build a value one bit at a time.',
+    recognise:'The question names bits, or a power of two, or a byte.',
+    traps:['signed shifting','bit order','assuming eight bits everywhere'],
+    edges:['0','all bits set','a single bit set'] },
+  { id:'NUM_THEORY', label:'Divisibility and sequences', level:[3,4],
+    skills:['NUMBER_THEORY','ITERATION','RECURSION'],
+    structure:'A loop whose stopping condition is itself the answer, or a recursive decomposition of a number.',
+    recognise:'The problem is arithmetic about a number rather than about its digits.',
+    traps:['looping further than necessary','0 and 1 as special cases','negative input'],
+    edges:['0','1','2','a prime','a large value'] },
+  { id:'STACK_MATCH', label:'Nesting and stacks', level:[5,5],
+    skills:['VALIDATION','ARRAY_TRAVERSAL','COUNTING'],
+    structure:'A counter, or an explicit stack, records what is still open while the scan continues.',
+    recognise:'Correctness depends on ORDER of opening and closing, not on totals.',
+    traps:['counting instead of matching when kinds differ','closing something never opened',
+           'ending with something still open'],
+    edges:['empty input','one unmatched closer','deep nesting','interleaved kinds'] },
+  { id:'GRID', label:'Two-dimensional traversal', level:[4,5],
+    skills:['ARRAY_TRAVERSAL','RECURSION','SEARCH'],
+    structure:'Positions are pairs; movement is a set of offsets, and bounds must be tested before every access.',
+    recognise:'The input describes a rectangle, or movement in directions.',
+    traps:['testing bounds after indexing','revisiting positions forever','rows of unequal length'],
+    edges:['a one-cell grid','an empty grid','the target on an edge or a corner'] },
+  { id:'STATE_MACHINE', label:'Explicit state across the scan', level:[4,5],
+    skills:['VALIDATION','ITERATION','FILTERING'],
+    structure:'What a character means depends on what has already been seen, so state is carried deliberately.',
+    recognise:'The same input character has to be handled two different ways at two different times.',
+    traps:['state not reset between items','a mode entered and never left','flags overwritten rather than combined'],
+    edges:['input that switches state on the first character','input that never leaves the initial state'] },
+  { id:'MEM_DUMP', label:'Fixed-width formatted output', level:[5,5],
+    skills:['BASE_CONVERSION','CHAR_CLASSIFICATION','CHAR_OUTPUT','ARRAY_TRAVERSAL'],
+    structure:'Output is a grid of fixed-width columns; short final rows still have to be padded.',
+    recognise:'The specification describes columns and widths rather than a value.',
+    traps:['the last, partial line','padding forgotten','printable test applied to the wrong column'],
+    edges:['size 0','exactly one full row','one byte past a row boundary'] },
+  { id:'LINKED', label:'Chains of allocated nodes', level:[3,5], track:'B',
+    skills:['LINKED_LIST','POINTER_MANIPULATION','DYNAMIC_MEMORY'],
+    structure:'Nodes reached only through the previous one; changing the head needs a pointer to the head pointer.',
+    recognise:'The data has no index and no length, only a next.',
+    traps:['losing the head','freeing a node still being read','an empty list'],
+    edges:['empty list','one node','removal of the first node','removal of the last'] },
+];
+
+/* ---------------------------------------------------------------------------
+   3. THE CONSTRUCTOR
+   ---------------------------------------------------------------------------
+   track and studied_status are assigned LAST, so a record literal cannot set
+   them even by accident — the same derive-never-assign rule the knowledge base
+   uses. phase36 asserts no literal in this file contains those keys.
+   ------------------------------------------------------------------------- */
+function EX(r) {
+  const gate = examGate(r.required_subjects);
+  const d = r.d || [1, 1, 1, 1, 1];
+  const difficulty = {
+    concept: d[0], algorithm: d[1], implementation: d[2], edges: d[3], combination: d[4],
+  };
+  const out = Object.assign({
+    source_type: 'generated',
+    source: { type:'generated_practice', by:'C-Execution-Lab' },
+    allowed_functions: ['write'],
+    forbidden_functions: ['printf', 'strlen', 'strcpy', 'atoi', 'malloc'],
+    algorithm_patterns: [],
+    edge_cases: [],
+    engine_support: 'full',
+    reference_solution: null,
+    cases_verified: false,
+  }, r, {
+    difficulty,
+    band: examBand(difficulty).id,
+    track: gate.track,                  // derived, always
+    studied_status: gate.status,        // derived, always
+    missing_subjects: gate.missing,
+  });
+  delete out.d;
+  return out;
+}
+
+/* The corpus rows, expanded. No task text and no solution on purpose: these are
+   evidence about which shapes recur, not exercises to be solved here. */
+const EXAM_CORPUS = EXAM_CORPUS_SRC.map(([name, level, pattern, subjects, asks]) => {
+  const gate = examGate(subjects);
+  return {
+    id: 'corpus.' + name, name, level, pattern, asks,
+    required_subjects: subjects,
+    source_type: 'historical',
+    source: { type:'historical_exam', repository:'DKMR/42exams',
+              url:'https://github.com/DKMR/42exams',
+              note:'A collection of known Piscine exam exercises in six difficulty levels. ' +
+                   'Historical practice material, not a specification of any current exam.' },
+    track: gate.track, studied_status: gate.status, missing_subjects: gate.missing,
+  };
+});
+/* ==== EXAMEX END ==== */
+
+/* ==== EXLIST START ==== */
+/* ============================================================================
+   FINAL EXAM PREP — generated practice
+   ----------------------------------------------------------------------------
+   Written against EXAM_PATTERNS, not copied from EXAM_CORPUS. Every record is
+   built by EX(), which derives track and studied_status; no literal below sets
+   either, and phase36 fails the build if one ever does.
+
+   `d:` is [concept, algorithm, implementation, edges, combination], each 1..5.
+   The band (A..E) is read off `combination`, so a task cannot claim to be a
+   Level E while training one skill.
+
+   Helper functions inside reference solutions are deliberately NOT named
+   ft_putstr / ft_strlen / ft_putnbr. Those are SUBJECT function names with
+   fixed prototypes, and a helper that resembles one is how a wrong prototype
+   gets memorised. They are put_str / put_nbr / s_len here.
+
+   `inspiredBy` records which pattern a task trains. For band E it is present in
+   the data but must never be rendered: an unfamiliar problem stops being
+   unfamiliar the moment the page names its ancestor. phase36 asserts every
+   band-E record carries `hideInspiration: true`.
+   ========================================================================== */
+
+/* Two helpers every write-only solution needs. Kept as source fragments so the
+   solutions below stay readable and stay consistent with one another. */
+const SOL_PUTSTR =
+  'void\tput_str(char *s)\n{\n\tint\ti;\n\n\ti = 0;\n\twhile (s[i])\n\t{\n\t\twrite(1, &s[i], 1);\n\t\ti++;\n\t}\n}\n\n';
+const SOL_PUTNBR =
+  'void\tput_nbr(int n)\n{\n\tchar\tc;\n\n\tif (n >= 10)\n\t\tput_nbr(n / 10);\n\tc = 48 + n % 10;\n\twrite(1, &c, 1);\n}\n\n';
+
+const EXAM_EXERCISES = [
+
+/* ==================== BAND A — one skill, stated plainly ================== */
+EX({ id:'a.only_lower', title:'lowercase pass',
+  brief:'Print only the lowercase letters of the argument, in order, then a newline. Wrong argument count prints just the newline.',
+  required_subjects:['C00','C02','C06'], skills:['STRING_SCAN','CHAR_CLASSIFICATION','CHAR_OUTPUT'],
+  algorithm_patterns:['SCAN_EMIT'], inspiredBy:'SCAN_EMIT', d:[1,1,1,2,1],
+  io:{ argv:'one string', stdout:'the lowercase letters, then \\n',
+       cases:[[['aBcDe'],'ace\n'], [['ABC'],'\n'], [[''],'\n'], [[],'\n']] },
+  edge_cases:['empty string','no lowercase letters at all','wrong argc'],
+  reference_solution: SOL_PUTSTR +
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\n\ti = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\twhile (argv[1][i])\n\t\t{\n\t\t\tif (argv[1][i] >= 97 && argv[1][i] <= 122)\n' +
+    '\t\t\t\twrite(1, &argv[1][i], 1);\n\t\t\ti++;\n\t\t}\n\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'a.swap_case', title:'case inversion',
+  brief:'Print the argument with every letter’s case inverted. Everything that is not a letter is unchanged.',
+  required_subjects:['C00','C02','C06'], skills:['TRANSFORMATION','CHAR_CLASSIFICATION','ASCII'],
+  algorithm_patterns:['CHAR_MAP'], inspiredBy:'CHAR_MAP', d:[1,1,1,2,1],
+  io:{ argv:'one string', stdout:'the transformed string, then \\n',
+       cases:[[['aBc9!'],'AbC9!\n'], [['   '],'   \n'], [[''],'\n'], [[],'\n']] },
+  edge_cases:['digits and punctuation must pass through','empty string','wrong argc'],
+  reference_solution:
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\tchar\tc;\n\n\ti = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\twhile (argv[1][i])\n\t\t{\n\t\t\tc = argv[1][i];\n' +
+    '\t\t\tif (c >= 97 && c <= 122)\n\t\t\t\tc = c - 32;\n' +
+    '\t\t\telse if (c >= 65 && c <= 90)\n\t\t\t\tc = c + 32;\n' +
+    '\t\t\twrite(1, &c, 1);\n\t\t\ti++;\n\t\t}\n\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'a.reverse_str', title:'reversed argument',
+  brief:'Print the argument backwards, then a newline.',
+  required_subjects:['C00','C02','C06'], skills:['REVERSE_TRAVERSAL','STRING_SCAN'],
+  algorithm_patterns:['REVERSE_TRAVERSE'], inspiredBy:'REVERSE_TRAVERSE', d:[1,2,1,2,1],
+  io:{ argv:'one string', stdout:'the reversed string, then \\n',
+       cases:[[['abc'],'cba\n'], [['a'],'a\n'], [[''],'\n'], [[],'\n']] },
+  edge_cases:['one character','empty string','finding the end before printing anything'],
+  reference_solution:
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\n\ti = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\twhile (argv[1][i])\n\t\t\ti++;\n\t\ti--;\n\t\twhile (i >= 0)\n\t\t{\n' +
+    '\t\t\twrite(1, &argv[1][i], 1);\n\t\t\ti--;\n\t\t}\n\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'a.shift_letters', title:'shift by one, wrapping',
+  brief:'Print the argument with every letter replaced by the next letter of the alphabet. z becomes a and Z becomes A. Non-letters are unchanged.',
+  required_subjects:['C00','C02','C06'], skills:['TRANSFORMATION','ASCII','CHAR_CLASSIFICATION'],
+  algorithm_patterns:['CHAR_MAP'], inspiredBy:'CHAR_MAP', d:[1,2,1,3,1],
+  io:{ argv:'one string', stdout:'the shifted string, then \\n',
+       cases:[[['abz'],'bca\n'], [['AZ!'],'BA!\n'], [[''],'\n'], [[],'\n']] },
+  edge_cases:['the wrap at z and Z','non-letters untouched','empty string'],
+  reference_solution:
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\tchar\tc;\n\n\ti = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\twhile (argv[1][i])\n\t\t{\n\t\t\tc = argv[1][i];\n' +
+    '\t\t\tif (c == 122 || c == 90)\n\t\t\t\tc = c - 25;\n' +
+    '\t\t\telse if ((c >= 97 && c < 122) || (c >= 65 && c < 90))\n\t\t\t\tc = c + 1;\n' +
+    '\t\t\twrite(1, &c, 1);\n\t\t\ti++;\n\t\t}\n\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'a.mirror_alpha', title:'alphabet mirror',
+  brief:'Print the argument with each letter reflected about the middle of its alphabet: a becomes z, b becomes y, A becomes Z. Non-letters are unchanged.',
+  required_subjects:['C00','C02','C06'], skills:['TRANSFORMATION','ASCII'],
+  algorithm_patterns:['CHAR_MAP'], inspiredBy:'CHAR_MAP', d:[2,2,1,2,1],
+  io:{ argv:'one string', stdout:'the mirrored string, then \\n',
+       cases:[[['abc'],'zyx\n'], [['AZ'],'ZA\n'], [['a1z'],'z1a\n'], [[],'\n']] },
+  edge_cases:['both ends of both alphabets','digits unchanged'],
+  reference_solution:
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\tchar\tc;\n\n\ti = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\twhile (argv[1][i])\n\t\t{\n\t\t\tc = argv[1][i];\n' +
+    '\t\t\tif (c >= 97 && c <= 122)\n\t\t\t\tc = 219 - c;\n' +
+    '\t\t\telse if (c >= 65 && c <= 90)\n\t\t\t\tc = 155 - c;\n' +
+    '\t\t\twrite(1, &c, 1);\n\t\t\ti++;\n\t\t}\n\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'a.strip_spaces', title:'spaces removed',
+  brief:'Print the argument with every space and tab removed.',
+  required_subjects:['C00','C02','C06'], skills:['STRING_SCAN','FILTERING','CHAR_CLASSIFICATION'],
+  algorithm_patterns:['SCAN_EMIT'], inspiredBy:'SCAN_EMIT', d:[1,1,1,2,1],
+  io:{ argv:'one string', stdout:'the string without spaces or tabs, then \\n',
+       cases:[[['a b\tc'],'abc\n'], [['   '],'\n'], [['abc'],'abc\n'], [[],'\n']] },
+  edge_cases:['all separators','no separators','empty string'],
+  reference_solution:
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\n\ti = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\twhile (argv[1][i])\n\t\t{\n\t\t\tif (argv[1][i] != 32 && argv[1][i] != 9)\n' +
+    '\t\t\t\twrite(1, &argv[1][i], 1);\n\t\t\ti++;\n\t\t}\n\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'a.double_each', title:'every character twice',
+  brief:'Print the argument with every character repeated once.',
+  required_subjects:['C00','C02','C06'], skills:['STRING_SCAN','CHAR_OUTPUT'],
+  algorithm_patterns:['SCAN_EMIT'], inspiredBy:'SCAN_EMIT', d:[1,1,1,1,1],
+  io:{ argv:'one string', stdout:'each character twice, then \\n',
+       cases:[[['ab'],'aabb\n'], [[''],'\n'], [[],'\n']] },
+  edge_cases:['empty string','wrong argc'],
+  reference_solution:
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\n\ti = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\twhile (argv[1][i])\n\t\t{\n\t\t\twrite(1, &argv[1][i], 1);\n\t\t\twrite(1, &argv[1][i], 1);\n' +
+    '\t\t\ti++;\n\t\t}\n\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'a.every_other', title:'every second character',
+  brief:'Print the characters of the argument at even positions, counting the first character as position 0.',
+  required_subjects:['C00','C02','C06'], skills:['STRING_SCAN','FILTERING'],
+  algorithm_patterns:['SCAN_EMIT'], inspiredBy:'SCAN_EMIT', d:[1,1,1,2,1],
+  io:{ argv:'one string', stdout:'the selected characters, then \\n',
+       cases:[[['abcdef'],'ace\n'], [['a'],'a\n'], [[''],'\n'], [[],'\n']] },
+  edge_cases:['odd and even lengths','one character','empty string'],
+  reference_solution:
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\n\ti = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\twhile (argv[1][i])\n\t\t{\n\t\t\tif (i % 2 == 0)\n\t\t\t\twrite(1, &argv[1][i], 1);\n' +
+    '\t\t\ti++;\n\t\t}\n\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'a.last_char', title:'final character',
+  brief:'Print the last character of the argument, then a newline. An empty argument prints only the newline.',
+  required_subjects:['C00','C02','C06'], skills:['STRING_SCAN','REVERSE_TRAVERSAL'],
+  algorithm_patterns:['REVERSE_TRAVERSE'], inspiredBy:'REVERSE_TRAVERSE', d:[1,1,1,3,1],
+  io:{ argv:'one string', stdout:'one character, then \\n',
+       cases:[[['abc'],'c\n'], [['a'],'a\n'], [[''],'\n'], [[],'\n']] },
+  edge_cases:['empty string is the whole difficulty','one character'],
+  reference_solution:
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\n\ti = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\twhile (argv[1][i])\n\t\t\ti++;\n\t\tif (i > 0)\n\t\t\twrite(1, &argv[1][i - 1], 1);\n' +
+    '\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'a.vowel_mask', title:'vowels hidden',
+  brief:'Print the argument with every vowel, upper or lower case, replaced by a dot.',
+  required_subjects:['C00','C02','C06'], skills:['TRANSFORMATION','CHAR_CLASSIFICATION'],
+  algorithm_patterns:['CHAR_MAP'], inspiredBy:'CHAR_MAP', d:[1,1,2,2,1],
+  io:{ argv:'one string', stdout:'the masked string, then \\n',
+       cases:[[['Hello'],'H.ll.\n'], [['xyz'],'xyz\n'], [['AEIOU'],'.....\n'], [[],'\n']] },
+  edge_cases:['uppercase vowels','no vowels','all vowels'],
+  reference_solution:
+    'int\tis_vowel(char c)\n{\n\tif (c == 97 || c == 101 || c == 105 || c == 111 || c == 117)\n\t\treturn (1);\n' +
+    '\tif (c == 65 || c == 69 || c == 73 || c == 79 || c == 85)\n\t\treturn (1);\n\treturn (0);\n}\n\n' +
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\tchar\tc;\n\n\ti = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\twhile (argv[1][i])\n\t\t{\n\t\t\tc = argv[1][i];\n\t\t\tif (is_vowel(c))\n\t\t\t\tc = 46;\n' +
+    '\t\t\twrite(1, &c, 1);\n\t\t\ti++;\n\t\t}\n\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'a.digits_only', title:'digits kept',
+  brief:'Print only the digit characters of the argument.',
+  required_subjects:['C00','C02','C06'], skills:['FILTERING','CHAR_CLASSIFICATION','STRING_SCAN'],
+  algorithm_patterns:['SCAN_EMIT'], inspiredBy:'SCAN_EMIT', d:[1,1,1,2,1],
+  io:{ argv:'one string', stdout:'the digits, then \\n',
+       cases:[[['a1b22c'],'122\n'], [['abc'],'\n'], [['42'],'42\n'], [[],'\n']] },
+  edge_cases:['no digits','all digits','empty string'],
+  reference_solution:
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\n\ti = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\twhile (argv[1][i])\n\t\t{\n\t\t\tif (argv[1][i] >= 48 && argv[1][i] <= 57)\n' +
+    '\t\t\t\twrite(1, &argv[1][i], 1);\n\t\t\ti++;\n\t\t}\n\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'a.is_numeric', title:'all digits?',
+  brief:'Print 1 if the argument contains only digits and 0 otherwise. An empty argument counts as 1.',
+  required_subjects:['C00','C02','C06'], skills:['VALIDATION','CHAR_CLASSIFICATION'],
+  algorithm_patterns:['SCAN_EMIT'], inspiredBy:'SCAN_EMIT', d:[1,1,1,3,1],
+  io:{ argv:'one string', stdout:'1 or 0, then \\n',
+       cases:[[['123'],'1\n'], [['12a'],'0\n'], [[''],'1\n'], [[],'0\n']] },
+  edge_cases:['the empty string convention, which C02 states explicitly','a single non-digit at the end'],
+  reference_solution:
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\tint\tok;\n\n\ti = 0;\n\tok = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\tok = 1;\n\t\twhile (argv[1][i])\n\t\t{\n\t\t\tif (argv[1][i] < 48 || argv[1][i] > 57)\n\t\t\t\tok = 0;\n' +
+    '\t\t\ti++;\n\t\t}\n\t}\n\tif (ok)\n\t\twrite(1, "1\\n", 2);\n\telse\n\t\twrite(1, "0\\n", 2);\n\treturn (0);\n}\n' }),
+
+EX({ id:'a.trim_ends', title:'trimmed argument',
+  brief:'Print the argument without its leading and trailing spaces and tabs. Separators inside are kept exactly.',
+  required_subjects:['C00','C02','C06'], skills:['STRING_SCAN','CHAR_CLASSIFICATION','REVERSE_TRAVERSAL'],
+  algorithm_patterns:['WORD_BOUNDARY'], inspiredBy:'WORD_BOUNDARY', d:[2,2,2,4,1],
+  io:{ argv:'one string', stdout:'the trimmed string, then \\n',
+       cases:[[['  a b  '],'a b\n'], [['   '],'\n'], [['ab'],'ab\n'], [[],'\n']] },
+  edge_cases:['a string of only separators','no separators at all','separators only at one end'],
+  reference_solution:
+    'int\tis_sep(char c)\n{\n\tif (c == 32 || c == 9)\n\t\treturn (1);\n\treturn (0);\n}\n\n' +
+    'int\tmain(int argc, char **argv)\n{\n\tint\ta;\n\tint\tb;\n\n\ta = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\twhile (argv[1][a] && is_sep(argv[1][a]))\n\t\t\ta++;\n\t\tb = a;\n' +
+    '\t\twhile (argv[1][b])\n\t\t\tb++;\n\t\twhile (b > a && is_sep(argv[1][b - 1]))\n\t\t\tb--;\n' +
+    '\t\twhile (a < b)\n\t\t{\n\t\t\twrite(1, &argv[1][a], 1);\n\t\t\ta++;\n\t\t}\n' +
+    '\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'a.first_upper', title:'first capital',
+  brief:'Print the first uppercase letter of the argument. If there is none, print only the newline.',
+  required_subjects:['C00','C02','C06'], skills:['SEARCH','CHAR_CLASSIFICATION','STRING_SCAN'],
+  algorithm_patterns:['SCAN_EMIT'], inspiredBy:'SCAN_EMIT', d:[1,1,1,3,1],
+  io:{ argv:'one string', stdout:'one character or nothing, then \\n',
+       cases:[[['abCdE'],'C\n'], [['abc'],'\n'], [['Abc'],'A\n'], [[],'\n']] },
+  edge_cases:['no uppercase letter','the first character being the answer','stopping after the first match'],
+  reference_solution:
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\tint\tdone;\n\n\ti = 0;\n\tdone = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\twhile (argv[1][i] && !done)\n\t\t{\n\t\t\tif (argv[1][i] >= 65 && argv[1][i] <= 90)\n\t\t\t{\n' +
+    '\t\t\t\twrite(1, &argv[1][i], 1);\n\t\t\t\tdone = 1;\n\t\t\t}\n\t\t\ti++;\n\t\t}\n' +
+    '\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+/* ==================== BAND B — two skills that must cooperate ============= */
+EX({ id:'b.count_words', title:'how many words',
+  brief:'Print the number of words in the argument. A word is a run of characters that are not spaces or tabs.',
+  required_subjects:['C00','C02','C04','C06'], skills:['WORD_DETECTION','COUNTING','NUMBER_DECOMPOSITION'],
+  algorithm_patterns:['WORD_BOUNDARY','NUM_EMIT'], inspiredBy:'WORD_BOUNDARY', d:[2,2,2,4,2],
+  io:{ argv:'one string', stdout:'the count, then \\n',
+       cases:[[['a bb  ccc'],'3\n'], [['   '],'0\n'], [['one'],'1\n'], [['  x  '],'1\n'], [[],'0\n']] },
+  edge_cases:['runs of separators must not count twice','leading and trailing separators','only separators'],
+  reference_solution: SOL_PUTNBR +
+    'int\tis_sep(char c)\n{\n\tif (c == 32 || c == 9)\n\t\treturn (1);\n\treturn (0);\n}\n\n' +
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\tint\tn;\n\n\ti = 0;\n\tn = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\twhile (argv[1][i])\n\t\t{\n\t\t\tif (!is_sep(argv[1][i]) && (i == 0 || is_sep(argv[1][i - 1])))\n' +
+    '\t\t\t\tn++;\n\t\t\ti++;\n\t\t}\n\t}\n\tput_nbr(n);\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'b.longest_word', title:'the longest word',
+  brief:'Print the longest word of the argument. If several are equally long, print the first of them.',
+  required_subjects:['C00','C02','C06'], skills:['WORD_DETECTION','COMPARISON','COUNTING'],
+  algorithm_patterns:['WORD_BOUNDARY'], inspiredBy:'WORD_BOUNDARY', d:[2,3,3,4,2],
+  io:{ argv:'one string', stdout:'the word, then \\n',
+       cases:[[['a bbb cc'],'bbb\n'], [['aa bb'],'aa\n'], [['   '],'\n'], [['solo'],'solo\n'], [[],'\n']] },
+  edge_cases:['ties resolved by first occurrence','no words at all','one word'],
+  reference_solution:
+    'int\tis_sep(char c)\n{\n\tif (c == 32 || c == 9)\n\t\treturn (1);\n\treturn (0);\n}\n\n' +
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\tint\tstart;\n\tint\tlen;\n\tint\tbest;\n\tint\tbestlen;\n\n' +
+    '\ti = 0;\n\tbest = -1;\n\tbestlen = 0;\n\tif (argc == 2)\n\t{\n\t\twhile (argv[1][i])\n\t\t{\n' +
+    '\t\t\tif (!is_sep(argv[1][i]))\n\t\t\t{\n\t\t\t\tstart = i;\n\t\t\t\tlen = 0;\n' +
+    '\t\t\t\twhile (argv[1][i] && !is_sep(argv[1][i]))\n\t\t\t\t{\n\t\t\t\t\tlen++;\n\t\t\t\t\ti++;\n\t\t\t\t}\n' +
+    '\t\t\t\tif (len > bestlen)\n\t\t\t\t{\n\t\t\t\t\tbestlen = len;\n\t\t\t\t\tbest = start;\n\t\t\t\t}\n' +
+    '\t\t\t}\n\t\t\telse\n\t\t\t\ti++;\n\t\t}\n\t\tif (best >= 0)\n\t\t{\n\t\t\ti = 0;\n' +
+    '\t\t\twhile (i < bestlen)\n\t\t\t{\n\t\t\t\twrite(1, &argv[1][best + i], 1);\n\t\t\t\ti++;\n\t\t\t}\n' +
+    '\t\t}\n\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'b.shortest_word', title:'the shortest word',
+  brief:'Print the shortest word of the argument. If several are equally short, print the last of them.',
+  required_subjects:['C00','C02','C06'], skills:['WORD_DETECTION','COMPARISON','COUNTING'],
+  algorithm_patterns:['WORD_BOUNDARY'], inspiredBy:'WORD_BOUNDARY', d:[2,3,3,4,2],
+  io:{ argv:'one string', stdout:'the word, then \\n',
+       cases:[[['aaa b cc'],'b\n'], [['aa bb'],'bb\n'], [['   '],'\n'], [[],'\n']] },
+  edge_cases:['the tie rule is the OPPOSITE of the longest-word task — read it again','no words'] }),
+
+EX({ id:'b.word_at', title:'the nth word',
+  brief:'The first argument is a string, the second a number n counting from 0. Print word number n, or only a newline if there is no such word.',
+  required_subjects:['C00','C02','C04','C06'], skills:['WORD_DETECTION','NUMBER_CONSTRUCTION','ARGC_ARGV'],
+  algorithm_patterns:['WORD_BOUNDARY','NUM_PARSE'], inspiredBy:'WORD_BOUNDARY', d:[2,3,3,4,2],
+  io:{ argv:'a string and an index', stdout:'the word, then \\n',
+       cases:[[['a bb ccc','1'],'bb\n'], [['a bb','5'],'\n'], [['a bb','0'],'a\n'], [['x'],'\n']] },
+  edge_cases:['n beyond the last word','n zero','a non-numeric index','wrong argc'] }),
+
+EX({ id:'b.capitalize_words', title:'capitalised words',
+  brief:'Print the argument with the first letter of every word in upper case and every other letter in lower case. A word is a run of alphanumeric characters.',
+  required_subjects:['C00','C02','C06'], skills:['WORD_DETECTION','TRANSFORMATION','CHAR_CLASSIFICATION'],
+  algorithm_patterns:['WORD_BOUNDARY','CHAR_MAP'], inspiredBy:'WORD_BOUNDARY', d:[2,3,3,4,2],
+  io:{ argv:'one string', stdout:'the transformed string, then \\n',
+       cases:[[['hi you'],'Hi You\n'], [['42abc x'],'42abc X\n'], [[''],'\n'], [[],'\n']] },
+  edge_cases:['a word starting with a digit takes no capital','punctuation between words',
+              'the C02 definition of a word is alphanumeric, not non-space'],
+  crossSubject:'C02 + C06' }),
+
+EX({ id:'b.reverse_each_word', title:'letters reversed inside each word',
+  brief:'Print the argument with the characters of every word reversed, but the words themselves left in place and every separator preserved exactly.',
+  required_subjects:['C00','C02','C06'], skills:['WORD_DETECTION','REVERSE_TRAVERSAL','TRANSFORMATION'],
+  algorithm_patterns:['WORD_BOUNDARY','REVERSE_TRAVERSE'], inspiredBy:'WORD_BOUNDARY', d:[2,3,3,4,2],
+  io:{ argv:'one string', stdout:'the transformed string, then \\n',
+       cases:[[['abc de'],'cba ed\n'], [['  ab  '],'  ba  \n'], [['a'],'a\n'], [[],'\n']] },
+  edge_cases:['separators preserved exactly, including runs','one-character words','leading separators'] }),
+
+EX({ id:'b.reverse_word_order', title:'words in reverse order',
+  brief:'Print the words of the argument in reverse order, separated by exactly one space, with no leading or trailing space.',
+  required_subjects:['C00','C02','C06'], skills:['WORD_DETECTION','REVERSE_TRAVERSAL','CHAR_OUTPUT'],
+  algorithm_patterns:['WORD_BOUNDARY','REVERSE_TRAVERSE'], inspiredBy:'WORD_BOUNDARY', d:[2,3,3,5,2],
+  io:{ argv:'one string', stdout:'the words reversed, then \\n',
+       cases:[[['a bb ccc'],'ccc bb a\n'], [['  x  y  '],'y x\n'], [['   '],'\n'], [[],'\n']] },
+  edge_cases:['separator runs collapse to one space','no trailing space','only separators'] }),
+
+EX({ id:'b.mask_middle', title:'masked words',
+  brief:'Print the argument with the middle of every word replaced by asterisks. The first and last character of each word are kept. Words of one or two characters are unchanged.',
+  required_subjects:['C00','C02','C06'], skills:['WORD_DETECTION','TRANSFORMATION','COUNTING'],
+  algorithm_patterns:['WORD_BOUNDARY','CHAR_MAP'], inspiredBy:'WORD_BOUNDARY', d:[2,3,3,4,2],
+  io:{ argv:'one string', stdout:'the masked string, then \\n',
+       cases:[[['hello ab c'],'h***o ab c\n'], [['abc'],'a*c\n'], [[''],'\n'], [[],'\n']] },
+  edge_cases:['words of length one and two are untouched','length three has exactly one masked character'] }),
+
+EX({ id:'b.sum_digits', title:'sum of the digits',
+  brief:'Print the sum of every digit character appearing anywhere in the argument.',
+  required_subjects:['C00','C02','C04','C06'], skills:['CHAR_CLASSIFICATION','COUNTING','NUMBER_DECOMPOSITION'],
+  algorithm_patterns:['SCAN_EMIT','NUM_EMIT'], inspiredBy:'NUM_EMIT', d:[1,2,2,3,2],
+  io:{ argv:'one string', stdout:'the sum, then \\n',
+       cases:[[['a1b2c3'],'6\n'], [['abc'],'0\n'], [['999'],'27\n'], [[],'0\n']] },
+  edge_cases:['no digits gives 0, not an empty line','a sum that needs two digits to print'],
+  reference_solution: SOL_PUTNBR +
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\tint\tsum;\n\n\ti = 0;\n\tsum = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\twhile (argv[1][i])\n\t\t{\n\t\t\tif (argv[1][i] >= 48 && argv[1][i] <= 57)\n' +
+    '\t\t\t\tsum = sum + argv[1][i] - 48;\n\t\t\ti++;\n\t\t}\n\t}\n' +
+    '\tput_nbr(sum);\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'b.max_number', title:'the largest number in the text',
+  brief:'Numbers are runs of digits embedded anywhere in the argument. Print the largest of them, or 0 if there are none.',
+  required_subjects:['C00','C02','C04','C06'], skills:['NUMBER_CONSTRUCTION','SEARCH','CHAR_CLASSIFICATION'],
+  algorithm_patterns:['NUM_PARSE','NUM_EMIT'], inspiredBy:'NUM_PARSE', d:[2,3,3,4,2],
+  io:{ argv:'one string', stdout:'the largest number, then \\n',
+       cases:[[['a12b7c300'],'300\n'], [['abc'],'0\n'], [['007'],'7\n'], [[],'0\n']] },
+  edge_cases:['leading zeros','adjacent digit runs separated by one letter','no digits at all'],
+  reference_solution: SOL_PUTNBR +
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\tint\tcur;\n\tint\tbest;\n\tint\tin;\n\n' +
+    '\ti = 0;\n\tcur = 0;\n\tbest = 0;\n\tin = 0;\n\tif (argc == 2)\n\t{\n\t\twhile (argv[1][i])\n\t\t{\n' +
+    '\t\t\tif (argv[1][i] >= 48 && argv[1][i] <= 57)\n\t\t\t{\n' +
+    '\t\t\t\tif (!in)\n\t\t\t\t\tcur = 0;\n\t\t\t\tin = 1;\n\t\t\t\tcur = cur * 10 + argv[1][i] - 48;\n' +
+    '\t\t\t\tif (cur > best)\n\t\t\t\t\tbest = cur;\n\t\t\t}\n\t\t\telse\n\t\t\t\tin = 0;\n' +
+    '\t\t\ti++;\n\t\t}\n\t}\n\tput_nbr(best);\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'b.acronym', title:'initials',
+  brief:'Print the first letter of every word of the argument, in upper case, with nothing between them.',
+  required_subjects:['C00','C02','C06'], skills:['WORD_DETECTION','TRANSFORMATION','CHAR_OUTPUT'],
+  algorithm_patterns:['WORD_BOUNDARY'], inspiredBy:'WORD_BOUNDARY', d:[2,2,2,3,2],
+  io:{ argv:'one string', stdout:'the initials, then \\n',
+       cases:[[['read the manual'],'RTM\n'], [['  a  '],'A\n'], [['   '],'\n'], [[],'\n']] },
+  edge_cases:['a word starting with a digit','only separators'],
+  reference_solution:
+    'int\tis_sep(char c)\n{\n\tif (c == 32 || c == 9)\n\t\treturn (1);\n\treturn (0);\n}\n\n' +
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\tchar\tc;\n\n\ti = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\twhile (argv[1][i])\n\t\t{\n\t\t\tif (!is_sep(argv[1][i]) && (i == 0 || is_sep(argv[1][i - 1])))\n\t\t\t{\n' +
+    '\t\t\t\tc = argv[1][i];\n\t\t\t\tif (c >= 97 && c <= 122)\n\t\t\t\t\tc = c - 32;\n' +
+    '\t\t\t\twrite(1, &c, 1);\n\t\t\t}\n\t\t\ti++;\n\t\t}\n\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'b.join_args', title:'arguments joined',
+  brief:'The first argument is a separator. Print every remaining argument in order, separated by it.',
+  required_subjects:['C00','C02','C06'], skills:['ARGC_ARGV','STRING_SCAN','CHAR_OUTPUT'],
+  algorithm_patterns:['ARGC_GUARD'], inspiredBy:'ARGC_GUARD', d:[2,2,2,3,2],
+  io:{ argv:'a separator then any number of strings', stdout:'the joined string, then \\n',
+       cases:[[['-','a','b','c'],'a-b-c\n'], [['-','a'],'a\n'], [['-'],'\n'], [[],'\n']] },
+  edge_cases:['no strings to join','exactly one string means no separator is printed','a multi-character separator'],
+  reference_solution: SOL_PUTSTR +
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\n\ti = 2;\n\tif (argc >= 3)\n\t{\n' +
+    '\t\tput_str(argv[2]);\n\t\ti = 3;\n\t\twhile (i < argc)\n\t\t{\n\t\t\tput_str(argv[1]);\n' +
+    '\t\t\tput_str(argv[i]);\n\t\t\ti++;\n\t\t}\n\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'b.count_char_across_args', title:'one character, every argument',
+  brief:'The first argument gives a character. Print how many times it occurs across all the remaining arguments.',
+  required_subjects:['C00','C02','C04','C06'], skills:['ARGC_ARGV','COUNTING','STRING_SCAN'],
+  algorithm_patterns:['ARGC_GUARD','SCAN_EMIT'], inspiredBy:'ARGC_GUARD', d:[2,2,2,3,2],
+  io:{ argv:'a character then any number of strings', stdout:'the count, then \\n',
+       cases:[[['a','banana','apple'],'4\n'], [['z','abc'],'0\n'], [['a'],'0\n'], [[],'0\n']] },
+  edge_cases:['no strings after the character','the character not occurring','an empty first argument'] }),
+
+EX({ id:'b.sort_chars', title:'characters in order',
+  brief:'Print the characters of the argument sorted into ascending ASCII order.',
+  required_subjects:['C00','C01','C02','C06'], skills:['SORTING','ARRAY_TRAVERSAL','STRING_SCAN'],
+  algorithm_patterns:['ARRAY_ORDER'], inspiredBy:'ARRAY_ORDER', d:[2,3,3,3,2],
+  io:{ argv:'one string', stdout:'the sorted characters, then \\n',
+       cases:[[['cba'],'abc\n'], [['aA'],'Aa\n'], [[''],'\n'], [[],'\n']] },
+  edge_cases:['upper case sorts before lower case','duplicates kept','empty string'],
+  crossSubject:'C01 + C02' }),
+
+/* ==================== BAND C — several skills, wired together ============= */
+EX({ id:'c.words_sorted', title:'words in ASCII order',
+  brief:'Print the words of the argument sorted into ascending ASCII order, separated by single spaces.',
+  required_subjects:['C00','C01','C02','C06'], skills:['WORD_DETECTION','SORTING','COMPARISON','ARRAY_TRAVERSAL'],
+  algorithm_patterns:['WORD_BOUNDARY','ARRAY_ORDER'], inspiredBy:'WORD_BOUNDARY', d:[3,3,4,4,3],
+  io:{ argv:'one string', stdout:'the sorted words, then \\n',
+       cases:[[['pear apple fig'],'apple fig pear\n'], [['b a'],'a b\n'], [['   '],'\n'], [[],'\n']] },
+  edge_cases:['no words','one word','equal words'], crossSubject:'C01 + C02 + C06' }),
+
+EX({ id:'c.words_by_length', title:'words by length',
+  brief:'Print the words of the argument ordered by increasing length. Words of equal length keep the order they appeared in.',
+  required_subjects:['C00','C01','C02','C06'], skills:['WORD_DETECTION','SORTING','COUNTING','COMPARISON'],
+  algorithm_patterns:['WORD_BOUNDARY','ARRAY_ORDER'], inspiredBy:'ARRAY_ORDER', d:[3,4,4,4,3],
+  io:{ argv:'one string', stdout:'the ordered words, then \\n',
+       cases:[[['ccc a bb'],'a bb ccc\n'], [['aa bb'],'aa bb\n'], [['   '],'\n'], [[],'\n']] },
+  edge_cases:['stability matters — equal lengths must not be reordered','no words'] }),
+
+EX({ id:'c.numbers_sorted', title:'embedded numbers, sorted',
+  brief:'Numbers are runs of digits anywhere in the argument. Print them in ascending order, separated by single spaces.',
+  required_subjects:['C00','C02','C04','C06'], skills:['NUMBER_CONSTRUCTION','SORTING','FILTERING'],
+  algorithm_patterns:['NUM_PARSE','ARRAY_ORDER','NUM_EMIT'], inspiredBy:'NUM_PARSE', d:[3,3,4,4,3],
+  io:{ argv:'one string', stdout:'the sorted numbers, then \\n',
+       cases:[[['a30b4c100'],'4 30 100\n'], [['abc'],'\n'], [['7'],'7\n'], [[],'\n']] },
+  edge_cases:['no numbers','one number','numbers with leading zeros'], crossSubject:'C02 + C04' }),
+
+EX({ id:'c.dedupe_words', title:'each word once',
+  brief:'Print the words of the argument, each one only the first time it appears, separated by single spaces.',
+  required_subjects:['C00','C02','C03','C06'], skills:['WORD_DETECTION','COMPARISON','FILTERING'],
+  algorithm_patterns:['WORD_BOUNDARY','TWO_SEQ_COMPARE'], inspiredBy:'TWO_SEQ_COMPARE', d:[3,3,4,4,3],
+  io:{ argv:'one string', stdout:'the distinct words, then \\n',
+       cases:[[['a b a c b'],'a b c\n'], [['x x'],'x\n'], [['   '],'\n'], [[],'\n']] },
+  edge_cases:['comparing words that are prefixes of one another','all words identical'],
+  crossSubject:'C02 + C03' }),
+
+EX({ id:'c.common_prefix', title:'the shared beginning',
+  brief:'Print the longest sequence of characters with which every argument begins.',
+  required_subjects:['C00','C02','C03','C06'], skills:['COMPARISON','ARGC_ARGV','STRING_SCAN'],
+  algorithm_patterns:['TWO_SEQ_COMPARE','ARGC_GUARD'], inspiredBy:'TWO_SEQ_COMPARE', d:[3,3,3,4,3],
+  io:{ argv:'any number of strings', stdout:'the common prefix, then \\n',
+       cases:[[['prefix','preface','prefer'],'pref\n'], [['abc','xyz'],'\n'],
+              [['only'],'only\n'], [[],'\n']] },
+  edge_cases:['one argument is its own prefix','no arguments','an empty argument makes the prefix empty'],
+  crossSubject:'C03 + C06' }),
+
+EX({ id:'c.filter_by_length', title:'long words only',
+  brief:'The second argument is a number n. Print the words of the first argument whose length is at least n, separated by single spaces.',
+  required_subjects:['C00','C02','C04','C06'], skills:['WORD_DETECTION','FILTERING','NUMBER_CONSTRUCTION'],
+  algorithm_patterns:['WORD_BOUNDARY','NUM_PARSE'], inspiredBy:'WORD_BOUNDARY', d:[3,3,3,4,3],
+  io:{ argv:'a string and a number', stdout:'the selected words, then \\n',
+       cases:[[['a bb ccc','2'],'bb ccc\n'], [['a bb','9'],'\n'], [['aa','1'],'aa\n'], [['x'],'\n']] },
+  edge_cases:['n larger than every word','n zero keeps everything','wrong argc'] }),
+
+EX({ id:'c.rotate_words', title:'first word to the back',
+  brief:'Print the words of the argument with the first one moved to the end, separated by single spaces.',
+  required_subjects:['C00','C02','C06'], skills:['WORD_DETECTION','ARRAY_TRAVERSAL','CHAR_OUTPUT'],
+  algorithm_patterns:['WORD_BOUNDARY'], inspiredBy:'WORD_BOUNDARY', d:[3,3,3,4,3],
+  io:{ argv:'one string', stdout:'the rotated words, then \\n',
+       cases:[[['a b c'],'b c a\n'], [['only'],'only\n'], [['   '],'\n'], [[],'\n']] },
+  edge_cases:['one word rotates to itself','no words','separator runs collapse'] }),
+
+EX({ id:'c.char_frequency', title:'the commonest character',
+  brief:'Print the character that occurs most often in the argument. If several tie, print the one with the smallest ASCII value.',
+  required_subjects:['C00','C01','C02','C06'], skills:['COUNTING','ARRAY_TRAVERSAL','COMPARISON'],
+  algorithm_patterns:['ARRAY_ORDER','SCAN_EMIT'], inspiredBy:'ARRAY_ORDER', d:[3,3,3,4,3],
+  io:{ argv:'one string', stdout:'one character, then \\n',
+       cases:[[['aabbbc'],'b\n'], [['ab'],'a\n'], [[''],'\n'], [[],'\n']] },
+  edge_cases:['ties broken by ASCII','empty string','every character distinct'],
+  crossSubject:'C01 + C02' }),
+
+EX({ id:'c.sum_numeric_args', title:'the arguments that are numbers',
+  brief:'Print the sum of every argument that consists only of digits. Arguments that are not numbers are ignored.',
+  required_subjects:['C00','C02','C04','C06'], skills:['ARGC_ARGV','VALIDATION','NUMBER_CONSTRUCTION'],
+  algorithm_patterns:['ARGC_GUARD','NUM_PARSE','NUM_EMIT'], inspiredBy:'NUM_PARSE', d:[3,3,3,4,3],
+  io:{ argv:'any number of strings', stdout:'the sum, then \\n',
+       cases:[[['10','x','32'],'42\n'], [['a','b'],'0\n'], [['5'],'5\n'], [[],'0\n']] },
+  edge_cases:['no numeric arguments','an empty argument is not a number','no arguments at all'] }),
+
+EX({ id:'c.reverse_letters_keep_rest', title:'letters reversed, the rest fixed',
+  brief:'Print the argument with only its letters reversed. Every character that is not a letter stays exactly where it was.',
+  required_subjects:['C00','C02','C06'], skills:['REVERSE_TRAVERSAL','CHAR_CLASSIFICATION','TRANSFORMATION'],
+  algorithm_patterns:['REVERSE_TRAVERSE','CHAR_MAP'], inspiredBy:'REVERSE_TRAVERSE', d:[3,4,3,4,3],
+  io:{ argv:'one string', stdout:'the transformed string, then \\n',
+       cases:[[['ab-cd'],'dc-ba\n'], [['a1b'],'b1a\n'], [['123'],'123\n'], [[],'\n']] },
+  edge_cases:['no letters at all','non-letters at both ends','two indices moving toward each other'] }),
+
+EX({ id:'c.word_lengths', title:'the shape of the sentence',
+  brief:'Print the length of every word of the argument, in order, separated by single spaces.',
+  required_subjects:['C00','C02','C04','C06'], skills:['WORD_DETECTION','COUNTING','NUMBER_DECOMPOSITION'],
+  algorithm_patterns:['WORD_BOUNDARY','NUM_EMIT'], inspiredBy:'WORD_BOUNDARY', d:[2,3,3,4,3],
+  io:{ argv:'one string', stdout:'the lengths, then \\n',
+       cases:[[['a bb ccc'],'1 2 3\n'], [['   '],'\n'], [['hello'],'5\n'], [[],'\n']] },
+  edge_cases:['no words','a word longer than nine characters needs two digits'] }),
+
+EX({ id:'c.alternating_words', title:'alternating case by word',
+  brief:'Print the words of the argument with the first, third, fifth and so on entirely in upper case and the others entirely in lower case. Separators are preserved exactly.',
+  required_subjects:['C00','C02','C06'], skills:['WORD_DETECTION','TRANSFORMATION','COUNTING'],
+  algorithm_patterns:['WORD_BOUNDARY','CHAR_MAP'], inspiredBy:'WORD_BOUNDARY', d:[3,3,3,4,3],
+  io:{ argv:'one string', stdout:'the transformed string, then \\n',
+       cases:[[['one two three'],'ONE two THREE\n'], [['  a  b '],'  A  b \n'], [[''],'\n'], [[],'\n']] },
+  edge_cases:['separators preserved exactly','the word counter must not advance on separators'] }),
+
+/* ==================== BAND D — a pipeline, stage by stage ================= */
+EX({ id:'d.number_pipeline', title:'extract, keep, order, total',
+  brief:'Numbers are runs of digits anywhere in the argument. Take only the even ones, print them in descending order separated by single spaces, then a newline, then their total.',
+  required_subjects:['C00','C02','C04','C06'], skills:['NUMBER_CONSTRUCTION','FILTERING','SORTING','COUNTING'],
+  algorithm_patterns:['NUM_PARSE','ARRAY_ORDER','NUM_EMIT'], inspiredBy:'NUM_PARSE', d:[3,4,4,4,4],
+  io:{ argv:'one string', stdout:'the selected numbers, \\n, the total, \\n',
+       cases:[[['a4b7c10'],'10 4\n14\n'], [['1 3'],'\n0\n'], [['2'],'2\n2\n'], [[],'\n0\n']] },
+  edge_cases:['no even numbers still prints an empty line and a zero','one number','zero itself is even'],
+  crossSubject:'C02 + C04 + C06' }),
+
+EX({ id:'d.word_checksum', title:'a letter for each word',
+  brief:'For every word of the argument, add the ASCII values of its characters, take the remainder modulo 26, and print the lower-case letter at that position in the alphabet. Print nothing between the letters.',
+  required_subjects:['C00','C02','C04','C06'], skills:['WORD_DETECTION','ASCII','NUMBER_DECOMPOSITION','TRANSFORMATION'],
+  algorithm_patterns:['WORD_BOUNDARY','CHAR_MAP'], inspiredBy:'WORD_BOUNDARY', d:[3,4,3,4,4],
+  io:{ argv:'one string', stdout:'one letter per word, then \\n',
+       cases:[[['ab'],'v\n'], [['   '],'\n'], [[],'\n']] },
+  edge_cases:['no words','a word whose sum is an exact multiple of 26'] }),
+
+EX({ id:'d.rank_args', title:'arguments ranked by digit sum',
+  brief:'Order the arguments by the sum of the digits they contain, smallest first. Arguments with equal sums keep their original order. Print them separated by single spaces.',
+  required_subjects:['C00','C01','C02','C04','C06'], skills:['ARGC_ARGV','SORTING','COUNTING','NUMBER_DECOMPOSITION'],
+  algorithm_patterns:['ARGC_GUARD','ARRAY_ORDER'], inspiredBy:'ARRAY_ORDER', d:[3,4,4,4,4],
+  io:{ argv:'any number of strings', stdout:'the reordered arguments, then \\n',
+       cases:[[['a9','b1','c5'],'b1 c5 a9\n'], [['x','y'],'x y\n'], [[],'\n']] },
+  edge_cases:['arguments with no digits all score zero','stability','no arguments'],
+  crossSubject:'C01 + C04 + C06' }),
+
+EX({ id:'d.interleave', title:'two strings woven together',
+  brief:'Print one character from the first argument, then one from the second, alternating. When one runs out, print the rest of the other.',
+  required_subjects:['C00','C02','C06'], skills:['STRING_SCAN','ARGC_ARGV','COMPARISON'],
+  algorithm_patterns:['TWO_SEQ_COMPARE'], inspiredBy:'TWO_SEQ_COMPARE', d:[2,3,3,4,4],
+  io:{ argv:'two strings', stdout:'the woven string, then \\n',
+       cases:[[['abc','12'],'a1b2c\n'], [['','xy'],'xy\n'], [['ab',''],'ab\n'], [['a'],'\n']] },
+  edge_cases:['unequal lengths','one string empty','wrong argc'],
+  reference_solution:
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\tint\tj;\n\n\ti = 0;\n\tj = 0;\n\tif (argc == 3)\n\t{\n' +
+    '\t\twhile (argv[1][i] || argv[2][j])\n\t\t{\n' +
+    '\t\t\tif (argv[1][i])\n\t\t\t{\n\t\t\t\twrite(1, &argv[1][i], 1);\n\t\t\t\ti++;\n\t\t\t}\n' +
+    '\t\t\tif (argv[2][j])\n\t\t\t{\n\t\t\t\twrite(1, &argv[2][j], 1);\n\t\t\t\tj++;\n\t\t\t}\n' +
+    '\t\t}\n\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'d.compress_runs', title:'runs counted',
+  brief:'Print the argument with each run of identical characters replaced by that character followed by the length of the run.',
+  required_subjects:['C00','C02','C04','C06'], skills:['STRING_SCAN','COUNTING','NUMBER_DECOMPOSITION','COMPARISON'],
+  algorithm_patterns:['STATE_MACHINE','NUM_EMIT'], inspiredBy:'STATE_MACHINE', d:[3,3,4,4,4],
+  io:{ argv:'one string', stdout:'the compressed string, then \\n',
+       cases:[[['aaab'],'a3b1\n'], [['abc'],'a1b1c1\n'], [[''],'\n'], [[],'\n']] },
+  edge_cases:['the final run must still be emitted','a run of more than nine','a single character'],
+  reference_solution: SOL_PUTNBR +
+    'int\tmain(int argc, char **argv)\n{\n\tint\ti;\n\tint\tn;\n\n\ti = 0;\n\tif (argc == 2)\n\t{\n' +
+    '\t\twhile (argv[1][i])\n\t\t{\n\t\t\tn = 1;\n' +
+    '\t\t\twhile (argv[1][i + n] && argv[1][i + n] == argv[1][i])\n\t\t\t\tn++;\n' +
+    '\t\t\twrite(1, &argv[1][i], 1);\n\t\t\tput_nbr(n);\n\t\t\ti = i + n;\n\t\t}\n' +
+    '\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'d.word_histogram', title:'a bar for every word',
+  brief:'For each word of the argument print the word, a space, and then as many hash characters as the word has letters, each word on its own line.',
+  required_subjects:['C00','C02','C06'], skills:['WORD_DETECTION','COUNTING','CHAR_OUTPUT'],
+  algorithm_patterns:['WORD_BOUNDARY'], inspiredBy:'WORD_BOUNDARY', d:[2,3,3,3,4],
+  io:{ argv:'one string', stdout:'one line per word',
+       cases:[[['ab c'],'ab ##\nc #\n'], [['   '],''], [[],'']] },
+  edge_cases:['no words prints nothing at all, not even a newline','one word'] }),
+
+EX({ id:'d.caesar_by_index', title:'each word shifted further',
+  brief:'Shift the letters of the first word by one, the second by two, and so on, wrapping within the alphabet. Non-letters and separators are unchanged.',
+  required_subjects:['C00','C02','C06'], skills:['WORD_DETECTION','TRANSFORMATION','ASCII','COUNTING'],
+  algorithm_patterns:['WORD_BOUNDARY','CHAR_MAP'], inspiredBy:'CHAR_MAP', d:[3,4,4,4,4],
+  io:{ argv:'one string', stdout:'the transformed string, then \\n',
+       cases:[[['abc abc'],'bcd cde\n'], [['z'],'a\n'], [['   '],'   \n'], [[],'\n']] },
+  edge_cases:['the wrap depends on the shift, not just on z','the word counter must not advance on separators'] }),
+
+EX({ id:'d.longest_run_report', title:'the longest run, described',
+  brief:'Find the longest run of identical characters in the argument. Print the character, a space, and the length of the run. If several runs tie, report the first.',
+  required_subjects:['C00','C02','C04','C06'], skills:['STRING_SCAN','COUNTING','COMPARISON','NUMBER_DECOMPOSITION'],
+  algorithm_patterns:['STATE_MACHINE','NUM_EMIT'], inspiredBy:'STATE_MACHINE', d:[3,3,4,4,4],
+  io:{ argv:'one string', stdout:'a character, a space, a length, then \\n',
+       cases:[[['aabbbc'],'b 3\n'], [['abc'],'a 1\n'], [[''],'\n'], [[],'\n']] },
+  edge_cases:['empty string prints only a newline','all characters distinct','ties resolved by first'] }),
+
+EX({ id:'d.balanced_words', title:'words in balance',
+  brief:'Print, in ASCII order and separated by single spaces, every word of the argument that contains exactly as many vowels as consonants.',
+  required_subjects:['C00','C01','C02','C06'], skills:['WORD_DETECTION','COUNTING','FILTERING','SORTING'],
+  algorithm_patterns:['WORD_BOUNDARY','ARRAY_ORDER'], inspiredBy:'WORD_BOUNDARY', d:[3,4,4,4,4],
+  io:{ argv:'one string', stdout:'the selected words, then \\n',
+       cases:[[['at sky be'],'at be\n'], [['xyz'],'\n'], [['   '],'\n'], [[],'\n']] },
+  edge_cases:['words containing digits — decide and state whether they count','no word qualifies'],
+  crossSubject:'C01 + C02 + C06' }),
+
+EX({ id:'d.columns', title:'padded columns',
+  brief:'Print the words of the argument one per line, each padded on the right with spaces to the width of the longest word, followed by that word’s length.',
+  required_subjects:['C00','C02','C04','C06'], skills:['WORD_DETECTION','COUNTING','CHAR_OUTPUT','NUMBER_DECOMPOSITION'],
+  algorithm_patterns:['WORD_BOUNDARY','MEM_DUMP'], inspiredBy:'MEM_DUMP', d:[3,4,4,4,4],
+  io:{ argv:'one string', stdout:'one padded line per word',
+       cases:[[['a bbb'],'a   1\nbbb 3\n'], [['   '],''], [[],'']] },
+  edge_cases:['the longest word needs exactly one space before its number','no words prints nothing'] }),
+
+/* ==================== BAND E — unfamiliar by design ======================= */
+/* hideInspiration is what keeps these unfamiliar. The pattern is recorded for
+   the recommender, and the UI must never render it for a band E record. */
+EX({ id:'e.tally', title:'tally',
+  brief:'Each argument is a label followed by a colon and a run of digits, for example count:12. Print the labels in decreasing order of their number, one per line, each followed by a space and its number. Labels with equal numbers keep the order they were given. Any argument not of that shape is ignored.',
+  required_subjects:['C00','C01','C02','C04','C06'],
+  skills:['VALIDATION','NUMBER_CONSTRUCTION','SORTING','ARGC_ARGV','STRING_SCAN'],
+  algorithm_patterns:['NUM_PARSE','ARRAY_ORDER','ARGC_GUARD'], inspiredBy:'NUM_PARSE',
+  hideInspiration:true, d:[4,4,4,5,5],
+  io:{ argv:'any number of label:number strings', stdout:'one line per valid argument',
+       cases:[[['a:2','b:10','c:2'],'b 10\na 2\nc 2\n'], [['bad'],''], [[],'']] },
+  edge_cases:['an argument with no colon','a colon with nothing after it','non-digits after the colon',
+              'equal counts must not be reordered','no valid arguments at all'],
+  crossSubject:'C01 + C02 + C04 + C06' }),
+
+EX({ id:'e.weave', title:'weave',
+  brief:'The first argument is a pattern made only of the characters u, l and d. Apply it to the second argument character by character, repeating the pattern as often as needed: u forces upper case, l forces lower case, d deletes the character. Characters that are not letters are never deleted and never changed, and they do not consume a pattern position.',
+  required_subjects:['C00','C02','C06'],
+  skills:['TRANSFORMATION','CHAR_CLASSIFICATION','ITERATION','STRING_SCAN'],
+  algorithm_patterns:['CHAR_MAP','STATE_MACHINE'], inspiredBy:'CHAR_MAP',
+  hideInspiration:true, d:[4,4,4,5,5],
+  io:{ argv:'a pattern and a string', stdout:'the transformed string, then \\n',
+       cases:[[['ul','abcd'],'AbCd\n'], [['d','abc'],'\n'], [['u','a-b'],'A-B\n'], [['u'],'\n']] },
+  edge_cases:['non-letters do not advance the pattern','a pattern shorter than the string',
+              'an empty pattern','a pattern containing another character'] }),
+
+EX({ id:'e.stratify', title:'stratify',
+  brief:'Read every argument as a word. Print the words grouped by their length, shortest group first, one group per line, the words within a group in the order they were given and separated by single spaces. A line is printed only for a length that actually occurs.',
+  required_subjects:['C00','C01','C02','C06'],
+  skills:['ARGC_ARGV','COUNTING','SORTING','ARRAY_TRAVERSAL','COMPARISON'],
+  algorithm_patterns:['ARRAY_ORDER','ARGC_GUARD'], inspiredBy:'ARRAY_ORDER',
+  hideInspiration:true, d:[4,4,4,4,5],
+  io:{ argv:'any number of strings', stdout:'one line per occurring length',
+       cases:[[['bb','a','cc','d'],'a d\nbb cc\n'], [['x'],'x\n'], [[],'']] },
+  edge_cases:['lengths with no words print no line','an empty argument has length zero','no arguments'] }),
+
+EX({ id:'e.relay', title:'relay',
+  brief:'Every argument is a word. Starting from the first, repeatedly move to the word that begins with the last letter of the current one, choosing the earliest such word not yet used. Print the chain, separated by arrows made of a hyphen and a greater-than sign, and stop when no unused word can follow.',
+  required_subjects:['C00','C01','C02','C03','C06'],
+  skills:['SEARCH','COMPARISON','ARRAY_TRAVERSAL','STRING_SCAN','FILTERING'],
+  algorithm_patterns:['TWO_SEQ_COMPARE','ARRAY_ORDER'], inspiredBy:'TWO_SEQ_COMPARE',
+  hideInspiration:true, d:[4,5,4,5,5],
+  io:{ argv:'any number of strings', stdout:'the chain, then \\n',
+       cases:[[['ab','ba','ac'],'ab->ba->ac\n'], [['xy'],'xy\n'], [[],'\n']] },
+  edge_cases:['a word cannot be reused','no continuation exists from the first word',
+              'case sensitivity must be decided and stated','a single-letter word'],
+  crossSubject:'C03 + C06' }),
+
+EX({ id:'e.mirrorfold', title:'mirrorfold',
+  brief:'Fold the argument onto itself: pair the first character with the last, the second with the second to last, and so on. For each pair print the character that is smaller in ASCII. If the string has an odd length its middle character is printed alone at the end.',
+  required_subjects:['C00','C02','C06'],
+  skills:['REVERSE_TRAVERSAL','COMPARISON','STRING_SCAN','ASCII'],
+  algorithm_patterns:['REVERSE_TRAVERSE','TWO_SEQ_COMPARE'], inspiredBy:'REVERSE_TRAVERSE',
+  hideInspiration:true, d:[3,4,3,5,5],
+  io:{ argv:'one string', stdout:'the folded string, then \\n',
+       cases:[[['abcd'],'ab\n'], [['abc'],'ab\n'], [['a'],'a\n'], [[''],'\n'], [[],'\n']] },
+  edge_cases:['odd length leaves a middle character','length one','empty string','equal pairs'] }),
+
+EX({ id:'e.ledger', title:'ledger',
+  brief:'Each argument is a signed amount: an optional plus or minus followed by digits. Print the running total after each valid argument, one per line. An argument that is not a valid amount prints the word skip on its own line and does not change the total.',
+  required_subjects:['C00','C02','C04','C06'],
+  skills:['VALIDATION','NUMBER_CONSTRUCTION','ARGC_ARGV','NUMBER_DECOMPOSITION'],
+  algorithm_patterns:['NUM_PARSE','NUM_EMIT','ARGC_GUARD'], inspiredBy:'NUM_PARSE',
+  hideInspiration:true, d:[4,4,4,5,5],
+  io:{ argv:'any number of amount strings', stdout:'one line per argument',
+       cases:[[['+5','-2','x','10'],'5\n3\nskip\n13\n'], [['-1'],'-1\n'], [[],'']] },
+  edge_cases:['a lone sign is not a number','a negative running total must print its sign',
+              'two signs','an empty argument','no arguments'] }),
+
+EX({ id:'e.sieveword', title:'sieveword',
+  brief:'Print the characters of the argument whose one-based position is a prime number, in order.',
+  required_subjects:['C00','C02','C04','C05','C06'],
+  skills:['NUMBER_THEORY','STRING_SCAN','FILTERING','ITERATION'],
+  algorithm_patterns:['NUM_THEORY','SCAN_EMIT'], inspiredBy:'NUM_THEORY',
+  hideInspiration:true, d:[4,4,3,4,5],
+  io:{ argv:'one string', stdout:'the selected characters, then \\n',
+       cases:[[['abcdefg'],'bce\n'], [['a'],'\n'], [[''],'\n'], [[],'\n']] },
+  edge_cases:['position 1 is not prime','a string shorter than the first prime','empty string'],
+  crossSubject:'C05 + C02' }),
+
+EX({ id:'e.tokenline', title:'tokenline',
+  brief:'The argument mixes words and numbers. Print every word with its letters reversed and every number multiplied by the count of words that preceded it, keeping the original order and separating items with single spaces.',
+  required_subjects:['C00','C02','C04','C06'],
+  skills:['WORD_DETECTION','NUMBER_CONSTRUCTION','TRANSFORMATION','COUNTING','REVERSE_TRAVERSAL'],
+  algorithm_patterns:['WORD_BOUNDARY','NUM_PARSE','NUM_EMIT'], inspiredBy:'WORD_BOUNDARY',
+  hideInspiration:true, d:[4,5,4,5,5],
+  io:{ argv:'one string', stdout:'the transformed items, then \\n',
+       cases:[[['ab 5 cd 3'],'ba 5 dc 6\n'], [['7'],'0\n'], [['   '],'\n'], [[],'\n']] },
+  edge_cases:['a number before any word is multiplied by zero','a token containing both letters and digits',
+              'no tokens at all'],
+  crossSubject:'C02 + C04 + C06' }),
+
+/* ---- coverage: one exercise for each pattern nothing else trained ------- */
+EX({ id:'a.stair', title:'a stair of digits',
+  brief:'With no arguments at all, print 1, then 12, then 123, and so on up to 123456789, each on its own line.',
+  required_subjects:['C00'], skills:['ITERATION','CHAR_OUTPUT','ASCII'],
+  algorithm_patterns:['FIXED_SEQUENCE'], inspiredBy:'FIXED_SEQUENCE', d:[1,2,2,2,1],
+  io:{ argv:'none — the output is fixed', stdout:'nine lines',
+       cases:[[[],'1\n12\n123\n1234\n12345\n123456\n1234567\n12345678\n123456789\n']] },
+  edge_cases:['the last line still needs its newline','generating rather than storing the digits'],
+  reference_solution:
+    'int\tmain(void)\n{\n\tint\tn;\n\tint\td;\n\tchar\tc;\n\n\tn = 1;\n' +
+    '\twhile (n <= 9)\n\t{\n\t\td = 1;\n\t\twhile (d <= n)\n\t\t{\n' +
+    '\t\t\tc = 48 + d;\n\t\t\twrite(1, &c, 1);\n\t\t\td++;\n\t\t}\n' +
+    '\t\twrite(1, "\\n", 1);\n\t\tn++;\n\t}\n\treturn (0);\n}\n' }),
+
+EX({ id:'b.swap_ends', title:'swap through addresses',
+  brief:'Write a function that exchanges two integers through their addresses, then use it to swap the first and last of a five-number array and print the array. The swap function must take two int pointers and return nothing.',
+  required_subjects:['C00','C01','C04'], skills:['POINTER_MANIPULATION','ARRAY_TRAVERSAL','NUMBER_DECOMPOSITION'],
+  algorithm_patterns:['PTR_WRITE'], inspiredBy:'PTR_WRITE', d:[2,2,2,3,2],
+  io:{ argv:'none', stdout:'the five numbers separated by spaces, then \\n',
+       cases:[[[],'5 2 3 4 1\n']] },
+  edge_cases:['swapping a value with itself','forgetting the temporary','& at the call site but not inside'],
+  note:'The whole point is where & is needed and where it is not. Inside the function you already hold addresses; at the call site you must take them.',
+  reference_solution:
+    'void\tswap_int(int *a, int *b)\n{\n\tint\tt;\n\n\tt = *a;\n\t*a = *b;\n\t*b = t;\n}\n\n' +
+    'void\tput_nbr2(int n)\n{\n\tchar\tc;\n\n\tif (n >= 10)\n\t\tput_nbr2(n / 10);\n' +
+    '\tc = 48 + n % 10;\n\twrite(1, &c, 1);\n}\n\n' +
+    'int\tmain(void)\n{\n\tint\tt[5];\n\tint\ti;\n\n\ti = 0;\n\twhile (i < 5)\n\t{\n' +
+    '\t\tt[i] = i + 1;\n\t\ti++;\n\t}\n\tswap_int(&t[0], &t[4]);\n\ti = 0;\n' +
+    '\twhile (i < 5)\n\t{\n\t\tif (i > 0)\n\t\t\twrite(1, " ", 1);\n' +
+    '\t\tput_nbr2(t[i]);\n\t\ti++;\n\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'b.byte_bits', title:'the bits of a byte',
+  brief:'The argument is a number between 0 and 255. Print its eight bits, most significant first.',
+  required_subjects:['C00','C02','C04','C06'], skills:['ASCII','NUMBER_DECOMPOSITION','ITERATION','NUMBER_CONSTRUCTION'],
+  algorithm_patterns:['BIT_OPS','NUM_PARSE'], inspiredBy:'BIT_OPS', d:[2,3,2,3,2],
+  io:{ argv:'one number', stdout:'eight characters, then \\n',
+       cases:[[['5'],'00000101\n'], [['0'],'00000000\n'], [['255'],'11111111\n'], [[],'\n']] },
+  edge_cases:['zero must still print eight bits','the order of the bits','wrong argc'],
+  reference_solution:
+    'int\tmain(int argc, char **argv)\n{\n\tint\tn;\n\tint\ti;\n\tchar\tc;\n\n' +
+    '\tn = 0;\n\ti = 0;\n\tif (argc == 2)\n\t{\n\t\twhile (argv[1][i])\n\t\t{\n' +
+    '\t\t\tn = n * 10 + argv[1][i] - 48;\n\t\t\ti++;\n\t\t}\n\t\ti = 7;\n' +
+    '\t\twhile (i >= 0)\n\t\t{\n\t\t\tc = 48 + ((n / (1 << i)) % 2);\n' +
+    '\t\t\twrite(1, &c, 1);\n\t\t\ti--;\n\t\t}\n\t}\n\twrite(1, "\\n", 1);\n\treturn (0);\n}\n' }),
+
+EX({ id:'d.nesting_depth', title:'how deep does it nest',
+  brief:'The argument contains round, square and curly brackets among other characters. Print the greatest nesting depth reached. If the brackets are ever mismatched, print the word bad instead.',
+  required_subjects:['C00','C02','C04','C06'], skills:['VALIDATION','COUNTING','ARRAY_TRAVERSAL','COMPARISON'],
+  algorithm_patterns:['STACK_MATCH','NUM_EMIT'], inspiredBy:'STACK_MATCH', d:[3,4,4,5,4],
+  io:{ argv:'one string', stdout:'a depth or the word bad, then \\n',
+       cases:[[['a(b[c]d)e'],'2\n'], [['(]'],'bad\n'], [['abc'],'0\n'], [['('],'bad\n'], [[],'0\n']] },
+  edge_cases:['a closer with nothing open','something still open at the end',
+              'the wrong KIND of closer — counting is not enough','no brackets at all'] }),
+
+EX({ id:'d.grid_find', title:'a position in a grid',
+  brief:'The first argument is a grid whose rows are separated by semicolons and whose rows all have the same length. The second is a single character. Print the row and column of its first occurrence, scanning row by row, separated by a space. If it does not occur, print nothing but a newline.',
+  required_subjects:['C00','C02','C04','C06'], skills:['ARRAY_TRAVERSAL','SEARCH','STRING_SCAN','NUMBER_DECOMPOSITION'],
+  algorithm_patterns:['GRID','NUM_EMIT'], inspiredBy:'GRID', d:[3,4,4,5,4],
+  io:{ argv:'a grid and a character', stdout:'two numbers, then \\n',
+       cases:[[['ab;cd','d'],'1 1\n'], [['ab;cd','z'],'\n'], [['ab','a'],'0 0\n'], [['ab'],'\n']] },
+  edge_cases:['the character being the separator itself','a one-row grid','rows of unequal length',
+              'the target on the last position'] }),
+
+EX({ id:'c.insertion_order', title:'ordered by insertion',
+  brief:'Sort the numeric arguments into ascending order and print them separated by single spaces — but build the result by taking each argument in turn and placing it where it belongs among those already placed, rather than by repeatedly exchanging neighbours.',
+  required_subjects:['C00','C01','C04','C06'], skills:['SORTING','ARRAY_TRAVERSAL','NUMBER_CONSTRUCTION','COMPARISON'],
+  algorithm_patterns:['ARRAY_ORDER','NUM_PARSE'], inspiredBy:'ARRAY_ORDER', d:[3,3,3,4,3],
+  io:{ argv:'any number of numbers', stdout:'the sorted numbers, then \\n',
+       cases:[[['3','1','2'],'1 2 3\n'], [['5'],'5\n'], [[],'\n']] },
+  edge_cases:['already sorted input','reverse sorted input','equal values','one value','none'],
+  note:'Insertion sort, stated as a shape rather than by name. It is worth knowing beside bubble sort: ' +
+       'insertion sort does very little work on input that is already nearly ordered, which bubble sort ' +
+       'only matches if it carries a did-I-swap flag. Both are O(n^2) in the worst case and both are ' +
+       'short enough to write correctly under time pressure.',
+  crossSubject:'C01 + C04 + C06' }),
+
+/* ==================== TRACK B — C09..C13, kept separate =================== */
+EX({ id:'tb.split_charset', title:'splitting on a set of separators',
+  brief:'Write ft_split as the subject states it: split a string using every character of a charset as a separator, returning a NULL-terminated array with no empty strings.',
+  required_subjects:['C07','C09'], skills:['DYNAMIC_MEMORY','WORD_DETECTION','ARRAY_TRAVERSAL'],
+  algorithm_patterns:['ALLOC_BUILD','WORD_BOUNDARY'], inspiredBy:'ALLOC_BUILD',
+  allowed_functions:['malloc'], d:[3,4,5,5,3],
+  io:{ argv:'called as a function, not a program', stdout:'n/a — the result is the returned array' },
+  edge_cases:['an empty charset','separators at both ends','a string of only separators','allocation failure'],
+  note:'This is the one function specified identically by two subjects — C07 ex05 and C09 ex02.',
+  engine_support:'full' }),
+
+EX({ id:'tb.libft_shape', title:'what belongs in a library',
+  brief:'Given the five libft functions, state which declarations belong in the header, which definitions belong in which .c file, and what the archive step actually produces.',
+  required_subjects:['C08','C09'], skills:['HEADERS','MULTI_FILE','BUILD_SYSTEM'],
+  algorithm_patterns:[], inspiredBy:null, allowed_functions:['write'], d:[3,2,3,2,3],
+  io:{ argv:'a reasoning exercise, not a program', stdout:'n/a' },
+  edge_cases:['a declaration without a definition','a definition in two translation units'],
+  engine_support:'none',
+  engine_note:'Separate compilation is outside the browser engine: it runs one translation unit. Use the local bridge, or reason on paper.' }),
+
+EX({ id:'tb.make_rules', title:'rules that do not rebuild what is current',
+  brief:'Write the Makefile the C09 subject describes: sources from srcs, headers from includes, cc -Wall -Wextra -Werror, and the rules all, clean, fclean, re and libft.a — compiling nothing unnecessarily.',
+  required_subjects:['C09'], skills:['BUILD_SYSTEM','MULTI_FILE'],
+  algorithm_patterns:[], inspiredBy:null, allowed_functions:[], d:[3,3,4,3,3],
+  io:{ argv:'not a C program', stdout:'n/a' },
+  edge_cases:['wildcards, which the subject warns about','a rule that always rebuilds','.o beside its .c'],
+  engine_support:'none', engine_note:'make is not modelled by the engine.' }),
+
+EX({ id:'tb.read_loop', title:'read returns what it got, not what you asked for',
+  brief:'Read a file into a fixed-size buffer and write it out, looping until read returns zero, and reporting failure the way the C10 subject requires.',
+  required_subjects:['C10'], skills:['FILE_IO','BUFFERED_READ','ERROR_REPORTING','ARGC_ARGV'],
+  algorithm_patterns:[], inspiredBy:null, allowed_functions:['open','read','write','close'], d:[3,3,4,4,3],
+  io:{ argv:'a file name', stdout:'the file contents' },
+  edge_cases:['a file larger than the buffer','a file that cannot be opened','no argument','too many arguments'],
+  engine_support:'none', engine_note:'The engine has no file descriptors. Needs the local bridge.' }),
+
+EX({ id:'tb.apply_each', title:'behaviour as an argument',
+  brief:'Write ft_foreach, then ft_map, and say precisely what differs between applying a function and collecting its results.',
+  required_subjects:['C11'], skills:['FUNCTION_POINTER','ARRAY_TRAVERSAL','DYNAMIC_MEMORY'],
+  algorithm_patterns:[], inspiredBy:null, allowed_functions:['malloc'], d:[4,3,3,3,3],
+  io:{ argv:'called as functions', stdout:'n/a' },
+  edge_cases:['length zero','a function with side effects only','allocation failure in ft_map'],
+  engine_support:'none', engine_note:'The engine does not parse function-pointer declarations. Measured, not assumed.' }),
+
+EX({ id:'tb.predicate_count', title:'counting by predicate',
+  brief:'Write ft_count_if and ft_any, and explain why one takes a length and the other relies on a null terminator.',
+  required_subjects:['C11'], skills:['FUNCTION_POINTER','COUNTING','FILTERING'],
+  algorithm_patterns:[], inspiredBy:null, allowed_functions:[], d:[4,3,3,3,3],
+  io:{ argv:'called as functions', stdout:'n/a' },
+  edge_cases:['an empty table','a predicate true for nothing','a predicate true for everything'],
+  engine_support:'none', engine_note:'Function pointers are not in the engine subset.' }),
+
+EX({ id:'tb.dispatch_table', title:'an array of behaviours',
+  brief:'Build do-op: dispatch on an operator through an array of function pointers, print the required message for division and modulo by zero, print 0 for an unknown operator and nothing for the wrong argument count.',
+  required_subjects:['C04','C06','C11'], skills:['FUNCTION_POINTER','ARGC_ARGV','NUMBER_CONSTRUCTION','VALIDATION'],
+  algorithm_patterns:['NUM_PARSE','ARGC_GUARD'], inspiredBy:'NUM_PARSE',
+  allowed_functions:['write'], d:[4,4,4,5,4],
+  io:{ argv:'value1 operator value2', stdout:'the result, or one of the two required messages',
+       cases:[[['42','+','21'],'63\n']] },
+  edge_cases:['division by zero','modulo by zero','an operator that is not one of the five','wrong argc'],
+  engine_support:'none', engine_note:'Needs function pointers. The arithmetic and parsing halves can be practised in Track A.',
+  crossSubject:'C04 + C06 + C11' }),
+
+EX({ id:'tb.list_build', title:'a chain, front and back',
+  brief:'Write ft_create_elem, ft_list_push_front and ft_list_push_back, and say why the last two take a t_list ** while ft_list_size takes a t_list *.',
+  required_subjects:['C12'], skills:['LINKED_LIST','POINTER_MANIPULATION','DYNAMIC_MEMORY'],
+  algorithm_patterns:['LINKED'], inspiredBy:'LINKED', allowed_functions:['malloc'], d:[4,3,4,4,3],
+  io:{ argv:'called as functions', stdout:'n/a' },
+  edge_cases:['an empty list','pushing onto a list of one','allocation failure'],
+  engine_support:'none', engine_note:'The engine has no struct support. Measured.' }),
+
+EX({ id:'tb.list_remove', title:'deleting while you walk',
+  brief:'Write ft_list_remove_if, freeing each removed element’s data, without losing the head and without reading a node after freeing it.',
+  required_subjects:['C11','C12'], skills:['LINKED_LIST','FUNCTION_POINTER','DYNAMIC_MEMORY','FILTERING'],
+  algorithm_patterns:['LINKED'], inspiredBy:'LINKED', allowed_functions:['free'], d:[5,4,5,5,4],
+  io:{ argv:'called as a function', stdout:'n/a' },
+  edge_cases:['removing the first element','removing every element','removing nothing','consecutive removals'],
+  engine_support:'none', crossSubject:'C11 + C12' }),
+
+EX({ id:'tb.list_cycle', title:'two pointers at different speeds',
+  brief:'Detect whether a chain loops back on itself, using constant extra memory.',
+  required_subjects:['C12'], skills:['LINKED_LIST','SEARCH','POINTER_MANIPULATION'],
+  algorithm_patterns:['LINKED'], inspiredBy:'LINKED', allowed_functions:[], d:[5,5,3,4,3],
+  io:{ argv:'called as a function', stdout:'n/a' },
+  edge_cases:['an empty list','one node pointing at itself','a loop that does not include the head'],
+  engine_support:'none' }),
+
+EX({ id:'tb.tree_order', title:'three traversals, one shape',
+  brief:'Write the prefix, infix and suffix traversals and say what infix guarantees for a tree built by btree_insert_data that the other two do not.',
+  required_subjects:['C13'], skills:['BINARY_TREE','RECURSION','FUNCTION_POINTER'],
+  algorithm_patterns:[], inspiredBy:null, allowed_functions:[], d:[4,4,3,3,3],
+  io:{ argv:'called as functions', stdout:'n/a' },
+  edge_cases:['an empty tree','a tree that is a single chain','one node'],
+  engine_support:'none' }),
+
+EX({ id:'tb.tree_levels', title:'breadth, not depth',
+  brief:'Write btree_apply_by_level, reporting for each node its level and whether it is the first of that level.',
+  required_subjects:['C13'], skills:['BINARY_TREE','DYNAMIC_MEMORY','ARRAY_TRAVERSAL'],
+  algorithm_patterns:[], inspiredBy:null, allowed_functions:['malloc','free'], d:[5,5,5,4,4],
+  io:{ argv:'called as a function', stdout:'n/a' },
+  edge_cases:['an empty tree','a tree of one node','an unbalanced tree'],
+  engine_support:'none',
+  engine_note:'A queue over an unbounded tree is the point; the engine models neither structs nor the tree.' }),
+];
+/* ==== EXLIST END ==== */
+
 /* ================================ WIRING ================================ */
 function inEditable(el) {
   return el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.isContentEditable);

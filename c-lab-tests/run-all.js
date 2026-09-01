@@ -41,6 +41,7 @@ const SUITES = [
   ['C 06 module','phase33.test.js'],
   ['Memory deep dive','phase34.test.js'],
   ['Terminal execution bridge','phase35.test.js'],
+  ['P41 exercise database',   'phase36.test.js'],
 ];
 
 let failed = 0;
