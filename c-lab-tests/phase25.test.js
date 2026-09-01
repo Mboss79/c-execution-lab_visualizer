@@ -233,7 +233,7 @@ function check(name, ok, detail) {
     return { ids: btns.map(x => x.id) };
   });
   check('the navigation buttons are one continuous run in order',
-        rail.ids.join(',') === 'railHome,railWork,railLab,railLearn,railExplorer,railErrLab,rail3d,railDock,railHelp',
+        rail.ids.join(',') === 'railHome,railWork,railLab,railLearn,railExam,railExplorer,railErrLab,rail3d,railDock,railHelp',
         rail.ids.join(','));
   check('the Labs button is a top-level destination, not buried in the utilities',
         rail.ids.indexOf('railLab') === 2, rail.ids.join(','));

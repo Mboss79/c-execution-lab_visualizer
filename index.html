@@ -213,7 +213,7 @@ kbd{
 .workarea{display:grid;grid-template-rows:1fr auto auto;min-width:0;min-height:0;overflow:hidden;position:relative;}
 /* Both view overlays share one geometry. They are out of flow, so they add no
    grid rows to .workarea. */
-#dashRoot,#labRoot,#learnRoot{position:absolute;inset:0;}
+#dashRoot,#labRoot,#learnRoot,#examRoot{position:absolute;inset:0;}
 /* draggable splitter between the workspace and the bottom dock */
 .dock-splitter{
   height:7px;flex-shrink:0;cursor:row-resize;background:var(--surface);
@@ -5161,6 +5161,308 @@ html[data-theme=light] .viz-node.vz-frame::after{
   #learnRoot .c6-rule { min-width: 62px; }
 }
 /* ==== C06CSS END ==== */
+
+/* ==== EXAMCSS START ==== */
+/* Practice view. Every selector is scoped under #examRoot and uses the x- prefix.
+   Bugfix fad8fd0 was an unscoped .vl-row colliding with a table; nothing here is
+   allowed to be a bare class. */
+#examRoot { display:none; z-index:40; background:var(--bg); overflow:hidden; }
+#examRoot .x-wrap { display:grid; grid-template-rows:auto minmax(0,1fr); height:100%; }
+#examRoot .x-main { overflow-y:auto; padding:24px 30px 80px; min-width:0; }
+
+/* nav */
+#examRoot .x-nav { display:flex; flex-wrap:wrap; gap:4px; align-items:center;
+  padding:10px 14px; border-bottom:1px solid var(--border); background:var(--surface); }
+#examRoot .x-navb { font:inherit; font-size:12px; font-weight:600; padding:6px 12px; border-radius:7px;
+  border:1px solid transparent; background:transparent; color:var(--text-muted); cursor:pointer; }
+#examRoot .x-navb:hover:not(:disabled) { color:var(--text); background:var(--surface-2, var(--bg)); }
+#examRoot .x-navb.on { color:var(--text); background:var(--execution-dim); border-color:var(--execution); }
+#examRoot .x-navb:disabled { opacity:.35; cursor:not-allowed; }
+#examRoot .x-modes { margin-left:auto; display:flex; gap:3px; align-items:center; }
+#examRoot .x-modes > span { font-size:9.5px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--text-faint); margin-right:4px; }
+#examRoot .x-modeb { font:inherit; font-size:11px; padding:4px 9px; border-radius:6px; cursor:pointer;
+  border:1px solid var(--border); background:transparent; color:var(--text-muted); }
+#examRoot .x-modeb.on { color:var(--text); background:var(--execution-dim); border-color:var(--execution); }
+#examRoot .x-modeb:disabled { opacity:.35; cursor:not-allowed; }
+
+/* headings */
+#examRoot .x-head { margin-bottom:20px; }
+#examRoot .x-head h1 { margin:2px 0 6px; font-size:29px; font-weight:800; letter-spacing:-.02em; }
+#examRoot .x-sub { margin:0; font-size:13px; line-height:1.65; color:var(--text-muted); max-width:78ch; }
+#examRoot .x-sec-h { font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-faint);
+  margin:24px 0 10px; font-weight:700; }
+#examRoot .x-count { font-size:12px; color:var(--text-faint); margin:0 0 12px; }
+#examRoot .x-empty { font-size:12.5px; color:var(--text-faint); font-style:italic; padding:8px 0; }
+#examRoot .x-back { font:inherit; font-size:11.5px; background:none; border:none; cursor:pointer;
+  color:var(--text-muted); padding:0 0 8px; }
+#examRoot .x-back:hover { color:var(--text); }
+#examRoot .mono { font-family:var(--mono); }
+#examRoot .sm { font-size:11px; }
+
+/* categories */
+#examRoot .x-cats { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:12px; }
+#examRoot .x-cat { text-align:left; font:inherit; cursor:pointer; padding:16px; border-radius:10px;
+  border:1px solid var(--border); background:var(--surface); display:flex; flex-direction:column; gap:7px; }
+#examRoot .x-cat:hover { border-color:var(--execution); }
+#examRoot .x-cat b { font-size:15px; }
+#examRoot .x-cat span { font-size:12px; line-height:1.55; color:var(--text-muted); }
+#examRoot .x-cat i { font-size:11px; color:var(--text-faint); font-style:normal; }
+#examRoot .x-cat.main { border-style:dashed; }
+
+/* exercise cards */
+#examRoot .x-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:10px; }
+#examRoot .x-card { text-align:left; font:inherit; cursor:pointer; padding:13px 14px; border-radius:9px;
+  border:1px solid var(--border); background:var(--surface); display:flex; flex-direction:column; gap:8px; }
+#examRoot .x-card:hover { border-color:var(--execution); }
+#examRoot .x-card-h { display:flex; align-items:center; gap:8px; }
+#examRoot .x-card-h b { font-size:13.5px; }
+#examRoot .x-card-b { font-size:11.5px; line-height:1.55; color:var(--text-muted); }
+#examRoot .x-card-f { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+#examRoot .x-band { font-family:var(--mono); font-size:10px; font-weight:700; padding:1px 6px;
+  border-radius:4px; border:1px solid var(--border); color:var(--text-faint); }
+#examRoot .x-band.big { font-size:11px; padding:3px 9px; }
+#examRoot .x-solved { font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700;
+  color:var(--ok,#3ddc84); margin-left:auto; }
+#examRoot .x-subs { font-family:var(--mono); font-size:10px; color:var(--text-faint); }
+#examRoot .x-srct { font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint); }
+
+/* the five difficulty axes */
+#examRoot .x-diff { display:inline-flex; gap:2px; align-items:flex-end; height:13px; }
+#examRoot .x-diff i { width:4px; border-radius:1px; background:var(--execution);
+  height:calc(var(--v) * 2.4px + 2px); opacity:calc(.35 + var(--v) * .13); }
+
+/* gate badges */
+#examRoot .x-gate { font-size:9px; letter-spacing:.08em; text-transform:uppercase; font-weight:700;
+  padding:2px 6px; border-radius:4px; border:1px solid var(--border); color:var(--text-faint); }
+#examRoot .x-gate.ok { color:var(--ok,#3ddc84); border-color:currentColor; }
+#examRoot .x-gate.warn { color:var(--warn,#d98b3a); border-color:currentColor; }
+#examRoot .x-gate.adv { color:var(--memory,#8b7ad9); border-color:currentColor; }
+#examRoot .x-gatebox { border:1px solid var(--warn,#d98b3a); border-radius:9px; padding:13px 16px;
+  margin-bottom:16px; background:var(--surface); }
+#examRoot .x-gatebox b { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--warn,#d98b3a); }
+#examRoot .x-gatebox p { margin:6px 0 0; font-size:12.5px; line-height:1.6; color:var(--text-muted); }
+
+/* exercise body */
+#examRoot .x-meta { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px; }
+#examRoot .x-task { border:1px solid var(--border); border-radius:10px; padding:16px 18px;
+  background:var(--surface); margin-top:6px; }
+#examRoot .x-brief { margin:0 0 12px; font-size:15px; line-height:1.7; }
+#examRoot .x-allowed, #examRoot .x-io { display:flex; gap:10px; align-items:baseline; margin-top:7px; font-size:12.5px; }
+#examRoot .x-allowed b, #examRoot .x-io b { font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--text-faint); min-width:120px; }
+#examRoot .x-allowed span { font-family:var(--mono); color:var(--execution); font-weight:600; }
+#examRoot .x-exnote { margin:12px 0 0; font-size:12px; color:var(--text-faint); line-height:1.6;
+  border-left:2px solid var(--border); padding-left:10px; }
+#examRoot .x-edges { margin:0; padding-left:20px; font-size:12.5px; line-height:1.75; color:var(--text-muted); }
+#examRoot .x-hidden { font-size:12px; color:var(--text-faint); font-style:italic; margin-top:20px; }
+#examRoot .x-prov p { margin:0 0 6px; font-size:12.5px; color:var(--text-muted); line-height:1.6; }
+
+/* editor + actions */
+#examRoot .x-editor { width:100%; min-height:300px; font-family:var(--mono); font-size:13px;
+  line-height:1.55; tab-size:4; padding:13px; border-radius:9px; border:1px solid var(--border);
+  background:var(--surface); color:var(--text); resize:vertical; }
+#examRoot .x-editor:focus { outline:2px solid var(--execution); outline-offset:-1px; }
+#examRoot .x-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+#examRoot .x-btn { font:inherit; font-size:12.5px; font-weight:600; padding:8px 15px; border-radius:7px;
+  cursor:pointer; border:1px solid var(--border); background:var(--surface); color:var(--text); }
+#examRoot .x-btn:hover:not(:disabled) { border-color:var(--execution); }
+#examRoot .x-btn.primary { background:var(--execution); border-color:var(--execution); color:#08121c; }
+#examRoot .x-btn.ghost { background:transparent; color:var(--text-muted); }
+#examRoot .x-btn.danger:hover { border-color:var(--error,#e5484d); color:var(--error,#e5484d); }
+#examRoot .x-btn:disabled { opacity:.4; cursor:not-allowed; }
+
+/* verdicts */
+#examRoot .x-result { margin-top:16px; }
+#examRoot .x-verdict { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:8px;
+  border:1px solid var(--border); font-size:13px; }
+#examRoot .x-verdict b { font-size:12px; letter-spacing:.06em; text-transform:uppercase; }
+#examRoot .x-verdict.ok { border-color:var(--ok,#3ddc84); color:var(--ok,#3ddc84); }
+#examRoot .x-verdict.warn { border-color:var(--warn,#d98b3a); color:var(--warn,#d98b3a); }
+#examRoot .x-verdict.bad { border-color:var(--error,#e5484d); color:var(--error,#e5484d); }
+#examRoot .x-verdict.info { border-color:var(--memory,#8b7ad9); color:var(--memory,#8b7ad9); }
+#examRoot .x-verdict span { color:var(--text-muted); font-size:12px; }
+#examRoot .x-vmsg { margin:9px 0 0; font-size:12.5px; line-height:1.65; color:var(--text-muted); }
+#examRoot .x-stderr { margin-top:10px; }
+#examRoot .x-stderr b { font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint); }
+#examRoot .x-stderr pre { margin:4px 0 0; font-family:var(--mono); font-size:12px; padding:8px 10px;
+  border-radius:6px; background:var(--surface); border:1px solid var(--border); white-space:pre-wrap; }
+
+/* tables — the column contract is stated so nothing can silently decouple it */
+#examRoot table { border-collapse:collapse; font-size:12px; width:100%; }
+#examRoot table tr { display:table-row; }
+#examRoot table th, #examRoot table td { display:table-cell; }
+#examRoot th { text-align:left; font-weight:600; color:var(--text-faint); font-size:10px;
+  letter-spacing:.08em; text-transform:uppercase; padding:5px 9px; border-bottom:1px solid var(--border); }
+#examRoot td { padding:5px 9px; border-bottom:1px solid var(--border); vertical-align:top; line-height:1.5; }
+#examRoot .x-cases tr.ok td { color:var(--ok,#3ddc84); }
+#examRoot .x-cases tr.bad td { color:var(--error,#e5484d); }
+#examRoot .x-scroll { overflow-x:auto; }
+#examRoot .x-ftable { min-width:900px; }
+#examRoot .x-flink { font:inherit; font-family:var(--mono); font-size:12.5px; font-weight:700;
+  background:none; border:none; padding:0; cursor:pointer; color:var(--execution); }
+#examRoot .x-proto { font-size:10.5px; color:var(--text-faint); margin-top:3px; }
+#examRoot .x-al { font-size:10px; color:var(--text-faint); }
+#examRoot .x-excl { margin-top:18px; border:1px dashed var(--border); border-radius:8px; padding:12px 15px; }
+#examRoot .x-excl b { font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint); }
+#examRoot .x-excl p { margin:6px 0 0; font-size:12px; line-height:1.6; color:var(--text-muted); }
+
+/* hints */
+#examRoot .x-hints { margin-top:20px; border-left:2px solid var(--border); padding-left:14px; }
+#examRoot .x-hint { margin-bottom:10px; }
+#examRoot .x-hint b { font-size:12px; }
+#examRoot .x-hint p { margin:4px 0 0; font-size:12.5px; line-height:1.65; color:var(--text-muted); }
+#examRoot .x-hint-end { font-size:12px; color:var(--text-faint); line-height:1.6; font-style:italic; }
+#examRoot .x-sol { font-family:var(--mono); font-size:12.5px; line-height:1.5; padding:14px;
+  border-radius:9px; background:var(--surface); border:1px solid var(--border); overflow-x:auto; }
+#examRoot .x-solnote { font-size:11.5px; color:var(--text-faint); line-height:1.6; margin-bottom:8px;
+  border-left:2px solid var(--warn,#d98b3a); padding-left:10px; }
+
+/* split layout */
+#examRoot .x-split { display:grid; grid-template-columns:210px minmax(0,1fr); gap:22px; align-items:start; }
+#examRoot .x-side { display:flex; flex-direction:column; gap:2px; position:sticky; top:0; }
+#examRoot .x-sideb { font:inherit; font-size:12px; text-align:left; padding:7px 11px; border-radius:6px;
+  border:1px solid transparent; background:transparent; color:var(--text-muted); cursor:pointer; }
+#examRoot .x-sideb:hover { color:var(--text); background:var(--surface); }
+#examRoot .x-sideb.on { color:var(--text); background:var(--execution-dim); border-color:var(--execution); }
+#examRoot .x-sidemain h2 { margin:0 0 6px; font-size:20px; }
+#examRoot .x-src2 { margin:0 0 16px; font-size:11.5px; color:var(--text-faint); font-family:var(--mono); }
+#examRoot .x-l { margin-bottom:14px; }
+#examRoot .x-l b { font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint); }
+#examRoot .x-l p { margin:5px 0 0; font-size:13px; line-height:1.7; }
+#examRoot .x-l ul, #examRoot .x-l ol { margin:5px 0 0; padding-left:20px; font-size:12.5px; line-height:1.75;
+  color:var(--text-muted); }
+#examRoot .x-l pre { margin:5px 0 0; font-family:var(--mono); font-size:12.5px; line-height:1.5;
+  padding:11px 13px; border-radius:8px; background:var(--surface); border:1px solid var(--border);
+  overflow-x:auto; white-space:pre; }
+#examRoot .x-l.warn { border-left:2px solid var(--warn,#d98b3a); padding-left:11px; }
+
+/* filters */
+#examRoot .x-filters { display:flex; gap:9px; flex-wrap:wrap; align-items:flex-end; margin-bottom:14px; }
+#examRoot .x-f { display:flex; flex-direction:column; gap:3px; }
+#examRoot .x-f.wide { flex:1; min-width:210px; }
+#examRoot .x-f span { font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint); }
+#examRoot .x-f select, #examRoot .x-f input { font:inherit; font-size:12px; padding:6px 9px; border-radius:6px;
+  border:1px solid var(--border); background:var(--surface); color:var(--text); }
+
+/* deceptive pairs */
+#examRoot .x-pairs { display:flex; flex-direction:column; gap:12px; }
+#examRoot .x-pair { border:1px solid var(--border); border-radius:10px; padding:14px 16px; background:var(--surface); }
+#examRoot .x-pair-h { display:flex; align-items:center; gap:10px; font-size:14px; font-weight:700; }
+#examRoot .x-pair-h i { font-style:normal; font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--text-faint); font-weight:600; }
+#examRoot .x-pair-b { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:10px; }
+#examRoot .x-pair-b p { margin:3px 0 0; font-size:12px; line-height:1.6; color:var(--text-muted); }
+#examRoot .x-pair-w { margin:12px 0 0; font-size:12.5px; line-height:1.65; border-left:2px solid var(--execution);
+  padding-left:11px; }
+
+/* quiz */
+#examRoot .x-quiz h2 { font-size:19px; margin:6px 0 16px; line-height:1.45; max-width:70ch; }
+#examRoot .x-qscore { font-size:11px; color:var(--text-faint); margin:0; }
+#examRoot .x-qopts { display:flex; flex-wrap:wrap; gap:7px; }
+#examRoot .x-qopt { font:inherit; font-family:var(--mono); font-size:12.5px; padding:8px 14px; border-radius:7px;
+  cursor:pointer; border:1px solid var(--border); background:var(--surface); color:var(--text); }
+#examRoot .x-qopt:hover:not(:disabled) { border-color:var(--execution); }
+#examRoot .x-qopt.right { border-color:var(--ok,#3ddc84); color:var(--ok,#3ddc84); }
+#examRoot .x-qopt.wrong { border-color:var(--error,#e5484d); color:var(--error,#e5484d); }
+#examRoot .x-qwhy { margin:16px 0; font-size:13px; line-height:1.7; }
+#examRoot .x-qwhy p { margin:5px 0 0; color:var(--text-muted); }
+#examRoot .x-q { border:1px solid var(--border); border-radius:8px; padding:10px 13px; margin-bottom:7px; }
+#examRoot .x-q summary { cursor:pointer; font-size:13px; }
+#examRoot .x-q ul { margin:9px 0 0; padding-left:20px; font-size:12.5px; line-height:1.7; color:var(--text-muted); }
+
+/* projects */
+#examRoot .x-form { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; }
+#examRoot .x-form label { display:flex; flex-direction:column; gap:3px; }
+#examRoot .x-form span { font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint); }
+#examRoot .x-form input, #examRoot .x-form select { font:inherit; font-size:12.5px; padding:7px 10px;
+  border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); min-width:170px; }
+#examRoot .x-plist { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:11px; }
+#examRoot .x-proj { border:1px solid var(--border); border-radius:10px; padding:14px; background:var(--surface); }
+#examRoot .x-proj.on { border-color:var(--execution); }
+#examRoot .x-proj-h { display:flex; align-items:center; gap:8px; }
+#examRoot .x-proj-h b { font-size:14px; }
+#examRoot .x-cur { font-size:9px; letter-spacing:.08em; text-transform:uppercase; font-weight:700;
+  color:var(--execution); }
+#examRoot .x-proj-m { display:flex; gap:8px; margin-top:6px; font-size:10.5px; color:var(--text-faint);
+  font-family:var(--mono); }
+#examRoot .x-proj-s { display:flex; gap:14px; margin-top:10px; font-size:11.5px; color:var(--text-muted); }
+#examRoot .x-proj-s b { color:var(--text); font-size:14px; }
+#examRoot .x-proj-a { display:flex; gap:7px; margin-top:12px; }
+
+/* progress */
+#examRoot .x-stats { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px;
+  margin-bottom:8px; }
+#examRoot .x-stat { border:1px solid var(--border); border-radius:9px; padding:13px; background:var(--surface); }
+#examRoot .x-stat b { display:block; font-size:25px; font-weight:800; letter-spacing:-.02em; }
+#examRoot .x-stat span { font-size:10.5px; color:var(--text-faint); }
+#examRoot .x-two { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+#examRoot .x-sk { list-style:none; margin:0; padding:0; }
+#examRoot .x-sk li { display:flex; justify-content:space-between; padding:5px 0;
+  border-bottom:1px solid var(--border); font-size:12px; }
+#examRoot .x-sk b { font-family:var(--mono); font-weight:600; }
+#examRoot .x-sk span { color:var(--text-faint); }
+#examRoot .x-sk.weak b { color:var(--warn,#d98b3a); }
+#examRoot .x-recs { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:10px; }
+#examRoot .x-rec { text-align:left; font:inherit; cursor:pointer; padding:12px 14px; border-radius:9px;
+  border:1px solid var(--border); background:var(--surface); display:flex; flex-direction:column; gap:6px; }
+#examRoot .x-rec:hover { border-color:var(--execution); }
+#examRoot .x-rec i { font-style:normal; font-size:11px; color:var(--text-faint); line-height:1.5; }
+#examRoot .x-cold { border:1px solid var(--border); border-radius:9px; padding:14px 16px; background:var(--surface); }
+#examRoot .x-cold p { margin:6px 0 0; font-size:12.5px; line-height:1.65; color:var(--text-muted); }
+#examRoot .x-sktable tr.bad td:last-child { color:var(--warn,#d98b3a); }
+#examRoot .x-sktable tr.ok td:last-child { color:var(--ok,#3ddc84); }
+#examRoot .x-sktable tr.dim td { color:var(--text-faint); }
+#examRoot .x-sktable i { font-style:normal; font-size:10px; }
+
+/* exam prep + simulator */
+#examRoot .x-hist { border:1px solid var(--warn,#d98b3a); border-radius:9px; padding:13px 16px;
+  background:var(--surface); margin-bottom:6px; }
+#examRoot .x-hist b { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--warn,#d98b3a); }
+#examRoot .x-hist p { margin:7px 0 0; font-size:12.5px; line-height:1.65; color:var(--text-muted); }
+#examRoot .x-cfgs { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:11px; }
+#examRoot .x-cfg { border:1px solid var(--border); border-radius:10px; padding:15px; background:var(--surface);
+  display:flex; flex-direction:column; gap:8px; }
+#examRoot .x-cfg b { font-size:14.5px; }
+#examRoot .x-prov2 { font-size:9px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-faint);
+  font-weight:700; }
+#examRoot .x-cfg p { margin:0; font-size:11.5px; line-height:1.6; color:var(--text-muted); }
+#examRoot .x-cfg ul { margin:0; padding-left:17px; font-size:11.5px; line-height:1.7; color:var(--text-faint); }
+#examRoot .x-cfg .x-btn { margin-top:auto; }
+#examRoot .x-quick { display:flex; gap:7px; flex-wrap:wrap; }
+#examRoot .x-simbar { display:flex; gap:14px; align-items:center; flex-wrap:wrap; padding:10px 14px;
+  border:1px solid var(--execution); border-radius:9px; background:var(--execution-dim); margin-bottom:18px;
+  font-size:12px; }
+#examRoot .x-simbar b { font-size:13px; }
+#examRoot .x-clock { font-family:var(--mono); font-weight:700; font-size:14px; }
+#examRoot .x-clock.low { color:var(--error,#e5484d); }
+#examRoot .x-nohint { font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--warn,#d98b3a);
+  font-weight:700; margin-left:auto; }
+#examRoot .x-score { display:flex; align-items:baseline; gap:10px; margin:10px 0; }
+#examRoot .x-score b { font-size:56px; font-weight:800; letter-spacing:-.03em; }
+#examRoot .x-score span { font-size:16px; color:var(--text-faint); }
+#examRoot .x-simlist { display:flex; flex-direction:column; gap:5px; }
+#examRoot .x-simrow { display:flex; align-items:center; gap:12px; padding:8px 12px; border-radius:7px;
+  border:1px solid var(--border); font-size:12.5px; }
+#examRoot .x-simrow.ok { border-color:var(--ok,#3ddc84); }
+#examRoot .x-simrow.bad { border-color:var(--border); opacity:.75; }
+#examRoot .x-simrow b { flex:1; }
+#examRoot .x-simrow i, #examRoot .x-simrow em { font-style:normal; font-size:11px; color:var(--text-faint); }
+#examRoot .x-simrow > span:first-child { font-family:var(--mono); color:var(--text-faint); min-width:18px; }
+
+/* notes grid (the main() explainer) */
+#examRoot .x-notes { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:11px; }
+#examRoot .x-note { border:1px solid var(--border); border-radius:9px; padding:13px 15px; background:var(--surface); }
+#examRoot .x-note b { font-size:12.5px; color:var(--execution); }
+#examRoot .x-note p { margin:6px 0 0; font-size:12.5px; line-height:1.65; color:var(--text-muted); }
+
+@media (max-width: 900px) {
+  #examRoot .x-split { grid-template-columns:1fr; }
+  #examRoot .x-side { position:static; flex-direction:row; flex-wrap:wrap; }
+  #examRoot .x-two, #examRoot .x-pair-b { grid-template-columns:1fr; }
+  #examRoot .x-main { padding:18px 16px 60px; }
+}
+/* ==== EXAMCSS END ==== */
 </style>
 </head>
 <body>
@@ -5229,6 +5531,7 @@ html[data-theme=light] .viz-node.vz-frame::after{
       <button class="rail-btn active" id="railWork" title="Workspace (Ctrl+1)" aria-label="Workspace">▦</button>
       <button class="rail-btn" id="railLab" title="Labs — ASCII, types, memory, pointers, functions (Ctrl+2)" aria-label="Open the labs">⌗</button>
       <button class="rail-btn" id="railLearn" title="Learn — the C Piscine modules (Ctrl+3)" aria-label="Open the learn section">◳</button>
+      <button class="rail-btn" id="railExam" title="Practice — recoding, exam prep, projects (Ctrl+4)" aria-label="Open the practice section">◎</button>
       <button class="rail-btn" id="railExplorer" title="Exercises and memory-error lessons (Ctrl+B)" aria-label="Open the library" aria-pressed="false">☰</button>
       <button class="rail-btn" id="railErrLab" title="Memory Error Lab" aria-label="Open the memory error lab" aria-pressed="false">⚠</button>
       <button class="rail-btn" id="rail3d"      title="3D visualization (V)" aria-label="3D visualization" aria-pressed="false">◈</button>
@@ -5566,6 +5869,7 @@ html[data-theme=light] .viz-node.vz-frame::after{
       <div id="dashRoot"></div>
       <div id="labRoot"></div>
       <div id="learnRoot"></div>
+      <div id="examRoot"></div>
     </div>
   </div>
 
@@ -15947,6 +16251,7 @@ function showDashboard() {
   $('#railWork').classList.remove('active');
   if (typeof hideLab === 'function') hideLab();
   if (typeof hideLearn === 'function') hideLearn();
+  if (typeof hideExam === 'function') hideExam();
   renderDashboard();
   $('#dashRoot').style.display = 'block';
 }
@@ -15958,6 +16263,7 @@ function showWorkspace() {
   $('#dashRoot').innerHTML = '';
   if (typeof hideLab === 'function') hideLab();
   if (typeof hideLearn === 'function') hideLearn();
+  if (typeof hideExam === 'function') hideExam();
 }
 /* Grouping metadata ONLY. Every label and id comes from LAB_TABS, so adding a
    lab tab shows up here automatically and a removed one disappears — there is
@@ -19459,6 +19765,7 @@ function wireLab() {
 }
 
 function showLab() {
+  if (typeof hideExam === 'function') hideExam();
   ui.view = 'lab';
   $('#dashRoot').style.display = 'none';
   if (typeof hideLearn === 'function') hideLearn();
@@ -27110,6 +27417,7 @@ function c4NavBtn(p) {
 }
 
 function showLearn(page, mod) {
+  if (typeof hideExam === 'function') hideExam();
   ui.view = 'learn';
   if (mod && learnModules().some(m => m.id === mod)) { c4.mod = mod; c4.page = 'overview'; }
   if (page) { c4.page = page; c4.step = null; }
@@ -33709,6 +34017,1810 @@ EX({ id:'tb.tree_levels', title:'breadth, not depth',
 ];
 /* ==== EXLIST END ==== */
 
+/* ==== EXAMSTORE START ==== */
+/* ============================================================================
+   FINAL EXAM PREP — state: persistence, progress, recommendations, exam config
+   ----------------------------------------------------------------------------
+   No DOM in this file. Everything here is a pure function over stored records,
+   so the whole layer is testable without a browser and the UI cannot become the
+   place where a rule secretly lives.
+
+   THREE SEPARATE KEYS, EACH VERSIONED. The UI preference key (cexlab.ui.v3) is
+   untouched: a corrupt practice history must never cost the learner their
+   theme, layout and panel state. Each store parses defensively and falls back
+   to an empty store rather than throwing — a browser in private mode, cleared
+   site data, or a half-written record must leave the application usable.
+   ========================================================================== */
+const EXAM_KEYS = {
+  progress: 'cexlab.progress.v1',
+  projects: 'cexlab.projects.v1',
+  exam:     'cexlab.exam.v1',
+};
+
+/* One guarded read/write pair. `shape` is asked to validate and normalise what
+   came back; anything it rejects is replaced by the empty value, and the bad
+   text is kept under a .broken key so a future migration could look at it
+   rather than having silently destroyed it. */
+function examLoad(key, shape, empty) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return empty();
+    const o = JSON.parse(raw);
+    const v = shape(o);
+    return v === null ? empty() : v;
+  } catch (e) {
+    try { localStorage.setItem(key + '.broken', String(localStorage.getItem(key)).slice(0, 20000)); }
+    catch (e2) { /* storage unavailable entirely — carry on with an empty store */ }
+    return empty();
+  }
+}
+function examSave(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+  catch (e) { return false; }
+}
+
+/* ------------------------------- progress -------------------------------- */
+/* One attempt record per submission. Deliberately flat and append-only: every
+   figure the dashboard shows is COMPUTED from these, so no derived number can
+   drift away from the events that produced it. */
+const emptyProgress = () => ({ v: 1, attempts: [], solved: {} });
+function shapeProgress(o) {
+  if (!o || typeof o !== 'object' || !Array.isArray(o.attempts)) return null;
+  const attempts = o.attempts.filter(a =>
+    a && typeof a.id === 'string' && typeof a.at === 'number' &&
+    (a.result === 'pass' || a.result === 'fail')).slice(-4000);
+  const solved = {};
+  if (o.solved && typeof o.solved === 'object') {
+    for (const k of Object.keys(o.solved)) if (typeof k === 'string') solved[k] = !!o.solved[k];
+  }
+  return { v: 1, attempts, solved };
+}
+const examProgress = {
+  data: null,
+  get() { if (!this.data) this.data = examLoad(EXAM_KEYS.progress, shapeProgress, emptyProgress); return this.data; },
+  reset() { this.data = emptyProgress(); examSave(EXAM_KEYS.progress, this.data); },
+  /* `ex` is the exercise record; `res` is 'pass' | 'fail'. Skills and subjects
+     are copied onto the attempt so a later edit to an exercise cannot rewrite
+     what the learner actually practised. */
+  record(ex, res, extra) {
+    const p = this.get();
+    p.attempts.push(Object.assign({
+      id: ex.id, at: Date.now(), result: res,
+      skills: (ex.skills || []).slice(), subjects: (ex.required_subjects || []).slice(),
+      band: ex.band, track: ex.track,
+    }, extra || {}));
+    if (p.attempts.length > 4000) p.attempts = p.attempts.slice(-4000);
+    if (res === 'pass') p.solved[ex.id] = true;
+    examSave(EXAM_KEYS.progress, p);
+    return p;
+  },
+  isSolved(id) { return !!this.get().solved[id]; },
+};
+
+/* Every summary figure, computed from the attempt log. */
+function examStats(progress) {
+  const p = progress || examProgress.get();
+  const A = p.attempts;
+  const byEx = {};
+  for (const a of A) {
+    if (!byEx[a.id]) byEx[a.id] = { tries: 0, passed: false };
+    byEx[a.id].tries++;
+    if (a.result === 'pass') byEx[a.id].passed = true;
+  }
+  const ids = Object.keys(byEx);
+  const solvedIds = ids.filter(k => byEx[k].passed);
+  const passes = A.filter(a => a.result === 'pass').length;
+  /* Attempts-to-first-solve is the honest measure of "how hard was this for
+     me" — a raw attempt count punishes someone who keeps practising. */
+  let triesToSolve = 0, solvedCounted = 0;
+  for (const id of solvedIds) {
+    let n = 0;
+    for (const a of A) { if (a.id !== id) continue; n++; if (a.result === 'pass') break; }
+    triesToSolve += n; solvedCounted++;
+  }
+  return {
+    attempted: ids.length,
+    attempts: A.length,
+    solved: solvedIds.length,
+    failed: ids.length - solvedIds.length,
+    successRate: A.length ? Math.round((passes / A.length) * 100) : 0,
+    avgAttemptsToSolve: solvedCounted ? Math.round((triesToSolve / solvedCounted) * 10) / 10 : 0,
+    solvedIds,
+  };
+}
+
+/* Per-skill performance. A skill is only judged once it has been seen enough
+   times to mean anything — MIN_SEEN stops one bad attempt branding a skill weak. */
+const SKILL_MIN_SEEN = 3;
+function examSkillStats(progress) {
+  const p = progress || examProgress.get();
+  const m = {};
+  for (const a of p.attempts) for (const s of (a.skills || [])) {
+    if (!m[s]) m[s] = { id: s, seen: 0, passed: 0 };
+    m[s].seen++;
+    if (a.result === 'pass') m[s].passed++;
+  }
+  const out = Object.values(m).map(r => Object.assign(r, {
+    rate: r.seen ? Math.round((r.passed / r.seen) * 100) : 0,
+    judged: r.seen >= SKILL_MIN_SEEN,
+  }));
+  out.sort((a, b) => a.rate - b.rate || b.seen - a.seen);
+  return out;
+}
+function examWeakSkills(progress) { return examSkillStats(progress).filter(s => s.judged && s.rate < 60); }
+function examStrongSkills(progress) {
+  return examSkillStats(progress).filter(s => s.judged && s.rate >= 80).sort((a, b) => b.rate - a.rate);
+}
+
+/* ---------------------------- recommendations ---------------------------- */
+/* Built only from stored attempts and the exercise table. With no history the
+   honest answer is "start somewhere", not a fabricated diagnosis — `cold` says
+   which it is so the UI can word it truthfully. */
+function examRecommend(all, progress) {
+  const p = progress || examProgress.get();
+  const st = examStats(p);
+  const weak = examWeakSkills(p);
+  const strong = examStrongSkills(p);
+  const solved = new Set(st.solvedIds);
+  const trackA = all.filter(x => x.track === 'C00-C08' && x.studied_status === 'STUDIED');
+  const unsolved = trackA.filter(x => !solved.has(x.id));
+  const picks = [];
+  const take = (list, n, why) => {
+    for (const x of list) {
+      if (picks.length >= 6) break;
+      if (picks.some(q => q.ex.id === x.id)) continue;
+      picks.push({ ex: x, why });
+      if (picks.filter(q => q.why === why).length >= n) break;
+    }
+  };
+  if (weak.length) {
+    for (const w of weak.slice(0, 3)) {
+      take(unsolved.filter(x => x.skills.includes(w.id) && x.band <= 'C'), 2,
+        'you have solved ' + w.rate + '% of the ' + w.seen + ' attempts touching ' + w.id);
+    }
+  }
+  /* Never seen at all beats anything already attempted. */
+  const neverSeen = unsolved.filter(x => !p.attempts.some(a => a.id === x.id));
+  take(neverSeen.filter(x => x.band === 'B' || x.band === 'C'), 2, 'a shape you have not met yet');
+  /* One harder thing, but only once there is something to build on. */
+  if (st.solved >= 5) take(unsolved.filter(x => x.band === 'D' || x.band === 'E'), 1,
+    'you have solved ' + st.solved + ' — time for a combination');
+  take(unsolved, 6 - picks.length, 'unsolved practice');
+  return { cold: st.attempts === 0, stats: st, weak, strong, picks: picks.slice(0, 6) };
+}
+
+/* ------------------------------- projects -------------------------------- */
+const emptyProjects = () => ({ v: 1, list: [], current: null });
+function shapeProjects(o) {
+  if (!o || typeof o !== 'object' || !Array.isArray(o.list)) return null;
+  const list = o.list.filter(p => p && typeof p.id === 'string' && typeof p.name === 'string')
+    .map(p => ({
+      id: p.id, name: String(p.name).slice(0, 80),
+      created: typeof p.created === 'number' ? p.created : Date.now(),
+      track: typeof p.track === 'string' ? p.track : 'C00-C08',
+      mode: typeof p.mode === 'string' ? p.mode : 'guided',
+      attempts: typeof p.attempts === 'number' ? p.attempts : 0,
+      solved: Array.isArray(p.solved) ? p.solved.filter(x => typeof x === 'string') : [],
+      skills: Array.isArray(p.skills) ? p.skills.filter(x => typeof x === 'string') : [],
+      score: typeof p.score === 'number' ? p.score : 0,
+    })).slice(0, 100);
+  return { v: 1, list, current: typeof o.current === 'string' ? o.current : null };
+}
+const examProjects = {
+  data: null,
+  get() { if (!this.data) this.data = examLoad(EXAM_KEYS.projects, shapeProjects, emptyProjects); return this.data; },
+  save() { return examSave(EXAM_KEYS.projects, this.get()); },
+  create(name, track, mode) {
+    const d = this.get();
+    const p = {
+      id: 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      name: String(name || 'Untitled').slice(0, 80), created: Date.now(),
+      track: track || 'C00-C08', mode: mode || 'guided',
+      attempts: 0, solved: [], skills: [], score: 0,
+    };
+    d.list.push(p); d.current = p.id; this.save();
+    return p;
+  },
+  remove(id) {
+    const d = this.get();
+    d.list = d.list.filter(p => p.id !== id);
+    if (d.current === id) d.current = d.list.length ? d.list[0].id : null;
+    this.save();
+  },
+  select(id) { const d = this.get(); if (d.list.some(p => p.id === id)) { d.current = id; this.save(); } },
+  currentProject() { const d = this.get(); return d.list.find(p => p.id === d.current) || null; },
+  /* Called alongside examProgress.record so a project reflects work done inside it. */
+  note(ex, res) {
+    const p = this.currentProject();
+    if (!p) return null;
+    p.attempts++;
+    if (res === 'pass' && p.solved.indexOf(ex.id) < 0) p.solved.push(ex.id);
+    for (const s of (ex.skills || [])) if (p.skills.indexOf(s) < 0) p.skills.push(s);
+    this.save();
+    return p;
+  },
+};
+
+/* ------------------------------ exam config ------------------------------ */
+/* Every number the simulator uses lives here. wkratos/42-examshell documents
+   10 points per exercise for weeks 01-03 and 6 for the Week 04 final, capped at
+   100 — that is where these defaults come from, and it is HISTORICAL, not a
+   claim about any current exam. Nothing in the UI may hard-code a score. */
+const EXAM_CONFIGS = [
+  { id:'final', name:'Final Exam practice', provenance:'historical',
+    note:'Modelled on the 6-points-per-exercise final described by wkratos/42-examshell, capped at 100. ' +
+         'Historical: formats have changed between Piscine generations.',
+    pointsPerExercise: 6, maxScore: 100, durationMinutes: 240,
+    exerciseCount: 8, levels:['A','B','C','D','E'], retryPolicy:'unlimited',
+    progression:'increasing', track:'C00-C08' },
+  { id:'week', name:'Weekly exam practice', provenance:'historical',
+    note:'Modelled on the 10-points-per-exercise weekly exams in the same source.',
+    pointsPerExercise: 10, maxScore: 100, durationMinutes: 180,
+    exerciseCount: 6, levels:['A','B','C'], retryPolicy:'unlimited',
+    progression:'increasing', track:'C00-C08' },
+  { id:'drill', name:'Recoding drill', provenance:'generated',
+    note:'Not modelled on any exam. Short, fast, recognition-focused — built for the second recoding.',
+    pointsPerExercise: 5, maxScore: 50, durationMinutes: 30,
+    exerciseCount: 10, levels:['A','B'], retryPolicy:'unlimited',
+    progression:'mixed', track:'C00-C08' },
+  { id:'validation', name:'Validation challenge', provenance:'generated',
+    note:'Unfamiliar multi-skill problems only. Inspiration is hidden by design.',
+    pointsPerExercise: 20, maxScore: 100, durationMinutes: 120,
+    exerciseCount: 5, levels:['D','E'], retryPolicy:'unlimited',
+    progression:'increasing', track:'C00-C08' },
+];
+const examConfig = (id) => EXAM_CONFIGS.find(c => c.id === id) || EXAM_CONFIGS[0];
+
+/* Scoring, in ONE place. score = solved * pointsPerExercise, capped. */
+function examScore(cfg, solvedCount) {
+  const raw = solvedCount * cfg.pointsPerExercise;
+  return { raw, score: Math.min(raw, cfg.maxScore), max: cfg.maxScore, capped: raw > cfg.maxScore };
+}
+
+/* Session selection: deterministic given a seed, so a session can be replayed
+   and a test can assert what it produced. Avoids repeating an exercise within
+   one session, and prefers what the learner has not solved. */
+function examPickSession(all, cfg, seed, progress) {
+  const p = progress || examProgress.get();
+  const solved = new Set(examStats(p).solvedIds);
+  let s = (seed || 1) >>> 0;
+  const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  const pool = all.filter(x =>
+    x.track === cfg.track && x.studied_status === 'STUDIED' && cfg.levels.indexOf(x.band) >= 0);
+  const out = [];
+  const bands = cfg.progression === 'increasing' ? cfg.levels.slice() : null;
+  for (let i = 0; i < cfg.exerciseCount; i++) {
+    let want = pool.filter(x => !out.some(o => o.id === x.id));
+    if (bands) {
+      const b = bands[Math.min(bands.length - 1, Math.floor(i * bands.length / cfg.exerciseCount))];
+      const inBand = want.filter(x => x.band === b);
+      if (inBand.length) want = inBand;
+    }
+    const fresh = want.filter(x => !solved.has(x.id));
+    if (fresh.length) want = fresh;
+    if (!want.length) break;
+    out.push(want[Math.floor(rnd() * want.length)]);
+  }
+  return out;
+}
+
+if (typeof window !== 'undefined') {
+  window.CExamStore = { EXAM_KEYS, examProgress, examProjects, examStats, examSkillStats,
+    examWeakSkills, examStrongSkills, examRecommend, EXAM_CONFIGS, examConfig, examScore,
+    examPickSession };
+}
+/* ==== EXAMSTORE END ==== */
+
+/* ==== TRAINDATA START ==== */
+/* ============================================================================
+   RECODING TRAINERS — string functions, algorithms, and problem generators
+   ----------------------------------------------------------------------------
+   1. FUNC_TRAINER   the string family, every field traced to a subject
+   2. FUNC_QUIZ      recognition questions built FROM that table
+   3. ALGO_LESSONS   the skills, taught before they are asked for
+   4. GEN_FAMILIES   generators that vary the reasoning, not the wording
+
+   WHICH FUNCTIONS ARE HERE, AND WHY ft_strnstr IS NOT. Every entry below is an
+   exercise in a supplied subject: C01 ex06, C02 ex00/ex01/ex10, C03 ex00..ex05.
+   ft_strnstr appears in no C00-C13 subject supplied here, so it is absent — and
+   FUNC_TRAINER_EXCLUDED says so on the page rather than leaving a silent gap.
+
+   WHERE THE BEHAVIOUR COMES FROM. Most of these subjects say only "Reproduce
+   the behavior of X (man X)" plus a prototype. So the PROTOTYPE, the exercise
+   number and the allowed-function list are quoted from the subject; the
+   behaviour is the man-page contract the subject points at, and each record
+   says which is which via `behaviourFrom`.
+   ========================================================================== */
+
+const FUNC_TRAINER_EXCLUDED = [
+  { name:'ft_strnstr',
+    why:'It appears in no C00-C13 subject supplied here. It is a BSD function that shows up in later ' +
+        '42 projects (libft), not in this Piscine. Nothing about it is trained here, because guessing ' +
+        'its contract is exactly the habit this trainer exists to break.' },
+];
+
+const FUNC_TRAINER = [
+  { id:'strlen', name:'ft_strlen', subject:'C01', ex:'ex06', allowed:'None',
+    proto:'int ft_strlen(char *str);', behaviourFrom:'the subject states the task directly',
+    family:'measure', returns:'int — the number of characters before the terminator',
+    purpose:'Count the characters of a string.',
+    params:[['str','the string to measure; it is not modified']],
+    behaviour:'Walks from index 0 until the \\0 and returns how many characters it passed.',
+    nul:'The \\0 is NOT counted. It is the stop condition, not data.',
+    src:'read only', dest:'none',
+    edges:['an empty string returns 0','there is no way to detect a missing terminator — that is the caller’s problem'],
+    distinct:'The only one here that neither writes nor compares. Everything else in the family is built on it.',
+    memory:'"Hi\\0"  ->  H i \\0   returns 2, not 3.',
+    impl:'int\tft_strlen(char *str)\n{\n\tint\ti;\n\n\ti = 0;\n\twhile (str[i])\n\t\ti++;\n\treturn (i);\n}\n' },
+
+  { id:'strcpy', name:'ft_strcpy', subject:'C02', ex:'ex00', allowed:'None',
+    proto:'char *ft_strcpy(char *dest, char *src);', behaviourFrom:'man strcpy, as the subject directs',
+    family:'copy', returns:'char * — dest, the same pointer that was passed in',
+    purpose:'Copy a string into a buffer the caller owns.',
+    params:[['dest','where the copy goes; must already be big enough'],['src','the string to copy; not modified']],
+    behaviour:'Copies every character of src into dest, then the terminator, and returns dest.',
+    nul:'ALWAYS terminates: the \\0 is copied as part of the string.',
+    src:'read only', dest:'written from index 0 to strlen(src) inclusive',
+    edges:['an empty src writes just the \\0','dest too small is undefined behaviour and cannot be detected from inside'],
+    distinct:'Takes no size at all. It cannot protect dest, because it is never told how big dest is.',
+    memory:'dest before: ? ? ? ?      src: "ab"\ndest after:  a b \\0 ?',
+    impl:'char\t*ft_strcpy(char *dest, char *src)\n{\n\tint\ti;\n\n\ti = 0;\n\twhile (src[i])\n\t{\n\t\tdest[i] = src[i];\n\t\ti++;\n\t}\n\tdest[i] = 0;\n\treturn (dest);\n}\n' },
+
+  { id:'strncpy', name:'ft_strncpy', subject:'C02', ex:'ex01', allowed:'None',
+    proto:'char *ft_strncpy(char *dest, char *src, unsigned int n);', behaviourFrom:'man strncpy, as the subject directs',
+    family:'copy', returns:'char * — dest',
+    purpose:'Copy at most n characters, padding with terminators if src was shorter.',
+    params:[['dest','destination'],['src','source, not modified'],['n','how many characters of dest to write — EXACTLY n']],
+    behaviour:'Writes exactly n bytes of dest: characters from src while it lasts, then \\0 for the rest.',
+    nul:'MAY NOT TERMINATE. If src is n characters or longer, no \\0 is written and dest is not a string.',
+    src:'read only, at most n characters', dest:'exactly n bytes written, always',
+    edges:['src longer than n leaves dest unterminated','src shorter than n pads the remainder with \\0',
+           'n of 0 writes nothing at all'],
+    distinct:'n bounds the DESTINATION writes and the result may not be a string. Compare strlcpy, which always terminates.',
+    memory:'src "abcd", n 3  ->  a b c        (no \\0 — not a string)\nsrc "ab",   n 4  ->  a b \\0 \\0   (padded)',
+    impl:'char\t*ft_strncpy(char *dest, char *src, unsigned int n)\n{\n\tunsigned int\ti;\n\n\ti = 0;\n\twhile (i < n && src[i])\n\t{\n\t\tdest[i] = src[i];\n\t\ti++;\n\t}\n\twhile (i < n)\n\t{\n\t\tdest[i] = 0;\n\t\ti++;\n\t}\n\treturn (dest);\n}\n' },
+
+  { id:'strlcpy', name:'ft_strlcpy', subject:'C02', ex:'ex10', allowed:'None',
+    proto:'unsigned int ft_strlcpy(char *dest, char *src, unsigned int size);', behaviourFrom:'man strlcpy, as the subject directs',
+    family:'copy', returns:'unsigned int — the length of src, which is the length it TRIED to create',
+    purpose:'Copy a string into a buffer of known size, always leaving a valid string.',
+    params:[['dest','destination'],['src','source, not modified'],['size','the SIZE OF DEST, including room for the terminator']],
+    behaviour:'Copies at most size - 1 characters and then terminates. Returns strlen(src) regardless of how much fitted.',
+    nul:'ALWAYS terminates when size is greater than 0. When size is 0 nothing is written at all.',
+    src:'read fully — the return value needs its whole length', dest:'at most size bytes written',
+    edges:['size 0 writes nothing but still returns strlen(src)','a return value >= size means the copy was truncated',
+           'size 1 writes only the terminator'],
+    distinct:'The third argument is the size of DEST, not a count of characters, and the return is a LENGTH not a pointer. ' +
+             'That return is how the caller detects truncation — strncpy gives no such signal.',
+    memory:'src "abcd", size 3  ->  a b \\0    returns 4  (4 >= 3, so it was truncated)',
+    impl:'unsigned int\tft_strlcpy(char *dest, char *src, unsigned int size)\n{\n\tunsigned int\ti;\n\tunsigned int\tlen;\n\n\tlen = 0;\n\twhile (src[len])\n\t\tlen++;\n\ti = 0;\n\tif (size > 0)\n\t{\n\t\twhile (i < size - 1 && src[i])\n\t\t{\n\t\t\tdest[i] = src[i];\n\t\t\ti++;\n\t\t}\n\t\tdest[i] = 0;\n\t}\n\treturn (len);\n}\n' },
+
+  { id:'strcmp', name:'ft_strcmp', subject:'C03', ex:'ex00', allowed:'None',
+    proto:'int ft_strcmp(char *s1, char *s2);', behaviourFrom:'man strcmp, as the subject directs',
+    family:'compare', returns:'int — the difference between the first differing characters, 0 if equal',
+    purpose:'Order or equate two strings.',
+    params:[['s1','first string, not modified'],['s2','second string, not modified']],
+    behaviour:'Walks both together and returns s1[i] - s2[i] at the first position where they differ, or 0.',
+    nul:'The \\0 takes part in the comparison, which is why a prefix compares less than the longer string.',
+    src:'both read only', dest:'none',
+    edges:['equal strings return 0','one a prefix of the other returns the difference against \\0',
+           'two empty strings return 0'],
+    distinct:'Returns a DIFFERENCE, not -1/0/1. Code that tests for exactly -1 is wrong.',
+    memory:'"abc" vs "abd"  ->  at index 2, 99 - 100 = -1\n"ab"  vs "abc"  ->  at index 2,  0 - 99 = -99',
+    impl:'int\tft_strcmp(char *s1, char *s2)\n{\n\tint\ti;\n\n\ti = 0;\n\twhile (s1[i] && s1[i] == s2[i])\n\t\ti++;\n\treturn (s1[i] - s2[i]);\n}\n' },
+
+  { id:'strncmp', name:'ft_strncmp', subject:'C03', ex:'ex01', allowed:'None',
+    proto:'int ft_strncmp(char *s1, char *s2, unsigned int n);', behaviourFrom:'man strncmp, as the subject directs',
+    family:'compare', returns:'int — the difference, or 0 if the first n characters agree',
+    purpose:'Compare only the beginning of two strings.',
+    params:[['s1','first string'],['s2','second string'],['n','how many characters to compare AT MOST']],
+    behaviour:'As strcmp, but stops after n characters and returns 0 if they all agreed.',
+    nul:'Still stops at a \\0 — n is an upper bound, not a fixed length.',
+    src:'both read only, at most n characters each', dest:'none',
+    edges:['n of 0 always returns 0 without reading anything','a difference beyond n is invisible',
+           'a \\0 inside the first n still ends the comparison'],
+    distinct:'n limits the COMPARISON, not the strings. Bytes past n are never even read.',
+    memory:'"abcX" vs "abcY", n 3  ->  0   (the difference at index 3 is never seen)',
+    impl:'int\tft_strncmp(char *s1, char *s2, unsigned int n)\n{\n\tunsigned int\ti;\n\n\ti = 0;\n\twhile (i < n && s1[i] && s1[i] == s2[i])\n\t\ti++;\n\tif (i == n)\n\t\treturn (0);\n\treturn (s1[i] - s2[i]);\n}\n' },
+
+  { id:'strcat', name:'ft_strcat', subject:'C03', ex:'ex02', allowed:'None',
+    proto:'char *ft_strcat(char *dest, char *src);', behaviourFrom:'man strcat, as the subject directs',
+    family:'concat', returns:'char * — dest',
+    purpose:'Append one string to the end of another.',
+    params:[['dest','the string to extend; must have room'],['src','what to append; not modified']],
+    behaviour:'Finds dest’s terminator, then copies src there, terminator included.',
+    nul:'dest’s old \\0 is overwritten by the first character of src, and a fresh \\0 ends the result.',
+    src:'read only', dest:'written from its old terminator onward',
+    edges:['an empty src leaves dest unchanged apart from rewriting its \\0',
+           'dest must already be a valid string or the starting point cannot be found'],
+    distinct:'Receives no size, so it cannot check capacity. It never even learns how big dest is.',
+    memory:'dest "Hi\\0???"  src "ab"  ->  H i a b \\0',
+    impl:'char\t*ft_strcat(char *dest, char *src)\n{\n\tint\ti;\n\tint\tj;\n\n\ti = 0;\n\twhile (dest[i])\n\t\ti++;\n\tj = 0;\n\twhile (src[j])\n\t{\n\t\tdest[i + j] = src[j];\n\t\tj++;\n\t}\n\tdest[i + j] = 0;\n\treturn (dest);\n}\n' },
+
+  { id:'strncat', name:'ft_strncat', subject:'C03', ex:'ex03', allowed:'None',
+    proto:'char *ft_strncat(char *dest, char *src, unsigned int nb);', behaviourFrom:'man strncat, as the subject directs',
+    family:'concat', returns:'char * — dest',
+    purpose:'Append at most nb characters of one string to another.',
+    params:[['dest','the string to extend'],['src','what to append'],['nb','how many characters OF SRC to take at most']],
+    behaviour:'Appends up to nb characters from src, then always writes a terminator.',
+    nul:'ALWAYS terminates, even when nb characters were taken. That is the difference from strncpy.',
+    src:'read at most nb characters', dest:'written from its old terminator, plus one for the \\0',
+    edges:['nb of 0 still rewrites the terminator','src shorter than nb stops early','nb does not bound dest at all'],
+    distinct:'nb bounds the SOURCE. strlcat’s third argument bounds the whole DESTINATION. They are not the same idea.',
+    memory:'dest "Hi\\0"  src "World"  nb 3  ->  H i W o r \\0',
+    impl:'char\t*ft_strncat(char *dest, char *src, unsigned int nb)\n{\n\tunsigned int\ti;\n\tunsigned int\tj;\n\n\ti = 0;\n\twhile (dest[i])\n\t\ti++;\n\tj = 0;\n\twhile (j < nb && src[j])\n\t{\n\t\tdest[i + j] = src[j];\n\t\tj++;\n\t}\n\tdest[i + j] = 0;\n\treturn (dest);\n}\n' },
+
+  { id:'strlcat', name:'ft_strlcat', subject:'C03', ex:'ex05', allowed:'None',
+    proto:'unsigned int ft_strlcat(char *dest, char *src, unsigned int size);', behaviourFrom:'man strlcat, as the subject directs',
+    family:'concat', returns:'unsigned int — the length it TRIED to create: the initial dest length plus strlen(src)',
+    purpose:'Append within a buffer of known total size, always leaving a valid string.',
+    params:[['dest','the string to extend'],['src','what to append'],['size','the TOTAL SIZE OF DEST, terminator included']],
+    behaviour:'Appends as much of src as fits in size, always terminating, and returns the length the full result would have had.',
+    nul:'Always terminates when there was room. A return value >= size means truncation happened.',
+    src:'read fully — the return needs its whole length', dest:'never written past size',
+    edges:['size smaller than the existing dest length — the return is size + strlen(src), not dest length + strlen(src)',
+           'size 0 appends nothing','a full dest appends nothing but still returns a length'],
+    distinct:'size is the WHOLE destination buffer, not a count of source characters. Its return is the truncation signal.',
+    memory:'dest "Hi" (len 2), src "ABCDEFG", size 10  ->  "HiABCDEFG"  returns 9',
+    impl:'unsigned int\tft_strlcat(char *dest, char *src, unsigned int size)\n{\n\tunsigned int\td;\n\tunsigned int\ts;\n\tunsigned int\ti;\n\n\td = 0;\n\twhile (dest[d] && d < size)\n\t\td++;\n\ts = 0;\n\twhile (src[s])\n\t\ts++;\n\tif (d == size)\n\t\treturn (size + s);\n\ti = 0;\n\twhile (src[i] && d + i < size - 1)\n\t{\n\t\tdest[d + i] = src[i];\n\t\ti++;\n\t}\n\tdest[d + i] = 0;\n\treturn (d + s);\n}\n' },
+
+  { id:'strstr', name:'ft_strstr', subject:'C03', ex:'ex04', allowed:'None',
+    proto:'char *ft_strstr(char *str, char *to_find);', behaviourFrom:'man strstr, as the subject directs',
+    family:'search', returns:'char * — a pointer INTO str at the first match, or NULL',
+    purpose:'Find one string inside another.',
+    params:[['str','the haystack, not modified'],['to_find','the needle, not modified']],
+    behaviour:'For each position of str, tries to match to_find; returns the address of the first full match.',
+    nul:'Matching stops at to_find’s \\0; a partial match that hits str’s \\0 fails and the outer scan ends.',
+    src:'both read only', dest:'none',
+    edges:['an empty needle returns str itself','no match returns NULL, not an empty string',
+           'a partial match must restart from the NEXT position, not from where it failed'],
+    distinct:'The only one here returning a pointer INTO its input rather than a copy or a count. Nothing is allocated.',
+    memory:'str "abcd", to_find "cd"  ->  returns &str[2]  (an address, not "cd")',
+    impl:'char\t*ft_strstr(char *str, char *to_find)\n{\n\tint\ti;\n\tint\tj;\n\n\tif (!to_find[0])\n\t\treturn (str);\n\ti = 0;\n\twhile (str[i])\n\t{\n\t\tj = 0;\n\t\twhile (str[i + j] && str[i + j] == to_find[j])\n\t\t\tj++;\n\t\tif (!to_find[j])\n\t\t\treturn (&str[i]);\n\t\ti++;\n\t}\n\treturn (0);\n}\n' },
+];
+
+/* The pairs that actually get confused, each with the ONE sentence that separates them. */
+const FUNC_PAIRS = [
+  ['strcpy','strncpy','strncpy writes exactly n bytes and may leave dest without a terminator; strcpy always terminates but is told no size at all.'],
+  ['strncpy','strlcpy','strncpy’s n counts bytes WRITTEN and may not terminate; strlcpy’s size is the buffer size, it always terminates, and it returns a length.'],
+  ['strcmp','strncmp','strncmp stops after n characters, so a difference beyond n is invisible. Both return a difference, never -1/0/1.'],
+  ['strcat','strncat','strncat bounds how much of SRC is taken and always terminates; strcat is bounded by nothing.'],
+  ['strncat','strlcat','strncat’s third argument counts SOURCE characters; strlcat’s is the TOTAL SIZE of dest. Different quantity, different question.'],
+  ['strlcpy','strlcat','Both take a destination size and both return the length they tried to build. strlcpy starts at dest[0]; strlcat starts at dest’s existing terminator.'],
+  ['strlen','strlcpy','strlen returns what IS; strlcpy returns what it TRIED to make — which is how the caller detects truncation.'],
+];
+
+/* Recognition questions, built FROM the table so they cannot contradict it.
+   Each answer is a function id that exists in FUNC_TRAINER. */
+const FUNC_QUIZ = [
+  { q:'Which one copies at most n characters and may leave the destination without a terminator?', a:'strncpy',
+    why:'strncpy writes exactly n bytes. If src is n or longer there is no room left for the \\0.' },
+  { q:'Which one takes the SIZE OF THE DESTINATION and always leaves a valid string?', a:'strlcpy',
+    why:'size includes the terminator, so at most size - 1 characters are copied.' },
+  { q:'Which one returns the length it tried to create rather than a pointer?', a:'strlcpy',
+    why:'That return is how a caller detects truncation: a value >= size means it did not all fit.' },
+  { q:'Which one returns a pointer INTO its own input?', a:'strstr',
+    why:'It reports where a match starts. Nothing is copied and nothing is allocated.' },
+  { q:'Which one appends at most nb characters of the source and always terminates?', a:'strncat',
+    why:'nb bounds the source; the terminator is written regardless.' },
+  { q:'Which one’s third argument is the total size of the destination buffer, not a count of source characters?', a:'strlcat',
+    why:'That is the single difference from strncat, and the one most often got wrong.' },
+  { q:'Which one compares only the first n characters, making a later difference invisible?', a:'strncmp',
+    why:'Bytes past n are never read.' },
+  { q:'Which one neither writes nor compares, and returns a count?', a:'strlen',
+    why:'It only measures. The terminator is the stop condition, not part of the count.' },
+  { q:'Which one joins two strings while being told nothing about the destination’s capacity?', a:'strcat',
+    why:'It receives no size at all, which is exactly why it cannot be safe.' },
+  { q:'Which one returns the difference between the first differing characters?', a:'strcmp',
+    why:'Not -1/0/1 — a difference. Code testing for exactly -1 is wrong.' },
+];
+
+/* Reverse quiz: given the function, state what it does. Scored by the learner
+   against `expect`, because free text cannot be machine-marked honestly. */
+const FUNC_EXPLAIN = FUNC_TRAINER.map(f => ({
+  id: f.id, name: f.name, proto: f.proto,
+  expect: [f.purpose, 'Returns: ' + f.returns, 'Terminator: ' + f.nul, 'Watch: ' + f.distinct],
+}));
+
+/* --------------------------- algorithm lessons --------------------------- */
+/* Taught before being asked for. `practice` names exercise ids in
+   EXAM_EXERCISES; phase37 fails if one does not exist. */
+const ALGO_LESSONS = [
+  { id:'linear', title:'Linear traversal', skills:['STRING_SCAN','ARRAY_TRAVERSAL'],
+    solves:'Visiting every element of a sequence exactly once.',
+    recognise:'The answer depends on all the data, and each element can be handled without looking back.',
+    model:'One index. It starts at 0, it only ever moves forward, and the loop ends on a condition you can state out loud.',
+    steps:['set the index to 0','while the stop condition is false: look at element i, act, i++','the answer is whatever you accumulated'],
+    pseudo:'i = 0\nwhile s[i] != NUL\n    handle s[i]\n    i = i + 1',
+    mistakes:['using the array length when the data is NUL-terminated, or the reverse',
+              'incrementing inside a branch so some iterations never advance — an infinite loop',
+              'reading s[i] after the loop has ended'],
+    edges:['empty input, where the body never runs','a single element'],
+    example:'Counting characters: the loop body is just i++, and the answer is i.',
+    practice:['a.only_lower','a.digits_only','a.double_each'] },
+
+  { id:'nested', title:'Nested traversal', skills:['SUBSTRING_SEARCH','SORTING','COMPARISON'],
+    solves:'Comparing every element against every other, or matching a run starting at each position.',
+    recognise:'One index is not enough: you need a position AND an offset from it.',
+    model:'The outer index chooses where to start; the inner one runs from there and may fail. When it fails, the outer moves on by ONE — not by however far the inner got.',
+    steps:['outer index over start positions','inner index from that start','on failure, reset the inner and advance the outer by one','on success, report the outer position'],
+    pseudo:'i = 0\nwhile s[i]\n    j = 0\n    while s[i+j] and s[i+j] == t[j]\n        j = j + 1\n    if t[j] == NUL then match at i\n    i = i + 1',
+    mistakes:['advancing the outer index by the inner’s progress, which skips overlapping matches',
+              'forgetting to reset the inner index','testing the wrong terminator to decide success'],
+    edges:['an empty needle matches immediately at position 0','a match at the very end','no match at all'],
+    example:'Substring search is the canonical shape; so is any "compare each with each" sort.',
+    practice:['c.dedupe_words','c.common_prefix'] },
+
+  { id:'wordbound', title:'Word boundary detection', skills:['WORD_DETECTION'],
+    solves:'Anything phrased in terms of words when the input is a flat string.',
+    recognise:'The answer depends on where words START or END — never on a character considered alone.',
+    model:'A word starts at a non-separator whose PREVIOUS character was a separator or which is at index 0. That single test replaces every ad-hoc flag.',
+    steps:['decide what a separator is, and write it as one function',
+           'scan; at each character ask "is this the start of a word?"',
+           'from a start, run forward to the next separator or the terminator',
+           'continue from where the word ended'],
+    pseudo:'i = 0\nwhile s[i]\n    if not sep(s[i]) and (i == 0 or sep(s[i-1]))\n        // a word starts here\n        j = i\n        while s[j] and not sep(s[j])\n            j = j + 1\n        handle the word s[i..j-1]\n        i = j\n    else\n        i = i + 1',
+    mistakes:['counting a run of separators as several boundaries',
+              'missing the last word because there is no separator after it',
+              'handling only the space and forgetting the tab',
+              'a "was I in a word" flag that is never reset'],
+    edges:['an empty string','only separators','one word with no separators at all',
+           'separators at both ends','a single-character word'],
+    example:'Counting words, the longest word, capitalising each word and reversing word order are all this one scan with a different body.',
+    practice:['b.count_words','b.longest_word','b.reverse_word_order','b.acronym'] },
+
+  { id:'classify', title:'Character classification', skills:['CHAR_CLASSIFICATION','ASCII'],
+    solves:'Deciding what a character is without a library.',
+    recognise:'The problem names letters, digits, case, or printability.',
+    model:'A character is a small integer. Every classification is a range test on that integer, and every case conversion is an addition of 32.',
+    steps:['write the range test as its own tiny function','use it, never inline the magic numbers twice'],
+    pseudo:'is_digit(c)  ->  c >= 48 and c <= 57\nis_upper(c)  ->  c >= 65 and c <= 90\nis_lower(c)  ->  c >= 97 and c <= 122\nto_upper(c)  ->  c - 32   (only if is_lower)',
+    mistakes:['assuming letters and digits are contiguous with each other — they are not',
+              'converting case without first checking it IS a letter',
+              'writing the numbers inline in five places and getting one wrong'],
+    edges:['characters outside every class','the boundary characters a, z, A, Z, 0 and 9'],
+    example:'C02 builds six whole exercises out of one range test each.',
+    practice:['a.swap_case','a.digits_only','a.vowel_mask'] },
+
+  { id:'counting', title:'Counting', skills:['COUNTING'],
+    solves:'How many of something there are.',
+    recognise:'The output is a number, and the input is a sequence.',
+    model:'One accumulator. WHERE you increment it decides every off-by-one you will ever have here.',
+    steps:['start the counter at 0','increment on the condition, not on the iteration','print it afterwards'],
+    pseudo:'n = 0\nfor each element\n    if condition then n = n + 1',
+    mistakes:['incrementing per character when the question asked per word',
+              'starting at 1 "because the first one counts"','printing the index instead of the count'],
+    edges:['nothing satisfies the condition, so the answer is 0 and not an empty line','everything satisfies it'],
+    example:'Counting words is counting word STARTS, not counting non-separators.',
+    practice:['b.count_words','b.sum_digits'] },
+
+  { id:'filtering', title:'Filtering', skills:['FILTERING'],
+    solves:'Keeping some elements and discarding the rest.',
+    recognise:'Output is a subsequence of the input, in the original order.',
+    model:'Traversal plus a predicate. Nothing is remembered between elements.',
+    steps:['write the predicate separately','traverse; emit when it holds'],
+    pseudo:'for each element\n    if keep(element) then emit(element)',
+    mistakes:['emitting the separator between kept items even when nothing followed',
+              'mutating the input when the task said to print'],
+    edges:['nothing kept','everything kept','the first and last element kept'],
+    example:'Printing only digits, only lowercase letters, or only the long words.',
+    practice:['a.digits_only','c.filter_by_length'] },
+
+  { id:'search', title:'Searching', skills:['SEARCH'],
+    solves:'Finding a position, or reporting that there is none.',
+    recognise:'The question is "where" or "is there", not "how many".',
+    model:'Traverse until found. The interesting half is the answer when nothing is found — decide it before you write the loop.',
+    steps:['decide the not-found answer FIRST','traverse; stop at the first hit','report position or the not-found answer'],
+    pseudo:'i = 0\nwhile s[i]\n    if match(s[i]) then return i\n    i = i + 1\nreturn NOT_FOUND',
+    mistakes:['returning 0 for not-found when 0 is a valid position',
+              'continuing after the first match when only the first was wanted'],
+    edges:['no match','a match at the first position','a match at the last position'],
+    example:'strstr returns NULL for not-found precisely because every real position is a valid pointer.',
+    practice:['a.first_upper','d.grid_find'] },
+
+  { id:'reversal', title:'Reversal', skills:['REVERSE_TRAVERSAL'],
+    solves:'Producing something whose first output depends on the last input.',
+    recognise:'You cannot emit anything until you have read to the end.',
+    model:'Two phases: find the end, then walk back. In place, it is two indices moving toward each other and meeting in the middle.',
+    steps:['find the length','either walk an index down from len-1, or swap a and b while a < b'],
+    pseudo:'len = 0\nwhile s[len] do len = len + 1\ni = len - 1\nwhile i >= 0\n    emit s[i]\n    i = i - 1',
+    mistakes:['starting at len rather than len - 1','an unsigned index that never goes below 0, so the loop never ends',
+              'swapping past the middle, which reverses it back'],
+    edges:['empty string','one character','even and odd lengths'],
+    example:'Reversing a whole string, reversing the words, or reversing the letters inside each word — three different scopes, one shape.',
+    practice:['a.reverse_str','b.reverse_each_word','e.mirrorfold'] },
+
+  { id:'inplace', title:'In-place transformation', skills:['TRANSFORMATION','POINTER_MANIPULATION'],
+    solves:'Changing data through a pointer the caller owns.',
+    recognise:'The function returns void or returns its own argument, and the caller sees the change.',
+    model:'You hold an address. Writing through it changes the caller’s object; reassigning the pointer changes nothing the caller can see.',
+    steps:['dereference to read','dereference to write','return the original pointer if the contract says so'],
+    pseudo:'i = 0\nwhile str[i]\n    str[i] = f(str[i])\n    i = i + 1\nreturn str',
+    mistakes:['assigning to the pointer instead of through it','forgetting & at the call site',
+              'returning a local buffer, whose lifetime ends with the function'],
+    edges:['an empty string','a string literal, which must not be written to'],
+    example:'ft_strupcase changes the caller’s string and returns the same pointer it was given.',
+    practice:['a.swap_case','b.swap_ends'] },
+
+  { id:'numextract', title:'Number extraction', skills:['NUMBER_CONSTRUCTION'],
+    solves:'Turning digits inside text into values.',
+    recognise:'A number arrives as characters and has to be computed with.',
+    model:'result = result * 10 + (c - 48), run over a RUN of digits. The run is the part people miss: you must know where the number starts and ends.',
+    steps:['scan to a digit','accumulate while the characters are digits','the run ends at the first non-digit','reset for the next run'],
+    pseudo:'n = 0\nwhile is_digit(s[i])\n    n = n * 10 + s[i] - 48\n    i = i + 1',
+    mistakes:['restarting the accumulator on every digit','treating adjacent runs as one number',
+              'forgetting that a lone sign is not a number'],
+    edges:['no digits at all','a number at the very end','leading zeros','a value too large for an int'],
+    example:'atoi is this with a sign and leading whitespace in front of it.',
+    practice:['b.max_number','c.numbers_sorted','d.number_pipeline'] },
+
+  { id:'numemit', title:'Number construction and printing', skills:['NUMBER_DECOMPOSITION','BASE_CONVERSION'],
+    solves:'Printing a computed value when only write is allowed.',
+    recognise:'You have an int and need bytes.',
+    model:'/ and % give digits least significant FIRST, so the order must be restored — by recursion, or by filling a buffer backwards.',
+    steps:['handle 0 explicitly','handle the sign explicitly','recurse on n / 10, then print n % 10'],
+    pseudo:'put_nbr(n)\n    if n >= 10 then put_nbr(n / 10)\n    write digit (48 + n % 10)',
+    mistakes:['zero printing nothing at all','digits coming out backwards',
+              'negating INT_MIN, which has no positive counterpart'],
+    edges:['0','a single digit','a negative value','INT_MIN'],
+    example:'Every exercise whose answer is a count needs this.',
+    practice:['b.count_words','b.sum_digits','a.stair'] },
+
+  { id:'asciiorder', title:'ASCII ordering', skills:['COMPARISON','ASCII'],
+    solves:'Putting characters or strings in order without a library.',
+    recognise:'The task says "alphabetical" or "ASCII order".',
+    model:'Comparison returns a SIGN. For strings it is the difference at the first differing byte — which is why "Z" sorts before "a".',
+    steps:['write the comparison as its own function','let the sort call it and never inline it'],
+    pseudo:'cmp(a, b)\n    i = 0\n    while a[i] and a[i] == b[i] do i = i + 1\n    return a[i] - b[i]',
+    mistakes:['assuming ASCII order is dictionary order — uppercase sorts before all lowercase',
+              'testing cmp() == -1 instead of cmp() < 0'],
+    edges:['equal strings','one a prefix of the other','mixed case'],
+    example:'Sorting argv is this comparison plus a swap of POINTERS, not of characters.',
+    practice:['b.sort_chars','c.words_sorted'] },
+
+  { id:'argvwalk', title:'Argument traversal', skills:['ARGC_ARGV'],
+    solves:'Reading what the program was invoked with.',
+    recognise:'The task speaks of arguments, or of the program name.',
+    model:'argv is an array of char *. argc is a COUNT, so the last argument is argv[argc - 1]. argv[0] is the program, not data.',
+    steps:['guard argc first and decide the wrong-count output','loop from 1 to argc - 1','each argv[i] is a string to scan'],
+    pseudo:'if argc != 2 then print newline and stop\ni = 1\nwhile i < argc\n    handle argv[i]\n    i = i + 1',
+    mistakes:['looping to argc inclusive','starting at 0 and processing the program name',
+              'printing nothing when the subject asked for a newline'],
+    edges:['no arguments','one too many','an empty string as an argument'],
+    example:'C06 is four exercises that are all this loop with different bodies.',
+    practice:['b.join_args','c.sum_numeric_args','d.rank_args'] },
+
+  { id:'bubble', title:'Bubble sort', skills:['SORTING'],
+    solves:'Ordering a small array with the least code you can write from memory.',
+    recognise:'You need order, the data is small, and correctness matters more than speed.',
+    model:'Repeatedly compare NEIGHBOURS and swap when they are out of order. After one full pass the largest element has reached the end.',
+    steps:['repeat n - 1 times','in each pass compare each adjacent pair and swap if needed','optionally stop early if a pass made no swap'],
+    pseudo:'i = 0\nwhile i < n - 1\n    j = 0\n    while j < n - 1 - i\n        if t[j] > t[j+1] then swap(t[j], t[j+1])\n        j = j + 1\n    i = i + 1',
+    mistakes:['the inner bound not shrinking, which still sorts but wastes half the work',
+              'j+1 running past the end','swapping without a temporary'],
+    edges:['already sorted','reverse sorted','all equal','one element'],
+    example:'O(n^2) comparisons; with the did-I-swap flag it becomes O(n) on already-sorted input.',
+    practice:['b.sort_chars','c.words_by_length'] },
+
+  { id:'insertion', title:'Insertion sort', skills:['SORTING'],
+    solves:'The same problem as bubble sort, with a different shape and a better best case.',
+    recognise:'The data is small AND likely to be nearly ordered already.',
+    model:'Keep a sorted region at the front. Take the next element and slide it left past everything bigger, the way you sort a hand of cards.',
+    steps:['treat element 0 as a sorted region of one','take the next element into a temporary',
+           'slide bigger elements one place right','drop the temporary into the gap','repeat'],
+    pseudo:'i = 1\nwhile i < n\n    key = t[i]\n    j = i - 1\n    while j >= 0 and t[j] > key\n        t[j+1] = t[j]\n        j = j - 1\n    t[j+1] = key\n    i = i + 1',
+    mistakes:['overwriting the element before saving it into key','the inner loop not testing j >= 0',
+              'writing key back at t[j] instead of t[j+1]'],
+    edges:['already sorted, where the inner loop never runs','reverse sorted, its worst case','one element'],
+    example:'Both are O(n^2) in the worst case. Insertion sort does almost NO work on already-ordered input — bubble sort only matches that if it carries a swap flag. ' +
+            'To remember it: bubble compares neighbours and pushes the biggest to the end; insertion holds one card and slides it back into a sorted hand.',
+    practice:['c.insertion_order'] },
+
+  { id:'recursion', title:'Recursion', skills:['RECURSION'],
+    solves:'Problems whose answer is stated in terms of a smaller version of themselves.',
+    recognise:'You can describe the answer for n using the answer for n - 1, or for half.',
+    model:'A base case that returns without recursing, and a recursive case on strictly smaller input. Trust the call — do not trace it in your head.',
+    steps:['write the base case first','write the recursive case assuming the call works','check the input really shrinks every time'],
+    pseudo:'f(n)\n    if n <= 1 then return 1        // base\n    return n * f(n - 1)            // strictly smaller',
+    mistakes:['no base case, or one that is unreachable','input that does not shrink on some path',
+              'doing the work both before and after the call by accident'],
+    edges:['the base case itself','the value just above the base case','a depth that exhausts the stack'],
+    example:'put_nbr recurses on n / 10 and prints after the call — which is exactly what puts the digits in the right order.',
+    practice:['e.sieveword'] },
+];
+
+/* ---------------------------- problem generators -------------------------- */
+/* A family produces variants that differ in the RULE and the EDGE CASES, not in
+   the naming. Each variant states its own rule and its own hardest case, so two
+   variants of one family really do need different reasoning. */
+const GEN_FAMILIES = [
+  { id:'wordcount', title:'Counting things in words', skill:'WORD_DETECTION',
+    base:'Scan a string, find word boundaries, count something.',
+    variants:[
+      { rule:'count the words', hard:'runs of separators must not count twice' },
+      { rule:'count the words that start with a vowel', hard:'a one-letter word that is a vowel' },
+      { rule:'count the words longer than the one before them', hard:'the first word has nothing before it' },
+      { rule:'count the DISTINCT word lengths that occur', hard:'the same length appearing far apart' },
+      { rule:'count the letters, ignoring separators entirely', hard:'the answer is not the string length' },
+    ] },
+  { id:'wordtransform', title:'Transforming every word', skill:'TRANSFORMATION',
+    base:'Find each word, rewrite it, put the separators back exactly.',
+    variants:[
+      { rule:'upper-case each word', hard:'a word starting with a digit' },
+      { rule:'reverse the letters inside each word', hard:'separators must survive unchanged' },
+      { rule:'mask all but the first and last character', hard:'words of length one and two' },
+      { rule:'shift each word by its own index in the sentence', hard:'the counter must not advance on separators' },
+      { rule:'keep only the words that read the same backwards', hard:'a one-letter word qualifies' },
+    ] },
+  { id:'numinstring', title:'Numbers hiding in text', skill:'NUMBER_CONSTRUCTION',
+    base:'Digit runs become values; then something is computed from them.',
+    variants:[
+      { rule:'sum every number', hard:'two runs separated by one letter are two numbers' },
+      { rule:'print the largest', hard:'leading zeros' },
+      { rule:'print them sorted ascending', hard:'no numbers at all' },
+      { rule:'print only the even ones, descending', hard:'zero is even' },
+      { rule:'print the difference between the largest and smallest', hard:'exactly one number' },
+    ] },
+  { id:'argvfamily', title:'Working across arguments', skill:'ARGC_ARGV',
+    base:'argc is a count; argv[0] is the program; the interesting data starts at 1.',
+    variants:[
+      { rule:'join them with a separator given as the first argument', hard:'exactly one thing to join means no separator' },
+      { rule:'print them in ASCII order', hard:'uppercase sorts before lowercase' },
+      { rule:'print only those that are entirely digits', hard:'an empty argument is not a number' },
+      { rule:'print the one that shares the longest prefix with the first', hard:'nothing shares anything' },
+      { rule:'print each argument’s length instead of the argument', hard:'a length of ten needs two digits' },
+    ] },
+  { id:'charfilter', title:'Choosing characters', skill:'FILTERING',
+    base:'One pass, one predicate, emit or skip.',
+    variants:[
+      { rule:'keep only letters', hard:'the empty result still needs its newline' },
+      { rule:'keep characters whose position is even', hard:'position counted from zero or one — decide and state it' },
+      { rule:'keep characters that do not appear earlier in the string', hard:'a nested scan is required' },
+      { rule:'keep only the characters that appear more than once', hard:'each kept character still appears once in the output' },
+      { rule:'keep the characters at prime positions', hard:'position 1 is not prime' },
+    ] },
+  { id:'ordering', title:'Putting things in order', skill:'SORTING',
+    base:'Comparison plus exchange. What you exchange is the design.',
+    variants:[
+      { rule:'sort the characters of one argument', hard:'duplicates must survive' },
+      { rule:'sort the words by length, stably', hard:'equal lengths must not be reordered' },
+      { rule:'sort the arguments by their digit sum', hard:'an argument with no digits scores zero' },
+      { rule:'report whether the input is already sorted', hard:'equal neighbours count as sorted' },
+      { rule:'sort by ASCII but put digits after letters', hard:'the comparison is no longer just a subtraction' },
+    ] },
+];
+
+if (typeof window !== 'undefined') {
+  window.CExamTrain = { FUNC_TRAINER, FUNC_PAIRS, FUNC_QUIZ, FUNC_EXPLAIN, ALGO_LESSONS,
+    GEN_FAMILIES, FUNC_TRAINER_EXCLUDED };
+}
+/* ==== TRAINDATA END ==== */
+
+/* ==== EXAMUI START ==== */
+/* ============================================================================
+   PRACTICE — the fifth view
+   ----------------------------------------------------------------------------
+   #examRoot is a peer of #dashRoot / #labRoot / #learnRoot, switched the same
+   way. No router was added: showExam() hides the others exactly as they hide
+   each other, and the rail gains one button.
+
+   The view CONSUMES the database. There is no exercise text, no allowed-function
+   list and no difficulty in this file — phase37 greps for a task sentence here
+   and fails if one appears.
+   ========================================================================== */
+
+const xs = {
+  page: 'recoding',      // recoding|exam|browse|skills|functions|cross|projects|progress
+  sub: null,             // section-specific selection
+  ex: null,              // the open exercise id, if any
+  mode: 'guided',        // guided|blind|challenge|drill|validation
+  hints: 0,              // how many hints have been asked for
+  showSolution: false,
+  attempted: false,      // gate: a solution needs a real attempt first
+  src: {},               // per-exercise editor buffer
+  result: null,          // last verdict
+  filters: { q:'', track:'', subject:'', skill:'', band:'', source:'', solved:'' },
+  quiz: { i: 0, picked: null, score: 0, asked: 0 },
+  sim: null,             // live simulator session
+  fn: 'strlen',
+  algo: 'wordbound',
+};
+
+const xEsc = (s) => String(s == null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+/* ------------------------------------------------------------------ engine */
+/* Constructs the browser engine does not parse. Measured, not guessed: casts of
+   every kind, switch, forward prototypes, struct and function pointers all fail
+   to parse. Reporting these as "compilation error" would teach the learner that
+   correct C is wrong, so they are named for what they are. */
+const ENGINE_LIMITS = [
+  /* Tested first: it is a cast, but naming it generically would be unhelpful. */
+  { id:'voidcast', re:/\(\s*void\s*\)\s*[A-Za-z_]/, what:'the (void)x idiom',
+    note:'Your code is correct — with an unused parameter, -Wall -Wextra -Werror needs exactly this. ' +
+         'Keep writing it in real submissions. To run the exercise HERE, either use the parameter ' +
+         '(an argc guard usually does) or delete the line while you practise.' },
+  { id:'cast',   re:/\(\s*(unsigned\s+|signed\s+)?(char|int|short|long|void|float|double)\s*\**\s*\)\s*[A-Za-z0-9_("']/,
+    what:'a cast' },
+  { id:'switch', re:/\bswitch\s*\(/, what:'switch' },
+  { id:'proto',  re:/^[ \t]*(?:unsigned |signed |const |static )*(?:void|int|char|long|short|float|double)[ \t*]+[a-zA-Z_]\w*\s*\([^;{]*\)\s*;[ \t]*$/m,
+    what:'a forward prototype' },
+  { id:'struct', re:/\b(struct|union|typedef)\b/, what:'struct, union or typedef' },
+  { id:'fnptr',  re:/\(\s*\*\s*[A-Za-z_]\w*\s*\)\s*\(/, what:'a function pointer' },
+];
+function examEngineLimit(src) {
+  for (const L of ENGINE_LIMITS) if (L.re.test(src)) return L;
+  return null;
+}
+
+const EXAM_STEP_BUDGET = 200000;
+
+/* One execution. Returns a verdict whose `kind` distinguishes the failures the
+   learner must tell apart. stdout is REBUILT from the output steps: r.output
+   merges the two streams, so comparing it to an expected stdout would be wrong
+   for any program that also writes to fd 2. */
+function examExecute(src, args, budget) {
+  const lim = examEngineLimit(src);
+  if (lim) return { kind:'engine-limit', limit:lim,
+    message:'Browser engine limitation: this engine does not parse ' + lim.what + '. ' +
+            (lim.note || 'Your code may be perfectly correct — it cannot be RUN here. ' +
+             'Rewrite without it, or use the local compiler bridge.') };
+  let r;
+  try { r = CEngine.createRun(src, { args: args || [], argv0: './a.out' }); }
+  catch (e) { return { kind:'compile', message: e.message }; }
+  if (!r.ok) return { kind:'compile', message: r.error.message, line: r.error.line };
+
+  const st = r.stepper;
+  let n = 0, err = null, timedOut = false;
+  const cap = budget || EXAM_STEP_BUDGET;
+  try {
+    for (;;) {
+      const x = st.gen.next();
+      if (x.done) break;
+      if (++n > cap) { timedOut = true; break; }
+    }
+  } catch (e) { err = e; }
+
+  let out = '', errOut = '';
+  for (const s of st.history.steps) {
+    if (!s.detail || s.detail.stream === undefined || !s.detail.bytes) continue;
+    let t = '';
+    for (const b of s.detail.bytes) t += String.fromCharCode(b.value);
+    if (s.detail.stream === 'stderr') errOut += t; else out += t;
+  }
+  if (timedOut) return { kind:'timeout', stdout:out, stderr:errOut, steps:n,
+    message:'Timeout: still running after ' + cap.toLocaleString() + ' steps. That is a loop that does not end, ' +
+            'or an algorithm far more expensive than this problem needs — not a wrong answer.' };
+  if (err) return { kind:'runtime', stdout:out, stderr:errOut, steps:n,
+    message: err.message, memSafety: !!err.memSafety, detail: err.details || null };
+  return { kind:'ok', stdout:out, stderr:errOut, steps:n };
+}
+
+/* Forbidden-function check, from the exercise's own list. The -42 rule is the
+   most expensive mistake in the real exam, so it is checked before output. */
+function examForbidden(ex, src) {
+  const allowed = new Set((ex.allowed_functions || []).concat(
+    ['main', 'if', 'while', 'for', 'return', 'sizeof', 'do', 'else']));
+  const called = new Set();
+  const re = /([A-Za-z_]\w*)\s*\(/g;
+  let m;
+  const defined = new Set();
+  const dre = /(?:^|\n)[ \t]*(?:unsigned |signed |const |static )*(?:void|int|char|long|short|float|double)[ \t*]+\**([a-z_]\w*)\s*\(/g;
+  while ((m = dre.exec(src))) defined.add(m[1]);
+  while ((m = re.exec(src))) {
+    const name = m[1];
+    if (defined.has(name) || allowed.has(name)) continue;
+    if (/^(if|while|for|return|switch|sizeof|do|else)$/.test(name)) continue;
+    called.add(name);
+  }
+  return [...called];
+}
+
+/* Check a submission against every declared case. */
+function examCheck(ex, src) {
+  const forbidden = examForbidden(ex, src);
+  if (forbidden.length) return { verdict:'forbidden', forbidden,
+    message:'Forbidden function' + (forbidden.length > 1 ? 's' : '') + ': ' + forbidden.join(', ') +
+            '. The subject allows only: ' + ((ex.allowed_functions || []).join(', ') || 'none') +
+            '. In the real exam this is graded -42.' };
+  const cases = (ex.io && ex.io.cases) || [];
+  if (!cases.length) {
+    const r = examExecute(src, []);
+    return { verdict: r.kind === 'ok' ? 'ran' : r.kind, runs:[{ args:[], r }], message:r.message || '' };
+  }
+  const runs = [];
+  let pass = 0;
+  for (const [args, expect] of cases) {
+    const r = examExecute(src, args);
+    const ok = r.kind === 'ok' && r.stdout === expect;
+    if (ok) pass++;
+    runs.push({ args, expect, r, ok });
+  }
+  const firstBad = runs.find(x => !x.ok);
+  let verdict = 'pass';
+  if (pass !== runs.length) {
+    verdict = firstBad.r.kind === 'ok' ? 'wrong-output' : firstBad.r.kind;
+  }
+  return { verdict, runs, passed: pass, total: runs.length,
+    message: verdict === 'pass' ? 'All ' + runs.length + ' cases passed.' : (firstBad.r.message || '') };
+}
+
+/* ------------------------------------------------------------ small helpers */
+const xAll = () => (typeof EXAM_EXERCISES !== 'undefined' ? EXAM_EXERCISES : []);
+const xById = (id) => xAll().find(x => x.id === id) || null;
+const xSolved = (id) => examProgress.isSolved(id);
+
+function xBadge(x) {
+  const g = EXAM_GATE_LABEL[x.studied_status] || EXAM_GATE_LABEL.STUDIED;
+  return '<span class="x-gate ' + g.tone + '">' + xEsc(g.text) + '</span>';
+}
+function xDiffBar(d) {
+  return '<span class="x-diff">' + EXAM_DIFFICULTY_AXES.map(([k, label]) =>
+    '<i title="' + xEsc(label) + ': ' + d[k] + ' of 5" style="--v:' + d[k] + '"></i>').join('') + '</span>';
+}
+function xCard(x) {
+  return '<button class="x-card" data-xopen="' + xEsc(x.id) + '">' +
+    '<span class="x-card-h"><b>' + xEsc(x.title) + '</b>' +
+      '<span class="x-band">' + xEsc(x.band) + '</span>' +
+      (xSolved(x.id) ? '<span class="x-solved">solved</span>' : '') + '</span>' +
+    '<span class="x-card-b">' + xEsc(x.brief.slice(0, 150)) + (x.brief.length > 150 ? '…' : '') + '</span>' +
+    '<span class="x-card-f">' + xDiffBar(x.difficulty) + xBadge(x) +
+      '<span class="x-subs">' + x.required_subjects.join(' ') + '</span></span></button>';
+}
+function xList(items, empty) {
+  if (!items.length) return '<p class="x-empty">' + xEsc(empty || 'Nothing here yet.') + '</p>';
+  return '<div class="x-grid">' + items.map(xCard).join('') + '</div>';
+}
+
+/* =============================== NAVIGATION =============================== */
+const XPAGES = [
+  ['recoding',  'Recoding Prep',            'C00–C07, organised by the situations you actually meet'],
+  ['exam',      'Final Exam Prep',          'Practice and a configurable simulator'],
+  ['browse',    'Practice Browser',         'Every exercise, filterable'],
+  ['skills',    'Skills & Algorithms',      'Taught before they are asked for'],
+  ['functions', 'String Function Trainer',  'The family you keep confusing'],
+  ['cross',     'Cross-Subject Challenges', 'Problems that need more than one subject'],
+  ['projects',  'My Projects',              'Named practice that survives a reload'],
+  ['progress',  'Progress',                 'What to practise next, from real attempts'],
+];
+
+function showExam(page) {
+  ui.view = 'exam';
+  if (page) { xs.page = page; xs.ex = null; }
+  $('#dashRoot').style.display = 'none';
+  if (typeof hideLab === 'function') hideLab();
+  if (typeof hideLearn === 'function') hideLearn();
+  $('#railHome').classList.remove('active');
+  $('#railWork').classList.remove('active');
+  const b = $('#railExam');
+  if (b) b.classList.add('active');
+  renderExam();
+  $('#examRoot').style.display = 'block';
+}
+function hideExam() {
+  const r = $('#examRoot');
+  if (r) { r.style.display = 'none'; r.innerHTML = ''; }
+  const b = $('#railExam');
+  if (b) b.classList.remove('active');
+}
+
+/* =============================== RECODING ================================= */
+/* The learner's own categories, each a filter over skills — no exercise is
+   duplicated into a category list. */
+const RECODE_CATS = [
+  { id:'strings', label:'Strings',  blurb:'Traversal, case, replacement, filtering, reversal, comparison, copying, concatenation, searching, ASCII.',
+    skills:['STRING_SCAN','CHAR_CLASSIFICATION','TRANSFORMATION','REVERSE_TRAVERSAL','COMPARISON','SUBSTRING_SEARCH','ASCII','FILTERING'] },
+  { id:'words',   label:'Words',    blurb:'Boundaries, counting, extraction, order, separators, longest and shortest, masking, initials, sorting.',
+    skills:['WORD_DETECTION'] },
+  { id:'argv',    label:'argc / argv', blurb:'Validation, traversal, argv[0], several arguments, comparing and combining them.',
+    skills:['ARGC_ARGV'] },
+  { id:'numbers', label:'Numbers in strings', blurb:'Digits, multi-digit numbers, extraction, sums, ordering, mixing numbers and text.',
+    skills:['NUMBER_CONSTRUCTION','NUMBER_DECOMPOSITION','BASE_CONVERSION'] },
+  { id:'pointers',label:'Pointers & arrays', blurb:'char *, char **, int *, arrays of strings, arithmetic, dereferencing, & and *.',
+    skills:['POINTER_MANIPULATION','ARRAY_TRAVERSAL','DYNAMIC_MEMORY'] },
+  { id:'sorting', label:'Sorting & ordering', blurb:'Bubble sort, insertion sort, comparison functions, stability.',
+    skills:['SORTING'] },
+];
+
+/* The main() explainer. Not an exercise — the thing the learner said they need
+   to be able to state out loud. */
+const MAIN_NOTES = [
+  ['int main(int argc, char **argv)',
+   'The only entry point. The two parameters are given to you by whatever launched the program; you never fill them in.'],
+  ['argc',
+   'A COUNT of the strings in argv, including the program name. So the last usable index is argc - 1, and "one argument" means argc == 2.'],
+  ['argv',
+   'An array of pointers to characters. Each argv[i] is the address of the first character of a NUL-terminated string.'],
+  ['why char **',
+   'argv[i] is a char * — a string. An ARRAY of those, passed to a function, decays to a pointer to its first element: a pointer to a char *, written char **.'],
+  ['argv[0]',
+   'The name the program was invoked with. It is data, not something you print by accident: most exercises must skip it.'],
+  ['argv[1]',
+   'The first real argument. It exists only when argc >= 2 — checking that FIRST is what the argc guard is for.'],
+  ['array versus pointer',
+   'char s[10] reserves ten bytes and s names them. char *p reserves a pointer. Both allow p[i], but only the array owns storage.'],
+  ['* (dereference)',
+   'Given an address, * reads or writes the thing at it. *p = 7 changes the caller’s object; p = &x changes only your local copy of the address.'],
+  ['& (address-of)',
+   'Produces the address of an object. Needed at the CALL SITE when a function wants to write to your variable: ft_swap(&a, &b).'],
+  ['when & is NOT required',
+   'When you already hold an address. An array name is already the address of its first element, so ft_strlen(str) — never &str. Same for argv[1].'],
+  ['char * versus char **',
+   'char * points at characters. char ** points at a char *. argv is char ** because it points at a list of strings, not at letters.'],
+];
+
+function xRecoding() {
+  const all = xAll().filter(x => x.track === 'C00-C08' && x.studied_status === 'STUDIED');
+  if (xs.sub === 'main') {
+    return '<header class="x-head"><h1>The main function</h1>' +
+      '<p class="x-sub">Everything the two parameters mean. If you can say these out loud, argv stops being a mystery.</p></header>' +
+      '<div class="x-notes">' + MAIN_NOTES.map(([k, v]) =>
+        '<div class="x-note"><b class="mono">' + xEsc(k) + '</b><p>' + xEsc(v) + '</p></div>').join('') + '</div>' +
+      '<div class="x-sec-h">Practise it</div>' +
+      xList(all.filter(x => x.skills.includes('ARGC_ARGV') || x.skills.includes('POINTER_MANIPULATION')).slice(0, 12));
+  }
+  const cat = RECODE_CATS.find(c => c.id === xs.sub);
+  if (cat) {
+    const items = all.filter(x => x.skills.some(s => cat.skills.includes(s)))
+      .sort((a, b) => a.band.localeCompare(b.band) || a.difficulty.combination - b.difficulty.combination);
+    return '<header class="x-head"><button class="x-back" data-xsub="">← all categories</button>' +
+      '<h1>' + xEsc(cat.label) + '</h1><p class="x-sub">' + xEsc(cat.blurb) + '</p></header>' +
+      '<p class="x-count">' + items.length + ' exercises, easiest first.</p>' + xList(items);
+  }
+  return '<header class="x-head"><h1>Recoding Prep — C00 to C07</h1>' +
+    '<p class="x-sub">Organised by the situation you meet, not by which subject introduced it. ' +
+    'Every exercise here needs only subjects you have studied.</p></header>' +
+    '<div class="x-cats">' +
+      RECODE_CATS.map(c => {
+        const n = all.filter(x => x.skills.some(s => c.skills.includes(s))).length;
+        const done = all.filter(x => x.skills.some(s => c.skills.includes(s)) && xSolved(x.id)).length;
+        return '<button class="x-cat" data-xsub="' + c.id + '"><b>' + xEsc(c.label) + '</b>' +
+          '<span>' + xEsc(c.blurb) + '</span><i>' + done + ' / ' + n + ' solved</i></button>';
+      }).join('') +
+      '<button class="x-cat main" data-xsub="main"><b>The main function</b>' +
+      '<span>argc, argv, char *, char **, arrays versus pointers, and exactly when &amp; is required.</span>' +
+      '<i>reference + practice</i></button>' +
+    '</div>';
+}
+
+/* ============================== EXERCISE VIEW ============================= */
+const HINT_LADDER = [
+  ['Understand the task', (x) => 'Read it again and answer three things: what exactly is the input, what exactly is the output, and what happens for the input you were NOT told about — ' +
+    (x.edge_cases && x.edge_cases.length ? 'the subject already hints at ' + x.edge_cases[0] + '.' : 'start with the empty input.')],
+  ['Which skill is this', (x) => 'This is trained by: ' + x.skills.join(', ') + '. ' +
+    'If you can name the skill you can usually name the loop.'],
+  ['Which algorithm', (x) => {
+    const p = (typeof EXAM_PATTERNS !== 'undefined' ? EXAM_PATTERNS : []).find(p => x.algorithm_patterns.indexOf(p.id) >= 0);
+    return p ? p.structure + '  Recognise it by: ' + p.recognise : 'Decompose it into one loop per stage and name what each stage produces.';
+  }],
+  ['The shape, in pseudocode', (x) => {
+    const p = (typeof ALGO_LESSONS !== 'undefined' ? ALGO_LESSONS : [])
+      .find(l => l.skills.some(s => x.skills.indexOf(s) >= 0));
+    return p ? p.pseudo : 'State the loop bounds and the variable each stage updates, then write it.';
+  }],
+];
+
+function xHints(x) {
+  let h = '<div class="x-hints"><div class="x-sec-h">Hints — ' + xs.hints + ' of ' + HINT_LADDER.length + ' used</div>';
+  for (let i = 0; i < xs.hints && i < HINT_LADDER.length; i++) {
+    h += '<div class="x-hint"><b>' + (i + 1) + '. ' + xEsc(HINT_LADDER[i][0]) + '</b><p>' +
+      xEsc(HINT_LADDER[i][1](x)) + '</p></div>';
+  }
+  if (xs.hints < HINT_LADDER.length) {
+    h += '<button class="x-btn ghost" data-xhint="1">' +
+      (xs.hints === 0 ? 'I am stuck — nudge me' : 'still stuck — next hint') + '</button>';
+  } else {
+    h += '<p class="x-hint-end">That is every hint. There is no fifth one containing the code. ' +
+      'If you are still stuck, trace your own input by hand and write down what changes each step.</p>';
+  }
+  return h + '</div>';
+}
+
+function xVerdict(v) {
+  if (!v) return '';
+  const KIND = {
+    pass:          ['ok',   'Passed'],
+    'wrong-output':['warn', 'Wrong output'],
+    'engine-limit':['info', 'Browser engine limitation'],
+    compile:       ['bad',  'Compilation error'],
+    runtime:       ['bad',  'Runtime error'],
+    timeout:       ['warn', 'Timeout'],
+    forbidden:     ['bad',  'Forbidden function'],
+    ran:           ['ok',   'Ran'],
+  };
+  const k = KIND[v.verdict] || ['bad', v.verdict];
+  let h = '<div class="x-verdict ' + k[0] + '"><b>' + xEsc(k[1]) + '</b>' +
+    (v.passed !== undefined ? '<span>' + v.passed + ' / ' + v.total + ' cases</span>' : '') + '</div>';
+  if (v.message) h += '<p class="x-vmsg">' + xEsc(v.message) + '</p>';
+  if (v.runs) {
+    h += '<table class="x-cases"><thead><tr><th></th><th>arguments</th><th>expected</th><th>got</th></tr></thead><tbody>' +
+      v.runs.map(r => '<tr class="' + (r.ok ? 'ok' : 'bad') + '"><td>' + (r.ok ? '✓' : '✕') + '</td>' +
+        '<td class="mono">' + xEsc(r.args.length ? r.args.map(a => JSON.stringify(a)).join(' ') : '(none)') + '</td>' +
+        '<td class="mono">' + xEsc(JSON.stringify(r.expect)) + '</td>' +
+        '<td class="mono">' + xEsc(r.r.kind === 'ok' ? JSON.stringify(r.r.stdout) : '— ' + r.r.kind) + '</td></tr>').join('') +
+      '</tbody></table>';
+    const anyErr = v.runs.find(r => r.r.stderr);
+    if (anyErr) h += '<div class="x-stderr"><b>stderr</b><pre>' + xEsc(anyErr.r.stderr) + '</pre></div>';
+  }
+  return h;
+}
+
+function xExercise(x) {
+  const blind = xs.mode === 'blind' || xs.mode === 'challenge' || xs.mode === 'validation';
+  const solved = xSolved(x.id);
+  const canSolve = xs.attempted || solved;
+  let h = '<header class="x-head ex"><button class="x-back" data-xopen="">← back</button>' +
+    '<h1>' + xEsc(x.title) + '</h1>' +
+    '<div class="x-meta">' + xBadge(x) + '<span class="x-band big">Band ' + xEsc(x.band) + '</span>' +
+    xDiffBar(x.difficulty) +
+    '<span class="x-subs">' + x.required_subjects.join(' ') + '</span>' +
+    '<span class="x-srct">' + xEsc((EV_LABEL[x.source_type] || {}).text || x.source_type) + '</span></div></header>';
+
+  if (x.studied_status !== 'STUDIED') {
+    h += '<div class="x-gatebox"><b>' + xEsc((EXAM_GATE_LABEL[x.studied_status] || {}).text) + '</b>' +
+      '<p>' + xEsc((EXAM_GATE_LABEL[x.studied_status] || {}).blurb) + '</p>' +
+      (x.missing_subjects.length ? '<p>It needs ' + x.missing_subjects.join(', ') +
+        ', which you have not studied. Not understanding the algorithm and not having studied the subject are different problems — ' +
+        'this is the second one.</p>' : '') + '</div>';
+  }
+
+  h += '<div class="x-task"><div class="x-sec-h">The problem</div><p class="x-brief">' + xEsc(x.brief) + '</p>' +
+    '<div class="x-allowed"><b>Allowed functions</b><span class="mono">' +
+      xEsc((x.allowed_functions || []).join(', ') || 'none') + '</span></div>' +
+    (x.io.argv ? '<div class="x-io"><b>Input</b><span>' + xEsc(x.io.argv) + '</span></div>' : '') +
+    (x.io.stdout ? '<div class="x-io"><b>Output</b><span>' + xEsc(x.io.stdout) + '</span></div>' : '') +
+    (x.note ? '<p class="x-exnote">' + xEsc(x.note) + '</p>' : '') + '</div>';
+
+  /* Examples and edge cases are part of the problem, not a hint. */
+  if (x.io.cases && x.io.cases.length) {
+    h += '<div class="x-sec-h">Examples</div><table class="x-cases"><thead><tr><th>arguments</th><th>output</th></tr></thead><tbody>' +
+      x.io.cases.slice(0, 4).map(([a, e]) => '<tr><td class="mono">' +
+        xEsc(a.length ? a.map(v => JSON.stringify(v)).join(' ') : '(none)') + '</td><td class="mono">' +
+        xEsc(JSON.stringify(e)) + '</td></tr>').join('') + '</tbody></table>';
+  }
+  if (x.edge_cases && x.edge_cases.length) {
+    h += '<div class="x-sec-h">Edge cases the examiner will try</div><ul class="x-edges">' +
+      x.edge_cases.map(e => '<li>' + xEsc(e) + '</li>').join('') + '</ul>';
+  }
+
+  /* Editor */
+  const buf = xs.src[x.id] !== undefined ? xs.src[x.id] :
+    'int\tmain(int argc, char **argv)\n{\n\t\n\treturn (0);\n}\n';
+  h += '<div class="x-sec-h">Your code</div>' +
+    '<textarea class="x-editor" id="xEditor" spellcheck="false">' + xEsc(buf) + '</textarea>' +
+    '<div class="x-actions">' +
+      '<button class="x-btn primary" data-xact="check">Run &amp; check</button>' +
+      '<button class="x-btn" data-xact="run">Run once</button>' +
+      '<button class="x-btn ghost" data-xact="reset">Reset</button>' +
+      (blind ? '' : '<button class="x-btn ghost" data-xact="hint">Hint</button>') +
+      (x.reference_solution
+        ? '<button class="x-btn ghost' + (canSolve ? '' : ' locked') + '" data-xact="solution"' +
+          (canSolve ? '' : ' disabled title="Attempt it first"') + '>Reference solution</button>'
+        : '') +
+    '</div>';
+
+  if (xs.result) h += '<div class="x-result">' + xVerdict(xs.result) + '</div>';
+  if (!blind && xs.hints) h += xHints(x);
+  else if (!blind) h += xHints(x);
+
+  if (xs.showSolution && x.reference_solution && canSolve) {
+    h += '<div class="x-sec-h">Reference solution</div>' +
+      '<div class="x-solnote">' + xEsc(EXAM_AI_RULES.ours) + '</div>' +
+      '<pre class="x-sol">' + xEsc(x.reference_solution) + '</pre>';
+  } else if (xs.showSolution && !canSolve) {
+    h += '<p class="x-empty">Attempt it first. The solution unlocks after you have run a check.</p>';
+  }
+
+  /* Source and pattern only AFTER solving — before that it gives the shape away. */
+  if (solved) {
+    h += '<div class="x-sec-h">Where this came from</div><div class="x-prov"><p>' +
+      xEsc((EV_LABEL[x.source_type] || {}).note || '') + '</p>' +
+      (x.inspiredBy ? '<p>Pattern trained: <b>' + xEsc(x.inspiredBy) + '</b></p>' : '') +
+      (x.crossSubject ? '<p>Cross-subject: <b>' + xEsc(x.crossSubject) + '</b></p>' : '') + '</div>';
+  } else if (x.hideInspiration) {
+    h += '<p class="x-hidden">The pattern behind this one stays hidden until you solve it. Naming it would hand you the algorithm.</p>';
+  }
+  return h;
+}
+
+/* ================================ BROWSER ================================= */
+function xFilterSet() {
+  const f = xs.filters;
+  return xAll().filter(x => {
+    if (f.track && x.track !== f.track) return false;
+    if (f.subject && x.required_subjects.indexOf(f.subject) < 0) return false;
+    if (f.skill && x.skills.indexOf(f.skill) < 0) return false;
+    if (f.band && x.band !== f.band) return false;
+    if (f.source && x.source_type !== f.source) return false;
+    if (f.solved === 'yes' && !xSolved(x.id)) return false;
+    if (f.solved === 'no' && xSolved(x.id)) return false;
+    if (f.q) {
+      const hay = (x.title + ' ' + x.brief + ' ' + x.skills.join(' ') + ' ' +
+        x.algorithm_patterns.join(' ')).toLowerCase();
+      if (hay.indexOf(f.q.toLowerCase()) < 0) return false;
+    }
+    return true;
+  });
+}
+function xSelect(name, value, options, label) {
+  return '<label class="x-f"><span>' + xEsc(label) + '</span><select data-xfilter="' + name + '">' +
+    options.map(([v, t]) => '<option value="' + xEsc(v) + '"' + (v === value ? ' selected' : '') + '>' +
+      xEsc(t) + '</option>').join('') + '</select></label>';
+}
+function xBrowse() {
+  const items = xFilterSet();
+  const subs = [['', 'any subject']].concat(EXAM_SUBJECTS.map(s => [s.id, s.id]));
+  const skills = [['', 'any skill']].concat(EXAM_SKILLS.map(s => [s.id, s.label]));
+  return '<header class="x-head"><h1>Practice Browser</h1>' +
+    '<p class="x-sub">Every exercise in the database, filterable. ' + xAll().length + ' in total.</p></header>' +
+    '<div class="x-filters">' +
+      '<label class="x-f wide"><span>search</span><input data-xfilter="q" value="' + xEsc(xs.filters.q) +
+        '" placeholder="title, brief, skill or pattern"></label>' +
+      xSelect('track', xs.filters.track, [['', 'both tracks'], ['C00-C08', 'Track A — C00–C08'],
+        ['C09-C13', 'Track B — C09–C13'], ['C00-C13-MIXED', 'cross-track']], 'track') +
+      xSelect('subject', xs.filters.subject, subs, 'subject') +
+      xSelect('skill', xs.filters.skill, skills, 'skill') +
+      xSelect('band', xs.filters.band, [['', 'any band']].concat(EXAM_BANDS.map(b => [b.id, b.id + ' — ' + b.label])), 'band') +
+      xSelect('source', xs.filters.source, [['', 'any source'], ['generated', 'generated practice'],
+        ['historical', 'historical'], ['official', 'official']], 'source') +
+      xSelect('solved', xs.filters.solved, [['', 'solved or not'], ['no', 'not solved yet'], ['yes', 'solved']], 'progress') +
+      '<button class="x-btn ghost" data-xact="random">Random</button>' +
+      '<button class="x-btn ghost" data-xact="unseen">Something I have never solved</button>' +
+      '<button class="x-btn ghost" data-xact="clearf">Clear</button>' +
+    '</div>' +
+    '<p class="x-count">' + items.length + ' matching.</p>' + xList(items, 'Nothing matches those filters.');
+}
+
+/* ============================== SKILLS / ALGO ============================= */
+function xSkills() {
+  const L = ALGO_LESSONS.find(l => l.id === xs.algo) || ALGO_LESSONS[0];
+  return '<header class="x-head"><h1>Skills &amp; Algorithms</h1>' +
+    '<p class="x-sub">Each one taught before it is asked for: what it solves, how to recognise it, ' +
+    'the mental model, the steps, pseudocode, the mistakes, the edges — then practice.</p></header>' +
+    '<div class="x-split"><nav class="x-side">' +
+      ALGO_LESSONS.map(l => '<button class="x-sideb' + (l.id === L.id ? ' on' : '') +
+        '" data-xalgo="' + l.id + '">' + xEsc(l.title) + '</button>').join('') +
+    '</nav><div class="x-sidemain">' +
+      '<h2>' + xEsc(L.title) + '</h2>' +
+      '<div class="x-l"><b>What it solves</b><p>' + xEsc(L.solves) + '</p></div>' +
+      '<div class="x-l"><b>How to recognise it</b><p>' + xEsc(L.recognise) + '</p></div>' +
+      '<div class="x-l"><b>Mental model</b><p>' + xEsc(L.model) + '</p></div>' +
+      '<div class="x-l"><b>Step by step</b><ol>' + L.steps.map(s => '<li>' + xEsc(s) + '</li>').join('') + '</ol></div>' +
+      '<div class="x-l"><b>Pseudocode</b><pre>' + xEsc(L.pseudo) + '</pre></div>' +
+      '<div class="x-l"><b>Common mistakes</b><ul>' + L.mistakes.map(s => '<li>' + xEsc(s) + '</li>').join('') + '</ul></div>' +
+      '<div class="x-l"><b>Edge cases</b><ul>' + L.edges.map(s => '<li>' + xEsc(s) + '</li>').join('') + '</ul></div>' +
+      '<div class="x-l"><b>Example</b><p>' + xEsc(L.example) + '</p></div>' +
+      ((L.id === 'bubble' || L.id === 'insertion') ? xSortTrainer() : '') +
+      '<div class="x-sec-h">Now practise it</div>' +
+      xList(L.practice.map(xById).filter(Boolean), 'No practice linked yet.') +
+    '</div></div>';
+}
+
+/* ============================ FUNCTION TRAINER =========================== */
+function xFunctions() {
+  const tab = xs.sub || 'table';
+  const F = FUNC_TRAINER.find(f => f.id === xs.fn) || FUNC_TRAINER[0];
+  let h = '<header class="x-head"><h1>String Function Trainer</h1>' +
+    '<p class="x-sub">The ten string functions the supplied subjects actually specify. ' +
+    'Prototype, exercise number and allowed list are quoted from the subject; behaviour is the man contract the subject points at.</p></header>' +
+    '<div class="x-tabs">' + [['table', 'Comparison table'], ['detail', 'One function'],
+      ['pairs', 'Deceptive pairs'], ['quiz', 'Recognition quiz'], ['explain', 'Explain it back'],
+      ['implement', 'Implement from memory']]
+      .map(([k, t]) => '<button class="x-tab' + (tab === k ? ' on' : '') + '" data-xsub="' + k + '">' +
+        xEsc(t) + '</button>').join('') + '</div>';
+
+  if (tab === 'table') {
+    h += '<div class="x-scroll"><table class="x-ftable"><thead><tr>' +
+      '<th>function</th><th>subject</th><th>what it does</th><th>returns</th><th>terminator</th><th>the distinction</th>' +
+      '</tr></thead><tbody>' + FUNC_TRAINER.map(f =>
+        '<tr><td><button class="x-flink" data-xfn="' + f.id + '">' + xEsc(f.name) + '</button>' +
+          '<div class="x-proto mono">' + xEsc(f.proto) + '</div></td>' +
+        '<td class="mono">' + xEsc(f.subject + ' ' + f.ex) + '<br><span class="x-al">allowed: ' + xEsc(f.allowed) + '</span></td>' +
+        '<td>' + xEsc(f.purpose) + '</td><td>' + xEsc(f.returns) + '</td>' +
+        '<td>' + xEsc(f.nul) + '</td><td>' + xEsc(f.distinct) + '</td></tr>').join('') +
+      '</tbody></table></div>' +
+      '<div class="x-excl"><b>Not here, on purpose</b>' + FUNC_TRAINER_EXCLUDED.map(e =>
+        '<p><span class="mono">' + xEsc(e.name) + '</span> — ' + xEsc(e.why) + '</p>').join('') + '</div>';
+  } else if (tab === 'detail') {
+    h += '<div class="x-split"><nav class="x-side">' + FUNC_TRAINER.map(f =>
+      '<button class="x-sideb' + (f.id === F.id ? ' on' : '') + '" data-xfn="' + f.id + '">' +
+      xEsc(f.name) + '</button>').join('') + '</nav><div class="x-sidemain">' +
+      '<h2 class="mono">' + xEsc(F.proto) + '</h2>' +
+      '<p class="x-src2">' + xEsc(F.subject + ' ' + F.ex) + ' · allowed: ' + xEsc(F.allowed) +
+        ' · behaviour from ' + xEsc(F.behaviourFrom) + '</p>' +
+      '<div class="x-l"><b>Purpose</b><p>' + xEsc(F.purpose) + '</p></div>' +
+      '<div class="x-l"><b>Parameters</b><ul>' + F.params.map(([n, d]) =>
+        '<li><span class="mono">' + xEsc(n) + '</span> — ' + xEsc(d) + '</li>').join('') + '</ul></div>' +
+      '<div class="x-l"><b>Return</b><p>' + xEsc(F.returns) + '</p></div>' +
+      '<div class="x-l"><b>Behaviour</b><p>' + xEsc(F.behaviour) + '</p></div>' +
+      '<div class="x-l"><b>Terminator</b><p>' + xEsc(F.nul) + '</p></div>' +
+      '<div class="x-l"><b>Source</b><p>' + xEsc(F.src) + '</p></div>' +
+      '<div class="x-l"><b>Destination</b><p>' + xEsc(F.dest) + '</p></div>' +
+      '<div class="x-l"><b>Edge cases</b><ul>' + F.edges.map(e => '<li>' + xEsc(e) + '</li>').join('') + '</ul></div>' +
+      '<div class="x-l warn"><b>The distinction</b><p>' + xEsc(F.distinct) + '</p></div>' +
+      '<div class="x-l"><b>In memory</b><pre>' + xEsc(F.memory) + '</pre></div>' +
+      '<div class="x-l"><b>A canonical implementation</b><pre>' + xEsc(F.impl) + '</pre></div>' +
+      '</div></div>';
+  } else if (tab === 'pairs') {
+    h += '<div class="x-pairs">' + FUNC_PAIRS.map(([a, b, why]) => {
+      const A = FUNC_TRAINER.find(f => f.id === a), B = FUNC_TRAINER.find(f => f.id === b);
+      return '<div class="x-pair"><div class="x-pair-h"><span class="mono">' + xEsc(A.name) +
+        '</span><i>versus</i><span class="mono">' + xEsc(B.name) + '</span></div>' +
+        '<div class="x-pair-b"><div><b>' + xEsc(A.name) + '</b><p class="mono sm">' + xEsc(A.proto) + '</p>' +
+          '<p>' + xEsc(A.nul) + '</p></div>' +
+        '<div><b>' + xEsc(B.name) + '</b><p class="mono sm">' + xEsc(B.proto) + '</p>' +
+          '<p>' + xEsc(B.nul) + '</p></div></div>' +
+        '<p class="x-pair-w">' + xEsc(why) + '</p></div>';
+    }).join('') + '</div>';
+  } else if (tab === 'quiz') {
+    const q = FUNC_QUIZ[xs.quiz.i % FUNC_QUIZ.length];
+    h += '<div class="x-quiz"><p class="x-qscore">' + xs.quiz.score + ' correct of ' + xs.quiz.asked + ' answered</p>' +
+      '<h2>' + xEsc(q.q) + '</h2><div class="x-qopts">' +
+      FUNC_TRAINER.map(f => {
+        let cls = '';
+        if (xs.quiz.picked) {
+          if (f.id === q.a) cls = ' right';
+          else if (f.id === xs.quiz.picked) cls = ' wrong';
+        }
+        return '<button class="x-qopt' + cls + '" data-xquiz="' + f.id + '"' +
+          (xs.quiz.picked ? ' disabled' : '') + '>' + xEsc(f.name) + '</button>';
+      }).join('') + '</div>' +
+      (xs.quiz.picked ? '<div class="x-qwhy"><b>' +
+        (xs.quiz.picked === q.a ? 'Correct.' : 'Not that one — it is ' + xEsc(q.a) + '.') +
+        '</b><p>' + xEsc(q.why) + '</p></div>' +
+        '<button class="x-btn primary" data-xact="qnext">Next question</button>' : '') +
+      '</div>';
+  } else if (tab === 'explain') {
+    h += '<p class="x-sub">The other direction: you are given the function, and you say what it does. ' +
+      'Answer out loud or on paper FIRST, then open the card and mark yourself.</p><div class="x-explain">' +
+      FUNC_EXPLAIN.map(e => '<details class="x-q"><summary><span class="mono">' + xEsc(e.name) +
+        '</span> — what does it do, what does it return, and what does it do about the terminator?</summary>' +
+        '<ul>' + e.expect.map(t => '<li>' + xEsc(t) + '</li>').join('') + '</ul></details>').join('') + '</div>';
+  } else {
+    h += '<p class="x-sub">Reproduce the behaviour from memory. The prototype is the subject’s; ' +
+      'your implementation is checked by running it.</p>' +
+      '<div class="x-split"><nav class="x-side">' + FUNC_TRAINER.map(f =>
+        '<button class="x-sideb' + (f.id === F.id ? ' on' : '') + '" data-xfn="' + f.id + '">' +
+        xEsc(f.name) + '</button>').join('') + '</nav><div class="x-sidemain">' +
+      '<h2 class="mono">' + xEsc(F.proto) + '</h2>' +
+      '<p class="x-src2">Allowed: ' + xEsc(F.allowed) + '. Write the function and a main that exercises it.</p>' +
+      '<textarea class="x-editor" id="xFnEditor" spellcheck="false">' +
+        xEsc(xs.src['fn.' + F.id] !== undefined ? xs.src['fn.' + F.id] : F.proto.replace(/;$/, '') + '\n{\n\t\n}\n') +
+      '</textarea>' +
+      '<div class="x-actions"><button class="x-btn primary" data-xact="fnrun">Run it</button>' +
+      '<button class="x-btn ghost" data-xact="fnreveal">Show the canonical version</button></div>' +
+      (xs.result ? '<div class="x-result">' + xVerdict(xs.result) + '</div>' : '') +
+      (xs.showSolution ? '<pre class="x-sol">' + xEsc(F.impl) + '</pre>' : '') +
+      '</div></div>';
+  }
+  return h;
+}
+
+/* Which sort fits? The reasoning is hidden until asked for, because being told
+   the answer before attempting is exactly what the learner asked to avoid. */
+const SORT_SCENARIOS = [
+  { s:'Twelve arguments, already almost in order — only two are out of place.',
+    a:'Insertion sort',
+    why:'Its inner loop does nothing for an element already in place, so nearly-ordered input costs almost one pass. Bubble sort only matches that if it carries a did-I-swap flag and stops early.' },
+  { s:'Five integers in a fixed array, order unknown, and you are under time pressure.',
+    a:'Either — write the one you can produce correctly first time',
+    why:'At n = 5 the difference is invisible. The real cost is a bug, so write whichever you can produce without hesitating. That is usually bubble sort if that is what you know.' },
+  { s:'Sorting an array of char * by ASCII order, where the strings must not move.',
+    a:'Either, but swap the POINTERS',
+    why:'The algorithm is not the interesting choice here. What matters is that you exchange the array entries, not the characters — that is why sorting argv is cheap.' },
+  { s:'The data arrives one element at a time and must stay sorted after each arrival.',
+    a:'Insertion sort',
+    why:'It is the only one of the two that is naturally incremental: each new element slides into an already-sorted region. Bubble sort has no notion of a partially built result.' },
+  { s:'Reverse-sorted input, and you must justify the number of comparisons.',
+    a:'Neither is better — both are O(n^2)',
+    why:'This is the worst case for both. Insertion sort shifts every element every time; bubble sort swaps every pair every pass. Do not claim one is faster here.' },
+];
+
+function xSortTrainer() {
+  return '<div class="x-sec-h">Bubble sort versus insertion sort</div>' +
+    '<div class="x-pair"><div class="x-pair-b">' +
+      '<div><b>Bubble sort</b><p>Compare NEIGHBOURS, swap when out of order. After each pass the largest ' +
+        'element has reached the end.</p><p class="mono sm">O(n^2) worst, O(n) best only with a swap flag</p></div>' +
+      '<div><b>Insertion sort</b><p>Hold one element and slide it back into an already-sorted region, ' +
+        'the way you sort a hand of cards.</p><p class="mono sm">O(n^2) worst, O(n) best naturally</p></div>' +
+    '</div><p class="x-pair-w">Both are short enough to write correctly under time pressure, which is the ' +
+      'property that actually matters in an exam. The difference that shows up in practice is nearly-ordered ' +
+      'input, where insertion sort does almost no work.</p></div>' +
+    '<div class="x-sec-h">Which one fits? Decide before you open the answer</div>' +
+    '<div class="x-explain">' + SORT_SCENARIOS.map(function (q, i) {
+      return '<details class="x-q"><summary>' + (i + 1) + '. ' + xEsc(q.s) + '</summary>' +
+        '<ul><li><b>' + xEsc(q.a) + '</b></li><li>' + xEsc(q.why) + '</li></ul></details>';
+    }).join('') + '</div>';
+}
+
+/* ============================== CROSS-SUBJECT ============================ */
+function xCross() {
+  const items = xAll().filter(x => x.crossSubject);
+  const groups = {};
+  for (const x of items) (groups[x.crossSubject] = groups[x.crossSubject] || []).push(x);
+  const keys = Object.keys(groups).sort();
+  return '<header class="x-head"><h1>Cross-Subject Challenges</h1>' +
+    '<p class="x-sub">Problems that genuinely need more than one subject at once. ' +
+    'Nothing here combines subjects to be difficult — the combination is what the problem actually requires.</p></header>' +
+    keys.map(k => '<div class="x-xg"><div class="x-sec-h">' + xEsc(k) + '</div>' + xList(groups[k])).join('</div>') + '</div>';
+}
+
+/* ================================ PROJECTS =============================== */
+function xProjects() {
+  const d = examProjects.get();
+  const cur = examProjects.currentProject();
+  let h = '<header class="x-head"><h1>My Projects</h1>' +
+    '<p class="x-sub">A named practice run that survives a reload. Stored under ' +
+    '<span class="mono">' + xEsc(EXAM_KEYS.projects) + '</span>, separately from your interface preferences.</p></header>';
+  h += '<div class="x-newp"><div class="x-sec-h">Create a project</div>' +
+    '<div class="x-form"><label><span>name</span><input id="xpName" placeholder="Recoding week 1" maxlength="80"></label>' +
+    '<label><span>track</span><select id="xpTrack">' +
+      '<option value="C00-C08">Track A — C00–C08</option>' +
+      '<option value="C09-C13">Track B — C09–C13</option></select></label>' +
+    '<label><span>mode</span><select id="xpMode">' +
+      '<option value="guided">Guided — hints available</option>' +
+      '<option value="blind">Blind — no hints</option>' +
+      '<option value="drill">Recoding drill — speed</option>' +
+      '<option value="validation">Validation — hard only</option></select></label>' +
+    '<button class="x-btn primary" data-xact="pcreate">Create</button></div></div>';
+  if (!d.list.length) return h + '<p class="x-empty">No projects yet.</p>';
+  h += '<div class="x-sec-h">' + d.list.length + ' project' + (d.list.length > 1 ? 's' : '') + '</div><div class="x-plist">' +
+    d.list.map(p => '<div class="x-proj' + (cur && cur.id === p.id ? ' on' : '') + '">' +
+      '<div class="x-proj-h"><b>' + xEsc(p.name) + '</b>' +
+        (cur && cur.id === p.id ? '<span class="x-cur">active</span>' : '') + '</div>' +
+      '<div class="x-proj-m"><span>' + xEsc(p.track) + '</span><span>' + xEsc(p.mode) + '</span>' +
+        '<span>' + new Date(p.created).toISOString().slice(0, 10) + '</span></div>' +
+      '<div class="x-proj-s"><span><b>' + p.solved.length + '</b> solved</span>' +
+        '<span><b>' + p.attempts + '</b> attempts</span>' +
+        '<span><b>' + p.skills.length + '</b> skills touched</span></div>' +
+      '<div class="x-proj-a">' +
+        (cur && cur.id === p.id ? '' : '<button class="x-btn ghost" data-xpsel="' + xEsc(p.id) + '">Make active</button>') +
+        '<button class="x-btn ghost danger" data-xpdel="' + xEsc(p.id) + '">Delete</button></div></div>').join('') +
+    '</div>';
+  return h;
+}
+
+/* ================================ PROGRESS =============================== */
+function xProgress() {
+  const p = examProgress.get();
+  const st = examStats(p);
+  const rec = examRecommend(xAll(), p);
+  const skills = examSkillStats(p);
+  let h = '<header class="x-head"><h1>Progress</h1>' +
+    '<p class="x-sub">Computed from ' + p.attempts.length + ' stored attempts. ' +
+    'No points, no streaks — the only question this page answers is what to practise next.</p></header>';
+  h += '<div class="x-stats">' + [
+    ['attempted', st.attempted], ['solved', st.solved], ['still unsolved', st.failed],
+    ['submissions', st.attempts], ['success rate', st.successRate + '%'],
+    ['average attempts to solve', st.avgAttemptsToSolve || '—'],
+  ].map(([k, v]) => '<div class="x-stat"><b>' + xEsc(String(v)) + '</b><span>' + xEsc(k) + '</span></div>').join('') + '</div>';
+
+  if (rec.cold) {
+    h += '<div class="x-cold"><b>Nothing recorded yet.</b><p>Recommendations here are built only from attempts you ' +
+      'have actually made, so until you submit something there is nothing honest to say. Start anywhere in ' +
+      'Recoding Prep — a few band A exercises are enough to make this page useful.</p></div>';
+  } else {
+    h += '<div class="x-two"><div><div class="x-sec-h">Strong</div>' +
+      (rec.strong.length ? '<ul class="x-sk">' + rec.strong.slice(0, 6).map(s =>
+        '<li><b>' + xEsc(s.id) + '</b><span>' + s.rate + '% of ' + s.seen + '</span></li>').join('') + '</ul>'
+        : '<p class="x-empty">Nothing has been seen ' + 3 + ' times yet.</p>') + '</div>' +
+      '<div><div class="x-sec-h">Needs practice</div>' +
+      (rec.weak.length ? '<ul class="x-sk weak">' + rec.weak.slice(0, 6).map(s =>
+        '<li><b>' + xEsc(s.id) + '</b><span>' + s.rate + '% of ' + s.seen + '</span></li>').join('') + '</ul>'
+        : '<p class="x-empty">No skill has dropped below 60% yet.</p>') + '</div></div>';
+  }
+  h += '<div class="x-sec-h">Recommended next</div>' +
+    (rec.picks.length ? '<div class="x-recs">' + rec.picks.map(r =>
+      '<button class="x-rec" data-xopen="' + xEsc(r.ex.id) + '"><b>' + xEsc(r.ex.title) + '</b>' +
+      '<span class="x-band">' + xEsc(r.ex.band) + '</span><i>' + xEsc(r.why) + '</i></button>').join('') + '</div>'
+      : '<p class="x-empty">Nothing left unsolved in Track A.</p>');
+
+  if (skills.length) {
+    h += '<div class="x-sec-h">Every skill you have touched</div><table class="x-sktable"><thead><tr>' +
+      '<th>skill</th><th>attempts</th><th>passed</th><th>rate</th></tr></thead><tbody>' +
+      skills.map(s => '<tr class="' + (s.judged ? (s.rate < 60 ? 'bad' : s.rate >= 80 ? 'ok' : '') : 'dim') + '">' +
+        '<td>' + xEsc(s.id) + '</td><td>' + s.seen + '</td><td>' + s.passed + '</td>' +
+        '<td>' + s.rate + '%' + (s.judged ? '' : ' <i>too few to judge</i>') + '</td></tr>').join('') +
+      '</tbody></table>';
+  }
+  h += '<div class="x-actions"><button class="x-btn ghost danger" data-xact="preset">Clear all progress</button></div>';
+  return h;
+}
+
+/* ============================= FINAL EXAM PREP =========================== */
+function xExamTabs() {
+  return '<div class="x-tabs">' + [['', 'Sessions & practice'], ['validation', 'Validation Challenges']]
+    .map(([k, t]) => '<button class="x-tab' + ((xs.sub || '') === k ? ' on' : '') +
+      '" data-xsub="' + k + '">' + t + '</button>').join('') + '</div>';
+}
+
+function xExam() {
+  if (xs.sim) return xSim();
+  if (xs.sub === 'validation') {
+    return '<header class="x-head"><h1>Validation Challenges</h1>' +
+      '<p class="x-sub">The hard end of Track A.</p></header>' + xExamTabs() + xValidation();
+  }
+  const all = xAll();
+  let h = '<header class="x-head"><h1>Final Exam Prep</h1>' +
+    '<p class="x-sub">The historical corpus is analysed here, never reproduced. ' +
+    'Everything you can open is generated practice trained on a pattern.</p></header>' + xExamTabs();
+  h += '<div class="x-hist"><b>HISTORICAL — not a current exam specification</b>' +
+    '<p>The 72 exercises of DKMR/42exams are stored as analysis: what each one really asks, which pattern it ' +
+    'instantiates, and which subjects it needs. Exam formats have changed between Piscine generations, so ' +
+    'nothing here is presented as the exam you will sit.</p></div>';
+  h += '<div class="x-sec-h">Run a session</div><div class="x-cfgs">' +
+    EXAM_CONFIGS.map(c => '<div class="x-cfg"><b>' + xEsc(c.name) + '</b>' +
+      '<span class="x-prov2">' + xEsc(c.provenance === 'historical' ? 'HISTORICAL MODEL' : 'GENERATED') + '</span>' +
+      '<p>' + xEsc(c.note) + '</p>' +
+      '<ul><li>' + c.exerciseCount + ' exercises</li><li>' + c.pointsPerExercise + ' points each, capped at ' +
+        c.maxScore + '</li><li>' + c.durationMinutes + ' minutes</li>' +
+        '<li>bands ' + c.levels.join(', ') + '</li></ul>' +
+      '<button class="x-btn primary" data-xsim="' + xEsc(c.id) + '">Start</button></div>').join('') + '</div>';
+  h += '<div class="x-sec-h">Or pick your own</div><div class="x-quick">' +
+    EXAM_BANDS.map(b => '<button class="x-btn ghost" data-xfilter2="band:' + b.id + '">Band ' + b.id +
+      ' — ' + xEsc(b.label) + '</button>').join('') +
+    '<button class="x-btn ghost" data-xact="random">Random challenge</button>' +
+    '<button class="x-btn ghost" data-xfilter2="band:E">Hard challenge</button>' +
+    '<button class="x-btn ghost" data-xfilter2="track:C00-C13-MIXED">Mixed track</button>' +
+    '</div>';
+  h += '<div class="x-sec-h">By difficulty</div>' +
+    xList(all.filter(x => x.band === 'D' || x.band === 'E').slice(0, 12));
+  return h;
+}
+
+/* --------------------------- validation challenges ----------------------- */
+/* Bands D and E only: unfamiliar, multi-skill, and deliberately not told what
+   they resemble. hideInspiration keeps the ancestry out of the page until the
+   exercise is solved. */
+function xValidation() {
+  const all = xAll().filter(x => x.track === 'C00-C08' &&
+    x.studied_status === 'STUDIED' && (x.band === 'D' || x.band === 'E'));
+  const e = all.filter(x => x.band === 'E');
+  const d = all.filter(x => x.band === 'D');
+  const solved = all.filter(x => xSolved(x.id)).length;
+  return '<div class="x-hist"><b>Unfamiliar by design</b>' +
+    '<p>Nothing here tells you what it resembles. These combine several C00\u2013C08 skills at once, and the ' +
+    'difficulty is in noticing which ones \u2014 not in any single technique. Work out the input structure, ' +
+    'name the patterns you can see, then design the algorithm before writing a line.</p></div>' +
+    '<p class="x-count">' + all.length + ' challenges, ' + solved + ' solved. ' +
+      e.length + ' are band E \u2014 the hardest, and the only ones that hide their pattern entirely.</p>' +
+    '<div class="x-sec-h">Band E \u2014 validation style</div>' + xList(e) +
+    '<div class="x-sec-h">Band D \u2014 algorithmic pipelines</div>' + xList(d);
+}
+
+/* ------------------------------- simulator ------------------------------ */
+function xSim() {
+  const s = xs.sim;
+  const cfg = s.cfg;
+  const sc = examScore(cfg, s.solved.length);
+  const left = Math.max(0, s.endsAt - Date.now());
+  const mm = Math.floor(left / 60000), ss = Math.floor((left % 60000) / 1000);
+  if (s.finished || left === 0) {
+    return '<header class="x-head"><h1>' + xEsc(cfg.name) + ' — result</h1></header>' +
+      '<div class="x-score"><b>' + sc.score + '</b><span>of ' + sc.max + '</span></div>' +
+      '<p class="x-sub">' + s.solved.length + ' of ' + s.list.length + ' solved, ' +
+        s.attempts + ' submissions, ' + Math.round((Date.now() - s.startedAt) / 60000) + ' minutes.' +
+        (sc.capped ? ' Raw total ' + sc.raw + ' was capped at ' + sc.max + '.' : '') + '</p>' +
+      '<div class="x-sec-h">What you sat</div>' +
+      '<div class="x-simlist">' + s.list.map((x, i) =>
+        '<div class="x-simrow ' + (s.solved.indexOf(x.id) >= 0 ? 'ok' : 'bad') + '">' +
+        '<span>' + (i + 1) + '</span><b>' + xEsc(x.title) + '</b>' +
+        '<i>' + xEsc(x.band) + '</i><em>' + (s.solved.indexOf(x.id) >= 0 ? 'solved' : 'not solved') + '</em>' +
+        '<button class="x-btn ghost" data-xopen="' + xEsc(x.id) + '">review</button></div>').join('') + '</div>' +
+      '<div class="x-actions"><button class="x-btn" data-xact="simend">Close</button></div>';
+  }
+  const cur = s.list[s.i];
+  return '<div class="x-simbar"><b>' + xEsc(cfg.name) + '</b>' +
+    '<span>exercise ' + (s.i + 1) + ' of ' + s.list.length + '</span>' +
+    '<span class="x-clock' + (left < 300000 ? ' low' : '') + '">' + mm + 'm ' + (ss < 10 ? '0' : '') + ss + 's</span>' +
+    '<span>' + examScore(cfg, s.solved.length).score + ' / ' + cfg.maxScore + '</span>' +
+    '<span class="x-nohint">EXAM MODE — no hints, no solutions</span>' +
+    '<button class="x-btn ghost" data-xact="simend">Abandon</button></div>' +
+    (cur ? xExercise(cur) : '<p class="x-empty">No exercises available for this configuration.</p>') +
+    '<div class="x-actions"><button class="x-btn" data-xact="simskip">Skip to the next exercise</button></div>';
+}
+
+/* ================================= RENDER ================================ */
+function renderExam() {
+  const root = $('#examRoot');
+  if (!root) return;
+  let body;
+  /* A live session owns the render: xSim() draws the clock, the score and the
+     current exercise together. Reviewing from the finished result screen is the
+     one case where the plain exercise page is what is wanted. */
+  if (xs.sim && !(xs.sim.finished && xs.ex)) body = xSim();
+  else if (xs.ex) {
+    const x = xById(xs.ex);
+    body = x ? xExercise(x) : '<p class="x-empty">That exercise no longer exists.</p>';
+  } else if (xs.page === 'recoding') body = xRecoding();
+  else if (xs.page === 'exam') body = xExam();
+  else if (xs.page === 'browse') body = xBrowse();
+  else if (xs.page === 'skills') body = xSkills();
+  else if (xs.page === 'functions') body = xFunctions();
+  else if (xs.page === 'cross') body = xCross();
+  else if (xs.page === 'projects') body = xProjects();
+  else body = xProgress();
+
+  const inSim = xs.sim && !xs.sim.finished;
+  const nav = '<nav class="x-nav" aria-label="Practice sections">' +
+    XPAGES.map(([k, t]) => '<button class="x-navb' + (xs.page === k && !xs.ex ? ' on' : '') +
+      '" data-xpage="' + k + '"' + (inSim ? ' disabled' : '') + '>' + xEsc(t) + '</button>').join('') +
+    '<div class="x-modes"><span>mode</span>' +
+      [['guided', 'Guided'], ['blind', 'Blind'], ['challenge', 'Challenge'],
+       ['drill', 'Drill'], ['validation', 'Validation']].map(([k, t]) =>
+        '<button class="x-modeb' + (xs.mode === k ? ' on' : '') + '" data-xmode="' + k + '"' +
+        (inSim ? ' disabled' : '') + '>' + xEsc(t) + '</button>').join('') + '</div></nav>';
+
+  let wrap = root.querySelector('.x-wrap');
+  if (!wrap) {
+    root.innerHTML = '<div class="x-wrap"><div class="x-navhost"></div><main class="x-main"></main></div>';
+    wrap = root.querySelector('.x-wrap');
+  }
+  wrap.querySelector('.x-navhost').innerHTML = nav;
+  wrap.querySelector('.x-main').innerHTML = body;
+  wireExam();
+}
+
+/* ================================= WIRING ================================ */
+function xGo(patch) { Object.assign(xs, patch); renderExam(); const m = $('.x-main'); if (m) m.scrollTop = 0; }
+function xOpen(id) {
+  if (!id) return xGo({ ex: null, result: null, hints: 0, showSolution: false, attempted: false });
+  xGo({ ex: id, result: null, hints: 0, showSolution: false, attempted: false, page: xs.page });
+}
+function xEditorValue() { const e = $('#xEditor') || $('#xFnEditor'); return e ? e.value : ''; }
+
+function wireExam() {
+  const on = (sel, ev, fn) => $$('#examRoot ' + sel).forEach(el => el.addEventListener(ev, fn));
+  on('[data-xpage]', 'click', function () { xGo({ page: this.dataset.xpage, sub: null, ex: null, result: null }); });
+  on('[data-xmode]', 'click', function () { xGo({ mode: this.dataset.xmode }); });
+  on('[data-xsub]', 'click', function () { xGo({ sub: this.dataset.xsub || null }); });
+  on('[data-xopen]', 'click', function () { xOpen(this.dataset.xopen); });
+  on('[data-xalgo]', 'click', function () { xGo({ algo: this.dataset.xalgo }); });
+  on('[data-xfn]', 'click', function () {
+    xGo({ fn: this.dataset.xfn, sub: xs.sub === 'implement' ? 'implement' : 'detail', result: null, showSolution: false });
+  });
+  on('[data-xfilter]', 'change', function () { xs.filters[this.dataset.xfilter] = this.value; renderExam(); });
+  on('[data-xfilter]', 'input', function () {
+    if (this.tagName !== 'INPUT') return;
+    xs.filters[this.dataset.xfilter] = this.value;
+    clearTimeout(xs._t); xs._t = setTimeout(renderExam, 220);
+  });
+  on('[data-xfilter2]', 'click', function () {
+    const [k, v] = this.dataset.xfilter2.split(':');
+    xs.filters = { q:'', track:'', subject:'', skill:'', band:'', source:'', solved:'' };
+    xs.filters[k] = v;
+    xGo({ page: 'browse', ex: null });
+  });
+  on('[data-xhint]', 'click', function () { xGo({ hints: Math.min(HINT_LADDER.length, xs.hints + 1) }); });
+  on('[data-xquiz]', 'click', function () {
+    if (xs.quiz.picked) return;
+    const q = FUNC_QUIZ[xs.quiz.i % FUNC_QUIZ.length];
+    xs.quiz.picked = this.dataset.xquiz;
+    xs.quiz.asked++;
+    if (xs.quiz.picked === q.a) xs.quiz.score++;
+    renderExam();
+  });
+  on('[data-xsim]', 'click', function () { xStartSim(this.dataset.xsim); });
+  on('[data-xpsel]', 'click', function () { examProjects.select(this.dataset.xpsel); renderExam(); });
+  on('[data-xpdel]', 'click', function () {
+    const p = examProjects.get().list.find(q => q.id === this.dataset.xpdel);
+    if (!p) return;
+    if (window.confirm('Delete the project "' + p.name + '"? Its record of attempts is removed. This cannot be undone.')) {
+      examProjects.remove(p.id); renderExam();
+    }
+  });
+  on('[data-xact]', 'click', function () { xAction(this.dataset.xact); });
+  const ed = $('#xEditor'), fed = $('#xFnEditor');
+  if (ed && xs.ex) ed.addEventListener('input', () => { xs.src[xs.ex] = ed.value; });
+  if (fed) fed.addEventListener('input', () => { xs.src['fn.' + xs.fn] = fed.value; });
+}
+
+function xAction(a) {
+  const x = xs.ex ? xById(xs.ex) : null;
+  if (a === 'clearf') { xs.filters = { q:'', track:'', subject:'', skill:'', band:'', source:'', solved:'' }; return renderExam(); }
+  if (a === 'random') {
+    const pool = xAll().filter(q => q.studied_status === 'STUDIED');
+    if (pool.length) xOpen(pool[Math.floor(Math.random() * pool.length)].id);
+    return;
+  }
+  if (a === 'unseen') {
+    const pool = xAll().filter(q => q.studied_status === 'STUDIED' && !xSolved(q.id));
+    if (pool.length) xOpen(pool[Math.floor(Math.random() * pool.length)].id);
+    else xGo({});
+    return;
+  }
+  if (a === 'preset') {
+    if (window.confirm('Clear every recorded attempt? Projects are kept. This cannot be undone.')) {
+      examProgress.reset(); renderExam();
+    }
+    return;
+  }
+  if (a === 'pcreate') {
+    const n = $('#xpName');
+    const name = (n && n.value.trim()) || 'Untitled project';
+    examProjects.create(name, $('#xpTrack').value, $('#xpMode').value);
+    return renderExam();
+  }
+  if (a === 'qnext') { xs.quiz.i++; xs.quiz.picked = null; return renderExam(); }
+  if (a === 'simend') { xs.sim = null; return xGo({ ex: null, page: 'exam' }); }
+  if (a === 'simskip') {
+    if (xs.sim) { xs.sim.i = Math.min(xs.sim.list.length - 1, xs.sim.i + 1); if (xs.sim.i >= xs.sim.list.length - 1 && xs.sim.solved.length >= xs.sim.list.length) xs.sim.finished = true; }
+    return xGo({ result: null, hints: 0, attempted: false, showSolution: false });
+  }
+  if (a === 'fnreveal') { xs.showSolution = !xs.showSolution; return renderExam(); }
+  if (a === 'fnrun') {
+    xs.result = { verdict: 'ran', runs: null };
+    const r = examExecute(xEditorValue(), []);
+    xs.result = { verdict: r.kind === 'ok' ? 'ran' : r.kind, message: r.message ||
+      ('stdout: ' + JSON.stringify(r.stdout) + (r.stderr ? '   stderr: ' + JSON.stringify(r.stderr) : '')) };
+    return renderExam();
+  }
+  if (!x) return;
+  if (a === 'reset') { delete xs.src[x.id]; return xGo({ result: null }); }
+  if (a === 'hint') { return xGo({ hints: Math.min(HINT_LADDER.length, xs.hints + 1) }); }
+  if (a === 'solution') { xs.showSolution = !xs.showSolution; return renderExam(); }
+  if (a === 'run') {
+    const r = examExecute(xEditorValue(), (x.io.cases && x.io.cases[0] && x.io.cases[0][0]) || []);
+    xs.attempted = true;
+    xs.result = { verdict: r.kind === 'ok' ? 'ran' : r.kind,
+      message: r.message || ('stdout: ' + JSON.stringify(r.stdout) +
+        (r.stderr ? '    stderr: ' + JSON.stringify(r.stderr) : '') + '    (' + r.steps + ' steps)') };
+    return renderExam();
+  }
+  if (a === 'check') {
+    const src = xEditorValue();
+    xs.src[x.id] = src;
+    xs.attempted = true;
+    const v = examCheck(x, src);
+    xs.result = v;
+    const passed = v.verdict === 'pass';
+    /* An engine limitation is not the learner being wrong, so it is not recorded
+       as a failed attempt — that would poison the weak-skill statistics. */
+    if (v.verdict !== 'engine-limit') {
+      examProgress.record(x, passed ? 'pass' : 'fail', { verdict: v.verdict });
+      examProjects.note(x, passed ? 'pass' : 'fail');
+      if (xs.sim && passed && xs.sim.solved.indexOf(x.id) < 0) xs.sim.solved.push(x.id);
+      if (xs.sim) {
+        xs.sim.attempts++;
+        if (passed) {
+          if (xs.sim.i < xs.sim.list.length - 1) { xs.sim.i++; xs.ex = xs.sim.list[xs.sim.i].id; xs.attempted = false; }
+          else { xs.sim.finished = true; xs.ex = null; }
+        }
+      }
+    }
+    return renderExam();
+  }
+}
+
+function xStartSim(cfgId) {
+  const cfg = examConfig(cfgId);
+  const list = examPickSession(xAll(), cfg, Date.now() & 0xffff);
+  xs.sim = { cfg, list, i: 0, solved: [], attempts: 0,
+    startedAt: Date.now(), endsAt: Date.now() + cfg.durationMinutes * 60000, finished: false };
+  xs.mode = 'blind';
+  xs.ex = list.length ? list[0].id : null;
+  xs.hints = 0; xs.showSolution = false; xs.attempted = false; xs.result = null;
+  xs.page = 'exam';
+  renderExam();
+  if (xs._simTimer) clearInterval(xs._simTimer);
+  xs._simTimer = setInterval(() => {
+    if (!xs.sim || xs.sim.finished) { clearInterval(xs._simTimer); xs._simTimer = null; return; }
+    if (Date.now() >= xs.sim.endsAt) { xs.sim.finished = true; xs.ex = null; renderExam(); return; }
+    const c = $('#examRoot .x-clock');
+    if (c) {
+      const left = Math.max(0, xs.sim.endsAt - Date.now());
+      c.textContent = Math.floor(left / 60000) + 'm ' +
+        (Math.floor((left % 60000) / 1000) < 10 ? '0' : '') + Math.floor((left % 60000) / 1000) + 's';
+    }
+  }, 1000);
+}
+
+if (typeof window !== 'undefined') {
+  window.CExamUI = { showExam, hideExam, renderExam, examExecute, examCheck, examForbidden,
+    examEngineLimit, xs, xFilterSet, xStartSim };
+}
+/* ==== EXAMUI END ==== */
+
 /* ================================ WIRING ================================ */
 function inEditable(el) {
   return el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.isContentEditable);
@@ -33763,6 +35875,10 @@ window.addEventListener('DOMContentLoaded', () => {
   const railLab = $('#railLab');
   if (railLab) railLab.addEventListener('click', () => {
     if (ui.view === 'lab') showWorkspace(); else showLab();
+  });
+  const rx = $('#railExam');
+  if (rx) rx.addEventListener('click', () => {
+    if (ui.view === 'exam') showWorkspace(); else showExam();
   });
   $('#railExplorer').addEventListener('click', () => toggleLibrary('files'));
   $('#railErrLab').addEventListener('click', () => toggleLibrary('errors'));

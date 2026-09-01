@@ -42,6 +42,7 @@ const SUITES = [
   ['Memory deep dive','phase34.test.js'],
   ['Terminal execution bridge','phase35.test.js'],
   ['P41 exercise database',   'phase36.test.js'],
+  ['P42 practice view',       'phase37.test.js'],
 ];
 
 let failed = 0;

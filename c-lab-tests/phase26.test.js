@@ -59,7 +59,7 @@ function check(name, ok, detail) {
   });
   check('there is still exactly one rail', rail.rails === 1, String(rail.rails));
   check('every navigation button is still present, in order',
-        rail.ids.join(',') === 'railHome,railWork,railLab,railLearn,railExplorer,railErrLab,rail3d,railDock,railHelp',
+        rail.ids.join(',') === 'railHome,railWork,railLab,railLearn,railExam,railExplorer,railErrLab,rail3d,railDock,railHelp',
         rail.ids.join(','));
   // Regression: .rail-sp{flex:1} absorbed all spare height and split the rail.
   check('the flexible spacer that split the rail is gone from the markup',
