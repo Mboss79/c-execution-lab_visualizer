@@ -43,6 +43,7 @@ const SUITES = [
   ['Terminal execution bridge','phase35.test.js'],
   ['P41 exercise database',   'phase36.test.js'],
   ['P42 practice view',       'phase37.test.js'],
+  ['P43 modes + code editor', 'phase38.test.js'],
 ];
 
 let failed = 0;

@@ -5258,11 +5258,7 @@ html[data-theme=light] .viz-node.vz-frame::after{
 #examRoot .x-hidden { font-size:12px; color:var(--text-faint); font-style:italic; margin-top:20px; }
 #examRoot .x-prov p { margin:0 0 6px; font-size:12.5px; color:var(--text-muted); line-height:1.6; }
 
-/* editor + actions */
-#examRoot .x-editor { width:100%; min-height:300px; font-family:var(--mono); font-size:13px;
-  line-height:1.55; tab-size:4; padding:13px; border-radius:9px; border:1px solid var(--border);
-  background:var(--surface); color:var(--text); resize:vertical; }
-#examRoot .x-editor:focus { outline:2px solid var(--execution); outline-offset:-1px; }
+/* actions — the editor itself is styled with the layered rules further down */
 #examRoot .x-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
 #examRoot .x-btn { font:inherit; font-size:12.5px; font-weight:600; padding:8px 15px; border-radius:7px;
   cursor:pointer; border:1px solid var(--border); background:var(--surface); color:var(--text); }
@@ -5463,6 +5459,60 @@ html[data-theme=light] .viz-node.vz-frame::after{
   #examRoot .x-main { padding:18px 16px 60px; }
 }
 /* ==== EXAMCSS END ==== */
+
+/* ==== the layered code editor ====
+   The transparent-textarea-over-highlighted-pre pattern the workspace editor
+   already uses. EVERY metric below must be identical on the two layers or the
+   caret drifts from its glyph — that was the Phase 12a bug, caused by tab-size
+   being declared on one layer only. One custom property feeds both. */
+#examRoot .x-ed { --x-tab:4; position:relative; border-radius:9px; border:1px solid var(--border);
+  background:var(--surface); overflow:hidden; }
+#examRoot .x-ed:focus-within { outline:2px solid var(--execution); outline-offset:-1px; }
+#examRoot .x-ed .x-hl,
+#examRoot .x-ed textarea.x-editor {
+  margin:0; border:0; padding:13px;
+  font-family:var(--mono); font-size:13px; line-height:1.55; letter-spacing:0;
+  tab-size:var(--x-tab); -moz-tab-size:var(--x-tab);
+  white-space:pre-wrap; overflow-wrap:normal; word-break:normal;
+  box-sizing:border-box;
+}
+#examRoot .x-ed .x-hl { position:absolute; inset:0; overflow:auto; pointer-events:none;
+  color:var(--text); background:transparent; }
+#examRoot .x-ed .x-hl code { font:inherit; background:none; padding:0; display:block; }
+#examRoot .x-ed textarea.x-editor { position:relative; display:block; width:100%; min-height:300px;
+  background:transparent; color:transparent; caret-color:var(--text); resize:vertical; overflow:auto; }
+#examRoot .x-ed textarea.x-editor::selection { background:var(--execution-dim); color:transparent; }
+#examRoot .x-ed textarea.x-editor:focus { outline:none; }
+
+/* token colours — chosen to stay legible in both themes */
+#examRoot .xh-k { color:#c678dd; font-weight:600; }   /* keyword */
+#examRoot .xh-t { color:#56b6c2; font-weight:600; }   /* type */
+#examRoot .xh-f { color:#61afef; }                    /* function */
+#examRoot .xh-s { color:#98c379; }                    /* string */
+#examRoot .xh-h { color:#e5c07b; }                    /* char literal */
+#examRoot .xh-n { color:#d19a66; }                    /* number */
+#examRoot .xh-c { color:var(--text-faint); font-style:italic; }  /* comment */
+#examRoot .xh-p { color:#e06c75; }                    /* preprocessor */
+#examRoot .xh-o { color:var(--text-muted); }          /* operator */
+
+/* mode presentation */
+#examRoot .x-modetag { font-size:9px; letter-spacing:.08em; text-transform:uppercase; font-weight:700;
+  padding:2px 7px; border-radius:4px; border:1px solid var(--execution); color:var(--execution); }
+#examRoot .x-modetag.validation, #examRoot .x-modetag.challenge { border-color:var(--warn,#d98b3a);
+  color:var(--warn,#d98b3a); }
+#examRoot .x-modeblurb { margin:9px 0 0; font-size:12px; line-height:1.6; color:var(--text-faint);
+  max-width:80ch; }
+#examRoot .x-nohints { margin-top:20px; font-size:12.5px; line-height:1.65; color:var(--text-faint);
+  border-left:2px solid var(--border); padding-left:12px; }
+/* compact: a drill should not make you scroll before you can type */
+#examRoot .chrome-compact .x-modeblurb, #examRoot .chrome-compact .x-prov { display:none; }
+#examRoot .chrome-compact .x-task { padding:12px 14px; }
+#examRoot .chrome-compact .x-brief { font-size:14px; margin-bottom:8px; }
+#examRoot .chrome-compact .x-ed textarea.x-editor { min-height:210px; }
+/* stark and exam: strip the decoration, keep the problem */
+#examRoot .chrome-stark .x-srct, #examRoot .chrome-exam .x-srct { display:none; }
+#examRoot .chrome-exam .x-task { border-color:var(--warn,#d98b3a); }
+#examRoot .chrome-exam .x-brief { font-size:16px; }
 </style>
 </head>
 <body>
@@ -34796,6 +34846,228 @@ if (typeof window !== 'undefined') {
 }
 /* ==== TRAINDATA END ==== */
 
+/* ==== XEDITOR START ==== */
+/* ============================================================================
+   The practice code editor: indentation, and a highlight layer behind it
+   ----------------------------------------------------------------------------
+   Same shape the main workspace editor already uses (#sourceView behind
+   #sourceEdit): a transparent textarea over a highlighted <pre>. Nothing about
+   the application's editor architecture changes; this is one self-contained
+   pair used by #examRoot only.
+
+   HIGHLIGHTING IS PURELY VISUAL. The <pre> is aria-hidden and never read back.
+   The value sent to the engine is textarea.value, untouched — no reformatting,
+   no auto-closing, no auto-correction. xCodeOf() is the single accessor and it
+   returns the raw value.
+
+   THE CARET TRAP, which cost this project an hour in Phase 12a: the two layers
+   must agree on tab-size EXACTLY. Declaring it on the textarea alone leaves the
+   <pre> at the CSS initial value of 8, and every tab-indented line then draws
+   the caret several columns from its glyph. Both layers read --x-tab, and
+   phase38 asserts the two computed values are equal.
+
+   INDENTATION IS A TAB, not four spaces. Norminette requires tabs, the engine's
+   own examples are tab-indented, and the existing editor uses INDENT = '\t'.
+   Practising with spaces here would train a habit that fails the real check.
+   ========================================================================== */
+const X_INDENT = '\t';
+
+/* ------------------------------- the lexer ------------------------------- */
+/* Lexical only, and deliberately so: this is not a parser and must never claim
+   to be. Ordering inside the alternation is the whole design — comments and
+   preprocessor lines first, so a // inside a string is not mistaken for one. */
+const X_KEYWORDS = ('auto break case const continue default do else enum extern for goto if inline ' +
+  'register restrict return sizeof static struct switch typedef union volatile while').split(' ');
+const X_TYPES = ('char double float int long short signed unsigned void size_t ' +
+  't_list t_btree t_bool t_point t_stock_str').split(' ');
+
+const X_TOKEN = new RegExp([
+  '(\\/\\*[\\s\\S]*?(?:\\*\\/|$))',        // 1 block comment, unterminated tolerated
+  '(\\/\\/[^\\n]*)',                       // 2 line comment
+  '(^[ \\t]*#[^\\n]*)',                    // 3 preprocessor
+  '("(?:\\\\.|[^"\\\\\\n])*"?)',           // 4 string, unterminated tolerated
+  "('(?:\\\\.|[^'\\\\\\n])*'?)",           // 5 char literal
+  '(\\b\\d[\\w.]*\\b)',                    // 6 number
+  '([A-Za-z_]\\w*)',                       // 7 identifier
+  '([-+*/%=<>!&|^~?:.,;]+)',               // 8 operator or punctuation
+].join('|'), 'gm');
+
+function xHiEsc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/* Returns HTML for the highlight layer. Every character of the input appears in
+   the output exactly once, escaped — the layer is a rendering of the text, not
+   a transformation of it. phase38 strips the tags and asserts round-tripping. */
+function xHiC(src) {
+  const s = String(src == null ? '' : src);
+  let out = '', last = 0, m;
+  X_TOKEN.lastIndex = 0;
+  while ((m = X_TOKEN.exec(s))) {
+    if (m.index > last) out += xHiEsc(s.slice(last, m.index));
+    const t = m[0];
+    let cls = null;
+    if (m[1] || m[2]) cls = 'c';                       // comment
+    else if (m[3]) cls = 'p';                          // preprocessor
+    else if (m[4]) cls = 's';                          // string
+    else if (m[5]) cls = 'h';                          // char literal
+    else if (m[6]) cls = 'n';                          // number
+    else if (m[7]) {
+      if (X_TYPES.indexOf(t) >= 0) cls = 't';          // type
+      else if (X_KEYWORDS.indexOf(t) >= 0) cls = 'k';  // keyword
+      else {
+        /* A function is an identifier followed by '(' — the only structural
+           thing this lexer looks at, and it is a heuristic, not a parse. */
+        const rest = s.slice(m.index + t.length);
+        cls = /^\s*\(/.test(rest) ? 'f' : null;
+      }
+    } else if (m[8]) cls = 'o';                        // operator
+    out += cls ? '<span class="xh-' + cls + '">' + xHiEsc(t) + '</span>' : xHiEsc(t);
+    last = m.index + t.length;
+  }
+  out += xHiEsc(s.slice(last));
+  /* A trailing newline collapses in a <pre>, which would shift the last line of
+     the highlight out of step with the textarea. One extra newline restores it. */
+  return out + '\n';
+}
+
+/* ------------------------------- the markup ------------------------------ */
+function xEditorHtml(id, value) {
+  return '<div class="x-ed" data-xed="' + id + '">' +
+    '<pre class="x-hl" aria-hidden="true"><code id="' + id + '_hl">' + xHiC(value) + '</code></pre>' +
+    '<textarea class="x-editor" id="' + id + '" spellcheck="false" autocomplete="off" ' +
+      'autocorrect="off" autocapitalize="off">' + xHiEsc(value) + '</textarea>' +
+    '</div>';
+}
+
+/* The ONE accessor. Everything that runs, checks or stores code reads this, so
+   there is no path by which a displayed value could diverge from the real one. */
+function xCodeOf(id) {
+  const el = document.getElementById(id || 'xEditor');
+  return el ? el.value : '';
+}
+
+/* ------------------------------ the behaviour ---------------------------- */
+function xRepaint(ta) {
+  const hl = document.getElementById(ta.id + '_hl');
+  if (!hl) return;
+  hl.innerHTML = xHiC(ta.value);
+  const pre = hl.parentNode;
+  pre.scrollTop = ta.scrollTop;
+  pre.scrollLeft = ta.scrollLeft;
+}
+
+/* Indentation edits go through execCommand('insertText') wherever possible so
+   the browser's native undo stack survives — the same reason the workspace
+   editor uses it. Where a range must be rewritten (Shift+Tab over a selection)
+   there is no equivalent, and the value is set directly. */
+function xInsert(ta, text) {
+  ta.focus();
+  if (document.execCommand && document.execCommand('insertText', false, text)) return;
+  const a = ta.selectionStart, b = ta.selectionEnd;
+  ta.value = ta.value.slice(0, a) + text + ta.value.slice(b);
+  ta.selectionStart = ta.selectionEnd = a + text.length;
+}
+
+function xLineStart(v, pos) { const i = v.lastIndexOf('\n', pos - 1); return i + 1; }
+function xIndentOf(line) { const m = /^[ \t]*/.exec(line); return m ? m[0] : ''; }
+
+function xEditorKey(e) {
+  const ta = e.target;
+  const v = ta.value, a = ta.selectionStart, b = ta.selectionEnd;
+
+  if (e.key === 'Tab') {
+    /* Tab must indent, not move focus. Only inside this editor — everything
+       outside keeps normal keyboard navigation. Escape then Tab still leaves. */
+    e.preventDefault();
+    const multi = v.slice(a, b).indexOf('\n') >= 0;
+    if (!multi && !e.shiftKey) { xInsert(ta, X_INDENT); xRepaint(ta); return; }
+
+    const start = xLineStart(v, a);
+    let end = v.indexOf('\n', b);
+    if (end < 0) end = v.length;
+    const block = v.slice(start, end);
+    const lines = block.split('\n');
+    let delta = 0, firstDelta = 0;
+    const out = lines.map((ln, i) => {
+      if (e.shiftKey) {
+        let cut = 0;
+        if (ln.startsWith(X_INDENT)) cut = 1;
+        else { const m = /^ {1,4}/.exec(ln); cut = m ? m[0].length : 0; }
+        if (i === 0) firstDelta = -cut;
+        delta -= cut;
+        return ln.slice(cut);
+      }
+      if (i === 0) firstDelta = X_INDENT.length;
+      delta += X_INDENT.length;
+      return ln.length || lines.length === 1 ? X_INDENT + ln : ln;
+    }).join('\n');
+    if (out === block) return;
+    ta.value = v.slice(0, start) + out + v.slice(end);
+    ta.selectionStart = Math.max(start, a + firstDelta);
+    ta.selectionEnd = Math.max(ta.selectionStart, b + delta);
+    xRepaint(ta);
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    return;
+  }
+
+  if (e.key === 'Enter' && a === b) {
+    /* Carry the current line's indentation onto the new line, and one more
+       level after an opening brace. Nothing else is inserted — no closing
+       brace is guessed, because guessing would be editing the user's code. */
+    const start = xLineStart(v, a);
+    const line = v.slice(start, a);
+    let ind = xIndentOf(line);
+    if (/\{\s*$/.test(line)) ind += X_INDENT;
+    if (!ind) return;
+    e.preventDefault();
+    xInsert(ta, '\n' + ind);
+    xRepaint(ta);
+    return;
+  }
+
+  if (e.key === 'Backspace' && a === b) {
+    /* Inside leading whitespace only, remove a whole indent unit. Elsewhere
+       Backspace is left completely alone. */
+    const start = xLineStart(v, a);
+    const before = v.slice(start, a);
+    if (!before.length || /[^ \t]/.test(before)) return;
+    let cut = 1;
+    if (before.endsWith(X_INDENT)) cut = 1;
+    else { const m = /( {1,4})$/.exec(before); cut = m ? m[1].length : 1; }
+    if (cut <= 1) return;                       // one character: let the browser do it
+    e.preventDefault();
+    ta.value = v.slice(0, a - cut) + v.slice(a);
+    ta.selectionStart = ta.selectionEnd = a - cut;
+    xRepaint(ta);
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+}
+
+/* Wire every editor currently in the view. Called after each render; the flag
+   stops a second listener being attached to a surviving element. */
+function xWireEditors() {
+  const tas = document.querySelectorAll('#examRoot textarea.x-editor');
+  for (const ta of tas) {
+    xRepaint(ta);
+    if (ta.dataset.xwired) continue;
+    ta.dataset.xwired = '1';
+    ta.addEventListener('keydown', xEditorKey);
+    ta.addEventListener('input', () => xRepaint(ta));
+    ta.addEventListener('scroll', () => {
+      const hl = document.getElementById(ta.id + '_hl');
+      if (!hl) return;
+      hl.parentNode.scrollTop = ta.scrollTop;
+      hl.parentNode.scrollLeft = ta.scrollLeft;
+    });
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.CExamEditor = { xHiC, xEditorHtml, xCodeOf, xWireEditors, xRepaint, X_INDENT };
+}
+/* ==== XEDITOR END ==== */
+
 /* ==== EXAMUI START ==== */
 /* ============================================================================
    PRACTICE — the fifth view
@@ -34972,6 +35244,99 @@ function xList(items, empty) {
   return '<div class="x-grid">' + items.map(xCard).join('') + '</div>';
 }
 
+/* ================================= MODES ================================= *
+ * One record per mode. Everything the mode changes is a field here, so a screen
+ * cannot drift from the mode it claims to be in, and a test can assert the
+ * DIFFERENCE between two modes rather than that five strings exist.
+ *
+ *   hints        is the hint ladder offered at all
+ *   showPattern  may the trained pattern / inspiration be named before solving
+ *   showEdges    is the edge-case list shown (it is a strong hint)
+ *   showDiff     are the five difficulty axes and the band shown up front
+ *   bands        the pool this mode draws from, null meaning all
+ *   prefer       how the next exercise is chosen
+ *   chrome       presentation: normal | stark | compact | exam
+ *   pick         does the mode select FOR you (Challenge, Drill, Validation)
+ */
+const MODE_CONFIG = {
+  guided: { label:'Guided', hints:true, showPattern:true, showEdges:true, showDiff:true,
+    bands:null, prefer:'any', chrome:'normal', pick:false,
+    blurb:'The full exercise, with the hint ladder available. Hints never end in code.' },
+  blind: { label:'Blind', hints:false, showPattern:false, showEdges:false, showDiff:true,
+    bands:null, prefer:'any', chrome:'normal', pick:false,
+    blurb:'No hints, no pattern, no edge-case list. Everything you need is in the task itself — ' +
+          'work out the input, the output, and what happens to the cases you were not told about. ' +
+          'Review opens up after you submit.' },
+  challenge: { label:'Challenge', hints:false, showPattern:false, showEdges:false, showDiff:false,
+    bands:['B','C','D','E'], prefer:'unseen', chrome:'stark', pick:true,
+    blurb:'An unfamiliar problem, chosen for you, with the metadata that would give the shape away ' +
+          'kept off the page. Recently attempted exercises are skipped.' },
+  drill: { label:'Drill', hints:true, showPattern:false, showEdges:false, showDiff:false,
+    bands:['A','B'], prefer:'weak', chrome:'compact', pick:true,
+    blurb:'Short exercises on one skill at a time, chosen from whatever you are currently weakest at. ' +
+          'Built for speed and recognition: read, write, run, next.' },
+  validation: { label:'Validation', hints:false, showPattern:false, showEdges:false, showDiff:false,
+    bands:['D','E'], prefer:'unseen-hard', chrome:'exam', pick:true,
+    blurb:'The hard end: several skills at once, nothing about where the problem came from, no hints ' +
+          'and no solution before you submit. The closest thing here to a difficult validation exercise.' },
+};
+const xMode = () => MODE_CONFIG[xs.mode] || MODE_CONFIG.guided;
+
+/* Selection driven by the mode. Track A and studied-only throughout: a mode
+   must never hand the learner something gated behind a subject they have not
+   studied. Recently attempted exercises are skipped so Challenge does not
+   immediately repeat itself. */
+function xPickForMode(mode) {
+  const cfg = MODE_CONFIG[mode] || MODE_CONFIG.guided;
+  const recent = xs.recent || [];
+  let pool = xAll().filter(x => x.track === 'C00-C08' && x.studied_status === 'STUDIED');
+  if (cfg.bands) pool = pool.filter(x => cfg.bands.indexOf(x.band) >= 0);
+  if (!pool.length) return null;
+
+  let want = pool;
+  if (cfg.prefer === 'unseen' || cfg.prefer === 'unseen-hard') {
+    const fresh = want.filter(x => !xSolved(x.id));
+    if (fresh.length) want = fresh;
+  }
+  if (cfg.prefer === 'unseen-hard') {
+    /* the most combined thing available, so Validation really is the hard end */
+    const max = Math.max.apply(null, want.map(x => x.difficulty.combination));
+    const top = want.filter(x => x.difficulty.combination === max);
+    if (top.length) want = top;
+  }
+  if (cfg.prefer === 'weak') {
+    /* Drill targets the skill the learner is currently worst at, and keeps
+       targeting it — repetition on one pattern is the point of a drill. */
+    const weak = examWeakSkills();
+    for (const w of weak) {
+      const hit = want.filter(x => x.skills.indexOf(w.id) >= 0);
+      if (hit.length) { want = hit; break; }
+    }
+    const unsolved = want.filter(x => !xSolved(x.id));
+    if (unsolved.length) want = unsolved;
+  }
+  const notRecent = want.filter(x => recent.indexOf(x.id) < 0);
+  if (notRecent.length) want = notRecent;
+  return want[Math.floor(Math.random() * want.length)];
+}
+
+function xRemember(id) {
+  if (!xs.recent) xs.recent = [];
+  xs.recent = [id].concat(xs.recent.filter(q => q !== id)).slice(0, 6);
+}
+
+/* Entering a mode that picks for you opens something immediately. */
+function xEnterMode(mode) {
+  xs.mode = mode;
+  const cfg = MODE_CONFIG[mode] || MODE_CONFIG.guided;
+  if (!cfg.pick) { xs.result = null; xs.hints = 0; xs.showSolution = false; return renderExam(); }
+  const x = xPickForMode(mode);
+  if (!x) { xs.ex = null; return renderExam(); }
+  xRemember(x.id);
+  xs.ex = x.id; xs.result = null; xs.hints = 0; xs.showSolution = false; xs.attempted = false;
+  renderExam();
+}
+
 /* =============================== NAVIGATION =============================== */
 const XPAGES = [
   ['recoding',  'Recoding Prep',            'C00–C07, organised by the situations you actually meet'],
@@ -35146,15 +35511,18 @@ function xVerdict(v) {
 }
 
 function xExercise(x) {
-  const blind = xs.mode === 'blind' || xs.mode === 'challenge' || xs.mode === 'validation';
+  const M = xMode();
+  const blind = !M.hints;
   const solved = xSolved(x.id);
   const canSolve = xs.attempted || solved;
   let h = '<header class="x-head ex"><button class="x-back" data-xopen="">← back</button>' +
     '<h1>' + xEsc(x.title) + '</h1>' +
-    '<div class="x-meta">' + xBadge(x) + '<span class="x-band big">Band ' + xEsc(x.band) + '</span>' +
-    xDiffBar(x.difficulty) +
+    '<div class="x-meta">' + xBadge(x) +
+    (M.showDiff ? '<span class="x-band big">Band ' + xEsc(x.band) + '</span>' + xDiffBar(x.difficulty) : '') +
     '<span class="x-subs">' + x.required_subjects.join(' ') + '</span>' +
-    '<span class="x-srct">' + xEsc((EV_LABEL[x.source_type] || {}).text || x.source_type) + '</span></div></header>';
+    (M.showPattern ? '<span class="x-srct">' + xEsc((EV_LABEL[x.source_type] || {}).text || x.source_type) + '</span>' : '') +
+    '<span class="x-modetag ' + xEsc(xs.mode) + '">' + xEsc(M.label) + ' mode</span></div>' +
+    '<p class="x-modeblurb">' + xEsc(M.blurb) + '</p></header>';
 
   if (x.studied_status !== 'STUDIED') {
     h += '<div class="x-gatebox"><b>' + xEsc((EXAM_GATE_LABEL[x.studied_status] || {}).text) + '</b>' +
@@ -35178,7 +35546,7 @@ function xExercise(x) {
         xEsc(a.length ? a.map(v => JSON.stringify(v)).join(' ') : '(none)') + '</td><td class="mono">' +
         xEsc(JSON.stringify(e)) + '</td></tr>').join('') + '</tbody></table>';
   }
-  if (x.edge_cases && x.edge_cases.length) {
+  if (M.showEdges && x.edge_cases && x.edge_cases.length) {
     h += '<div class="x-sec-h">Edge cases the examiner will try</div><ul class="x-edges">' +
       x.edge_cases.map(e => '<li>' + xEsc(e) + '</li>').join('') + '</ul>';
   }
@@ -35187,7 +35555,7 @@ function xExercise(x) {
   const buf = xs.src[x.id] !== undefined ? xs.src[x.id] :
     'int\tmain(int argc, char **argv)\n{\n\t\n\treturn (0);\n}\n';
   h += '<div class="x-sec-h">Your code</div>' +
-    '<textarea class="x-editor" id="xEditor" spellcheck="false">' + xEsc(buf) + '</textarea>' +
+    xEditorHtml('xEditor', buf) +
     '<div class="x-actions">' +
       '<button class="x-btn primary" data-xact="check">Run &amp; check</button>' +
       '<button class="x-btn" data-xact="run">Run once</button>' +
@@ -35200,8 +35568,13 @@ function xExercise(x) {
     '</div>';
 
   if (xs.result) h += '<div class="x-result">' + xVerdict(xs.result) + '</div>';
-  if (!blind && xs.hints) h += xHints(x);
-  else if (!blind) h += xHints(x);
+  if (M.pick && !xs.sim) h += '<div class="x-actions">' +
+    '<button class="x-btn" data-xact="nextmode">Next ' + xEsc(M.label.toLowerCase()) + ' exercise</button>' +
+    '</div>';
+  if (M.hints) h += xHints(x);
+  else h += '<p class="x-nohints">' + xEsc(M.label) + ' mode offers no hints. ' +
+    'Switch to Guided if you want the ladder \u2014 but try naming the input, the output and the ' +
+    'changing state yourself first.</p>';
 
   if (xs.showSolution && x.reference_solution && canSolve) {
     h += '<div class="x-sec-h">Reference solution</div>' +
@@ -35217,7 +35590,7 @@ function xExercise(x) {
       xEsc((EV_LABEL[x.source_type] || {}).note || '') + '</p>' +
       (x.inspiredBy ? '<p>Pattern trained: <b>' + xEsc(x.inspiredBy) + '</b></p>' : '') +
       (x.crossSubject ? '<p>Cross-subject: <b>' + xEsc(x.crossSubject) + '</b></p>' : '') + '</div>';
-  } else if (x.hideInspiration) {
+  } else if (x.hideInspiration || !M.showPattern) {
     h += '<p class="x-hidden">The pattern behind this one stays hidden until you solve it. Naming it would hand you the algorithm.</p>';
   }
   return h;
@@ -35384,9 +35757,8 @@ function xFunctions() {
         xEsc(f.name) + '</button>').join('') + '</nav><div class="x-sidemain">' +
       '<h2 class="mono">' + xEsc(F.proto) + '</h2>' +
       '<p class="x-src2">Allowed: ' + xEsc(F.allowed) + '. Write the function and a main that exercises it.</p>' +
-      '<textarea class="x-editor" id="xFnEditor" spellcheck="false">' +
-        xEsc(xs.src['fn.' + F.id] !== undefined ? xs.src['fn.' + F.id] : F.proto.replace(/;$/, '') + '\n{\n\t\n}\n') +
-      '</textarea>' +
+      xEditorHtml('xFnEditor',
+        xs.src['fn.' + F.id] !== undefined ? xs.src['fn.' + F.id] : F.proto.replace(/;$/, '') + '\n{\n\t\n}\n') +
       '<div class="x-actions"><button class="x-btn primary" data-xact="fnrun">Run it</button>' +
       '<button class="x-btn ghost" data-xact="fnreveal">Show the canonical version</button></div>' +
       (xs.result ? '<div class="x-result">' + xVerdict(xs.result) + '</div>' : '') +
@@ -35658,6 +36030,7 @@ function renderExam() {
   }
   wrap.querySelector('.x-navhost').innerHTML = nav;
   wrap.querySelector('.x-main').innerHTML = body;
+  wrap.querySelector('.x-main').className = 'x-main chrome-' + xMode().chrome;
   wireExam();
 }
 
@@ -35665,14 +36038,16 @@ function renderExam() {
 function xGo(patch) { Object.assign(xs, patch); renderExam(); const m = $('.x-main'); if (m) m.scrollTop = 0; }
 function xOpen(id) {
   if (!id) return xGo({ ex: null, result: null, hints: 0, showSolution: false, attempted: false });
+  xRemember(id);
   xGo({ ex: id, result: null, hints: 0, showSolution: false, attempted: false, page: xs.page });
 }
-function xEditorValue() { const e = $('#xEditor') || $('#xFnEditor'); return e ? e.value : ''; }
+/* The code that runs is the code in the textarea, never the highlight layer. */
+function xEditorValue() { return $('#xEditor') ? xCodeOf('xEditor') : xCodeOf('xFnEditor'); }
 
 function wireExam() {
   const on = (sel, ev, fn) => $$('#examRoot ' + sel).forEach(el => el.addEventListener(ev, fn));
   on('[data-xpage]', 'click', function () { xGo({ page: this.dataset.xpage, sub: null, ex: null, result: null }); });
-  on('[data-xmode]', 'click', function () { xGo({ mode: this.dataset.xmode }); });
+  on('[data-xmode]', 'click', function () { xEnterMode(this.dataset.xmode); });
   on('[data-xsub]', 'click', function () { xGo({ sub: this.dataset.xsub || null }); });
   on('[data-xopen]', 'click', function () { xOpen(this.dataset.xopen); });
   on('[data-xalgo]', 'click', function () { xGo({ algo: this.dataset.xalgo }); });
@@ -35710,6 +36085,7 @@ function wireExam() {
     }
   });
   on('[data-xact]', 'click', function () { xAction(this.dataset.xact); });
+  if (typeof xWireEditors === 'function') xWireEditors();
   const ed = $('#xEditor'), fed = $('#xFnEditor');
   if (ed && xs.ex) ed.addEventListener('input', () => { xs.src[xs.ex] = ed.value; });
   if (fed) fed.addEventListener('input', () => { xs.src['fn.' + xs.fn] = fed.value; });
@@ -35741,6 +36117,7 @@ function xAction(a) {
     examProjects.create(name, $('#xpTrack').value, $('#xpMode').value);
     return renderExam();
   }
+  if (a === 'nextmode') { return xEnterMode(xs.mode); }
   if (a === 'qnext') { xs.quiz.i++; xs.quiz.picked = null; return renderExam(); }
   if (a === 'simend') { xs.sim = null; return xGo({ ex: null, page: 'exam' }); }
   if (a === 'simskip') {

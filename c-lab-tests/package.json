@@ -20,7 +20,8 @@
     "test:phase10": "node phase11.test.js",
     "test:phase11": "node phase12.test.js",
     "test:p41": "node phase36.test.js",
-    "test:p42": "node phase37.test.js"
+    "test:p42": "node phase37.test.js",
+    "test:p43": "node phase38.test.js"
   },
   "dependencies": {
     "puppeteer-core": "^25.8.0"
