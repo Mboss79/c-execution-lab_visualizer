@@ -45,6 +45,7 @@ const SUITES = [
   ['P42 practice view',       'phase37.test.js'],
   ['P43 modes + code editor', 'phase38.test.js'],
   ['P44 ExamShell Training',  'phase39.test.js'],
+  ['P45 argc/argv graph + editor','phase40.test.js'],
 ];
 
 let failed = 0;

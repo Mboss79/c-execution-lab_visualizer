@@ -5558,6 +5558,36 @@ html[data-theme=light] .viz-node.vz-frame::after{
   #examRoot .x-esrow { grid-template-columns:30px minmax(0,1fr) 80px; }
   #examRoot .x-eschk, #examRoot .x-esst { display:none; }
 }
+
+/* ==== ARGVCSS START ==== */
+/* The command-line argument strip. Scoped under #argvBar; reuses the existing
+   surface, border, mono and accent tokens so it reads as part of the run
+   configuration rather than a bolted-on panel. */
+#argvBar { border-bottom:1px solid var(--border); background:var(--surface);
+  padding:8px 12px 9px; font-size:12px; }
+#argvBar[hidden] { display:none; }
+#argvBar .ab-head { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:7px; }
+#argvBar .ab-t { font-size:9.5px; letter-spacing:.11em; text-transform:uppercase; font-weight:700;
+  color:var(--text-faint); }
+#argvBar .ab-argc { font-family:var(--mono); font-size:11.5px; color:var(--text-muted); }
+#argvBar .ab-argc b { color:var(--execution); font-size:12.5px; }
+#argvBar .ab-null { font-family:var(--mono); font-size:11px; color:var(--text-faint); }
+#argvBar .ab-add { margin-left:auto; font:inherit; font-size:11px; padding:3px 9px; border-radius:6px;
+  cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--text-muted); }
+#argvBar .ab-add:hover { border-color:var(--execution); color:var(--text); }
+#argvBar .ab-rows { display:flex; flex-direction:column; gap:4px; }
+#argvBar .ab-row { display:flex; align-items:center; gap:8px; }
+#argvBar .ab-i { font-family:var(--mono); font-size:11px; color:var(--text-faint); min-width:56px; }
+#argvBar .ab-row.zero .ab-i { color:var(--execution); }
+#argvBar .ab-in { flex:1; min-width:0; font-family:var(--mono); font-size:12px; padding:4px 8px;
+  border-radius:5px; border:1px solid var(--border); background:var(--bg); color:var(--text); }
+#argvBar .ab-in:focus { outline:1px solid var(--execution); outline-offset:-1px; }
+#argvBar .ab-x { font:inherit; font-size:11px; line-height:1; padding:4px 7px; border-radius:5px;
+  cursor:pointer; border:1px solid transparent; background:transparent; color:var(--text-faint); }
+#argvBar .ab-x:hover { color:var(--error,#e5484d); border-color:var(--border); }
+#argvBar .ab-note { margin:7px 0 0; font-size:10.5px; line-height:1.5; color:var(--text-faint); }
+@media (max-width: 720px) { #argvBar .ab-note { display:none; } }
+/* ==== ARGVCSS END ==== */
 </style>
 </head>
 <body>
@@ -5691,6 +5721,11 @@ html[data-theme=light] .viz-node.vz-frame::after{
                         aria-label="Expand the source editor" aria-pressed="false">⤢</button>
               </span>
             </div>
+            <!-- Command-line arguments for the simulated process. Shown only when
+                 main takes (int, char **). Structured rows, so "hello world" as a
+                 single argument is expressible; a single text field could not
+                 distinguish that from two arguments. -->
+            <div class="argv-bar" id="argvBar" hidden></div>
             <div class="bp-banner hide" id="bpBanner">
               <span>●</span><span id="bpBannerText">Breakpoint hit</span>
               <button class="bb-x" id="bpBannerClose" aria-label="Dismiss">✕</button>
@@ -8891,6 +8926,11 @@ class History {
       id: b.id, base: b.base, size: b.size, label: b.label, region: b.region,
       section: b.section, sectionLabel: b.sectionLabel,
       align: b.type ? alignof(b.type) : 1, entryPoint: !!b.entryPoint,
+      /* The TYPE OBJECT, not just its name. The graph needs it to tell an
+         array of pointers from an array of anything else and to size a cell;
+         typeName alone is a string and cannot be walked. Same reference the
+         engine already holds, so this copies nothing. */
+      type: b.type || null,
       frameName: b.frameName, typeName: b.type ? typeName(b.type) : null,
       state: stateMap.get(b.id) || 'live',
       readonly: !!b.readonly,
@@ -9040,36 +9080,41 @@ class History {
       /* One edge per pointer OBJECT — including a pointer sitting inside an
          array of pointers later on — describing what it holds right now. */
       const edges = [];
-      const addPointerEdge = (fromBlockId, name, pt, uninit) => {
+      /* `cell` is set only for a pointer living inside an array of pointers;
+         it carries the index and the address of that slot so a view can label
+         the arrow argv[1] rather than just naming the whole array. Every
+         other edge is byte-for-byte what it was before. */
+      const addPointerEdge = (fromBlockId, name, pt, uninit, cell) => {
         const from = 'b' + fromBlockId;
+        const mark = (e) => {
+          if (cell) { e.cellIndex = cell.index; e.cellAddress = cell.address; }
+          edges.push(e);
+          return undefined;
+        };
         if (uninit) {
-          edges.push({ from, to: null, name, kind: 'uninitialized', valid: false,
+          return mark({ from, to: null, name, kind: 'uninitialized', valid: false,
                        text: 'holds no address yet',
                        why: 'This pointer has never been assigned, so the bytes where its address would live still hold whatever was there. Reading it is undefined behaviour in real C; here it is trapped.' });
-          return;
         }
         if (!pt) return;
         if (pt.kind === 'null') {
-          edges.push({ from, to: null, name, kind: 'null', valid: false, address: 0,
+          return mark({ from, to: null, name, kind: 'null', valid: false, address: 0,
                        text: 'NULL',
                        why: 'NULL is a valid, deliberate value meaning "points at nothing". It is different from an uninitialized pointer, which holds an unknown address, and from a dangling pointer, which holds an address that used to be valid.' });
-          return;
         }
         if (pt.kind === 'wild') {
-          edges.push({ from, to: null, name, kind: 'wild', valid: false, address: pt.address,
+          return mark({ from, to: null, name, kind: 'wild', valid: false, address: pt.address,
                        text: 'unmapped address', why: 'This address is not inside any object this program owns.' });
-          return;
         }
         if (pt.kind === 'freed' || pt.kind === 'destroyed') {
-          edges.push({ from, to: nodeByBlock.has(pt.blockId) ? 'b' + pt.blockId : null,
+          return mark({ from, to: nodeByBlock.has(pt.blockId) ? 'b' + pt.blockId : null,
                        name, kind: 'dangling', valid: false, address: pt.address,
                        blockId: pt.blockId, text: pt.text,
                        why: pt.kind === 'freed'
                          ? 'The heap block this points at has been freed. The address is still stored, but the object is gone.'
                          : 'The frame this points into has returned. The address is still stored, but that storage no longer belongs to the program.' });
-          return;
         }
-        edges.push({
+        return mark({
           from, to: 'b' + pt.blockId, name, kind: 'points-to', valid: true,
           address: pt.address, blockId: pt.blockId, offset: pt.offset,
           elementIndex: pt.elementIndex, elemSize: pt.elemSize,
@@ -9085,6 +9130,34 @@ class History {
         const isPtr = v.typeName && v.typeName.indexOf('*') >= 0 && !v.isArray;
         if (!isPtr) continue;
         addPointerEdge(v.blockId, v.name, v.pointerTarget, v.uninitialized);
+      }
+
+      /* A pointer that lives INSIDE an array of pointers. The loop above walks
+         variables only, so an anonymous block such as the argv vector produced
+         nodes but no arrows: argv reached the array and the chain stopped
+         there, and every string it pointed at reported referencedBy: [].
+         Nothing here is specific to argv — any array of pointers is walked,
+         so a char *tab[3] the student writes behaves identically. The value is
+         decoded and resolved with the SAME helpers the variable path uses, so
+         no second way of reading a pointer enters the engine. */
+      for (const b of blocks) {
+        if (b.state !== 'live' || !b.type) continue;
+        if (!isArray(b.type) || !isPointer(b.type.of)) continue;
+        if (!nodeByBlock.has(b.id)) continue;
+        const esz = sizeof(b.type.of);
+        if (!esz) continue;
+        const count = Math.floor(b.size / esz);
+        const owner = [...frames.flatMap(f => f.vars), ...globals].find(v => v.blockId === b.id);
+        /* "argv array" labels the vector; the CELLS are argv[0], argv[1]...
+           Generic: any block labelled "X array" names its cells X[i]. */
+        const base = owner ? owner.name : String(b.label || 'array').replace(/ array$/, '');
+        for (let i = 0; i < count; i++) {
+          const at = b.base + i * esz;
+          const nm = base + '[' + i + ']';
+          if (!allInit(at, esz)) { addPointerEdge(b.id, nm, null, true, { index: i, address: at }); continue; }
+          addPointerEdge(b.id, nm, resolvePointer(decode(at, b.type.of), b.type.of.to),
+                         false, { index: i, address: at });
+        }
       }
 
       /* Reverse index: what points AT this object. Answers "who still holds a
@@ -9142,7 +9215,9 @@ class History {
                        inside: inside ? inside.label : null,
                        past: !inside });
         }
-        arithmetic[Number(e.from.slice(1))] = {
+        const akey = Number(e.from.slice(1));
+        if (arithmetic[akey]) continue;   // first edge wins; one edge per block today
+        arithmetic[akey] = {
           elemSize: e.elemSize, pointeeTypeName: e.pointeeTypeName, steps,
         };
       }
@@ -14011,6 +14086,8 @@ function saveUI() {
       explorerOpen: ui.explorerOpen, collapsed: ui.collapsed, watches: ui.watches,
       dockH: ui.dockH, srcExpanded: ui.srcExpanded, libTab: ui.libTab,
       animSpeed: ui.animSpeed,
+      // the simulated command line, so a reload keeps what you were running
+      argv0: ui.argv0, args: ui.args,
       // Where the learner last was, so the dashboard can say something true.
       exampleKey: ui.exampleKey,
       labTab: (typeof lab === 'object' && lab) ? lab.tab : null,
@@ -14036,6 +14113,9 @@ function loadUI() {
     if (typeof o.explorerOpen === 'boolean') ui.explorerOpen = o.explorerOpen;
     if (typeof o.srcExpanded === 'boolean') ui.srcExpanded = o.srcExpanded;
     if (typeof o.animSpeed === 'number' && CViz3D.SPEEDS.indexOf(o.animSpeed) >= 0) ui.animSpeed = o.animSpeed;
+    if (typeof o.argv0 === 'string' && o.argv0) ui.argv0 = o.argv0.slice(0, 120);
+    if (Array.isArray(o.args))
+      ui.args = o.args.filter(x => typeof x === 'string').slice(0, 32).map(x => x.slice(0, 512));
     if (o.libTab === 'files' || o.libTab === 'errors') ui.libTab = o.libTab;
     if (o.collapsed && typeof o.collapsed === 'object') ui.collapsed = o.collapsed;
     if (Array.isArray(o.watches)) ui.watches = o.watches.filter(x => typeof x === 'string').slice(0, 20);
@@ -14717,6 +14797,7 @@ function displaySource() {
    rather than once per keystroke. */
 let srcRepaint = 0;
 function scheduleSourceRepaint() {
+  if (typeof renderArgvBar === 'function') renderArgvBar();
   if (srcRepaint) return;
   srcRepaint = requestAnimationFrame(() => {
     srcRepaint = 0;
@@ -14941,10 +15022,14 @@ function startExecution() {
   if (r.needsInput) {
     const def = (EXAMPLES[ui.exampleKey] && EXAMPLES[ui.exampleKey].needsInput)
       ? EXAMPLES[ui.exampleKey].defaultInput : 'Hello World';
-    askInput(def, (val) => launch(src, { inputString: val }));
+    askInput(def, (val) => launch(src,
+      Object.assign(typeof argvOpts === 'function' ? argvOpts() : {}, { inputString: val })));
     return false;
   }
-  return launch(src, {});
+  /* The arguments the user typed into the run configuration, handed to the
+     same launch() the terminal calls. Before this the workspace passed {},
+     so the Run button could only ever produce argc == 1. */
+  return launch(src, typeof argvOpts === 'function' ? argvOpts() : {});
 }
 function launch(src, opts) {
   const r = CEngine.createRun(src, opts);
@@ -32251,6 +32336,123 @@ function termSyncToProject(key) {
 }
 /* ==== TERM END ==== */
 
+/* ==== ARGVUI START ==== */
+/* ============================================================================
+   COMMAND-LINE ARGUMENTS for the workspace run
+   ----------------------------------------------------------------------------
+   The engine has modelled argc/argv properly for a long time: a bind-param
+   startup step, one .data block per argument string with its terminator, a
+   char *[] vector with an explicit NULL at argv[argc], and parameters matched
+   by TYPE so `int ac, char **av` works. What was missing was any way for the
+   workspace to SUPPLY arguments — startExecution() called launch(src, {}) with
+   a hardcoded empty opts, so the Run button could only ever produce argc == 1.
+   The terminal already passed real arguments through the same launch().
+
+   So this file adds an editor and nothing else. It does not compute argc, it
+   does not lay out memory, and it does not decide what argv[0] means — it
+   hands { args, argv0 } to the SAME launch() the terminal uses, and the engine
+   remains the only thing that builds argv. One source of truth.
+
+   STRUCTURED ROWS, NOT ONE TEXT FIELD. A single field cannot distinguish
+       ./a.out hello world      (argc 3)
+   from
+       ./a.out "hello world"    (argc 2)
+   without inventing a quoting dialect the student then has to learn. One row
+   per argument makes the distinction visible instead of parsed.
+   ========================================================================== */
+
+/* Does this program's main actually take (int, char **)? The ENGINE decides
+   that by type when it runs; this is only about whether to show the editor, so
+   a cheap syntactic test is right — being wrong costs a hidden or a needless
+   strip, never a wrong execution. */
+function argvProgram(src) {
+  return /\bmain\s*\(\s*(?:int|unsigned|long|short)\b[^)]*,\s*char\s*(?:\*\s*\*|\*\s*[A-Za-z_]\w*\s*\[)/.test(String(src || ''));
+}
+
+/* The two pieces of state. Persisted with the rest of the UI preferences. */
+function argvState() {
+  if (!Array.isArray(ui.args)) ui.args = [];
+  if (typeof ui.argv0 !== 'string' || !ui.argv0) ui.argv0 = './a.out';
+  return { argv0: ui.argv0, args: ui.args };
+}
+
+/* What every runner passes to the engine. The ONLY place these options are
+   built for the workspace, so the visualiser, the debugger and a restart can
+   never disagree about what the program was started with. */
+function argvOpts() {
+  const st = argvState();
+  const o = {};
+  if (st.args.length) o.args = st.args.slice();
+  if (st.argv0 && st.argv0 !== './a.out') o.argv0 = st.argv0;
+  return o;
+}
+
+/* argc as the engine will compute it: argv[0] plus the arguments. Displayed so
+   the relationship is visible while editing, and asserted by phase40 against a
+   real run rather than being a second implementation of the rule. */
+const argvArgc = () => argvState().args.length + 1;
+
+function renderArgvBar() {
+  const bar = $('#argvBar');
+  if (!bar) return;
+  const src = $('#sourceEdit') ? $('#sourceEdit').value : '';
+  if (!argvProgram(src)) { bar.hidden = true; bar.innerHTML = ''; return; }
+  bar.hidden = false;
+  const st = argvState();
+  const n = argvArgc();
+  bar.innerHTML =
+    '<div class="ab-head">' +
+      '<span class="ab-t">Program arguments</span>' +
+      '<span class="ab-argc">argc = <b>' + n + '</b></span>' +
+      '<span class="ab-null">argv[' + n + '] = NULL</span>' +
+      '<button class="ab-add" id="argvAdd" type="button">+ argument</button>' +
+    '</div>' +
+    '<div class="ab-rows">' +
+      '<label class="ab-row zero"><span class="ab-i">argv[0]</span>' +
+        '<input class="ab-in" id="argv0In" value="' + esc(st.argv0) + '" ' +
+        'aria-label="argv[0], the program name" spellcheck="false"></label>' +
+      st.args.map((a, i) =>
+        '<label class="ab-row"><span class="ab-i">argv[' + (i + 1) + ']</span>' +
+        '<input class="ab-in" data-argvi="' + i + '" value="' + esc(a) + '" ' +
+        'aria-label="argument ' + (i + 1) + '" spellcheck="false">' +
+        '<button class="ab-x" data-argvdel="' + i + '" type="button" ' +
+        'aria-label="Remove argument ' + (i + 1) + '">✕</button></label>').join('') +
+    '</div>' +
+    '<p class="ab-note">One row is one argument, so a value containing spaces stays a single ' +
+      'argument. Changes apply on the next run.</p>';
+  wireArgvBar();
+}
+
+function wireArgvBar() {
+  const z = $('#argv0In');
+  if (z) z.addEventListener('input', () => {
+    ui.argv0 = z.value || './a.out';
+    saveUI();
+    const a = $('#argvBar .ab-argc b');   // argc cannot change here; nothing to repaint
+    if (a) a.textContent = String(argvArgc());
+  });
+  $$('#argvBar [data-argvi]').forEach(el => el.addEventListener('input', () => {
+    ui.args[Number(el.dataset.argvi)] = el.value;
+    saveUI();
+  }));
+  $$('#argvBar [data-argvdel]').forEach(el => el.addEventListener('click', () => {
+    ui.args.splice(Number(el.dataset.argvdel), 1);
+    saveUI(); renderArgvBar();
+  }));
+  const add = $('#argvAdd');
+  if (add) add.addEventListener('click', () => {
+    ui.args.push('');
+    saveUI(); renderArgvBar();
+    const rows = $$('#argvBar [data-argvi]');
+    if (rows.length) rows[rows.length - 1].focus();
+  });
+}
+
+if (typeof window !== 'undefined') {
+  window.CArgvUI = { argvProgram, argvState, argvOpts, argvArgc, renderArgvBar };
+}
+/* ==== ARGVUI END ==== */
+
 /* ==== EXAMDATA START ==== */
 /* ============================================================================
    FINAL EXAM PREP — the knowledge base
@@ -36867,6 +37069,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if (rx) rx.addEventListener('click', () => {
     if (ui.view === 'exam') showWorkspace(); else showExam();
   });
+  if (typeof renderArgvBar === 'function') renderArgvBar();
   $('#railExplorer').addEventListener('click', () => toggleLibrary('files'));
   $('#railErrLab').addEventListener('click', () => toggleLibrary('errors'));
   $('#libClose').addEventListener('click', closeLibrary);
